@@ -1,0 +1,489 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Mi Portal de Salud</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="verProximaCita()" *ngIf="proximaCita" class="cita-alert-btn">
+        <ion-icon slot="icon-only" name="notifications-outline" [color]="diasParaCita <= 1 ? 'danger' : diasParaCita <= 3 ? 'warning' : 'primary'"></ion-icon>
+        <ion-badge color="danger" *ngIf="diasParaCita <= 3">{{diasParaCita}}</ion-badge>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR DEL PACIENTE (IDÉNTICO A paciente.page) -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <!-- Info del paciente -->
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-patient.png" alt="Paciente" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombrePaciente}}</h4>
+          <p>Paciente</p>
+        </div>
+      </div>
+
+      <ul>
+        <!-- 🏠 Inicio -->
+        <li (click)="navegarA('paciente')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <!-- 🥗 Módulo Plan Nutricional -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('plan')">
+            <ion-icon name="nutrition-outline"></ion-icon>
+            <span>Plan Nutricional</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+            <li (click)="navegarA('pacienteverplan')" class="active">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver mi plan</span>
+            </li>
+            <li (click)="navegarA('pacientehistorialplan')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Historial de planes</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 💊 Módulo Seguimiento de Salud -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
+            <ion-icon name="pulse-outline"></ion-icon>
+            <span>Seguimiento Salud</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+            <li (click)="navegarA('pacientedatosantropometricos')">
+              <ion-icon name="body-outline"></ion-icon>
+              <span>Datos antropométricos</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Registrar glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteverglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarpresion')">
+              <ion-icon name="heart-outline"></ion-icon>
+              <span>Registrar presión arterial</span>
+            </li>
+            <li (click)="navegarA('pacienteverpresion')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de presion arterial</span>
+            </li>
+            <li (click)="navegarA('pacientehistorialmedico')">
+              <ion-icon name="analytics-outline"></ion-icon>
+              <span>Historial médico</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 💬 Comunicación Médica -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <span>Comunicación</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+            <li (click)="contactarWhatsApp()">
+              <ion-icon name="logo-whatsapp"></ion-icon>
+              <span>WhatsApp médico</span>
+            </li>
+            <li (click)="navegarA('pacientemensajes')">
+              <ion-icon name="mail-outline"></ion-icon>
+              <span>Mensajes al médico</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- ⚙️ Configuración -->
+        <li (click)="navegarA('pacienteconfiguracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando tu plan nutricional...</p>
+      </div>
+
+      <!-- Sin plan -->
+      <div *ngIf="!cargando && !plan" class="empty-state">
+        <ion-icon name="nutrition-outline" class="empty-icon"></ion-icon>
+        <h3>Sin plan nutricional activo</h3>
+        <p>Aún no tienes un plan nutricional asignado. Contacta a tu médico para que te genere uno.</p>
+        <ion-button color="primary" (click)="contactarWhatsApp()">
+          <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+          Contactar médico
+        </ion-button>
+      </div>
+
+      <!-- Plan cargado -->
+      <div *ngIf="!cargando && plan" class="plan-container">
+        
+        <!-- Header del plan -->
+        <div class="plan-hero">
+          <div class="hero-content">
+            <div class="hero-icon">
+              <ion-icon name="leaf-outline"></ion-icon>
+            </div>
+            <div class="hero-info">
+              <h1>{{plan.perfil_recomendado}}</h1>
+              <p class="hero-subtitle">
+                Plan personalizado por <strong>{{plan.medico_nombre}}</strong>
+              </p>
+              <div class="hero-badges">
+                <ion-badge color="success">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+                  {{plan.estado | titlecase}}
+                </ion-badge>
+                <ion-badge color="primary">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{plan.duracion_semanas}} semanas
+                </ion-badge>
+                <ion-badge color="tertiary" *ngIf="plan.confianza_ia">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  IA: {{(plan.confianza_ia * 100) | number:'1.0-0'}}%
+                </ion-badge>
+              </div>
+            </div>
+          </div>
+          <div class="hero-dates">
+            <div class="date-item">
+              <small>Desde</small>
+              <strong>{{plan.fecha_vigencia_desde | date:'dd/MM/yyyy'}}</strong>
+            </div>
+            <div class="date-item">
+              <small>Hasta</small>
+              <strong>{{plan.fecha_vigencia_hasta | date:'dd/MM/yyyy'}}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info del médico -->
+        <ion-card class="medico-card" *ngIf="plan.medico_nombre">
+          <ion-card-content>
+            <div class="medico-info">
+              <ion-avatar>
+                <img src="assets/avatar-placeholder.png" alt="Médico">
+              </ion-avatar>
+              <div class="medico-details">
+                <h4>{{plan.medico_nombre}}</h4>
+                <p>Tu médico tratante</p>
+              </div>
+              <ion-button fill="solid" color="success" size="small" (click)="contactarWhatsApp()">
+                <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+                Contactar
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Recomendaciones -->
+        <ion-card class="recomendaciones-card" *ngIf="plan.recomendaciones">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="bulb-outline" color="warning"></ion-icon>
+              Recomendaciones
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{plan.recomendaciones}}</p>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Alergias -->
+        <ion-card class="alergias-card" *ngIf="plan.alergias && plan.alergias.length > 0">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="warning-outline" color="danger"></ion-icon>
+              Alergias / Restricciones
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="alergias-list">
+              <ion-chip *ngFor="let alergia of plan.alergias" color="danger" outline>
+                <ion-icon name="close-circle"></ion-icon>
+                {{alergia}}
+              </ion-chip>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Tabs: Semana / Día / Mes -->
+        <ion-segment [(ngModel)]="vistaActual" (ionChange)="cambiarVista()" scrollable>
+          <ion-segment-button value="semana">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ion-label>Semana</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="dia">
+            <ion-icon name="today-outline"></ion-icon>
+            <ion-label>Día</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="mes">
+            <ion-icon name="calendar-number-outline"></ion-icon>
+            <ion-label>Mes</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- VISTA SEMANA -->
+        <div *ngIf="vistaActual === 'semana' && plan.plan_detallado?.weekly" class="week-view">
+          <ion-card *ngFor="let day of plan.plan_detallado.weekly.days" class="day-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="sunny-outline" *ngIf="day.day_name?.toLowerCase()?.includes('lun')"></ion-icon>
+                <ion-icon name="cloudy-outline" *ngIf="day.day_name?.toLowerCase()?.includes('mar')"></ion-icon>
+                <ion-icon name="partly-sunny-outline" *ngIf="day.day_name?.toLowerCase()?.includes('mié') || day.day_name?.toLowerCase()?.includes('mie')"></ion-icon>
+                <ion-icon name="rainy-outline" *ngIf="day.day_name?.toLowerCase()?.includes('jue')"></ion-icon>
+                <ion-icon name="snow-outline" *ngIf="day.day_name?.toLowerCase()?.includes('vie')"></ion-icon>
+                <ion-icon name="cloud-outline" *ngIf="day.day_name?.toLowerCase()?.includes('sáb') || day.day_name?.toLowerCase()?.includes('sab')"></ion-icon>
+                <ion-icon name="moon-outline" *ngIf="day.day_name?.toLowerCase()?.includes('dom')"></ion-icon>
+                {{day.day_name}} {{day.date | date:'dd'}}
+              </ion-card-title>
+              <ion-card-subtitle>
+                <span class="macro-pill calories">{{day.daily_totals?.calories}} kcal</span>
+                <span class="macro-pill protein">P: {{day.daily_totals?.protein}}g</span>
+                <span class="macro-pill carbs">C: {{day.daily_totals?.carbs}}g</span>
+                <span class="macro-pill fat">G: {{day.daily_totals?.fat}}g</span>
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="meals-timeline">
+                <div *ngFor="let meal of day.meals" class="meal-item">
+                  <div class="meal-header">
+                    <div class="meal-icon-wrapper" [ngClass]="getMealColorClass(meal.meal_type)">
+                      <ion-icon [name]="getMealIcon(meal.meal_type)"></ion-icon>
+                    </div>
+                    <div class="meal-info">
+                      <strong>{{getMealLabel(meal.meal_type)}}</strong>
+                      <small>{{meal.time_suggestion}}</small>
+                    </div>
+                    <ion-chip color="primary" class="meal-calories">
+                      {{meal.total_calories}} kcal
+                    </ion-chip>
+                  </div>
+                  
+                  <div class="meal-foods">
+                    <div *ngFor="let food of meal.foods" class="food-item">
+                      <div class="food-main">
+                        <h4>{{food.name}}</h4>
+                        <p class="food-serving">
+                          {{food.serving_size}} {{food.serving_unit}}
+                        </p>
+                      </div>
+                      <div class="food-macros">
+                        <span class="macro protein">P:{{food.protein}}g</span>
+                        <span class="macro carbs">C:{{food.carbs}}g</span>
+                        <span class="macro fat">G:{{food.fat}}g</span>
+                        <span class="macro calories">{{food.calories}} kcal</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="meal.notes" class="meal-notes">
+                    <ion-icon name="information-circle-outline"></ion-icon>
+                    <span>{{meal.notes}}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="day-footer">
+                <div class="footer-item hydration">
+                  <ion-icon name="water-outline"></ion-icon>
+                  <span>Meta de hidratación: <strong>{{day.hydration_goal_liters}} L</strong></span>
+                </div>
+                <div *ngIf="day.special_notes" class="footer-item notes">
+                  <ion-icon name="lightbulb-outline"></ion-icon>
+                  <span>{{day.special_notes}}</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- VISTA DÍA -->
+        <div *ngIf="vistaActual === 'dia' && plan.plan_detallado?.weekly" class="day-view">
+          <ion-card class="date-picker-card">
+            <ion-card-content>
+              <ion-datetime 
+                [(ngModel)]="fechaSeleccionada" 
+                presentation="date"
+                (ionChange)="cargarDiaSeleccionado()"
+                [min]="plan.plan_detallado.weekly.start_date"
+                [max]="plan.plan_detallado.weekly.end_date"
+                locale="es-EC">
+              </ion-datetime>
+            </ion-card-content>
+          </ion-card>
+          
+          <ion-card *ngIf="diaSeleccionado" class="day-card selected-day">
+            <ion-card-header>
+              <ion-card-title>
+                {{diaSeleccionado.day_name}} {{diaSeleccionado.date | date:'dd/MM/yyyy'}}
+              </ion-card-title>
+              <ion-card-subtitle>
+                <span class="macro-pill calories">{{diaSeleccionado.daily_totals?.calories}} kcal</span>
+                <span class="macro-pill protein">P: {{diaSeleccionado.daily_totals?.protein}}g</span>
+                <span class="macro-pill carbs">C: {{diaSeleccionado.daily_totals?.carbs}}g</span>
+                <span class="macro-pill fat">G: {{diaSeleccionado.daily_totals?.fat}}g</span>
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="meals-timeline">
+                <div *ngFor="let meal of diaSeleccionado.meals" class="meal-item">
+                  <div class="meal-header">
+                    <div class="meal-icon-wrapper" [ngClass]="getMealColorClass(meal.meal_type)">
+                      <ion-icon [name]="getMealIcon(meal.meal_type)"></ion-icon>
+                    </div>
+                    <div class="meal-info">
+                      <strong>{{getMealLabel(meal.meal_type)}}</strong>
+                      <small>{{meal.time_suggestion}}</small>
+                    </div>
+                    <ion-chip color="primary">{{meal.total_calories}} kcal</ion-chip>
+                  </div>
+                  <div class="meal-foods">
+                    <div *ngFor="let food of meal.foods" class="food-item">
+                      <div class="food-main">
+                        <h4>{{food.name}}</h4>
+                        <p class="food-serving">{{food.serving_size}} {{food.serving_unit}}</p>
+                      </div>
+                      <div class="food-macros">
+                        <span class="macro protein">P:{{food.protein}}g</span>
+                        <span class="macro carbs">C:{{food.carbs}}g</span>
+                        <span class="macro fat">G:{{food.fat}}g</span>
+                        <span class="macro calories">{{food.calories}} kcal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <div *ngIf="!diaSeleccionado" class="no-day-selected">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <p>Selecciona un día para ver tu plan</p>
+          </div>
+        </div>
+
+        <!-- VISTA MES -->
+        <div *ngIf="vistaActual === 'mes'" class="month-view">
+          <ion-card class="summary-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="analytics-outline"></ion-icon>
+                Resumen del Plan
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <div class="summary-icon">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                  </div>
+                  <div class="summary-data">
+                    <strong>{{plan.duracion_semanas}}</strong>
+                    <small>Semanas</small>
+                  </div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon">
+                    <ion-icon name="restaurant-outline"></ion-icon>
+                  </div>
+                  <div class="summary-data">
+                    <strong>{{plan.plan_detallado?.monthly_summary?.total_days || 28}}</strong>
+                    <small>Días totales</small>
+                  </div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon">
+                    <ion-icon name="flame-outline"></ion-icon>
+                  </div>
+                  <div class="summary-data">
+                    <strong>{{plan.plan_detallado?.monthly_summary?.avg_calories || 0}}</strong>
+                    <small>Kcal promedio/día</small>
+                  </div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon">
+                    <ion-icon name="trending-up-outline"></ion-icon>
+                  </div>
+                  <div class="summary-data">
+                    <strong>{{plan.confianza_ia ? ((plan.confianza_ia * 100) | number:'1.0-0') : '0'}}%</strong>
+                    <small>Confianza IA</small>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="tips-card" *ngIf="plan.plan_detallado?.monthly_summary?.adherence_tips">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="bulb-outline" color="warning"></ion-icon>
+                Consejos para el Éxito
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ul class="tips-list">
+                <li *ngFor="let tip of plan.plan_detallado.monthly_summary.adherence_tips">
+                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                  <span>{{tip}}</span>
+                </li>
+              </ul>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="checkpoints-card" *ngIf="plan.plan_detallado?.monthly_summary?.progress_checkpoints">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="flag-outline" color="primary"></ion-icon>
+                Puntos de Control
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="checkpoints-timeline">
+                <div *ngFor="let checkpoint of plan.plan_detallado.monthly_summary.progress_checkpoints" class="checkpoint-item">
+                  <div class="checkpoint-week">
+                    <ion-badge color="primary">Sem {{checkpoint.week}}</ion-badge>
+                  </div>
+                  <div class="checkpoint-goal">
+                    {{checkpoint.goal}}
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

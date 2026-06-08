@@ -1,0 +1,304 @@
+<!-- 🔝 HEADER PRINCIPAL -->
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel Hospitalario</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR CON MENÚ DESPLEGABLE -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor || 'Dr. Usuario'}}</h4>
+          <p>{{especialidad || 'Especialista'}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon 
+              name="chevron-down-outline" 
+              class="submenu-arrow" 
+              [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Buscar paciente</span>
+            </li>
+          </ul>
+        </li>
+        
+        <!-- Planes (ACTIVO) -->
+        <li (click)="navegarA('planes-nutricionales')" class="active-menu">
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Planes Nutricionales</span>
+        </li>
+
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon>
+          <span>Seguimiento clinico</span>
+        </li>
+        
+        <li (click)="navegarA('reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          <span>Reportes</span>
+        </li>
+        
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Header de página -->
+      <div class="page-header">
+        <div class="page-title">
+          <ion-icon name="clipboard-outline" class="page-icon"></ion-icon>
+          <div>
+            <h1>Planes Nutricionales</h1>
+            <p class="subtitle">Gestiona los planes alimenticios creados para tus pacientes</p>
+          </div>
+        </div>
+        
+        <ion-button color="primary" (click)="crearNuevoPlan()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Crear Nuevo Plan
+        </ion-button>
+      </div>
+
+      <!-- Barra de filtros -->
+      <div class="filters-bar">
+        <ion-searchbar 
+          [(ngModel)]="searchTerm"
+          (ionInput)="filtrarPlanes()"
+          placeholder="Buscar por paciente..."
+          class="search-input">
+        </ion-searchbar>
+
+        <div class="filter-controls">
+          <ion-select 
+            [(ngModel)]="filtroEstado"
+            (ionChange)="filtrarPlanes()"
+            placeholder="Estado"
+            interface="popover"
+            class="filter-select">
+            <ion-select-option value="todos">Todos</ion-select-option>
+            <ion-select-option value="activo">Activos</ion-select-option>
+            <ion-select-option value="borrador">Borradores</ion-select-option>
+            <ion-select-option value="completado">Completados</ion-select-option>
+            <ion-select-option value="cancelado">Cancelados</ion-select-option>
+          </ion-select>
+
+          <ion-select 
+            [(ngModel)]="ordenPor"
+            (ionChange)="filtrarPlanes()"
+            placeholder="Ordenar"
+            interface="popover"
+            class="filter-select">
+            <ion-select-option value="fecha_desc">Más recientes</ion-select-option>
+            <ion-select-option value="fecha_asc">Más antiguos</ion-select-option>
+            <ion-select-option value="paciente_asc">Paciente A-Z</ion-select-option>
+            <ion-select-option value="duracion_desc">Mayor duración</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando planes nutricionales...</p>
+      </div>
+
+      <!-- Sin resultados -->
+      <div *ngIf="!cargando && planesFiltrados.length === 0" class="empty-state">
+        <ion-icon name="clipboard-outline" class="empty-icon"></ion-icon>
+        <h3>No hay planes nutricionales</h3>
+        <p>Aún no has creado planes nutricionales para tus pacientes.</p>
+        <ion-button color="primary" (click)="crearNuevoPlan()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Crear primer plan
+        </ion-button>
+      </div>
+
+      <!-- Lista de planes -->
+      <div *ngIf="!cargando && planesFiltrados.length > 0" class="plans-container">
+        
+        <!-- Vista Cards (móvil) -->
+        <div class="plans-cards">
+          <ion-card *ngFor="let plan of planesFiltrados" class="plan-card" [ngClass]="'estado-' + plan.estado">
+            
+            <ion-card-header>
+              <div class="card-header-row">
+                <ion-card-title>{{ plan.paciente_nombre }}</ion-card-title>
+                <ion-badge [color]="getBadgeColor(plan.estado)" class="estado-badge">
+                  {{ plan.estado | titlecase }}
+                </ion-badge>
+              </div>
+              <ion-card-subtitle>
+                <ion-icon name="card-outline"></ion-icon>
+                {{ plan.paciente_identificacion }}
+              </ion-card-subtitle>
+            </ion-card-header>
+
+            <ion-card-content>
+              <div class="plan-details">
+                <div class="detail-item">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span><strong>Creado:</strong> {{ plan.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="detail-item">
+                  <ion-icon name="time-outline"></ion-icon>
+                  <span><strong>Duración:</strong> {{ plan.duracion_semanas }} semanas</span>
+                </div>
+                <div class="detail-item">
+                  <ion-icon name="nutrition-outline"></ion-icon>
+                  <span><strong>Perfil:</strong> {{ plan.perfil_recomendado }}</span>
+                </div>
+                <div class="detail-item" *ngIf="plan.confianza_ia">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  <span><strong>Confianza IA:</strong> {{ (plan.confianza_ia * 100) | number:'1.0-0' }}%</span>
+                </div>
+              </div>
+
+              <!-- Vigencia -->
+              <div class="vigencia-info" *ngIf="plan.fecha_vigencia_hasta">
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                <small>Válido hasta: {{ plan.fecha_vigencia_hasta | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </ion-card-content>
+
+            <ion-card-content class="card-actions">
+              <ion-button fill="solid" size="small" color="primary" (click)="verPlan(plan)">
+                <ion-icon name="eye-outline" slot="start"></ion-icon>
+                Ver Plan
+              </ion-button>
+              
+              <ion-button fill="outline" size="small" color="medium" (click)="descargarPlan(plan)">
+                <ion-icon name="download-outline" slot="start"></ion-icon>
+                PDF
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- Vista Tabla (desktop) -->
+        <div class="plans-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Identificación</th>
+                <th>Perfil</th>
+                <th>Creación</th>
+                <th>Duración</th>
+                <th>Estado</th>
+                <th>Confianza IA</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let plan of planesFiltrados">
+                <td>
+                  <div class="paciente-cell">
+                    <ion-avatar class="paciente-avatar">
+                      <img src="assets/avatar-patient.png" alt="Paciente">
+                    </ion-avatar>
+                    <strong>{{ plan.paciente_nombre }}</strong>
+                  </div>
+                </td>
+                <td>{{ plan.paciente_identificacion }}</td>
+                <td>
+                  <ion-badge color="light" class="perfil-badge">
+                    {{ plan.perfil_recomendado }}
+                  </ion-badge>
+                </td>
+                <td>{{ plan.fecha_creacion | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="duracion-badge">
+                    {{ plan.duracion_semanas }} sem
+                  </span>
+                </td>
+                <td>
+                  <ion-badge [color]="getBadgeColor(plan.estado)" class="estado-badge">
+                    {{ plan.estado | titlecase }}
+                  </ion-badge>
+                </td>
+                <td>
+                  <span *ngIf="plan.confianza_ia" class="confianza-badge" 
+                        [ngClass]="{
+                          'alta': plan.confianza_ia >= 0.9,
+                          'media': plan.confianza_ia >= 0.7 && plan.confianza_ia < 0.9,
+                          'baja': plan.confianza_ia < 0.7
+                        }">
+                    {{ (plan.confianza_ia * 100) | number:'1.0-0' }}%
+                  </span>
+                  <span *ngIf="!plan.confianza_ia" class="text-muted">-</span>
+                </td>
+                <td class="actions-cell">
+                  <ion-button fill="clear" size="small" color="primary" (click)="verPlan(plan)" title="Ver plan">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" color="medium" (click)="descargarPlan(plan)" title="Descargar PDF">
+                    <ion-icon name="download-outline"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resumen -->
+        <div class="summary-bar">
+          <p>
+            Mostrando <strong>{{ planesFiltrados.length }}</strong> de <strong>{{ planes.length }}</strong> planes
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,432 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clínico: Signos Vitales</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="volver()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR (Mismo menú de enfermería) -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <!-- 👤 Info de Usuario -->
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <!-- 📋 Menú -->
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          </ul>
+        </li>
+        
+        <li>
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Registros</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL - FORMULARIO -->
+    <div class="main-content form-layout">
+      <div class="form-container">
+        
+        <!-- Encabezado del Formulario -->
+        <div class="form-header-section">
+          <h1>Signos Vitales</h1>
+          <p>Registre las constantes vitales del paciente para continuar con la evaluación clínica.</p>
+        </div>
+
+        <!-- 👥 Selector de Perfil de Paciente -->
+        <ion-card class="profile-selector-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="person-outline"></ion-icon> Perfil del Paciente
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-select 
+              [(ngModel)]="perfilPacienteId" 
+              (ionChange)="onPerfilPacienteChange()"
+              placeholder="Seleccione perfil"
+              interface="action-sheet"
+              class="profile-select">
+              <ion-select-option *ngFor="let perfil of perfilesDisponibles" [value]="perfil.id">
+                <ion-icon [name]="perfil.icon" slot="start"></ion-icon>
+                {{perfil.label}}
+              </ion-select-option>
+            </ion-select>
+            
+            <!-- Info del perfil seleccionado -->
+            <div class="profile-info" *ngIf="getPerfilActual()">
+              <small>
+                <ion-icon name="information-circle-outline"></ion-icon>
+                Rangos clínicos aplicados: <strong>{{getPerfilActual().label}}</strong>
+              </small>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <form #signosForm="ngForm" (ngSubmit)="guardarYContinuar()">
+          
+          <div class="form-grid">
+            
+            <!-- Columna Izquierda: Signos Vitales Básicos -->
+            <div class="form-column">
+              <ion-card class="input-card">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="pulse-outline"></ion-icon> Signos Vitales Básicos
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  
+                  <!-- Frecuencia Cardíaca -->
+                  <div class="form-group">
+                    <label>
+                      Frecuencia Cardíaca (Pulso) *
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('frecuenciaCardiaca')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('frecuenciaCardiaca')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('frecuenciaCardiaca')==='critical'"
+                            *ngIf="validaciones['frecuenciaCardiaca']?.estado">
+                        <ion-icon [name]="getEstadoIcono('frecuenciaCardiaca')"></ion-icon>
+                        {{validaciones['frecuenciaCardiaca']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['frecuenciaCardiaca']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        [(ngModel)]="signosVitalesForm.frecuenciaCardiaca" 
+                        name="fc" 
+                        placeholder="60-100"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('frecuenciaCardiaca')==='critical'"
+                        [class.warning-only]="getEstadoClase('frecuenciaCardiaca')==='warning'"
+                        (ionChange)="validarSignoVital('frecuenciaCardiaca', signosVitalesForm.frecuenciaCardiaca)"
+                        required>
+                      </ion-input>
+                      <span class="unit-label">lpm</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['frecuenciaCardiaca']?.mensaje && getEstadoClase('frecuenciaCardiaca')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('frecuenciaCardiaca')"></ion-icon>
+                      {{validaciones['frecuenciaCardiaca']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- Presión Arterial -->
+                  <div class="form-group">
+                    <label>
+                      Presión Arterial *
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('presionArterial')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('presionArterial')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('presionArterial')==='critical'"
+                            *ngIf="validaciones['presionArterial']?.estado">
+                        <ion-icon [name]="getEstadoIcono('presionArterial')"></ion-icon>
+                        {{validaciones['presionArterial']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['presionArterial']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        [(ngModel)]="signosVitalesForm.presionArterial" 
+                        name="pa" 
+                        placeholder="120/80"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('presionArterial')==='critical'"
+                        [class.warning-only]="getEstadoClase('presionArterial')==='warning'"
+                        (ionChange)="validarSignoVital('presionArterial', signosVitalesForm.presionArterial)"
+                        required>
+                      </ion-input>
+                      <span class="unit-label">mmHg</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['presionArterial']?.mensaje && getEstadoClase('presionArterial')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('presionArterial')"></ion-icon>
+                      {{validaciones['presionArterial']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- Frecuencia Respiratoria -->
+                  <div class="form-group">
+                    <label>
+                      Frecuencia Respiratoria
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('frecuenciaRespiratoria')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('frecuenciaRespiratoria')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('frecuenciaRespiratoria')==='critical'"
+                            *ngIf="validaciones['frecuenciaRespiratoria']?.estado">
+                        <ion-icon [name]="getEstadoIcono('frecuenciaRespiratoria')"></ion-icon>
+                        {{validaciones['frecuenciaRespiratoria']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['frecuenciaRespiratoria']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        [(ngModel)]="signosVitalesForm.frecuenciaRespiratoria" 
+                        name="fr" 
+                        placeholder="12-20"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('frecuenciaRespiratoria')==='critical'"
+                        [class.warning-only]="getEstadoClase('frecuenciaRespiratoria')==='warning'"
+                        (ionChange)="validarSignoVital('frecuenciaRespiratoria', signosVitalesForm.frecuenciaRespiratoria)">
+                      </ion-input>
+                      <span class="unit-label">rpm</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['frecuenciaRespiratoria']?.mensaje && getEstadoClase('frecuenciaRespiratoria')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('frecuenciaRespiratoria')"></ion-icon>
+                      {{validaciones['frecuenciaRespiratoria']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- Temperatura -->
+                  <div class="form-group">
+                    <label>
+                      Temperatura Corporal
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('temperatura')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('temperatura')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('temperatura')==='critical'"
+                            *ngIf="validaciones['temperatura']?.estado">
+                        <ion-icon [name]="getEstadoIcono('temperatura')"></ion-icon>
+                        {{validaciones['temperatura']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['temperatura']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        step="0.1"
+                        [(ngModel)]="signosVitalesForm.temperatura" 
+                        name="temp" 
+                        placeholder="36.5"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('temperatura')==='critical'"
+                        [class.warning-only]="getEstadoClase('temperatura')==='warning'"
+                        (ionChange)="validarSignoVital('temperatura', signosVitalesForm.temperatura)">
+                      </ion-input>
+                      <span class="unit-label">°C</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['temperatura']?.mensaje && getEstadoClase('temperatura')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('temperatura')"></ion-icon>
+                      {{validaciones['temperatura']?.mensaje}}
+                    </small>
+                  </div>
+
+                </ion-card-content>
+              </ion-card>
+            </div>
+
+            <!-- Columna Derecha: Oxigenación y Metabolismo -->
+            <div class="form-column">
+              <ion-card class="input-card">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="leaf-outline"></ion-icon> Oxigenación y Metabolismo
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  
+                  <!-- SpO₂ -->
+                  <div class="form-group">
+                    <label>
+                      Saturación de Oxígeno (SpO₂)
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('spo2')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('spo2')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('spo2')==='critical'"
+                            *ngIf="validaciones['spo2']?.estado">
+                        <ion-icon [name]="getEstadoIcono('spo2')"></ion-icon>
+                        {{validaciones['spo2']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['spo2']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        [(ngModel)]="signosVitalesForm.spo2" 
+                        name="spo2" 
+                        placeholder="95-100"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('spo2')==='critical'"
+                        [class.warning-only]="getEstadoClase('spo2')==='warning'"
+                        (ionChange)="validarSignoVital('spo2', signosVitalesForm.spo2)">
+                      </ion-input>
+                      <span class="unit-label">%</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['spo2']?.mensaje && getEstadoClase('spo2')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('spo2')"></ion-icon>
+                      {{validaciones['spo2']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- Glucosa en Ayunas -->
+                  <div class="form-group">
+                    <label>
+                      Glucosa en Ayunas
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('glucosaAyunas')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('glucosaAyunas')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('glucosaAyunas')==='critical'"
+                            *ngIf="validaciones['glucosaAyunas']?.estado">
+                        <ion-icon [name]="getEstadoIcono('glucosaAyunas')"></ion-icon>
+                        {{validaciones['glucosaAyunas']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['glucosaAyunas']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        [(ngModel)]="signosVitalesForm.glucosaAyunas" 
+                        name="glucosaAyunas" 
+                        placeholder="70-100"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('glucosaAyunas')==='critical'"
+                        [class.warning-only]="getEstadoClase('glucosaAyunas')==='warning'"
+                        (ionChange)="validarSignoVital('glucosaAyunas', signosVitalesForm.glucosaAyunas)">
+                      </ion-input>
+                      <span class="unit-label">mg/dL</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['glucosaAyunas']?.mensaje && getEstadoClase('glucosaAyunas')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('glucosaAyunas')"></ion-icon>
+                      {{validaciones['glucosaAyunas']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- Glucosa Postprandial -->
+                  <div class="form-group">
+                    <label>
+                      Glucosa Postprandial <small>(opcional)</small>
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('glucosaPostprandial')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('glucosaPostprandial')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('glucosaPostprandial')==='critical'"
+                            *ngIf="validaciones['glucosaPostprandial']?.estado">
+                        <ion-icon [name]="getEstadoIcono('glucosaPostprandial')"></ion-icon>
+                        {{validaciones['glucosaPostprandial']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['glucosaPostprandial']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        [(ngModel)]="signosVitalesForm.glucosaPostprandial" 
+                        name="glucosaPost" 
+                        placeholder="<140"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('glucosaPostprandial')==='critical'"
+                        [class.warning-only]="getEstadoClase('glucosaPostprandial')==='warning'"
+                        (ionChange)="validarSignoVital('glucosaPostprandial', signosVitalesForm.glucosaPostprandial)">
+                      </ion-input>
+                      <span class="unit-label">mg/dL</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['glucosaPostprandial']?.mensaje && getEstadoClase('glucosaPostprandial')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('glucosaPostprandial')"></ion-icon>
+                      {{validaciones['glucosaPostprandial']?.mensaje}}
+                    </small>
+                  </div>
+
+                  <!-- HbA1c -->
+                  <div class="form-group">
+                    <label>
+                      Hemoglobina Glicosilada <small>(opcional)</small>
+                      <span class="clinical-badge" 
+                            [class.clinical-normal]="getEstadoClase('hemoglobinaGlicosilada')==='normal'"
+                            [class.clinical-warning]="getEstadoClase('hemoglobinaGlicosilada')==='warning'"
+                            [class.clinical-critical]="getEstadoClase('hemoglobinaGlicosilada')==='critical'"
+                            *ngIf="validaciones['hemoglobinaGlicosilada']?.estado">
+                        <ion-icon [name]="getEstadoIcono('hemoglobinaGlicosilada')"></ion-icon>
+                        {{validaciones['hemoglobinaGlicosilada']?.estado === 'normal' ? 'Normal' : 
+                          validaciones['hemoglobinaGlicosilada']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                      </span>
+                    </label>
+                    <div class="input-with-unit">
+                      <ion-input 
+                        type="number" 
+                        step="0.1"
+                        [(ngModel)]="signosVitalesForm.hemoglobinaGlicosilada" 
+                        name="hba1c" 
+                        placeholder="4.0-5.6"
+                        class="custom-input"
+                        [class.ion-invalid]="getEstadoClase('hemoglobinaGlicosilada')==='critical'"
+                        [class.warning-only]="getEstadoClase('hemoglobinaGlicosilada')==='warning'"
+                        (ionChange)="validarSignoVital('hemoglobinaGlicosilada', signosVitalesForm.hemoglobinaGlicosilada)">
+                      </ion-input>
+                      <span class="unit-label">%</span>
+                    </div>
+                    <small class="alert-text" 
+                           *ngIf="validaciones['hemoglobinaGlicosilada']?.mensaje && getEstadoClase('hemoglobinaGlicosilada')!=='normal'">
+                      <ion-icon [name]="getEstadoIcono('hemoglobinaGlicosilada')"></ion-icon>
+                      {{validaciones['hemoglobinaGlicosilada']?.mensaje}}
+                    </small>
+                  </div>
+
+                </ion-card-content>
+              </ion-card>
+            </div>
+
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="form-actions">
+            <ion-button fill="outline" color="medium" (click)="volver()" type="button">
+              <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+              Volver
+            </ion-button>
+            <ion-button type="submit" color="primary" class="btn-submit">
+              <ion-icon slot="start" name="arrow-forward-outline"></ion-icon>
+              Siguiente Paso
+            </ion-button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,27 @@
+{
+  "names": {
+    "0": "Hipocalorico",
+    "1": "Control Glucemico",
+    "2": "Hipo-grasa",
+    "3": "Normocalorico"
+  },
+  "descriptions": {
+    "0": "Reduccion calorica para perdida de peso (IMC ≥25).",
+    "1": "Control de carbohidratos para estabilidad glucemica.",
+    "2": "Reducción de lipidos para dislipidemia/higado graso.",
+    "3": "Dieta equilibrada para mantenimiento (IMC <25 o bajo peso)."
+  },
+  "recommendations": {
+    "0": "Priorizar alimentos bajos en calorias y alta densidad nutricional. Evitar azucares simples.",
+    "1": "Controlar porciones de carbohidratos. Preferir alimentos de indice glucemico bajo.",
+    "2": "Reducir grasas saturadas y trans. Aumentar fibra soluble y acidos grasos omega-3.",
+    "3": "Mantener equilibrio de macronutrientes. Enfocarse en habitos sostenibles a largo plazo."
+  },
+  "label_encoder_classes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "num_classes": 4
+}

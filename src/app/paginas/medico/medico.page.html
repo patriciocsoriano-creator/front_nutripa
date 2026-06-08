@@ -1,0 +1,237 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel Hospitalario</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')" class="active">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando dashboard...</p>
+      </div>
+
+      <div *ngIf="!cargando">
+        <!-- ACCIONES RÁPIDAS -->
+        <div class="quick-actions">
+          <ion-card class="action-card pacientes" button (click)="navegarA('medicoverpacientes')">
+            <ion-card-content>
+              <ion-icon name="people-outline"></ion-icon>
+              <h3>Gestionar Pacientes</h3>
+              <p>Ver y administrar pacientes</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="action-card plan" button (click)="navegarA('medicoplanesnutricionalescreados')">
+            <ion-card-content>
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <h3>Planes nutricionales</h3>
+              <p>Planes personalizados</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="action-card educacion" button (click)="navegarA('medicoseguimientoclinico')">
+            <ion-card-content>
+              <ion-icon name="pulse-outline"></ion-icon>
+              <h3>Seguimiento clínico</h3>
+              <p>Observación pacientes</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="action-card alertas" button (click)="verAlertas()" [class.has-alerts]="alertasActivas > 0">
+            <ion-card-content>
+              <ion-icon name="warning-outline"></ion-icon>
+              <h3>Alertas</h3>
+              <p>{{alertasActivas}} pacientes en riesgo</p>
+              <span *ngIf="alertasActivas > 0" class="alert-badge">{{alertasActivas}}</span>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="people-outline" color="primary"></ion-icon>
+                Pacientes activos
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <h2>{{totalPacientes}}</h2>
+              <p>Registrados en el sistema</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="clipboard-outline" color="tertiary"></ion-icon>
+                Planes creados
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <h2>{{planesCreados}}</h2>
+              <p>Nutricionales activos</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="checkmark-done-outline" color="success"></ion-icon>
+                Controles realizados
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <h2>{{controlesRealizados}}</h2>
+              <p>Seguimientos completados</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card [class.alert-card]="alertasActivas > 0">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="alert-circle-outline" [color]="alertasActivas > 0 ? 'danger' : 'medium'"></ion-icon>
+                Alertas
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <h2 [class.text-danger]="alertasActivas > 0">{{alertasActivas}}</h2>
+              <p>Presión arterial alta</p>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- PACIENTES RECIENTES -->
+        <ion-card class="recent-patients-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="recent-outline" color="primary"></ion-icon>
+              Pacientes Recientes
+            </ion-card-title>
+            <ion-button fill="clear" size="small" (click)="navegarA('medicoverpacientes')">
+              Ver todos
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          </ion-card-header>
+          <ion-card-content>
+            
+            <div *ngIf="pacientesRecientes.length === 0" class="empty-state">
+              <ion-icon name="people-outline"></ion-icon>
+              <p>No hay pacientes registrados aún</p>
+            </div>
+
+            <div class="patients-grid" *ngIf="pacientesRecientes.length > 0">
+              <div 
+                *ngFor="let paciente of pacientesRecientes" 
+                class="patient-card"
+                [class.riesgo-critico]="paciente.riesgo === 'critico'"
+                [class.riesgo-alto]="paciente.riesgo === 'alto'"
+                [class.riesgo-medio]="paciente.riesgo === 'medio'"
+                (click)="verDetallePaciente(paciente)">
+                
+                <div class="patient-header">
+                  <ion-avatar>
+                    <img src="assets/avatar-patient.png" alt="Paciente">
+                  </ion-avatar>
+                  <div class="patient-info">
+                    <h4>{{paciente.nombre}} {{paciente.apellido}}</h4>
+                    <p class="cedula">🆔 {{paciente.cedula}}</p>
+                  </div>
+                  <ion-badge [color]="getRiesgoColor(paciente.riesgo)" class="riesgo-badge">
+                    {{paciente.riesgo === 'critico' ? 'Crítico' : paciente.riesgo === 'alto' ? 'Alto' : paciente.riesgo === 'medio' ? 'Medio' : 'Bajo'}}
+                  </ion-badge>
+                </div>
+
+                <div class="patient-details">
+                  <div class="detail-row">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    <span>{{paciente.edad ? paciente.edad + ' años' : 'Edad N/D'}}</span>
+                  </div>
+                  <div class="detail-row">
+                    <ion-icon name="phone-outline"></ion-icon>
+                    <span>{{paciente.telefono || 'Sin teléfono'}}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="paciente.presion_arterial">
+                    <ion-icon name="heart-outline" [color]="paciente.riesgo === 'critico' || paciente.riesgo === 'alto' ? 'danger' : 'success'"></ion-icon>
+                    <span class="presion">PA: {{paciente.presion_arterial}} mmHg</span>
+                  </div>
+                  <div class="detail-row">
+                    <ion-icon name="nutrition-outline"></ion-icon>
+                    <span>{{paciente.total_planes}} plan(es)</span>
+                  </div>
+                  <div class="detail-row" *ngIf="paciente.ultimo_control">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <span>Último control: {{formatearFecha(paciente.ultimo_control)}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+</ion-content>

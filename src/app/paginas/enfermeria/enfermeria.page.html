@@ -1,0 +1,288 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel Hospitalario</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('enfermeria')" [class.active]="true">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">
+              <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
+            </li>
+          </ul>
+        </li>
+        <li (click)="iniciarRegistroPaciente()">
+          <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
+        </li>
+        <li (click)="navegarA('reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Reportes</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- ACCIONES RÁPIDAS -->
+      <div class="quick-actions">
+        <ion-card class="action-card pacientes" button (click)="navegarA('medicoverpacientes')">
+          <ion-card-content>
+            <ion-icon name="people-outline"></ion-icon>
+            <h3>Gestionar Pacientes</h3>
+            <p>Ver y administrar registros</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card registro" button (click)="iniciarRegistroPaciente()">
+          <ion-card-content>
+            <ion-icon name="clipboard-outline"></ion-icon>
+            <h3>Nuevo Registro</h3>
+            <p>Evaluación clínica completa</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card reportes" button (click)="navegarA('reportes')">
+          <ion-card-content>
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <h3>Reportes</h3>
+            <p>Ver evolución y estadísticas</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card signos" button (click)="navegarA('signos-vitales')">
+          <ion-card-content>
+            <ion-icon name="pulse-outline"></ion-icon>
+            <h3>Signos Vitales</h3>
+            <p>Registro rápido de constantes</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- ESTADÍSTICAS -->
+      <div class="stats">
+        <ion-card class="stat-card">
+          <div class="stat-icon-wrapper pacientes-bg">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{totalPacientes}}</h2>
+            <p>Pacientes activos</p>
+          </div>
+        </ion-card>
+
+        <ion-card class="stat-card">
+          <div class="stat-icon-wrapper hoy-bg">
+            <ion-icon name="today-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{citasHoy}}</h2>
+            <p>Registros hoy</p>
+          </div>
+        </ion-card>
+
+        <ion-card class="stat-card" [class.alert-card]="alertasActivas > 0" (click)="verDetalleAlertas()">
+          <div class="stat-icon-wrapper alertas-bg">
+            <ion-icon name="warning-outline"></ion-icon>
+            <span class="stat-badge" *ngIf="alertasActivas > 0">{{alertasActivas}}</span>
+          </div>
+          <div class="stat-info">
+            <h2>{{alertasActivas}}</h2>
+            <p>Alertas activas</p>
+          </div>
+        </ion-card>
+
+        <ion-card class="stat-card">
+          <div class="stat-icon-wrapper mes-bg">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{registrosMes}}</h2>
+            <p>Registros del mes</p>
+          </div>
+        </ion-card>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 🆕 PACIENTES RECIENTES - REDISEÑO PROFESIONAL -->
+      <!-- ============================================ -->
+      <div class="recent-patients-section">
+        <div class="section-header">
+          <div class="section-title">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <div>
+              <h2>Pacientes Recientes</h2>
+              <p>Últimos registros clínicos realizados</p>
+            </div>
+          </div>
+          <ion-button fill="clear" size="small" (click)="navegarA('medicoverpacientes')">
+            Ver todos
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="pacientesRecientes.length === 0" class="empty-state-card">
+          <ion-icon name="person-add-outline"></ion-icon>
+          <h3>Sin pacientes recientes</h3>
+          <p>Comienza registrando un nuevo paciente</p>
+          <ion-button size="small" (click)="iniciarRegistroPaciente()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Nuevo Registro
+          </ion-button>
+        </div>
+
+        <!-- Grid de pacientes -->
+        <div class="patients-grid" *ngIf="pacientesRecientes.length > 0">
+          <div 
+            *ngFor="let paciente of pacientesRecientes" 
+            class="patient-card"
+            [class.estado-finalizado]="paciente.estado_real === 'finalizado'"
+            [class.estado-en-proceso]="paciente.estado_real === 'en_proceso'"
+            [class.estado-iniciado]="paciente.estado_real === 'iniciado'"
+            [class.estado-alerta]="paciente.tiene_alerta">
+            
+            <!-- Header de la card -->
+            <div class="patient-card-header">
+              <div class="patient-avatar-profesional" [style.background]="getAvatarColor(paciente.nombre_completo)">
+                <span>{{getIniciales(paciente.nombre_completo)}}</span>
+              </div>
+              <div class="patient-main-info">
+                <h3>{{paciente.nombre_completo}}</h3>
+                <p class="patient-cedula">
+                  <ion-icon name="card-outline"></ion-icon>
+                  {{paciente.cedula}}
+                </p>
+              </div>
+              <div class="patient-status">
+                <ion-badge [color]="getEstadoColor(paciente.estado_real)" class="estado-badge">
+                  <ion-icon [name]="getEstadoIcono(paciente.estado_real)" slot="start"></ion-icon>
+                  {{formatearEstadoReal(paciente.estado_real)}}
+                </ion-badge>
+              </div>
+            </div>
+
+            <!-- Info del registro -->
+            <div class="patient-card-body">
+              <div class="info-row">
+                <div class="info-item">
+                  <ion-icon name="call-outline"></ion-icon>
+                  <span>{{paciente.telefono || 'Sin teléfono'}}</span>
+                </div>
+                <div class="info-item" *ngIf="paciente.progreso">
+                  <ion-icon name="analytics-outline"></ion-icon>
+                  <span>Progreso: {{paciente.progreso}}%</span>
+                </div>
+              </div>
+              
+              <!-- Barra de progreso -->
+              <div class="progress-bar-container" *ngIf="paciente.progreso !== undefined">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="paciente.progreso"
+                    [class.progress-complete]="paciente.progreso === 100"
+                    [class.progress-warning]="paciente.progreso < 50"
+                    [class.progress-normal]="paciente.progreso >= 50 && paciente.progreso < 100">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alertas del paciente -->
+              <div class="patient-alerts" *ngIf="paciente.alertas && paciente.alertas.length > 0">
+                <div *ngFor="let alerta of paciente.alertas" class="alert-chip" [class]="alerta.nivel">
+                  <ion-icon name="warning-outline"></ion-icon>
+                  <span>{{alerta.tipo}}</span>
+                </div>
+              </div>
+
+              <!-- Fecha -->
+              <div class="patient-footer">
+                <small *ngIf="paciente.ultima_fecha">
+                  <ion-icon name="time-outline"></ion-icon>
+                  {{paciente.ultima_fecha | date:'dd/MM/yyyy HH:mm'}}
+                </small>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="patient-card-actions">
+              
+              <!-- Para registros iniciados o en proceso (ej: Marjorie con 30%) -->
+              <ion-button 
+                *ngIf="paciente.estado_real === 'en_proceso' || paciente.estado_real === 'iniciado'"
+                fill="solid" 
+                size="small" 
+                color="primary"
+                (click)="continuarRegistro(paciente)">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                {{paciente.progreso === 0 ? 'Iniciar' : 'Continuar'}}
+              </ion-button>
+              
+              <!-- Para registros finalizados (ej: Patricio y Marcia con 100%) -->
+              <ion-button 
+                *ngIf="paciente.estado_real === 'finalizado'"
+                fill="outline" 
+                size="small" 
+                color="primary"
+                (click)="verDetallePaciente(paciente)">
+                <ion-icon name="eye-outline" slot="start"></ion-icon>
+                Ver registro
+              </ion-button>
+
+              <!-- Botón de opciones adicionales -->
+              <ion-button 
+                fill="clear" 
+                size="small"
+                (click)="verDetallePaciente(paciente)">
+                <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+              </ion-button>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 40px;"></div>
+    </div>
+  </div>
+
+</ion-content>

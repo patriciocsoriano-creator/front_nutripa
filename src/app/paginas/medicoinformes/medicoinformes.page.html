@@ -1,0 +1,612 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Informes Médicos</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportarInformes()" title="Exportar informes">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')"><ion-icon name="home-outline"></ion-icon><span>Inicio</span></li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')"><ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span></li>
+        <li (click)="navegarA('medicoseguimientoclinico')"><ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span></li>
+        <li (click)="navegarA('medicoinformes')" class="active"><ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span></li>
+        <li (click)="navegarA('configuracion')"><ion-icon name="settings-outline"></ion-icon><span>Configuración</span></li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando informes...</p>
+      </div>
+
+      <div *ngIf="!cargando" class="informes-container">
+        
+        <!-- Header de Informes -->
+        <div class="informes-header">
+          <h1>📊 Panel de Informes</h1>
+          <p>Análisis completo del sistema de nutrición</p>
+        </div>
+
+        <!-- Filtros de Fecha -->
+        <div class="filtros-card">
+          <div class="filtros-content">
+            <div class="filtro-item">
+              <label>Período:</label>
+              <ion-select [(ngModel)]="filtroPeriodo" (ionChange)="aplicarFiltros()">
+                <ion-select-option value="7">Últimos 7 días</ion-select-option>
+                <ion-select-option value="30">Últimos 30 días</ion-select-option>
+                <ion-select-option value="90">Últimos 90 días</ion-select-option>
+                <ion-select-option value="365">Último año</ion-select-option>
+                <ion-select-option value="todo">Todo</ion-select-option>
+              </ion-select>
+            </div>
+            <div class="filtro-item">
+              <label>Tipo de Informe:</label>
+              <ion-select [(ngModel)]="tipoInforme" (ionChange)="aplicarFiltros()">
+                <ion-select-option value="todos">Todos</ion-select-option>
+                <ion-select-option value="ia">IA y Red Neuronal</ion-select-option>
+                <ion-select-option value="pacientes">Pacientes</ion-select-option>
+                <ion-select-option value="planes">Planes Nutricionales</ion-select-option>
+                <ion-select-option value="alertas">Alertas Clínicas</ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECCIÓN 1: IA Y RED NEURONAL ==================== -->
+        <div *ngIf="tipoInforme === 'todos' || tipoInforme === 'ia'" class="section">
+          <h2 class="section-title">
+            <ion-icon name="brain-outline"></ion-icon>
+            Evolución de la Inteligencia Artificial
+          </h2>
+
+          <!-- Cards de Métricas IA -->
+          <div class="metrics-grid">
+            <ion-card class="metric-card ai-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="trending-up-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Confianza Promedio</label>
+                  <span class="metric-value">{{informesIA.confianzaPromedio | number:'1.1-1'}}%</span>
+                  <small class="metric-trend positive">
+                    <ion-icon name="arrow-up-outline"></ion-icon>
+                    {{informesIA.tendenciaConfianza}}% vs mes anterior
+                  </small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card ai-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Tasa de Aceptación</label>
+                  <span class="metric-value">{{informesIA.tasaAceptacion | number:'1.1-1'}}%</span>
+                  <small>Planes aceptados / generados</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card ai-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="nutrition-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Perfil Más Recomendado</label>
+                  <span class="metric-value profile-name">{{informesIA.perfilMasRecomendado}}</span>
+                  <small>{{informesIA.cantidadPerfilTop}} veces recomendado</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card ai-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="flash-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Precisión de Predicción</label>
+                  <span class="metric-value">{{informesIA.precisionPrediccion | number:'1.1-1'}}%</span>
+                  <small>Basado en feedback del médico</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!-- Gráfico de Evolución de Confianza -->
+          <ion-card class="chart-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="trending-up-outline"></ion-icon>
+                Evolución de Confianza de la IA (Últimos 6 meses)
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="chart-container">
+                <div class="chart-bars">
+                  <div *ngFor="let mes of informesIA.evolucionConfianza" class="chart-bar-wrapper">
+                    <div class="chart-bar" [style.height.%]="mes.confianza" [class.high]="mes.confianza >= 90" [class.medium]="mes.confianza >= 75 && mes.confianza < 90" [class.low]="mes.confianza < 75">
+                      <span class="bar-value">{{mes.confianza | number:'1.0-0'}}%</span>
+                    </div>
+                    <span class="bar-label">{{mes.mes}}</span>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Distribución de Perfiles -->
+          <ion-card class="chart-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="pie-chart-outline"></ion-icon>
+                Distribución de Perfiles Nutricionales Recomendados
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="distribution-list">
+                <div *ngFor="let perfil of informesIA.distribucionPerfiles" class="distribution-item">
+                  <div class="distribution-info">
+                    <span class="profile-name">{{perfil.nombre}}</span>
+                    <span class="profile-count">{{perfil.cantidad}} planes</span>
+                  </div>
+                  <div class="distribution-bar">
+                    <div class="bar-fill" [style.width.%]="perfil.porcentaje" [style.background]="perfil.color"></div>
+                  </div>
+                  <span class="distribution-percent">{{perfil.porcentaje | number:'1.0-0'}}%</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- ==================== SECCIÓN 2: PACIENTES ==================== -->
+        <div *ngIf="tipoInforme === 'todos' || tipoInforme === 'pacientes'" class="section">
+          <h2 class="section-title">
+            <ion-icon name="people-outline"></ion-icon>
+            Estadísticas de Pacientes
+          </h2>
+
+          <!-- Cards de Métricas Pacientes -->
+          <div class="metrics-grid">
+            <ion-card class="metric-card patient-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="people-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Total Pacientes</label>
+                  <span class="metric-value">{{informesPacientes.totalPacientes}}</span>
+                  <small>{{informesPacientes.nuevosEsteMes}} nuevos este mes</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card patient-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Pacientes Activos</label>
+                  <span class="metric-value">{{informesPacientes.pacientesActivos}}</span>
+                  <small>Con plan nutricional activo</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card patient-card">
+              <ion-card-content>
+                <div class="metric-icon warning">
+                  <ion-icon name="alert-circle-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Pacientes en Riesgo</label>
+                  <span class="metric-value">{{informesPacientes.pacientesRiesgo}}</span>
+                  <small>Requieren atención inmediata</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card patient-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Promedio Edad</label>
+                  <span class="metric-value">{{informesPacientes.promedioEdad | number:'1.0-0'}} años</span>
+                  <small>Rango: {{informesPacientes.edadMin}} - {{informesPacientes.edadMax}} años</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!-- Distribución por Sexo -->
+          <ion-card class="chart-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="male-female-outline"></ion-icon>
+                Distribución por Sexo
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="gender-distribution">
+                <div class="gender-item">
+                  <div class="gender-icon male">
+                    <ion-icon name="male-outline"></ion-icon>
+                  </div>
+                  <div class="gender-info">
+                    <span class="gender-label">Masculino</span>
+                    <span class="gender-value">{{informesPacientes.distribucionSexo.masculino}} pacientes</span>
+                  </div>
+                  <div class="gender-bar">
+                    <div class="bar-fill male" [style.width.%]="informesPacientes.porcentajeSexo.masculino"></div>
+                  </div>
+                  <span class="gender-percent">{{informesPacientes.porcentajeSexo.masculino | number:'1.0-0'}}%</span>
+                </div>
+                <div class="gender-item">
+                  <div class="gender-icon female">
+                    <ion-icon name="female-outline"></ion-icon>
+                  </div>
+                  <div class="gender-info">
+                    <span class="gender-label">Femenino</span>
+                    <span class="gender-value">{{informesPacientes.distribucionSexo.femenino}} pacientes</span>
+                  </div>
+                  <div class="gender-bar">
+                    <div class="bar-fill female" [style.width.%]="informesPacientes.porcentajeSexo.femenino"></div>
+                  </div>
+                  <span class="gender-percent">{{informesPacientes.porcentajeSexo.femenino | number:'1.0-0'}}%</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- ==================== SECCIÓN 3: PLANES NUTRICIONALES ==================== -->
+        <div *ngIf="tipoInforme === 'todos' || tipoInforme === 'planes'" class="section">
+          <h2 class="section-title">
+            <ion-icon name="nutrition-outline"></ion-icon>
+            Informes de Planes Nutricionales
+          </h2>
+
+          <!-- Cards de Métricas Planes -->
+          <div class="metrics-grid">
+            <ion-card class="metric-card plan-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Total Planes Creados</label>
+                  <span class="metric-value">{{informesPlanes.totalPlanes}}</span>
+                  <small>{{informesPlanes.planesEsteMes}} este mes</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card plan-card">
+              <ion-card-content>
+                <div class="metric-icon success">
+                  <ion-icon name="checkmark-done-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Planes Activos</label>
+                  <span class="metric-value">{{informesPlanes.planesActivos}}</span>
+                  <small>En seguimiento actual</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card plan-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="trophy-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Planes Completados</label>
+                  <span class="metric-value">{{informesPlanes.planesCompletados}}</span>
+                  <small>Tasa de éxito: {{informesPlanes.tasaExito | number:'1.0-0'}}%</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card plan-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="time-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Duración Promedio</label>
+                  <span class="metric-value">{{informesPlanes.duracionPromedio}} semanas</span>
+                  <small>De planes completados</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!-- Estado de Planes -->
+          <ion-card class="chart-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="pie-chart-outline"></ion-icon>
+                Estado de Planes Nutricionales
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="status-list">
+                <div class="status-item">
+                  <div class="status-indicator active"></div>
+                  <div class="status-info">
+                    <span class="status-label">Activos</span>
+                    <span class="status-value">{{informesPlanes.planesActivos}} planes</span>
+                  </div>
+                  <div class="status-bar">
+                    <div class="bar-fill" [style.width.%]="informesPlanes.porcentajeEstados.activo" style="background: #10b981;"></div>
+                  </div>
+                  <span class="status-percent">{{informesPlanes.porcentajeEstados.activo | number:'1.0-0'}}%</span>
+                </div>
+                <div class="status-item">
+                  <div class="status-indicator completed"></div>
+                  <div class="status-info">
+                    <span class="status-label">Completados</span>
+                    <span class="status-value">{{informesPlanes.planesCompletados}} planes</span>
+                  </div>
+                  <div class="status-bar">
+                    <div class="bar-fill" [style.width.%]="informesPlanes.porcentajeEstados.completado" style="background: #3b82f6;"></div>
+                  </div>
+                  <span class="status-percent">{{informesPlanes.porcentajeEstados.completado | number:'1.0-0'}}%</span>
+                </div>
+                <div class="status-item">
+                  <div class="status-indicator draft"></div>
+                  <div class="status-info">
+                    <span class="status-label">Borradores</span>
+                    <span class="status-value">{{informesPlanes.planesBorrador}} planes</span>
+                  </div>
+                  <div class="status-bar">
+                    <div class="bar-fill" [style.width.%]="informesPlanes.porcentajeEstados.borrador" style="background: #f59e0b;"></div>
+                  </div>
+                  <span class="status-percent">{{informesPlanes.porcentajeEstados.borrador | number:'1.0-0'}}%</span>
+                </div>
+                <div class="status-item">
+                  <div class="status-indicator cancelled"></div>
+                  <div class="status-info">
+                    <span class="status-label">Cancelados</span>
+                    <span class="status-value">{{informesPlanes.planesCancelados}} planes</span>
+                  </div>
+                  <div class="status-bar">
+                    <div class="bar-fill" [style.width.%]="informesPlanes.porcentajeEstados.cancelado" style="background: #ef4444;"></div>
+                  </div>
+                  <span class="status-percent">{{informesPlanes.porcentajeEstados.cancelado | number:'1.0-0'}}%</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- ==================== SECCIÓN 4: ALERTAS CLÍNICAS ==================== -->
+        <div *ngIf="tipoInforme === 'todos' || tipoInforme === 'alertas'" class="section">
+          <h2 class="section-title">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Alertas Clínicas y Pacientes en Riesgo
+          </h2>
+
+          <!-- Cards de Alertas -->
+          <div class="metrics-grid">
+            <ion-card class="metric-card alert-card critical">
+              <ion-card-content>
+                <div class="metric-icon critical">
+                  <ion-icon name="heart-dislike-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Presión Arterial Alta</label>
+                  <span class="metric-value">{{informesAlertas.presionAlta}}</span>
+                  <small>Pacientes requieren atención</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card alert-card warning">
+              <ion-card-content>
+                <div class="metric-icon warning">
+                  <ion-icon name="water-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Glucosa Elevada</label>
+                  <span class="metric-value">{{informesAlertas.glucosaAlta}}</span>
+                  <small>Monitoreo necesario</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card alert-card warning">
+              <ion-card-content>
+                <div class="metric-icon warning">
+                  <ion-icon name="body-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>IMC Fuera de Rango</label>
+                  <span class="metric-value">{{informesAlertas.imcFueraRango}}</span>
+                  <small>Requiere intervención</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card alert-card info">
+              <ion-card-content>
+                <div class="metric-icon info">
+                  <ion-icon name="flask-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>HbA1c Elevada</label>
+                  <span class="metric-value">{{informesAlertas.hba1cAlta}}</span>
+                  <small>Control glucémico deficiente</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!-- Lista de Pacientes en Riesgo -->
+          <ion-card class="risk-patients-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="warning-outline"></ion-icon>
+                Pacientes que Requieren Atención Inmediata
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div *ngIf="informesAlertas.pacientesRiesgo.length === 0" class="no-alerts">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <p>No hay pacientes en riesgo actualmente</p>
+              </div>
+              <div *ngIf="informesAlertas.pacientesRiesgo.length > 0" class="risk-list">
+                <div *ngFor="let paciente of informesAlertas.pacientesRiesgo" class="risk-item" [class.critical]="paciente.nivelRiesgo === 'crítico'" [class.high]="paciente.nivelRiesgo === 'alto'" [class.medium]="paciente.nivelRiesgo === 'medio'">
+                  <div class="risk-indicator"></div>
+                  <div class="risk-info">
+                    <h4>{{paciente.nombre}}</h4>
+                    <p class="risk-details">
+                      <span *ngIf="paciente.presionArterial">
+                        <ion-icon name="heart-outline"></ion-icon>
+                        PA: {{paciente.presionArterial}}
+                      </span>
+                      <span *ngIf="paciente.glucosa">
+                        <ion-icon name="water-outline"></ion-icon>
+                        Glucosa: {{paciente.glucosa}} mg/dL
+                      </span>
+                      <span *ngIf="paciente.imc">
+                        <ion-icon name="body-outline"></ion-icon>
+                        IMC: {{paciente.imc}}
+                      </span>
+                    </p>
+                    <p class="risk-reason">{{paciente.motivo}}</p>
+                  </div>
+                  <div class="risk-actions">
+                    <ion-badge [color]="paciente.nivelRiesgo === 'crítico' ? 'danger' : paciente.nivelRiesgo === 'alto' ? 'warning' : 'medium'">
+                      {{paciente.nivelRiesgo | titlecase}}
+                    </ion-badge>
+                    <ion-button fill="clear" size="small" (click)="verPaciente(paciente.id)">
+                      <ion-icon name="eye-outline"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" size="small" color="success" (click)="contactarPaciente(paciente)">
+                      <ion-icon name="logo-whatsapp"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- ==================== SECCIÓN 5: REGISTROS CLÍNICOS ==================== -->
+        <div *ngIf="tipoInforme === 'todos'" class="section">
+          <h2 class="section-title">
+            <ion-icon name="clipboard-outline"></ion-icon>
+            Informes de Registros Clínicos
+          </h2>
+
+          <div class="metrics-grid">
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="checkmark-done-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Registros Finalizados</label>
+                  <span class="metric-value">{{informesRegistros.finalizados}}</span>
+                  <small>Tiempo promedio: {{informesRegistros.tiempoPromedio}} min</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="hourglass-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>En Proceso</label>
+                  <span class="metric-value">{{informesRegistros.enProceso}}</span>
+                  <small>Registros incompletos</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="close-circle-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Cancelados</label>
+                  <span class="metric-value">{{informesRegistros.cancelados}}</span>
+                  <small>Tasa de cancelación: {{informesRegistros.tasaCancelacion | number:'1.0-0'}}%</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon">
+                  <ion-icon name="speedometer-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Eficiencia</label>
+                  <span class="metric-value">{{informesRegistros.eficiencia | number:'1.0-0'}}%</span>
+                  <small>Finalizados / Total</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

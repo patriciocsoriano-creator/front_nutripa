@@ -1,0 +1,133 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>NutriPA - Inicio de Sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    
+    <!-- 🖼️ Logo con efecto neumórfico -->
+    <ion-img src="assets/img/logo.jpeg" class="logo" alt="Logo NutriPA"></ion-img>
+    
+    <!-- 🧱 Formulario principal -->
+    <form (ngSubmit)="iniciarSesion()" [formGroup]="loginForm" novalidate>
+      
+      <!-- ✉️ Campo Email -->
+      <ion-item lines="none">
+        <div class="neu-input-wrapper" 
+             [class.has-value]="loginForm.get('email')?.value" 
+             [class.has-error]="hasError('email')">
+          
+          <!-- Icono email -->
+          <span class="input-icon" aria-hidden="true">
+            <ion-icon name="mail-outline"></ion-icon>
+          </span>
+          
+          <!-- Input -->
+          <ion-input 
+            type="email" 
+            formControlName="email" 
+            name="email"
+            (ionBlur)="onBlur('email')"
+            (ionChange)="onInputChange('email')"
+            aria-label="Correo electrónico"
+            aria-describedby="email-error">
+          </ion-input>
+          
+          <!-- Label flotante -->
+          <span class="neu-label" 
+                [class.floating]="loginForm.get('email')?.touched || loginForm.get('email')?.value">
+            Correo Electrónico
+          </span>
+        </div>
+      </ion-item>
+      
+      <!-- ⚠️ Mensajes de error para email -->
+      <ion-text color="danger" class="error-message" 
+                id="email-error"
+                [class.show]="hasError('email')" 
+                role="alert">
+        <small>
+          <span *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email']">Ingresa un correo válido</span>
+        </small>
+      </ion-text>
+
+      <!-- 🔐 Campo Password -->
+      <ion-item lines="none">
+        <div class="neu-input-wrapper password-group" 
+             [class.has-value]="loginForm.get('password')?.value"
+             [class.has-error]="hasError('password')">
+          
+          <!-- Icono lock -->
+          <span class="input-icon" aria-hidden="true">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </span>
+          
+          <!-- Input password -->
+          <ion-input 
+            [type]="mostrarPassword ? 'text' : 'password'" 
+            formControlName="password" 
+            name="password"
+            (ionBlur)="onBlur('password')"
+            (ionChange)="onInputChange('password')"
+            aria-label="Contraseña"
+            aria-describedby="password-error">
+          </ion-input>
+          
+          <!-- Label flotante -->
+          <span class="neu-label"
+                [class.floating]="loginForm.get('password')?.touched || loginForm.get('password')?.value">
+            Contraseña
+          </span>
+          
+          <!-- 👁️ Toggle visibilidad password -->
+          <button 
+            type="button" 
+            class="password-toggle" 
+            (click)="togglePassword()"
+            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            aria-pressed="{{mostrarPassword}}">
+            <ion-icon [name]="mostrarPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+      </ion-item>
+      
+      <!-- ⚠️ Mensajes de error para password -->
+      <ion-text color="danger" class="error-message" 
+                id="password-error"
+                [class.show]="hasError('password')" 
+                role="alert">
+        <small>
+          <span *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Mínimo 6 caracteres</span>
+        </small>
+      </ion-text>
+
+      <!-- 🔘 Botón de inicio de sesión -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        [disabled]="cargando || loginForm.invalid"
+        class="ion-margin-top"
+        aria-busy="{{cargando}}">
+        
+        <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
+        {{ cargando ? 'Iniciando...' : 'Iniciar Sesión' }}
+      </ion-button>
+      
+    </form>
+    
+    <!-- 🔗 Links secundarios -->
+    <div class="links">
+      <ion-text color="primary" (click)="irARegistro()" role="link" tabindex="0">
+        ¿No tienes cuenta? <strong>Regístrate</strong>
+      </ion-text>
+      <ion-text color="medium" (click)="recuperarPassword()" role="link" tabindex="0">
+        ¿Olvidaste tu contraseña?
+      </ion-text>
+    </div>
+    
+  </div>
+</ion-content>

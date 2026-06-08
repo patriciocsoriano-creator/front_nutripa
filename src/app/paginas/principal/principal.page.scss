@@ -1,0 +1,531 @@
+// src/theme/variables.scss o principal.page.scss
+
+// ============================================
+// 🎨 VARIABLES NEUMÓRFICAS (Personalizables)
+// ============================================
+$neu-bg: #e0e5ec;
+$neu-bg-dark: #bec3cf;
+$neu-bg-light: #ffffff;
+$neu-text-primary: #3d4468;
+$neu-text-secondary: #9499b7;
+$neu-text-accent: #6c7293;
+$neu-success: #00c896;
+$neu-error: #ff3b5c;
+$neu-radius-lg: 30px;
+$neu-radius-md: 20px;
+$neu-radius-sm: 15px;
+$neu-radius-xs: 10px;
+
+// Sombras neumórficas
+$neu-shadow-out: 
+  20px 20px 60px $neu-bg-dark,
+  -20px -20px 60px $neu-bg-light;
+
+$neu-shadow-in: 
+  inset 8px 8px 16px $neu-bg-dark,
+  inset -8px -8px 16px $neu-bg-light;
+
+$neu-shadow-in-focus: 
+  inset 4px 4px 8px $neu-bg-dark,
+  inset -4px -4px 8px $neu-bg-light;
+
+$neu-shadow-btn: 
+  8px 8px 20px $neu-bg-dark,
+  -8px -8px 20px $neu-bg-light;
+
+$neu-shadow-btn-active: 
+  inset 4px 4px 10px $neu-bg-dark,
+  inset -4px -4px 10px $neu-bg-light;
+
+// ============================================
+// 🔄 RESET Y BASE
+// ============================================
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// Forzar fondo neumórfico en todo el contenido
+ion-content {
+  --background: #{$neu-bg};
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
+// ============================================
+// 📦 LOGIN CONTAINER
+// ============================================
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// ============================================
+// 🖼️ LOGO
+// ============================================
+.logo {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: $neu-bg;
+  box-shadow: 
+    8px 8px 20px $neu-bg-dark,
+    -8px -8px 20px $neu-bg-light;
+  transition: all 0.3s ease;
+  padding: 8px;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 
+      4px 4px 10px $neu-bg-dark,
+      -4px -4px 10px $neu-bg-light;
+  }
+}
+
+// ============================================
+// 🧱 FORMULARIO NEUMÓRFICO
+// ============================================
+form {
+  width: 100%;
+  background: $neu-bg;
+  border-radius: $neu-radius-lg;
+  padding: 40px 32px;
+  box-shadow: $neu-shadow-out;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+// ============================================
+// 📝 ION-ITEM PERSONALIZADO
+// ============================================
+ion-item {
+  --background: transparent;
+  --inner-padding-end: 0;
+  --inner-padding-start: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --border-width: 0;
+  --highlight-height: 0;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+// Contenedor neumórfico para el input
+.neu-input-wrapper {
+  position: relative;
+  background: $neu-bg;
+  border-radius: $neu-radius-sm;
+  box-shadow: $neu-shadow-in;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+
+  &:focus-within,
+  &.has-value {
+    box-shadow: $neu-shadow-in-focus;
+  }
+
+  // Estado de error
+  &.has-error {
+    box-shadow: 
+      inset 8px 8px 16px #ffb8c4,
+      inset -8px -8px 16px #ffffff,
+      0 0 0 2px #{$neu-error};
+  }
+}
+
+// ============================================
+// ⌨️ ION-INPUT PERSONALIZADO
+// ============================================
+ion-input {
+  --padding-start: 52px;
+  --padding-end: 16px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  --color: #{$neu-text-primary};
+  --placeholder-color: transparent;
+  --highlight-color-focused: transparent;
+  font-size: 16px;
+  font-weight: 500;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+
+  &.sc-ion-input-md {
+    padding-left: 52px !important;
+  }
+}
+
+// ============================================
+// 🏷️ FLOATING LABEL NEUMÓRFICO
+// ============================================
+.neu-label {
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $neu-text-secondary;
+  font-size: 16px;
+  font-weight: 400;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 1;
+
+  &.floating,
+  .neu-input-wrapper.has-value & {
+    top: 8px;
+    font-size: 12px;
+    color: $neu-text-accent;
+    transform: translateY(0);
+    background: $neu-bg;
+    padding: 0 8px;
+  }
+}
+
+// ============================================
+// 🔍 ICONO DENTRO DEL INPUT
+// ============================================
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: $neu-text-secondary;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+
+  .neu-input-wrapper:focus-within & {
+    color: $neu-text-accent;
+  }
+}
+
+// ============================================
+// 👁️ TOGGLE PASSWORD
+// ============================================
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: $neu-bg;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: $neu-radius-xs;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $neu-text-secondary;
+  box-shadow: 
+    4px 4px 10px $neu-bg-dark,
+    -4px -4px 10px $neu-bg-light;
+  transition: all 0.3s ease;
+  z-index: 2;
+
+  &:hover {
+    color: $neu-text-accent;
+  }
+
+  &:active {
+    box-shadow: 
+      inset 2px 2px 5px $neu-bg-dark,
+      inset -2px -2px 5px $neu-bg-light;
+  }
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// ============================================
+// ⚠️ MENSAJES DE ERROR
+// ============================================
+ion-text[color="danger"] {
+  display: block;
+  margin: -16px 0 16px 20px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.3s ease;
+
+  &.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  small {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &::before {
+      content: "•";
+      color: $neu-error;
+    }
+  }
+}
+
+// ============================================
+// 🔘 BOTÓN NEUMÓRFICO (ion-button)
+// ============================================
+ion-button {
+  --background: #{$neu-bg};
+  --color: #{$neu-text-primary};
+  --border-radius: #{$neu-radius-sm};
+  --box-shadow: #{$neu-shadow-btn};
+  --padding-top: 18px;
+  --padding-bottom: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  margin-top: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  // Efecto hover
+  &:not([disabled]):hover {
+    --box-shadow: 
+      12px 12px 30px $neu-bg-dark,
+      -12px -12px 30px $neu-bg-light;
+    transform: translateY(-2px);
+  }
+
+  // Efecto active/presionado
+  &:not([disabled]):active {
+    --box-shadow: #{$neu-shadow-btn-active};
+    transform: translateY(0);
+  }
+
+  // Estado disabled
+  &[disabled] {
+    --background: #{$neu-bg};
+    --color: #{$neu-text-secondary};
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  // Shine effect on hover
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: left 0.5s ease;
+    pointer-events: none;
+  }
+
+  &:not([disabled]):hover::before {
+    left: 100%;
+  }
+
+  // Spinner personalizado
+  ion-spinner {
+    --color: #{$neu-text-accent};
+    margin-right: 8px;
+  }
+}
+
+// ============================================
+// 🔗 LINKS INFERIORES
+// ============================================
+.links {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 0 16px;
+
+  ion-text {
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-align: center;
+
+    &:hover {
+      color: $neu-text-primary !important;
+    }
+  }
+}
+
+// ============================================
+// 🎭 ANIMACIONES Y EFECTOS
+// ============================================
+@keyframes neu-pulse {
+  0%, 100% { box-shadow: $neu-shadow-out; }
+  50% { box-shadow: 
+    25px 25px 70px $neu-bg-dark,
+    -25px -25px 70px $neu-bg-light;
+  }
+}
+
+.login-container {
+  animation: neu-pulse 3s ease-in-out infinite;
+}
+
+// ============================================
+// 📱 RESPONSIVE - MÓVILES
+// ============================================
+@media (max-width: 480px) {
+  ion-content {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+
+  .login-container {
+    padding: 12px 0;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
+  form {
+    padding: 32px 24px;
+    border-radius: $neu-radius-md;
+  }
+
+  ion-item {
+    margin-bottom: 20px;
+  }
+
+  ion-input {
+    --padding-start: 48px;
+    --padding-top: 18px;
+    --padding-bottom: 18px;
+    font-size: 15px;
+  }
+
+  .neu-label {
+    left: 48px;
+    font-size: 15px;
+
+    &.floating {
+      font-size: 11px;
+    }
+  }
+
+  .input-icon {
+    left: 14px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .password-toggle {
+    width: 32px;
+    height: 32px;
+    right: 10px;
+  }
+
+  ion-button {
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 15px;
+  }
+
+  .links {
+    gap: 12px;
+    margin-top: 20px;
+
+    ion-text {
+      font-size: 13px;
+    }
+  }
+}
+
+// ============================================
+// 📱 MÓVILES MUY PEQUEÑOS (< 360px)
+// ============================================
+@media (max-width: 360px) {
+  form {
+    padding: 28px 20px;
+    border-radius: $neu-radius-md;
+  }
+
+  .neu-label {
+    left: 44px;
+  }
+
+  ion-input {
+    --padding-start: 44px;
+  }
+
+  .input-icon {
+    left: 12px;
+  }
+}
+
+// ============================================
+// ♿ ACCESIBILIDAD
+// ============================================
+// Focus visible para navegación con teclado
+:focus-visible {
+  outline: 2px solid $neu-text-accent;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+// Respetar preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ============================================
+// 🎨 DARK MODE (Opcional - Descomentar si lo usas)
+// ============================================
+/*
+@media (prefers-color-scheme: dark) {
+  $neu-bg: #2a2d3a;
+  $neu-bg-dark: #1a1d26;
+  $neu-bg-light: #3a3d4a;
+  $neu-text-primary: #e0e5ec;
+  $neu-text-secondary: #9499b7;
+  
+  // Re-definir sombras para dark mode aquí si es necesario
+}
+*/

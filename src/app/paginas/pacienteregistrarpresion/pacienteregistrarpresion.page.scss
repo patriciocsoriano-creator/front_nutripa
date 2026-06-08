@@ -1,0 +1,890 @@
+/* =========================================
+   🎨 VARIABLES
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+
+/* Colores para presión arterial */
+$presion-normal: #10b981;
+$presion-elevada: #f59e0b;
+$presion-alta1: #f97316;
+$presion-alta2: #ef4444;
+$presion-crisis: #7f1d1d;
+
+/* =========================================
+   📦 HEADER
+   ========================================= */
+::ng-deep .main-header {
+  ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🧭 DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* =========================================
+   🧭 SIDEBAR (mismo que otras páginas)
+   ========================================= */
+::ng-deep .sidebar {
+  width: 70px;
+  min-width: 70px;
+  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  color: white;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.open {
+    width: 260px !important;
+    min-width: 260px;
+    
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
+  }
+
+  .menu-icon {
+    margin: 1rem auto;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    width: fit-content;
+    align-self: center;
+    &:hover { background: rgba(255,255,255,0.15); }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0 0 4px;
+        font-weight: 500;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+      }
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      
+      ion-icon { 
+        font-size: 1.3rem; 
+        min-width: 30px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      
+      span { 
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+      
+      &.active {
+        background: rgba(255,255,255,0.2);
+        border-left: 3px solid $accent-color;
+      }
+    }
+  }
+
+  .menu-item-with-submenu {
+    position: relative;
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      
+      ion-icon:first-child {
+        width: 30px;
+        min-width: 30px;
+        text-align: center;
+      }
+      
+      span {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+        flex: 1;
+      }
+      
+      .submenu-arrow {
+        margin-left: auto;
+        padding-right: 20px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.3s ease;
+        
+        &.rotate { transform: rotate(180deg); }
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+    }
+    
+    .submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background: rgba(0,0,0,0.15);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+      
+      &.active { max-height: 500px; }
+      
+      li {
+        padding-left: 50px;
+        font-size: 0.85rem;
+        
+        span { opacity: 0; }
+        
+        &:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+      }
+    }
+  }
+  
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow {
+    opacity: 1;
+  }
+  
+  &.open .menu-item-with-submenu .submenu li span {
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   📦 MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: $bg-color;
+}
+
+/* =========================================
+   📋 PAGE HEADER
+   ========================================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    ion-icon {
+      font-size: 2rem;
+      color: $primary-color;
+      background: rgba($accent-color, 0.15);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 4px;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+/* =========================================
+   📊 STATS GRID
+   ========================================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: $radius-lg;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: $shadow-md;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    &.ultima { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    &.promedio { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    &.rango { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    &.total { background: linear-gradient(135deg, #10b981, #059669); }
+  }
+
+  .stat-info {
+    flex: 1;
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+
+      &.valor-normal { color: $presion-normal; }
+      &.valor-elevada { color: $presion-elevada; }
+      &.valor-alta1 { color: $presion-alta1; }
+      &.valor-alta2 { color: $presion-alta2; }
+      &.valor-crisis { color: $presion-crisis; }
+    }
+
+    small {
+      display: block;
+      font-size: 0.75rem;
+      color: $text-muted;
+      margin-top: 4px;
+    }
+  }
+}
+
+/* =========================================
+   🆕 REGISTRO CARD
+   ========================================= */
+.registro-card, .historial-card {
+  --background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 24px;
+
+  ion-card-header {
+    padding: 20px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid $border-color;
+
+    ion-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $text-primary;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+
+      ion-icon {
+        font-size: 1.3rem;
+        color: $secondary-color;
+      }
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 6px;
+    }
+  }
+
+  ion-card-content {
+    padding: 20px 24px;
+  }
+}
+
+/* =========================================
+   🫀 PRESIÓN PRINCIPAL (SISTÓLICA/DIASTÓLICA)
+   ========================================= */
+.presion-principal {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba($primary-color, 0.05), rgba($accent-color, 0.05));
+  border-radius: 12px;
+  border: 2px dashed $border-color;
+}
+
+.presion-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.presion-input-item {
+  flex: 1;
+  min-width: 150px;
+  text-align: center;
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-secondary;
+    margin-bottom: 8px;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    padding-right: 12px;
+    transition: border-color 0.2s ease;
+
+    &:focus-within {
+      border-color: $secondary-color;
+    }
+
+    ion-input {
+      flex: 1;
+      --padding-start: 16px;
+      --padding-top: 16px;
+      --padding-bottom: 16px;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .unit {
+      font-size: 0.85rem;
+      color: $text-muted;
+      font-weight: 500;
+    }
+  }
+
+  small {
+    display: block;
+    font-size: 0.75rem;
+    color: $text-muted;
+    margin-top: 6px;
+  }
+
+  &.sistolica .input-wrapper {
+    border-color: #ef4444;
+    
+    ion-input {
+      color: #ef4444;
+    }
+  }
+
+  &.diastolica .input-wrapper {
+    border-color: #3b82f6;
+    
+    ion-input {
+      color: #3b82f6;
+    }
+  }
+}
+
+.presion-separator {
+  font-size: 3rem;
+  font-weight: 700;
+  color: $text-muted;
+  line-height: 1;
+}
+
+/* =========================================
+   📝 FORMULARIO GENERAL
+   ========================================= */
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-secondary;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  .form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  padding-right: 12px;
+
+  ion-input {
+    flex: 1;
+    --padding-start: 16px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+
+  .unit-label {
+    font-size: 0.85rem;
+    color: $text-muted;
+    font-weight: 500;
+  }
+}
+
+ion-input.custom-input,
+ion-textarea.custom-input,
+ion-select.custom-select {
+  --background: #f8fafc;
+  --border-radius: 10px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --color: #{$text-primary};
+  --placeholder-color: #{$text-muted};
+  border: 1px solid $border-color;
+  min-height: 48px;
+
+  &:focus-within {
+    border-color: $secondary-color;
+    box-shadow: 0 0 0 3px rgba(20, 93, 160, 0.15);
+  }
+}
+
+ion-textarea.custom-input {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+/* =========================================
+   📊 RANGOS DE REFERENCIA
+   ========================================= */
+.rangos-referencia {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid $border-color;
+
+  h4 {
+    margin: 0 0 16px;
+    font-size: 0.95rem;
+    color: $text-primary;
+  }
+
+  .rangos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+
+    .rango-item {
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid;
+
+      strong {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+      }
+
+      span {
+        font-size: 0.75rem;
+      }
+
+      &.normal {
+        border-color: $presion-normal;
+        background: rgba($presion-normal, 0.1);
+        strong { color: $presion-normal; }
+        span { color: $text-secondary; }
+      }
+
+      &.elevada {
+        border-color: $presion-elevada;
+        background: rgba($presion-elevada, 0.1);
+        strong { color: $presion-elevada; }
+        span { color: $text-secondary; }
+      }
+
+      &.alta1 {
+        border-color: $presion-alta1;
+        background: rgba($presion-alta1, 0.1);
+        strong { color: $presion-alta1; }
+        span { color: $text-secondary; }
+      }
+
+      &.alta2 {
+        border-color: $presion-alta2;
+        background: rgba($presion-alta2, 0.1);
+        strong { color: $presion-alta2; }
+        span { color: $text-secondary; }
+      }
+
+      &.crisis {
+        border-color: $presion-crisis;
+        background: rgba($presion-crisis, 0.1);
+        strong { color: $presion-crisis; }
+        span { color: $text-secondary; }
+      }
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* =========================================
+   📋 HISTORIAL
+   ========================================= */
+.loading-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  color: $text-secondary;
+}
+
+.empty-inline {
+  text-align: center;
+  padding: 40px 20px;
+  color: $text-muted;
+
+  ion-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.mediciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.medicion-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid $border-color;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+  }
+
+  &.valor-normal { border-left-color: $presion-normal; }
+  &.valor-elevada { border-left-color: $presion-elevada; }
+  &.valor-alta1 { border-left-color: $presion-alta1; }
+  &.valor-alta2 { border-left-color: $presion-alta2; }
+  &.valor-crisis { border-left-color: $presion-crisis; }
+
+  .medicion-valor {
+    text-align: center;
+    min-width: 100px;
+
+    .valor {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    .unidad {
+      font-size: 0.75rem;
+      color: $text-muted;
+    }
+
+    .pulso {
+      display: block;
+      font-size: 0.75rem;
+      color: #ef4444;
+      margin-top: 4px;
+    }
+  }
+
+  .medicion-info {
+    flex: 1;
+
+    .clasificacion {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+
+      &.valor-normal { color: $presion-normal; }
+      &.valor-elevada { color: $presion-elevada; }
+      &.valor-alta1 { color: $presion-alta1; }
+      &.valor-alta2 { color: $presion-alta2; }
+      &.valor-crisis { color: $presion-crisis; }
+    }
+
+    .fecha {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: $text-secondary;
+      margin-bottom: 4px;
+
+      ion-icon {
+        font-size: 0.85rem;
+      }
+    }
+
+    .detalles-adicionales {
+      display: flex;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: $text-muted;
+      margin-bottom: 4px;
+    }
+
+    .notas {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: $text-muted;
+      font-style: italic;
+
+      ion-icon {
+        font-size: 0.85rem;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .medicion-actions {
+    flex-shrink: 0;
+  }
+}
+
+/* =========================================
+   📱 RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    height: calc(100vh - 60px);
+    width: 280px !important;
+    min-width: 280px !important;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+
+    &.open {
+      left: 0;
+    }
+
+    .menu-icon { display: block; }
+    .user-info { display: block; }
+
+    .user-details {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    ul li span { opacity: 1 !important; }
+
+    .menu-item-with-submenu {
+      .menu-link span { opacity: 1 !important; }
+
+      .submenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        min-width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+      }
+    }
+  }
+
+  ::ng-deep .main-content {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .presion-input-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .presion-separator {
+    font-size: 2rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rangos-referencia .rangos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medicion-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

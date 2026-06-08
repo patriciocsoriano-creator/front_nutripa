@@ -1,0 +1,717 @@
+/* =========================================
+   🎨 VARIABLES
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+$radius-xl: 20px;
+
+$menu-icon-size: 1.3rem;
+$menu-icon-width: 28px;
+$menu-padding-left: 20px;
+
+/* =========================================
+   📦 HEADER
+   ========================================= */
+::ng-deep .main-header {
+  ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🧭 DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* =========================================
+   🧭 SIDEBAR
+   ========================================= */
+::ng-deep .sidebar {
+  width: 70px;
+  min-width: 70px;
+  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  color: white;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.open {
+    width: 260px !important;
+    min-width: 260px;
+    
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
+  }
+
+  .menu-icon {
+    margin: 1rem auto;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    width: fit-content;
+    align-self: center;
+    &:hover { background: rgba(255,255,255,0.15); }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0 0 4px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      padding: 12px $menu-padding-left;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      position: relative;
+      
+      ion-icon { 
+        font-size: $menu-icon-size;
+        width: $menu-icon-width;
+        min-width: $menu-icon-width;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      
+      span { 
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+      
+      &.active {
+        background: rgba(255,255,255,0.2);
+        border-left: 3px solid $accent-color;
+      }
+    }
+  }
+
+  .menu-item-with-submenu {
+    position: relative;
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px $menu-padding-left;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      
+      ion-icon:first-child {
+        width: $menu-icon-width;
+        min-width: $menu-icon-width;
+        text-align: center;
+      }
+      
+      span {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+        flex: 1;
+      }
+      
+      .submenu-arrow {
+        margin-left: auto;
+        padding-right: 12px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.3s ease;
+        
+        &.rotate { transform: rotate(180deg); }
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+    }
+    
+    .submenu {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+      min-width: 240px;
+      border-radius: 0 12px 12px 0;
+      box-shadow: 4px 0 16px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      
+      &.active { 
+        max-height: 400px;
+        box-shadow: 4px 4px 16px rgba(0,0,0,0.3);
+      }
+      
+      li {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        ion-icon {
+          width: $menu-icon-width;
+          min-width: $menu-icon-width;
+          text-align: center;
+          font-size: 1.1rem;
+          margin-right: 10px;
+        }
+        
+        span { 
+          opacity: 1;
+          white-space: nowrap;
+        }
+        
+        &:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+      }
+    }
+  }
+  
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow {
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   📦 MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: $bg-color;
+}
+
+/* =========================================
+   🔄 LOADING / EMPTY
+   ========================================= */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: $text-secondary;
+  
+  ion-spinner { margin-bottom: 16px; }
+  .empty-icon { font-size: 5rem; color: $primary-color; margin-bottom: 16px; opacity: 0.5; }
+  h3 { color: $text-primary; margin: 0 0 8px; }
+  p { margin: 0 0 24px; max-width: 400px; }
+}
+
+/* =========================================
+   📊 DATOS CONTAINER
+   ========================================= */
+.datos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* =========================================
+   ℹ️ INFO HEADER
+   ========================================= */
+.info-header {
+  background: linear-gradient(135deg, $primary-color, $secondary-color);
+  color: white;
+  padding: 20px 24px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+
+  .info-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    ion-icon {
+      font-size: 2rem;
+      opacity: 0.8;
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+}
+
+/* =========================================
+   📏 METRICS GRID
+   ========================================= */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.metric-card {
+  background: white;
+  border-radius: $radius-lg;
+  padding: 20px;
+  box-shadow: $shadow-md;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+
+  .metric-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 1.6rem;
+      color: white;
+    }
+
+    &.peso { background: linear-gradient(135deg, #667eea, #764ba2); }
+    &.talla { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    &.imc { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    &.cintura { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+    &.bajo-peso { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    &.normal { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    &.sobrepeso { background: linear-gradient(135deg, #fa709a, #fee140); }
+    &.obesidad { background: linear-gradient(135deg, #f5576c, #ff6b6b); }
+  }
+
+  .metric-info {
+    flex: 1;
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: $text-secondary;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    small {
+      display: block;
+      font-size: 0.8rem;
+      color: $text-muted;
+
+      &.metric-status {
+        font-weight: 600;
+
+        &.bajo-peso { color: #3b82f6; }
+        &.normal { color: #10b981; }
+        &.sobrepeso, &.alto { color: #f59e0b; }
+        &.obesidad, &.muy-alto { color: #ef4444; }
+      }
+    }
+  }
+}
+
+/* =========================================
+   📋 SECTION CARD
+   ========================================= */
+.section-card {
+  background: white;
+  border-radius: $radius-lg;
+  padding: 24px;
+  box-shadow: $shadow-md;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid $border-color;
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: $primary-color;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $text-primary;
+    }
+  }
+}
+
+/* =========================================
+   ❤️ SIGNOS GRID
+   ========================================= */
+.signos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.signo-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid $primary-color;
+
+  .signo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, $primary-color, $secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 1.4rem;
+      color: white;
+    }
+  }
+
+  .signo-info {
+    flex: 1;
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: $text-secondary;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .signo-value {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 4px;
+    }
+
+    small {
+      display: block;
+      font-size: 0.8rem;
+      color: $text-muted;
+      font-weight: 500;
+
+      &.normal { color: #10b981; }
+      &.elevada, &.pre-diabetes, &.bajo { color: #f59e0b; }
+      &.alta, &.diabetes, &.critico { color: #ef4444; }
+      &.critica { color: #dc2626; font-weight: 700; }
+    }
+  }
+}
+
+/* =========================================
+   📊 HISTORIAL TABLE
+   ========================================= */
+.historial-table {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      color: white;
+
+      th {
+        padding: 12px;
+        text-align: left;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &:first-child { border-top-left-radius: 8px; }
+        &:last-child { border-top-right-radius: 8px; }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid $border-color;
+        transition: background 0.2s ease;
+
+        &:hover { background: #f8fafc; }
+
+        &:last-child { border-bottom: none; }
+
+        td {
+          padding: 12px;
+          font-size: 0.9rem;
+          color: $text-primary;
+
+          span {
+            &.bajo-peso { color: #3b82f6; font-weight: 600; }
+            &.normal { color: #10b981; font-weight: 600; }
+            &.sobrepeso { color: #f59e0b; font-weight: 600; }
+            &.obesidad { color: #ef4444; font-weight: 600; }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* =========================================
+   💡 RECOMENDACIONES
+   ========================================= */
+.recomendaciones-card {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: $radius-lg;
+  padding: 24px;
+  box-shadow: $shadow-md;
+  border-left: 4px solid #f59e0b;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: #92400e;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #92400e;
+    }
+  }
+
+  .recomendaciones-content {
+    p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #78350f;
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+/* =========================================
+   📱 RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    height: calc(100vh - 60px);
+    width: 280px !important;
+    min-width: 280px !important;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+
+    &.open {
+      left: 0;
+    }
+
+    .menu-icon {
+      display: block;
+    }
+
+    .user-info {
+      display: block;
+
+      .user-details {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+
+    ul li span {
+      opacity: 1 !important;
+    }
+
+    .menu-item-with-submenu {
+      .menu-link span {
+        opacity: 1 !important;
+      }
+
+      .submenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        min-width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+
+        li {
+          padding-left: 48px !important;
+        }
+      }
+    }
+  }
+
+  ::ng-deep .main-content {
+    padding: 16px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .historial-table table {
+    font-size: 0.8rem;
+
+    th, td {
+      padding: 8px;
+    }
+  }
+}

@@ -1,0 +1,551 @@
+<!-- 🔝 HEADER PRINCIPAL -->
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel Hospitalario</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="imprimirPlan()" title="Imprimir plan">
+        <ion-icon slot="icon-only" name="print-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR CON MENÚ DESPLEGABLE -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor || 'Dr. Usuario'}}</h4>
+          <p>{{especialidad || 'Especialista'}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon 
+              name="chevron-down-outline" 
+              class="submenu-arrow" 
+              [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Buscar paciente</span>
+            </li>
+          </ul>
+        </li>
+        
+        <!-- Planes (ACTIVO) -->
+        <li (click)="navegarA('planes-nutricionales')" class="active-menu">
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Planes Nutricionales</span>
+        </li>
+        
+        <li (click)="navegarA('educacion')">
+          <ion-icon name="school-outline"></ion-icon>
+          <span>Seguimiento clinico</span>
+        </li>
+
+        <li (click)="navegarA('reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          <span>Reportes</span>
+        </li>
+        
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando plan nutricional...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!cargando && error" class="error-state">
+        <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+        <h3>Error al cargar el plan</h3>
+        <p>{{error}}</p>
+        <ion-button color="primary" (click)="volver()">
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+          Volver
+        </ion-button>
+      </div>
+
+      <!-- Contenido del plan -->
+      <div *ngIf="!cargando && !error && plan" class="plan-detail-container">
+        
+        <!-- Header del plan -->
+        <div class="plan-header">
+          <div class="plan-header-content">
+            <ion-button fill="clear" size="small" (click)="volver()" class="back-button">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Volver a planes
+            </ion-button>
+            
+            <div class="plan-title-row">
+              <div class="plan-icon-wrapper">
+                <ion-icon name="clipboard-outline"></ion-icon>
+              </div>
+              <div>
+                <h1>Plan Nutricional</h1>
+                <p class="plan-subtitle">
+                  {{ plan.paciente_nombre_completo }} • 
+                  <ion-badge [color]="getBadgeColor(plan.estado)">{{ plan.estado | titlecase }}</ion-badge>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="plan-actions-header">
+            <ion-button fill="outline" size="small" color="primary" (click)="imprimirPlan()">
+              <ion-icon name="print-outline" slot="start"></ion-icon>
+              Imprimir
+            </ion-button>
+            <ion-button fill="outline" size="small" color="medium" (click)="descargarPDF()">
+              <ion-icon name="download-outline" slot="start"></ion-icon>
+              PDF
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Tabs para organizar la información -->
+        <ion-segment [(ngModel)]="tabActiva" (ionChange)="cambiarTab()">
+          <ion-segment-button value="resumen">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <ion-label>Resumen</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="clinico">
+            <ion-icon name="medical-outline"></ion-icon>
+            <ion-label>Datos Clínicos</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="plan">
+            <ion-icon name="restaurant-outline"></ion-icon>
+            <ion-label>Plan Semanal</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- TAB: RESUMEN -->
+        <div *ngIf="tabActiva === 'resumen'" class="tab-content">
+          
+          <!-- Info del paciente -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="person-outline"></ion-icon>
+                Información del Paciente
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Nombre completo</label>
+                  <span>{{ plan.paciente_nombre_completo }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Identificación</label>
+                  <span>{{ paciente?.numero_identificacion || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Edad</label>
+                  <span>{{ paciente?.edad || '-' }} años</span>
+                </div>
+                <div class="info-item">
+                  <label>Sexo</label>
+                  <span>{{ paciente?.sexo === 'M' ? 'Masculino' : paciente?.sexo === 'F' ? 'Femenino' : '-' }}</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Info del plan -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="clipboard-outline"></ion-icon>
+                Detalles del Plan
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Perfil recomendado</label>
+                  <span class="highlight">{{ plan.perfil_recomendado }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Confianza IA</label>
+                  <span class="confianza-badge" [ngClass]="{
+                    'alta': plan.confianza_ia >= 0.9,
+                    'media': plan.confianza_ia >= 0.7 && plan.confianza_ia < 0.9,
+                    'baja': plan.confianza_ia < 0.7
+                  }">
+                    {{ (plan.confianza_ia * 100) | number:'1.0-0' }}%
+                  </span>
+                </div>
+                <div class="info-item">
+                  <label>Duración</label>
+                  <span>{{ plan.duracion_semanas }} semanas</span>
+                </div>
+                <div class="info-item">
+                  <label>Vigencia</label>
+                  <span>{{ plan.fecha_vigencia_desde | date:'dd/MM/yyyy' }} - {{ plan.fecha_vigencia_hasta | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Recomendaciones</label>
+                  <span>{{ plan.recomendaciones || 'Sin recomendaciones' }}</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Alergias y preferencias -->
+          <div class="two-columns">
+            <ion-card class="info-card">
+              <ion-card-header>
+                <ion-card-title>
+                  <ion-icon name="warning-outline" color="danger"></ion-icon>
+                  Alergias
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="plan.alergias && plan.alergias.length > 0" class="tags-container">
+                  <ion-chip *ngFor="let alergia of plan.alergias" color="danger" outline>
+                    <ion-icon name="close-circle"></ion-icon>
+                    {{ alergia }}
+                  </ion-chip>
+                </div>
+                <p *ngIf="!plan.alergias || plan.alergias.length === 0" class="no-data">
+                  Sin alergias registradas
+                </p>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="info-card">
+              <ion-card-header>
+                <ion-card-title>
+                  <ion-icon name="heart-outline" color="primary"></ion-icon>
+                  Preferencias Alimenticias
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="plan.preferencias" class="info-grid compact">
+                  <div class="info-item" *ngIf="plan.preferencias.actividad_fisica">
+                    <label>Actividad física</label>
+                    <span>{{ plan.preferencias.actividad_fisica | titlecase }}</span>
+                  </div>
+                  <div class="info-item" *ngIf="plan.preferencias.alimentarias">
+                    <label>Tipo alimentación</label>
+                    <span>{{ plan.preferencias.alimentarias | titlecase }}</span>
+                  </div>
+                  <div class="info-item" *ngIf="plan.preferencias.economicas">
+                    <label>Situación económica</label>
+                    <span>{{ plan.preferencias.economicas | titlecase }}</span>
+                  </div>
+                </div>
+                <p *ngIf="!plan.preferencias" class="no-data">
+                  Sin preferencias registradas
+                </p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+        </div>
+
+        <!-- TAB: DATOS CLÍNICOS -->
+        <div *ngIf="tabActiva === 'clinico'" class="tab-content">
+          
+          <!-- Métricas antropométricas -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="body-outline"></ion-icon>
+                Métricas Antropométricas
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="metrics-grid">
+                <div class="metric-card" *ngIf="datosClinicos?.peso">
+                  <div class="metric-icon">
+                    <ion-icon name="scale-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>Peso</label>
+                    <span class="metric-value">{{ datosClinicos.peso }} kg</span>
+                  </div>
+                </div>
+                
+                <div class="metric-card" *ngIf="datosClinicos?.talla">
+                  <div class="metric-icon">
+                    <ion-icon name="resize-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>Talla</label>
+                    <span class="metric-value">{{ datosClinicos.talla }} m</span>
+                  </div>
+                </div>
+                
+                <div class="metric-card" *ngIf="datosClinicos?.imc">
+                  <div class="metric-icon" [ngClass]="{
+                    'bajo-peso': datosClinicos.imc < 18.5,
+                    'normal': datosClinicos.imc >= 18.5 && datosClinicos.imc < 25,
+                    'sobrepeso': datosClinicos.imc >= 25 && datosClinicos.imc < 30,
+                    'obesidad': datosClinicos.imc >= 30
+                  }">
+                    <ion-icon name="analytics-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>IMC</label>
+                    <span class="metric-value">{{ datosClinicos.imc }}</span>
+                    <small class="imc-category">{{ getIMCCategory(datosClinicos.imc) }}</small>
+                  </div>
+                </div>
+                
+                <div class="metric-card" *ngIf="datosClinicos?.circunferenciaCintura">
+                  <div class="metric-icon">
+                    <ion-icon name="radio-button-off-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>Cintura</label>
+                    <span class="metric-value">{{ datosClinicos.circunferenciaCintura }} cm</span>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Métricas metabólicas -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="pulse-outline"></ion-icon>
+                Métricas Metabólicas
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="metrics-grid">
+                <div class="metric-card" *ngIf="datosClinicos?.glucosa_ayunas">
+                  <div class="metric-icon" [ngClass]="{
+                    'normal': datosClinicos.glucosa_ayunas < 100,
+                    'pre-diabetes': datosClinicos.glucosa_ayunas >= 100 && datosClinicos.glucosa_ayunas < 126,
+                    'diabetes': datosClinicos.glucosa_ayunas >= 126
+                  }">
+                    <ion-icon name="water-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>Glucosa en ayunas</label>
+                    <span class="metric-value">{{ datosClinicos.glucosa_ayunas }} mg/dL</span>
+                    <small class="glucosa-category">{{ getGlucosaCategory(datosClinicos.glucosa_ayunas) }}</small>
+                  </div>
+                </div>
+                
+                <div class="metric-card" *ngIf="datosClinicos?.hba1c">
+                  <div class="metric-icon" [ngClass]="{
+                    'normal': datosClinicos.hba1c < 5.7,
+                    'pre-diabetes': datosClinicos.hba1c >= 5.7 && datosClinicos.hba1c < 6.5,
+                    'diabetes': datosClinicos.hba1c >= 6.5
+                  }">
+                    <ion-icon name="flask-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>HbA1c</label>
+                    <span class="metric-value">{{ datosClinicos.hba1c }}%</span>
+                    <small class="hba1c-category">{{ getHbA1cCategory(datosClinicos.hba1c) }}</small>
+                  </div>
+                </div>
+                
+                <div class="metric-card" *ngIf="datosClinicos?.colesterol">
+                  <div class="metric-icon">
+                    <ion-icon name="heart-outline"></ion-icon>
+                  </div>
+                  <div class="metric-info">
+                    <label>Colesterol</label>
+                    <span class="metric-value">{{ datosClinicos.colesterol }} mg/dL</span>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Actividad física -->
+          <ion-card class="info-card" *ngIf="datosClinicos?.actividad_fisica || plan.preferencias?.actividad_fisica">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="fitness-outline"></ion-icon>
+                Actividad Física
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="actividad-fisica-display">
+                <ion-icon name="walk-outline" class="actividad-icon"></ion-icon>
+                <div>
+                  <h3>{{ (plan.preferencias?.actividad_fisica || datosClinicos?.actividad_fisica) | titlecase }}</h3>
+                  <p>{{ getActividadDescripcion(plan.preferencias?.actividad_fisica || datosClinicos?.actividad_fisica) }}</p>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+        </div>
+
+        <!-- TAB: PLAN SEMANAL -->
+        <div *ngIf="tabActiva === 'plan'" class="tab-content">
+          
+          <div *ngIf="!plan.plan_detallado?.weekly?.days?.length" class="empty-state">
+            <ion-icon name="restaurant-outline" class="empty-icon"></ion-icon>
+            <h3>Plan no disponible</h3>
+            <p>Este plan aún no tiene el detalle de comidas asignado.</p>
+          </div>
+
+          <div *ngIf="plan.plan_detallado?.weekly?.days?.length" class="weekly-plan">
+            
+            <!-- Resumen semanal -->
+            <ion-card class="weekly-summary-card">
+              <ion-card-header>
+                <ion-card-title>
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  Semana {{ plan.plan_detallado.weekly.week_number }}
+                </ion-card-title>
+                <ion-card-subtitle>
+                  {{ plan.plan_detallado.weekly.start_date | date:'dd/MM/yyyy' }} - 
+                  {{ plan.plan_detallado.weekly.end_date | date:'dd/MM/yyyy' }}
+                </ion-card-subtitle>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="weekly-goals" *ngIf="plan.plan_detallado.weekly.weekly_goals">
+                  <div class="goal-item">
+                    <ion-icon name="flame-outline"></ion-icon>
+                    <span><strong>Promedio diario:</strong> {{ plan.plan_detallado.weekly.weekly_goals.avg_daily_calories }} kcal</span>
+                  </div>
+                  <div class="goal-item" *ngIf="plan.plan_detallado.weekly.weekly_goals.target_macros">
+                    <ion-icon name="pie-chart-outline"></ion-icon>
+                    <span>
+                      <strong>Macros:</strong> 
+                      P: {{ plan.plan_detallado.weekly.weekly_goals.target_macros.protein }}% • 
+                      C: {{ plan.plan_detallado.weekly.weekly_goals.target_macros.carbs }}% • 
+                      G: {{ plan.plan_detallado.weekly.weekly_goals.target_macros.fat }}%
+                    </span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Días de la semana -->
+            <ion-card *ngFor="let day of plan.plan_detallado.weekly.days" class="day-card">
+              <ion-card-header>
+                <ion-card-title>
+                  <ion-icon name="sunny-outline"></ion-icon>
+                  {{ day.day_name }} {{ day.date | date:'dd' }}
+                </ion-card-title>
+                <ion-card-subtitle>
+                  {{ day.daily_totals?.calories }} kcal • 
+                  P: {{ day.daily_totals?.protein }}g • 
+                  C: {{ day.daily_totals?.carbs }}g • 
+                  G: {{ day.daily_totals?.fat }}g
+                </ion-card-subtitle>
+              </ion-card-header>
+              <ion-card-content>
+                
+                <!-- Comidas del día -->
+                <div class="meals-timeline">
+                  <div *ngFor="let meal of day.meals" class="meal-item">
+                    <div class="meal-header">
+                      <ion-icon [name]="getMealIcon(meal.meal_type)" class="meal-icon"></ion-icon>
+                      <div class="meal-info">
+                        <strong>{{ getMealLabel(meal.meal_type) }}</strong>
+                        <small>{{ meal.time_suggestion }}</small>
+                      </div>
+                      <ion-chip color="primary" class="meal-calories">
+                        {{ meal.total_calories }} kcal
+                      </ion-chip>
+                    </div>
+                    
+                    <!-- Alimentos de la comida -->
+                    <div class="meal-foods">
+                      <div *ngFor="let food of meal.foods" class="food-item">
+                        <div class="food-info">
+                          <h4>{{ food.name }}</h4>
+                          <p class="food-serving">
+                            {{ food.serving_size }} {{ food.serving_unit }}
+                          </p>
+                        </div>
+                        <div class="food-macros">
+                          <span class="macro protein">P: {{ food.protein }}g</span>
+                          <span class="macro carbs">C: {{ food.carbs }}g</span>
+                          <span class="macro fat">G: {{ food.fat }}g</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Notas de la comida -->
+                    <div *ngIf="meal.notes" class="meal-notes">
+                      <ion-icon name="information-circle-outline"></ion-icon>
+                      <span>{{ meal.notes }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Footer del día -->
+                <div class="day-footer">
+                  <div class="footer-item">
+                    <ion-icon name="water-outline" color="primary"></ion-icon>
+                    <span>Meta de hidratación: <strong>{{ day.hydration_goal_liters }} L</strong></span>
+                  </div>
+                  <div *ngIf="day.special_notes" class="footer-item">
+                    <ion-icon name="lightbulb-outline" color="warning"></ion-icon>
+                    <span>{{ day.special_notes }}</span>
+                  </div>
+                </div>
+                
+              </ion-card-content>
+            </ion-card>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,545 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Crear Cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  
+  <!-- 📋 Encabezado del formulario -->
+  <div class="form-header ion-text-center ion-padding-vertical">
+    <ion-icon name="person-add-outline" size="large" color="primary"></ion-icon>
+    <h2 class="ion-no-margin ion-margin-top">Información Personal</h2>
+    <p class="ion-text-muted ion-no-margin">Complete sus datos para crear una cuenta</p>
+  </div>
+
+  <!-- 🎉 BANNER DE AUTOCOMPLETADO -->
+  <ion-card *ngIf="pacienteEncontrado" class="autocompletado-banner" color="success">
+    <ion-card-content>
+      <div class="autocompletado-content">
+        <ion-icon name="checkmark-done-circle" class="autocompletado-icon"></ion-icon>
+        <div class="autocompletado-text">
+          <h3>¡Bienvenido de vuelta!</h3>
+          <p>{{ mensajeAutocompletado }}</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ⚠️ BANNER DE CUENTA EXISTENTE -->
+  <ion-card *ngIf="mensajeAutocompletado && !pacienteEncontrado && mensajeAutocompletado.includes('cuenta')" class="autocompletado-banner" color="warning">
+    <ion-card-content>
+      <div class="autocompletado-content">
+        <ion-icon name="alert-circle" class="autocompletado-icon"></ion-icon>
+        <div class="autocompletado-text">
+          <h3>Atención</h3>
+          <p>{{ mensajeAutocompletado }}</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <form #formDirective="ngForm">
+    
+    <!-- 👤 Sección: Datos Personales -->
+    <ion-card class="card-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+          Datos Personales
+          <ion-spinner *ngIf="buscandoPaciente" name="crescent" color="primary" class="spinner-header"></ion-spinner>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+
+        <!-- 🆕 NOTA INFORMATIVA PARA PACIENTES -->
+        <div class="nota-paciente" *ngIf="registroForm.rol === 'paciente' || !registroForm.rol">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <div class="nota-texto">
+            <strong>¿Eres paciente?</strong>
+            <p>Ingresa tu <strong>número de cédula</strong> exactamente como está registrado en el sistema y selecciona el rol <strong>"Paciente"</strong>. Tus datos se completarán automáticamente.</p>
+          </div>
+        </div>
+        
+        <ion-grid>
+          <ion-row>
+            <!-- Nombre -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.autocompletado-item]="pacienteEncontrado && registroForm.nombre">
+                <ion-label position="floating">Nombre *</ion-label>
+                <ion-input 
+                  [(ngModel)]="registroForm.nombre" 
+                  name="nombre" 
+                  required
+                  pattern="[a-zA-Z\s]+"
+                  maxlength="50"
+                  [readonly]="pacienteEncontrado">
+                </ion-input>
+                <ion-icon *ngIf="pacienteEncontrado && registroForm.nombre" slot="end" name="checkmark-circle" color="success"></ion-icon>
+              </ion-item>
+            </ion-col>
+            
+            <!-- Apellido -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.autocompletado-item]="pacienteEncontrado && registroForm.apellido">
+                <ion-label position="floating">Apellido *</ion-label>
+                <ion-input 
+                  [(ngModel)]="registroForm.apellido" 
+                  name="apellido" 
+                  required
+                  pattern="[a-zA-Z\s]+"
+                  maxlength="50"
+                  [readonly]="pacienteEncontrado">
+                </ion-input>
+                <ion-icon *ngIf="pacienteEncontrado && registroForm.apellido" slot="end" name="checkmark-circle" color="success"></ion-icon>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <!-- Fecha Nacimiento + Edad -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full">
+                <ion-label position="floating">Fecha de Nacimiento *</ion-label>
+                <ion-input 
+                  type="date" 
+                  [(ngModel)]="registroForm.fechaNacimiento" 
+                  name="fechaNacimiento" 
+                  required
+                  (ionChange)="calcularEdad()"
+                  (ionBlur)="calcularEdad()"
+                  [max]="getFechaMaxima()">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.ion-text-success]="registroForm.edad">
+                <ion-label>Edad calculada</ion-label>
+                <ion-label slot="end" class="ion-text-right">
+                  <strong *ngIf="registroForm.edad !== null" color="success">
+                    {{ registroForm.edad }} años
+                  </strong>
+                  <span *ngIf="registroForm.edad === null" class="edad-placeholder">
+                    ---
+                  </span>
+                </ion-label>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <!-- Cédula (CON BÚSQUEDA AUTOMÁTICA) -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.ion-text-success]="cedulaValida" [class.ion-text-danger]="cedulaError">
+                <ion-label position="floating">Cédula *</ion-label>
+                <ion-input 
+                  type="tel" 
+                  inputmode="numeric"
+                  [(ngModel)]="registroForm.cedula" 
+                  name="cedula" 
+                  required
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  (ionInput)="validarCedula()"
+                  (ionBlur)="validarCedula(); buscarPacienteExistente()"
+                  placeholder="Ej: 1712345678">
+                </ion-input>
+                <ion-spinner *ngIf="buscandoPaciente" name="crescent" slot="end" color="primary"></ion-spinner>
+                <ion-icon slot="end" *ngIf="!buscandoPaciente && cedulaValida && !pacienteEncontrado" name="checkmark-circle" color="success"></ion-icon>
+                <ion-icon slot="end" *ngIf="!buscandoPaciente && pacienteEncontrado" name="person-circle" color="primary"></ion-icon>
+                <ion-icon slot="end" *ngIf="!buscandoPaciente && cedulaError && registroForm.cedula.length === 10" name="close-circle" color="danger"></ion-icon>
+              </ion-item>
+              <ion-text color="danger" *ngIf="cedulaError" class="ion-padding-start">
+                <small>
+                  <ion-icon name="alert-circle-outline"></ion-icon>
+                  {{ cedulaError }}
+                </small>
+              </ion-text>
+              <ion-text color="primary" *ngIf="!cedulaError && registroForm.cedula.length === 10 && !pacienteEncontrado && registroForm.rol === 'paciente'" class="ion-padding-start">
+                <small>
+                  <ion-icon name="search-outline"></ion-icon>
+                  Se buscarán datos previos al continuar...
+                </small>
+              </ion-text>
+            </ion-col>
+            
+            <!-- Género -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.autocompletado-item]="pacienteEncontrado && registroForm.genero">
+                <ion-label>Género *</ion-label>
+                <ion-select 
+                  [(ngModel)]="registroForm.genero" 
+                  name="genero" 
+                  required
+                  placeholder="Seleccione"
+                  interface="action-sheet"
+                  cancelText="Cancelar"
+                  okText="Aceptar"
+                  [disabled]="pacienteEncontrado">
+                  <ion-select-option *ngFor="let g of generos" [value]="g.value">
+                    {{ g.label }}
+                  </ion-select-option>
+                </ion-select>
+                <ion-icon *ngIf="pacienteEncontrado && registroForm.genero" slot="end" name="checkmark-circle" color="success"></ion-icon>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <!-- Teléfono -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full" [class.autocompletado-item]="pacienteEncontrado && registroForm.telefono">
+                <ion-label position="floating">Telefono *</ion-label>
+                <ion-input 
+                  type="tel" 
+                  inputmode="numeric"
+                  [(ngModel)]="registroForm.telefono" 
+                  name="telefono" 
+                  required
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  (ionInput)="validarTelefono()"
+                  (ionBlur)="validarTelefono()"
+                  [readonly]="pacienteEncontrado">
+                </ion-input>
+                <ion-icon *ngIf="pacienteEncontrado && registroForm.telefono" slot="end" name="checkmark-circle" color="success"></ion-icon>
+                <ion-label slot="end" *ngIf="!pacienteEncontrado">10 dígitos</ion-label>
+              </ion-item>
+              <ion-text color="danger" *ngIf="telefonoError" class="ion-padding-start">
+                <small>{{ telefonoError }}</small>
+              </ion-text>
+            </ion-col>
+            
+            <!-- Correo -->
+            <ion-col size="12" size-md="6">
+              <ion-item lines="full">
+                <ion-label position="floating">Correo Electrónico *</ion-label>
+                <ion-input 
+                  type="email" 
+                  [(ngModel)]="registroForm.correo" 
+                  name="correo" 
+                  required
+                  pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
+                  autocapitalize="none"
+                  autocorrect="off">
+                </ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- 🆕 BOTÓN PARA BUSCAR POR NOMBRE -->
+          <ion-row *ngIf="registroForm.rol === 'paciente' && registroForm.nombre && registroForm.apellido && !pacienteEncontrado && !buscandoPaciente">
+            <ion-col size="12">
+              <ion-button expand="block" fill="outline" size="small" color="primary" (click)="buscarPorNombre()">
+                <ion-icon name="search-outline" slot="start"></ion-icon>
+                Buscar mis datos por nombre y apellido
+              </ion-button>
+            </ion-col>
+          </ion-row>
+
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- 🏠 Sección: Ubicación -->
+    <ion-card class="card-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="location-outline" slot="start" color="primary"></ion-icon>
+          Ubicación en Ecuador
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        
+        <!-- Loading state -->
+        <div *ngIf="isLoadingLocations" class="ion-text-center ion-padding">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p class="ion-text-muted ion-margin-top">Cargando provincias de Ecuador...</p>
+        </div>
+
+        <!-- Error state -->
+        <div *ngIf="locationsError && !isLoadingLocations" class="ion-padding">
+          <ion-note color="danger">
+            <ion-icon name="warning-outline"></ion-icon>
+            No se pudieron cargar todas las ubicaciones. 
+            <a (click)="cargarUbicaciones(); $event.preventDefault()">Reintentar</a>
+          </ion-note>
+        </div>
+
+        <!-- Formularios de ubicación -->
+        <div *ngIf="!isLoadingLocations">
+          
+          <ion-item lines="full" [class.autocompletado-item]="pacienteEncontrado && registroForm.direccion">
+            <ion-label position="floating">Dirección de Residencia</ion-label>
+            <ion-input 
+              [(ngModel)]="registroForm.direccion" 
+              name="direccion"
+              placeholder="Ej: Av. Principal y Calle Secundaria">
+            </ion-input>
+            <ion-icon *ngIf="pacienteEncontrado && registroForm.direccion" slot="end" name="checkmark-circle" color="success"></ion-icon>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Ciudad</ion-label>
+            <ion-input 
+              [(ngModel)]="registroForm.ciudad" 
+              name="ciudad" 
+              placeholder="Ej: Quito, Guayaquil, Cuenca...">
+            </ion-input>
+          </ion-item>
+
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" size-md="4">
+                <ion-item lines="full">
+                  <ion-label>Provincia *</ion-label>
+                  <ion-select 
+                    [(ngModel)]="registroForm.provinciaCodigo" 
+                    name="provinciaCodigo" 
+                    required
+                    placeholder="Seleccione"
+                    interface="action-sheet"
+                    cancelText="Cancelar"
+                    okText="Aceptar"
+                    (ionChange)="onProvinciaChange($event.detail.value)">
+                    <ion-select-option *ngFor="let p of provincias" [value]="p.codigo">
+                      {{ p.nombre }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              
+              <ion-col size="12" size-md="4">
+                <ion-item lines="full">
+                  <ion-label>Cantón *</ion-label>
+                  <ion-select 
+                    [(ngModel)]="registroForm.cantonCodigo" 
+                    name="cantonCodigo" 
+                    required
+                    [disabled]="!registroForm.provinciaCodigo"
+                    placeholder="Seleccione provincia"
+                    interface="action-sheet"
+                    cancelText="Cancelar"
+                    okText="Aceptar"
+                    (ionChange)="onCantonChange($event.detail.value)">
+                    <ion-select-option *ngFor="let c of cantones" [value]="c.codigo">
+                      {{ c.nombre }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              
+              <ion-col size="12" size-md="4">
+                <ion-item lines="full">
+                  <ion-label>Parroquia</ion-label>
+                  <ion-select 
+                    [(ngModel)]="registroForm.parroquiaCodigo" 
+                    name="parroquiaCodigo"
+                    [disabled]="!registroForm.cantonCodigo"
+                    placeholder="Seleccione cantón"
+                    interface="action-sheet"
+                    cancelText="Cancelar"
+                    okText="Aceptar"
+                    (ionChange)="onParroquiaChange($event.detail.value)">
+                    <ion-select-option *ngFor="let par of parroquias" [value]="par.codigo">
+                      {{ par.nombre }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+          <ion-note class="ion-padding-start" color="medium">
+            <small>
+              <ion-icon name="information-circle"></ion-icon>
+              Los cantones y parroquias se actualizan automáticamente según su selección.
+            </small>
+          </ion-note>
+
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- 🔐 Sección: Seguridad y Configuración -->
+    <ion-card class="card-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+          Seguridad y Configuración
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        
+        <!-- Contraseña -->
+        <ion-item lines="full">
+          <ion-label position="floating">Contraseña *</ion-label>
+          <ion-input 
+            [type]="showPassword ? 'text' : 'password'" 
+            [(ngModel)]="registroForm.password" 
+            name="password" 
+            required
+            minlength="6"
+            (ionChange)="validarPasswords(); calcularSeguridadPassword()"
+            placeholder="Mínimo 6 caracteres">
+          </ion-input>
+          <ion-button fill="clear" slot="end" (click)="showPassword = !showPassword">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+          </ion-button>
+        </ion-item>
+
+        <!-- 🆕 BARRA DE SEGURIDAD DE CONTRASEÑA -->
+        <div class="password-security-container" *ngIf="registroForm.password">
+          
+          <!-- Barra de progreso -->
+          <div class="security-bar-wrapper">
+            <div class="security-bar">
+              <div 
+                class="security-bar-fill" 
+                [style.width.%]="seguridadPassword.porcentaje"
+                [class.nivel-muy-debil]="seguridadPassword.nivel === 'muy_debil'"
+                [class.nivel-debil]="seguridadPassword.nivel === 'debil'"
+                [class.nivel-media]="seguridadPassword.nivel === 'media'"
+                [class.nivel-fuerte]="seguridadPassword.nivel === 'fuerte'"
+                [class.nivel-muy-fuerte]="seguridadPassword.nivel === 'muy_fuerte'">
+              </div>
+            </div>
+            <span 
+              class="security-level-text"
+              [class.nivel-muy-debil]="seguridadPassword.nivel === 'muy_debil'"
+              [class.nivel-debil]="seguridadPassword.nivel === 'debil'"
+              [class.nivel-media]="seguridadPassword.nivel === 'media'"
+              [class.nivel-fuerte]="seguridadPassword.nivel === 'fuerte'"
+              [class.nivel-muy-fuerte]="seguridadPassword.nivel === 'muy_fuerte'">
+              {{ seguridadPassword.texto }}
+            </span>
+          </div>
+
+          <!-- Requisitos de la contraseña -->
+          <div class="password-requirements">
+            <div class="requirement-item" [class.cumplido]="seguridadPassword.requisitos.longitud">
+              <ion-icon [name]="seguridadPassword.requisitos.longitud ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>Mínimo 8 caracteres</span>
+            </div>
+            <div class="requirement-item" [class.cumplido]="seguridadPassword.requisitos.mayuscula">
+              <ion-icon [name]="seguridadPassword.requisitos.mayuscula ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>Al menos una letra mayúscula (A-Z)</span>
+            </div>
+            <div class="requirement-item" [class.cumplido]="seguridadPassword.requisitos.minuscula">
+              <ion-icon [name]="seguridadPassword.requisitos.minuscula ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>Al menos una letra minúscula (a-z)</span>
+            </div>
+            <div class="requirement-item" [class.cumplido]="seguridadPassword.requisitos.numero">
+              <ion-icon [name]="seguridadPassword.requisitos.numero ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>Al menos un número (0-9)</span>
+            </div>
+            <div class="requirement-item" [class.cumplido]="seguridadPassword.requisitos.especial">
+              <ion-icon [name]="seguridadPassword.requisitos.especial ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>Al menos un carácter especial (!@#$%^&*)</span>
+            </div>
+          </div>
+        </div>
+
+        <ion-text color="danger" *ngIf="passwordError" class="ion-padding-start">
+          <small>{{ passwordError }}</small>
+        </ion-text>
+
+        <!-- Confirmar Contraseña -->
+        <ion-item lines="full">
+          <ion-label position="floating">Confirmar Contraseña *</ion-label>
+          <ion-input 
+            [type]="showConfirmPassword ? 'text' : 'password'" 
+            [(ngModel)]="registroForm.confirmarPassword" 
+            name="confirmarPassword" 
+            required
+            (ionChange)="validarPasswords()">
+          </ion-input>
+          <ion-button fill="clear" slot="end" (click)="showConfirmPassword = !showConfirmPassword">
+            <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+          </ion-button>
+        </ion-item>
+        
+        <!-- 🆕 Indicador de coincidencia -->
+        <div class="password-match-indicator" *ngIf="registroForm.confirmarPassword">
+          <ion-icon [name]="passwordsCoinciden ? 'checkmark-circle' : 'close-circle'" 
+                    [color]="passwordsCoinciden ? 'success' : 'danger'"></ion-icon>
+          <span [class.coincide]="passwordsCoinciden" [class.no-coincide]="!passwordsCoinciden">
+            {{ passwordsCoinciden ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden' }}
+          </span>
+        </div>
+
+        <!-- Selección de Rol -->
+        <ion-item lines="full">
+          <ion-label>Rol en el Sistema *</ion-label>
+          <ion-select 
+            [(ngModel)]="registroForm.rol" 
+            name="rol" 
+            required
+            placeholder="Seleccione su rol"
+            interface="alert"
+            [interfaceOptions]="customAlertOptions"
+            (ionChange)="onRolChange()">
+            <ion-select-option *ngFor="let r of roles" [value]="r.value">
+              {{ r.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Términos y Condiciones -->
+        <ion-item lines="none" class="ion-padding-vertical">
+          <ion-label class="ion-text-wrap">
+            <ion-checkbox 
+              [(ngModel)]="registroForm.aceptaTerminos" 
+              name="aceptaTerminos" 
+              slot="start"
+              color="primary">
+            </ion-checkbox>
+            <span class="checkbox-label">
+              Acepto los 
+              <a href="#" (click)="verTerminos(); $event.preventDefault()" class="link-terminos">
+                <strong>Términos y Condiciones</strong>
+              </a> y la 
+              <a href="#" (click)="verTerminos(); $event.preventDefault()" class="link-terminos">
+                <strong>Política de Privacidad</strong>
+              </a> *
+            </span>
+          </ion-label>
+        </ion-item>
+
+      </ion-card-content>
+    </ion-card>
+
+    <!-- 🎯 Botones de Acción -->
+    <div class="action-buttons ion-padding">
+      
+      <ion-button 
+        expand="block" 
+        color="primary" 
+        size="large"
+        (click)="registrarUsuario()"
+        [disabled]="!registroForm.aceptaTerminos || isLoadingLocations || buscandoPaciente || seguridadPassword.nivel === 'muy_debil'"
+        class="btn-primary">
+        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+        Crear Cuenta
+      </ion-button>
+
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        color="medium"
+        (click)="irALogin()"
+        class="btn-secondary">
+        <ion-icon slot="start" name="log-in-outline"></ion-icon>
+        ¿Ya tienes una cuenta? Inicia Sesión
+      </ion-button>
+
+    </div>
+
+  </form>
+
+  <div class="ion-padding-bottom"></div>
+
+</ion-content>

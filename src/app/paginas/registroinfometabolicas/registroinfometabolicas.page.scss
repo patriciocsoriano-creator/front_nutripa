@@ -1,0 +1,743 @@
+/* =========================================
+   🎨 VARIABLES - Tema Hospitalario
+   ========================================= */
+$primary-color: #0a4d68;
+$primary-dark: #083d52;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+$input-bg: #f8fafc;
+
+// 🚨 Colores clínicos
+$clinical-normal: #06d6a0;
+$clinical-warning: #ffc107;
+$clinical-critical: #ff3b5c;
+
+$shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+$shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+
+/* =========================================
+   🔄 RESET Y BASE
+   ========================================= */
+* {
+  box-sizing: border-box;
+}
+
+ion-content {
+  --background: #{$bg-color};
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+/* =========================================
+   🎯 HEADER (Idéntico al Dashboard)
+   ========================================= */
+.main-header {
+  ion-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-bottom: 1px solid $border-color;
+    padding: 0 20px;
+    box-shadow: $shadow-sm;
+    --min-height: 64px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 700;
+        color: $primary-color;
+        font-size: 1.1rem;
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    ion-button {
+      --color: $text-secondary;
+      --color-hover: $primary-color;
+      
+      ion-icon {
+        font-size: 1.4rem;
+      }
+      
+      &:hover {
+        --background: rgba(0,0,0,0.04);
+      }
+    }
+  }
+}
+
+/* =========================================
+   📦 DASHBOARD CONTAINER
+   ========================================= */
+.dashboard-container {
+  display: flex;
+  height: 100%;
+  background: $bg-color;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* =========================================
+   🧭 SIDEBAR (Mismo estilo que enfermería)
+   ========================================= */
+.sidebar {
+  width: 70px;
+  background-color: $primary-color;
+  color: white;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 90;
+
+  &.open {
+    width: 230px;
+  }
+
+  .menu-icon {
+    margin: 1rem 0;
+    font-size: 1.6rem;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    
+    ion-icon {
+      transition: transform 0.2s ease;
+    }
+    
+    &:hover ion-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 0.5rem;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      ion-icon {
+        font-size: 30px;
+        color: white;
+      }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.7);
+        margin: 2px 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  &.open .user-details {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.85);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      
+      ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
+      }
+      
+      span {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+      }
+      
+      &:hover {
+        background: rgba(255,255,255,0.12);
+        color: white;
+      }
+      
+      &.active {
+        background: rgba(255,255,255,0.18);
+        color: white;
+        border-left: 3px solid $accent-color;
+      }
+    }
+  }
+
+  &.open ul li span {
+    opacity: 1;
+  }
+  
+  .menu-item-with-submenu {
+    .menu-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .submenu-arrow {
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+      margin-left: auto;
+      
+      &.rotate {
+        transform: rotate(180deg);
+      }
+    }
+    
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0,0,0,0.1);
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      &.active {
+        max-height: 200px;
+      }
+      
+      li {
+        padding: 10px 20px 10px 52px;
+        font-size: 0.85rem;
+        
+        ion-icon {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+  
+  &.open .menu-item-with-submenu .submenu li span {
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   📦 CONTENIDO PRINCIPAL - FORMULARIO
+   ========================================= */
+.main-content.form-layout {
+  flex: 1;
+  padding: 30px 40px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 800px;
+  background: transparent;
+}
+
+/* Encabezado del Formulario */
+.form-header-section {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  
+  h1 {
+    color: $primary-color;
+    font-size: 1.9rem;
+    margin: 0 0 8px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  
+  p {
+    color: $text-secondary;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+/* =========================================
+   👥 TARJETA DE RESUMEN DEL PACIENTE
+   ========================================= */
+.patient-summary-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0 0 24px;
+  border: 1px solid rgba(0,0,0,0.03);
+  border-left: 4px solid $accent-color;
+  
+  ion-card-header {
+    padding: 16px 24px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    
+    ion-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $primary-color;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 1.2rem;
+        color: $secondary-color;
+      }
+    }
+  }
+  
+  ion-card-content {
+    padding: 16px 24px;
+    
+    p {
+      margin: 8px 0;
+      font-size: 0.95rem;
+      color: $text-primary;
+      
+      strong {
+        color: $text-secondary;
+        font-weight: 500;
+        min-width: 140px;
+        display: inline-block;
+      }
+    }
+  }
+}
+
+/* =========================================
+   📋 LISTA DE CONDICIONES METABÓLICAS
+   ========================================= */
+.conditions-list-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0 0 24px;
+  border: 1px solid rgba(0,0,0,0.03);
+  
+  ion-card-header {
+    padding: 18px 24px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    
+    ion-card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: $primary-color;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 1.3rem;
+        color: $secondary-color;
+      }
+    }
+  }
+  
+  ion-card-content {
+    padding: 8px 0;
+  }
+}
+
+/* Items de la lista con toggles */
+.condition-item {
+  --background: transparent;
+  --inner-padding-start: 24px;
+  --inner-padding-end: 24px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  --border-width: 0 0 1px 0;
+  --border-color: #f0f0f0;
+  --min-height: auto;
+  
+  &:last-child {
+    --border-width: 0;
+  }
+  
+  &:hover {
+    --background: rgba(10, 77, 104, 0.03);
+  }
+  
+  ion-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #b9c5d9; 
+    margin: 0;
+  }
+  
+  /* Toggle personalizado */
+  ion-toggle {
+    --background: #{$border-color};
+    --background-checked: #{$secondary-color};
+    --handle-background: #ffffff;
+    --handle-width: 20px;
+    --handle-height: 20px;
+    --handle-border-radius: 50%;
+    --handle-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    
+    &.toggle-checked {
+      --handle-background: #ffffff;
+    }
+    
+    &::part(track) {
+      border-radius: 20px;
+      height: 28px;
+      width: 48px;
+    }
+    
+    &::part(handle) {
+      transition: transform 0.2s ease;
+    }
+  }
+}
+
+/* =========================================
+   ⚠️ TARJETA DE INFORMACIÓN / ALERTA
+   ========================================= */
+.info-card {
+  --background: rgba(255, 193, 7, 0.1);
+  border-radius: $radius-md;
+  border-left: 4px solid $clinical-warning;
+  margin: 0 0 32px;
+  
+  ion-card-content {
+    padding: 16px 20px;
+    
+    small {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: darken($clinical-warning, 20%);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      
+      ion-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🔘 BOTONES DE ACCIÓN (FINALIZAR)
+   ========================================= */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 24px 0;
+  border-top: 1px solid $border-color;
+  margin-top: 8px;
+  
+  ion-button {
+    --border-radius: #{$radius-md};
+    text-transform: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-width: 150px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    box-shadow: $shadow-sm;
+    transition: all 0.2s ease;
+    
+    &.btn-finalize {
+      --background: #{$clinical-normal};
+      --box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+      
+      &:hover:not([disabled]) {
+        --background: #{darken($clinical-normal, 8%)};
+        --box-shadow: 0 6px 20px rgba(6, 214, 160, 0.4);
+        transform: translateY(-2px);
+      }
+      
+      &:active:not([disabled]) {
+        transform: translateY(0);
+        --box-shadow: 0 2px 8px rgba(6, 214, 160, 0.2);
+      }
+    }
+    
+    &[fill="outline"] {
+      --border-width: 2px;
+      --border-color: #{$text-muted};
+      --color: #{$text-secondary};
+      
+      &:hover:not([disabled]) {
+        --border-color: #{$primary-color};
+        --color: #{$primary-color};
+        --background: rgba(10, 77, 104, 0.04);
+      }
+    }
+  }
+}
+
+/* =========================================
+   🎨 TOAST Y LOADING PERSONALIZADOS
+   ========================================= */
+.toast-custom {
+  --border-radius: 12px;
+  --box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  
+  &.toast-success {
+    --background: #{$clinical-normal};
+  }
+  
+  &.toast-warning {
+    --background: #{$clinical-warning};
+    --color: #1a1f36;
+  }
+  
+  &.toast-danger {
+    --background: #{$clinical-critical};
+  }
+}
+
+.loading-custom {
+  --background: rgba(26, 31, 54, 0.9);
+  --spinner-color: #4fc3f7;
+  --color: white;
+  border-radius: 16px;
+  padding: 20px 30px;
+}
+
+/* =========================================
+   📱 RESPONSIVE
+   ========================================= */
+
+/* Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+  .main-content.form-layout {
+    padding: 24px;
+  }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: $shadow-lg;
+    
+    &.open {
+      transform: translateX(0);
+    }
+    
+    .menu-icon {
+      position: absolute;
+      top: 12px;
+      right: -40px;
+      width: 40px;
+      height: 40px;
+      background: $primary-color;
+      border-radius: 0 8px 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+  }
+  
+  .form-container {
+    max-width: 100%;
+  }
+}
+
+/* Móvil (≤ 768px) */
+@media (max-width: 768px) {
+  .main-header ion-toolbar {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    
+    ion-title {
+      font-size: 1rem;
+    }
+  }
+  
+  .main-content.form-layout {
+    padding: 16px;
+  }
+  
+  .form-header-section {
+    h1 { font-size: 1.5rem; }
+    p { font-size: 0.9rem; }
+  }
+  
+  .patient-summary-card,
+  .conditions-list-card {
+    ion-card-header {
+      padding: 14px 20px 8px;
+      ion-card-title { font-size: 1rem; }
+    }
+    ion-card-content { padding: 14px 20px; }
+  }
+  
+  .condition-item {
+    --inner-padding-start: 20px;
+    --inner-padding-end: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+    
+    ion-button {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+  
+  .sidebar {
+    width: 240px;
+    &.open { width: 240px; }
+    .user-info { padding: 12px; }
+  }
+}
+
+/* Móvil muy pequeño (≤ 480px) */
+@media (max-width: 480px) {
+  .form-header-section h1 { font-size: 1.4rem; }
+  
+  .patient-summary-card ion-card-content p {
+    font-size: 0.9rem;
+    
+    strong {
+      display: block;
+      min-width: auto;
+      margin-bottom: 2px;
+    }
+  }
+  
+  .condition-item ion-label {
+    font-size: 0.9rem;
+  }
+  
+  .info-card ion-card-content small {
+    font-size: 0.85rem;
+  }
+  
+  .form-actions ion-button {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* =========================================
+   ♿ ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 🆕 Estilos para IMC en el resumen */
+.patient-summary-card {
+  ion-card-content {
+    .imc-obesidad {
+      color: #ff3b5c;
+      font-weight: 700;
+    }
+    
+    .imc-sobrepeso {
+      color: #ffc107;
+      font-weight: 600;
+    }
+    
+    .imc-normal {
+      color: #06d6a0;
+      font-weight: 600;
+    }
+  }
+}
+
+/* =========================================
+   🎨 DARK MODE (Opcional)
+   ========================================= */
+/*
+@media (prefers-color-scheme: dark) {
+  $bg-color: #1a1d26;
+  $card-bg: #232733;
+  $text-primary: #e0e5ec;
+  $text-secondary: #9499b7;
+  $input-bg: #2a2d3a;
+  $border-color: rgba(255,255,255,0.1);
+}
+*/

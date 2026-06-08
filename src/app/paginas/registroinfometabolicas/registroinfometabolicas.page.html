@@ -1,0 +1,162 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clínico: Enfermedades Metabólicas</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="volver()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR (Mismo menú de enfermería) -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <!-- 👤 Info de Usuario -->
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <!-- 📋 Menú -->
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          </ul>
+        </li>
+        
+        <li>
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Registros</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL - FORMULARIO -->
+    <div class="main-content form-layout">
+      <div class="form-container">
+        
+        <!-- Encabezado del Formulario -->
+        <div class="form-header-section">
+          <h1>Enfermedades Metabólicas</h1>
+          <p>Seleccione las condiciones presentes para personalizar el plan de cuidado.</p>
+        </div>
+
+        <!-- ✅ Resumen del paciente -->
+        <ion-card class="patient-summary-card">
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="person-outline"></ion-icon> Resumen del Paciente
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <p><strong>Nombre:</strong> {{ nombrePaciente }}</p>
+    <p><strong>ID:</strong> {{ identificacionPaciente }}</p>
+    <p><strong>Actividad Física:</strong> {{ actividadFisicaPaciente }}</p>
+    <!-- 🆕 Mostrar IMC calculado -->
+    <p *ngIf="imcCalculado !== null">
+      <strong>IMC:</strong> 
+      <span [class.imc-obesidad]="imcCalculado >= 30" 
+            [class.imc-sobrepeso]="imcCalculado >= 25 && imcCalculado < 30"
+            [class.imc-normal]="imcCalculado < 25">
+        {{ imcCalculado }} kg/m² ({{ clasificacionIMC }})
+      </span>
+    </p>
+  </ion-card-content>
+</ion-card>
+
+        <!-- ✅ Lista de condiciones metabólicas -->
+        <ion-card class="conditions-list-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="medkit-outline"></ion-icon> Condiciones Metabólicas
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item class="condition-item">
+                <ion-label>Hipertensión Arterial</ion-label>
+                <ion-toggle [(ngModel)]="metabolicasForm.hipertension" name="hipertension" slot="end"></ion-toggle>
+              </ion-item>
+
+              <ion-item class="condition-item">
+                <ion-label>Obesidad</ion-label>
+                <ion-toggle [(ngModel)]="metabolicasForm.obesidad" name="obesidad" slot="end"></ion-toggle>
+              </ion-item>
+
+              <ion-item class="condition-item">
+                <ion-label>Dislipidemia</ion-label>
+                <ion-toggle [(ngModel)]="metabolicasForm.dislipidemia" name="dislipidemia" slot="end"></ion-toggle>
+              </ion-item>
+
+              <ion-item class="condition-item">
+                <ion-label>Hígado Graso</ion-label>
+                <ion-toggle [(ngModel)]="metabolicasForm.higadoGraso" name="higadoGraso" slot="end"></ion-toggle>
+              </ion-item>
+
+              <ion-item class="condition-item">
+                <ion-label>Resistencia a la Insulina</ion-label>
+                <ion-toggle [(ngModel)]="metabolicasForm.resistenciaInsulina" name="resistenciaInsulina" slot="end"></ion-toggle>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ✅ Tarjeta de información -->
+        <ion-card class="info-card">
+          <ion-card-content>
+            <small>
+              <ion-icon name="information-circle"></ion-icon>
+              Estas condiciones ayudarán a personalizar el plan de cuidado del paciente.
+            </small>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ✅ Botones de acción -->
+        <div class="form-actions">
+          <ion-button fill="outline" color="medium" (click)="volver()" type="button">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver
+          </ion-button>
+          <ion-button type="button" class="btn-finalize" (click)="finalizarRegistro()">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Finalizar Registro
+          </ion-button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

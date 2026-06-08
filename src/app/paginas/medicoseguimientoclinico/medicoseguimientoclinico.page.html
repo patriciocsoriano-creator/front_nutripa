@@ -1,0 +1,552 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Seguimiento Clínico</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="contactarWhatsApp()" title="Contactar por WhatsApp" *ngIf="pacienteSeleccionado">
+        <ion-icon slot="icon-only" name="logo-whatsapp" color="success"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')"><ion-icon name="home-outline"></ion-icon><span>Inicio</span></li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')"><ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span></li>
+        <li (click)="navegarA('medicoseguimientoclinico')" class="active"><ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span></li>
+        <li (click)="navegarA('reportes')"><ion-icon name="stats-chart-outline"></ion-icon><span>Reportes</span></li>
+        <li (click)="navegarA('configuracion')"><ion-icon name="settings-outline"></ion-icon><span>Configuración</span></li>
+      </ul>
+    </div>
+
+    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando información del paciente...</p>
+      </div>
+
+      <!-- Sin paciente seleccionado -->
+      <div *ngIf="!cargando && !pacienteSeleccionado" class="empty-state">
+        <ion-icon name="person-outline" class="empty-icon"></ion-icon>
+        <h3>Selecciona un paciente</h3>
+        <p>Busca o selecciona un paciente para ver su seguimiento clínico.</p>
+        <ion-button color="primary" (click)="navegarA('medicoverpacientes')">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          Ver pacientes
+        </ion-button>
+      </div>
+
+      <!-- Contenido del paciente -->
+      <div *ngIf="!cargando && pacienteSeleccionado" class="patient-content">
+        
+        <!-- Header del paciente -->
+        <div class="patient-header">
+          <div class="patient-info">
+            <ion-avatar class="patient-avatar">
+              <img src="assets/avatar-patient.png" alt="Paciente" />
+            </ion-avatar>
+            <div class="patient-details">
+              <h2>{{pacienteSeleccionado.nombres}} {{pacienteSeleccionado.apellidos}}</h2>
+              <p class="patient-meta">
+                <ion-icon name="card-outline"></ion-icon>
+                {{pacienteSeleccionado.numero_identificacion}}
+                <span class="separator">•</span>
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{pacienteSeleccionado.edad || '-'}} años
+                <span class="separator">•</span>
+                <ion-icon name="phone-outline"></ion-icon>
+                {{pacienteSeleccionado.telefono || 'Sin teléfono'}}
+              </p>
+            </div>
+          </div>
+          <div class="patient-actions">
+            <ion-button color="success" size="small" (click)="contactarWhatsApp()">
+              <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+              WhatsApp
+            </ion-button>
+            <ion-button color="primary" size="small" fill="outline" (click)="verPlanActivo()">
+              <ion-icon name="nutrition-outline" slot="start"></ion-icon>
+              Ver Plan
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <ion-segment [(ngModel)]="tabActiva" (ionChange)="cambiarTab()">
+          <ion-segment-button value="evolucion">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <ion-label>Evolución</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="citas">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ion-label>Citas</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="glucosa">
+            <ion-icon name="water-outline"></ion-icon>
+            <ion-label>Glucosa</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="comunicacion">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <ion-label>Comunicación</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- TAB: EVOLUCIÓN -->
+        <div *ngIf="tabActiva === 'evolucion'" class="tab-content">
+          
+          <!-- Plan activo -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="nutrition-outline" color="primary"></ion-icon>
+                Plan Nutricional Activo
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div *ngIf="planActivo" class="plan-activo-info">
+                <div class="plan-badge-row">
+                  <ion-badge color="primary">{{planActivo.perfil_recomendado}}</ion-badge>
+                  <ion-badge [color]="planActivo.estado === 'activo' ? 'success' : 'medium'">
+                    {{planActivo.estado | titlecase}}
+                  </ion-badge>
+                </div>
+                <div class="plan-details-grid">
+                  <div class="detail-item">
+                    <label>Duración</label>
+                    <span>{{planActivo.duracion_semanas}} semanas</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Vigencia</label>
+                    <span>{{planActivo.fecha_vigencia_desde | date:'dd/MM/yyyy'}} al {{planActivo.fecha_vigencia_hasta | date:'dd/MM/yyyy'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Confianza IA</label>
+                    <span class="confianza" [ngClass]="{'alta': planActivo.confianza_ia >= 0.9}">
+                      {{(planActivo.confianza_ia * 100) | number:'1.0-0'}}%
+                    </span>
+                  </div>
+                </div>
+                <div class="plan-recomendacion" *ngIf="planActivo.recomendaciones">
+                  <ion-icon name="bulb-outline"></ion-icon>
+                  <span>{{planActivo.recomendaciones}}</span>
+                </div>
+              </div>
+              <div *ngIf="!planActivo" class="no-data">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <p>Este paciente no tiene un plan nutricional activo.</p>
+                <ion-button size="small" color="primary" (click)="crearNuevoPlan()">
+                  <ion-icon name="add-outline" slot="start"></ion-icon>
+                  Crear Plan
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Registrar evolución -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="create-outline" color="secondary"></ion-icon>
+                Registrar Nueva Evolución
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="evolucionForm" (ngSubmit)="guardarEvolucion()">
+                <ion-item lines="none">
+                  <ion-label position="stacked">Fecha de seguimiento</ion-label>
+                  <ion-input type="date" formControlName="fecha"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Objetivos alcanzados</ion-label>
+                  <ion-textarea formControlName="objetivos" placeholder="Describe los objetivos logrados en este seguimiento..." rows="3"></ion-textarea>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Observaciones clínicas</ion-label>
+                  <ion-textarea formControlName="observaciones" placeholder="Observaciones, ajustes al plan, comentarios..." rows="3"></ion-textarea>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Adherencia al plan</ion-label>
+                  <ion-select formControlName="adherencia" placeholder="Selecciona el nivel">
+                    <ion-select-option value="excelente">Excelente (90-100%)</ion-select-option>
+                    <ion-select-option value="buena">Buena (70-89%)</ion-select-option>
+                    <ion-select-option value="regular">Regular (50-69%)</ion-select-option>
+                    <ion-select-option value="baja">Baja (&lt;50%)</ion-select-option>
+                  </ion-select>
+                </ion-item>
+
+                <div class="form-actions">
+                  <ion-button type="submit" [disabled]="evolucionForm.invalid || guardando">
+                    <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+                    <ion-icon *ngIf="!guardando" name="save-outline" slot="start"></ion-icon>
+                    {{guardando ? 'Guardando...' : 'Guardar Evolución'}}
+                  </ion-button>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Historial de evoluciones -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="time-outline" color="tertiary"></ion-icon>
+                Historial de Evoluciones
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div *ngIf="evoluciones.length === 0" class="no-data">
+                <p>No hay evoluciones registradas aún.</p>
+              </div>
+              <div class="timeline">
+                <div *ngFor="let evolucion of evoluciones" class="timeline-item">
+                  <div class="timeline-marker"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <strong>{{evolucion.fecha | date:'dd/MM/yyyy'}}</strong>
+                      <ion-badge [color]="getAdherenciaColor(evolucion.adherencia)">
+                        {{evolucion.adherencia | titlecase}}
+                      </ion-badge>
+                    </div>
+                    <p *ngIf="evolucion.objetivos"><strong>Objetivos:</strong> {{evolucion.objetivos}}</p>
+                    <p *ngIf="evolucion.observaciones"><strong>Observaciones:</strong> {{evolucion.observaciones}}</p>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+        </div>
+
+        <!-- TAB: CITAS -->
+        <div *ngIf="tabActiva === 'citas'" class="tab-content">
+          
+          <!-- Agendar nueva cita -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="add-circle-outline" color="primary"></ion-icon>
+                Agendar Nueva Cita
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="citaForm" (ngSubmit)="agendarCita()">
+                <ion-item lines="none">
+                  <ion-label position="stacked">Fecha y hora</ion-label>
+                  <ion-input type="datetime-local" formControlName="fecha_hora"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Tipo de cita</ion-label>
+                  <ion-select formControlName="tipo" placeholder="Selecciona el tipo">
+                    <ion-select-option value="control">Control de rutina</ion-select-option>
+                    <ion-select-option value="seguimiento">Seguimiento de plan</ion-select-option>
+                    <ion-select-option value="evaluacion">Evaluación inicial</ion-select-option>
+                    <ion-select-option value="urgencia">Urgencia</ion-select-option>
+                    <ion-select-option value="teleconsulta">Teleconsulta</ion-select-option>
+                  </ion-select>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Motivo</ion-label>
+                  <ion-textarea formControlName="motivo" placeholder="Describe el motivo de la cita..." rows="2"></ion-textarea>
+                </ion-item>
+
+                <div class="form-actions">
+                  <ion-button type="submit" [disabled]="citaForm.invalid || guardandoCita">
+                    <ion-spinner *ngIf="guardandoCita" name="crescent" slot="start"></ion-spinner>
+                    <ion-icon *ngIf="!guardandoCita" name="calendar-outline" slot="start"></ion-icon>
+                    {{guardandoCita ? 'Agendando...' : 'Agendar Cita'}}
+                  </ion-button>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Próximas citas -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="calendar-outline" color="secondary"></ion-icon>
+                Próximas Citas
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div *ngIf="citas.length === 0" class="no-data">
+                <ion-icon name="calendar-clear-outline"></ion-icon>
+                <p>No hay citas agendadas.</p>
+              </div>
+              <div class="citas-list">
+                <div *ngFor="let cita of citas" class="cita-item" [class.pasada]="esCitaPasada(cita.fecha_hora)">
+                  <div class="cita-date">
+                    <div class="cita-day">{{cita.fecha_hora | date:'dd'}}</div>
+                    <div class="cita-month">{{cita.fecha_hora | date:'MMM'}}</div>
+                    <div class="cita-time">{{cita.fecha_hora | date:'HH:mm'}}</div>
+                  </div>
+                  <div class="cita-info">
+                    <div class="cita-header">
+                      <ion-badge [color]="getTipoCitaColor(cita.tipo)">{{getTipoCitaLabel(cita.tipo)}}</ion-badge>
+                      <ion-badge *ngIf="esCitaPasada(cita.fecha_hora)" color="medium">Pasada</ion-badge>
+                    </div>
+                    <p class="cita-motivo" *ngIf="cita.motivo">{{cita.motivo}}</p>
+                  </div>
+                  <div class="cita-actions">
+                    <ion-button fill="clear" size="small" color="success" (click)="recordarCitaWhatsApp(cita)" title="Recordar por WhatsApp">
+                      <ion-icon name="logo-whatsapp"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" size="small" color="danger" (click)="cancelarCita(cita)" title="Cancelar cita">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+        </div>
+
+        <!-- TAB: GLUCOSA -->
+        <div *ngIf="tabActiva === 'glucosa'" class="tab-content">
+          
+          <!-- Métricas actuales -->
+          <div class="metrics-grid">
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon" [ngClass]="getGlucosaColor(registroActual?.glucosa_ayunas)">
+                  <ion-icon name="water-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Glucosa en Ayunas</label>
+                  <span class="metric-value">{{registroActual?.glucosa_ayunas || '-'}} mg/dL</span>
+                  <small>{{getGlucosaEstado(registroActual?.glucosa_ayunas)}}</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon" [ngClass]="getHbA1cColor(registroActual?.hba1c)">
+                  <ion-icon name="flask-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>HbA1c</label>
+                  <span class="metric-value">{{registroActual?.hba1c || '-'}}%</span>
+                  <small>{{getHbA1cEstado(registroActual?.hba1c)}}</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="metric-card">
+              <ion-card-content>
+                <div class="metric-icon normal">
+                  <ion-icon name="trending-up-outline"></ion-icon>
+                </div>
+                <div class="metric-info">
+                  <label>Glucosa Postprandial</label>
+                  <span class="metric-value">{{registroActual?.glucosa_postprandial || '-'}} mg/dL</span>
+                  <small>2 horas post-comida</small>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!-- Registrar nueva medición -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="add-circle-outline" color="primary"></ion-icon>
+                Registrar Nueva Medición
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="glucosaForm" (ngSubmit)="registrarGlucosa()">
+                <ion-item lines="none">
+                  <ion-label position="stacked">Fecha de medición</ion-label>
+                  <ion-input type="date" formControlName="fecha"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Glucosa en ayunas (mg/dL)</ion-label>
+                  <ion-input type="number" formControlName="glucosa_ayunas" placeholder="Ej: 95"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">HbA1c (%)</ion-label>
+                  <ion-input type="number" formControlName="hba1c" placeholder="Ej: 5.6" step="0.1"></ion-input>
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label position="stacked">Glucosa postprandial (mg/dL)</ion-label>
+                  <ion-input type="number" formControlName="glucosa_postprandial" placeholder="Ej: 140"></ion-input>
+                </ion-item>
+
+                <ion-item lines="none">
+                  <ion-label position="stacked">Observaciones</ion-label>
+                  <ion-textarea formControlName="observaciones" placeholder="Condiciones de la medición, síntomas, etc." rows="2"></ion-textarea>
+                </ion-item>
+
+                <div class="form-actions">
+                  <ion-button type="submit" [disabled]="glucosaForm.invalid || guardandoGlucosa">
+                    <ion-spinner *ngIf="guardandoGlucosa" name="crescent" slot="start"></ion-spinner>
+                    <ion-icon *ngIf="!guardandoGlucosa" name="save-outline" slot="start"></ion-icon>
+                    {{guardandoGlucosa ? 'Guardando...' : 'Registrar Medición'}}
+                  </ion-button>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Historial de mediciones -->
+          <ion-card class="info-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="analytics-outline" color="tertiary"></ion-icon>
+                Historial de Mediciones
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div *ngIf="historialGlucosa.length === 0" class="no-data">
+                <p>No hay mediciones registradas.</p>
+              </div>
+              <div class="glucosa-table" *ngIf="historialGlucosa.length > 0">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Ayunas</th>
+                      <th>HbA1c</th>
+                      <th>Postprandial</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let med of historialGlucosa">
+                      <td>{{med.fecha | date:'dd/MM/yyyy'}}</td>
+                      <td>
+                        <span [ngClass]="getGlucosaColor(med.glucosa_ayunas)">
+                          {{med.glucosa_ayunas}} mg/dL
+                        </span>
+                      </td>
+                      <td>
+                        <span [ngClass]="getHbA1cColor(med.hba1c)">
+                          {{med.hba1c}}%
+                        </span>
+                      </td>
+                      <td>{{med.glucosa_postprandial || '-'}} mg/dL</td>
+                      <td>
+                        <ion-badge [color]="getEstadoGlucosaColor(med.glucosa_ayunas)">
+                          {{getGlucosaEstado(med.glucosa_ayunas)}}
+                        </ion-badge>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+        </div>
+
+        <!-- TAB: COMUNICACIÓN -->
+        <div *ngIf="tabActiva === 'comunicacion'" class="tab-content">
+          
+          <ion-card class="info-card whatsapp-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="logo-whatsapp" color="success"></ion-icon>
+                Comunicación con el Paciente
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="patient-contact-info">
+                <div class="contact-item">
+                  <ion-icon name="person-outline"></ion-icon>
+                  <span>{{pacienteSeleccionado.nombres}} {{pacienteSeleccionado.apellidos}}</span>
+                </div>
+                <div class="contact-item">
+                  <ion-icon name="phone-outline"></ion-icon>
+                  <span>{{pacienteSeleccionado.telefono || 'Sin teléfono registrado'}}</span>
+                </div>
+              </div>
+
+              <ion-item lines="none">
+                <ion-label position="stacked">Mensaje personalizado</ion-label>
+                <ion-textarea [(ngModel)]="mensajeWhatsApp" rows="4" placeholder="Escribe un mensaje personalizado..."></ion-textarea>
+              </ion-item>
+
+              <div class="quick-messages">
+                <h4>Mensajes rápidos:</h4>
+                <div class="quick-messages-list">
+                  <ion-button size="small" fill="outline" (click)="setMensajeRapido('recordatorio')">
+                    <ion-icon name="alarm-outline" slot="start"></ion-icon>
+                    Recordatorio de cita
+                  </ion-button>
+                  <ion-button size="small" fill="outline" (click)="setMensajeRapido('seguimiento')">
+                    <ion-icon name="pulse-outline" slot="start"></ion-icon>
+                    Seguimiento plan
+                  </ion-button>
+                  <ion-button size="small" fill="outline" (click)="setMensajeRapido('glucosa')">
+                    <ion-icon name="water-outline" slot="start"></ion-icon>
+                    Control glucosa
+                  </ion-button>
+                  <ion-button size="small" fill="outline" (click)="setMensajeRapido('saludo')">
+                    <ion-icon name="happy-outline" slot="start"></ion-icon>
+                    Saludo inicial
+                  </ion-button>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <ion-button color="success" (click)="contactarWhatsApp()" [disabled]="!pacienteSeleccionado.telefono">
+                  <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+                  Enviar por WhatsApp
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

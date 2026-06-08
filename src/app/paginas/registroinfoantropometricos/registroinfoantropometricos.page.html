@@ -1,0 +1,241 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clínico: Indicadores Antropométricos</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="volver()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <!-- 👤 Info de Usuario -->
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <!-- 📋 Menú -->
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="irAInicio(); $event.stopPropagation()"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="irAInicio(); $event.stopPropagation()"><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          </ul>
+        </li>
+        
+        <li (click)="irAInicio()">
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Registros</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content form-layout">
+      <div class="form-container">
+        
+        <!-- Encabezado -->
+        <div class="form-header-section">
+          <h1>Indicadores Antropométricos</h1>
+          <p>Registre las medidas corporales para calcular el IMC y evaluar el estado nutricional.</p>
+        </div>
+
+        <!-- 📏 Tarjeta de Medidas Corporales -->
+        <ion-card class="anthro-list-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="scale-outline"></ion-icon> Medidas Corporales
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="anthro-grid">
+              
+              <!-- Peso -->
+              <div class="anthro-item">
+                <label class="input-label">
+                  <ion-icon name="scale-outline"></ion-icon>
+                  Peso <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <ion-icon name="fitness-outline" class="input-icon"></ion-icon>
+                  <ion-input 
+                    type="number" 
+                    step="0.1"
+                    [(ngModel)]="antropometriaForm.peso" 
+                    name="peso" 
+                    placeholder="70.5"
+                    class="custom-input"
+                    (ionChange)="calcularIMC()"
+                    required>
+                  </ion-input>
+                  <span class="unit-badge">kg</span>
+                </div>
+              </div>
+
+              <!-- Talla -->
+              <div class="anthro-item">
+                <label class="input-label">
+                  <ion-icon name="resize-outline"></ion-icon>
+                  Talla <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <ion-icon name="expand-outline" class="input-icon"></ion-icon>
+                  <ion-input 
+                    type="number" 
+                    step="0.01"
+                    [(ngModel)]="antropometriaForm.talla" 
+                    name="talla" 
+                    placeholder="1.70"
+                    class="custom-input"
+                    (ionChange)="calcularIMC()"
+                    required>
+                  </ion-input>
+                  <span class="unit-badge">m</span>
+                </div>
+              </div>
+
+              <!-- IMC Calculado (Chip Premium) -->
+              <div class="anthro-item full-width imc-result-item">
+                <div class="imc-display">
+                  <div class="imc-value">
+                    <span class="value-number" *ngIf="antropometriaForm.imc !== null">{{ antropometriaForm.imc }}</span>
+                    <span class="value-unit">kg/m²</span>
+                  </div>
+                  <span class="imc-chip" 
+                        [class.imc-bajo]="antropometriaForm.imc !== null && antropometriaForm.imc < 18.5"
+                        [class.imc-normal]="antropometriaForm.imc !== null && antropometriaForm.imc >= 18.5 && antropometriaForm.imc < 25"
+                        [class.imc-sobrepeso]="antropometriaForm.imc !== null && antropometriaForm.imc >= 25 && antropometriaForm.imc < 30"
+                        [class.imc-obesidad]="antropometriaForm.imc !== null && antropometriaForm.imc >= 30"
+                        *ngIf="antropometriaForm.imc !== null">
+                    <ion-icon 
+                      [name]="antropometriaForm.imc < 25 ? 'checkmark-circle' : 
+                             antropometriaForm.imc < 30 ? 'warning' : 'alert-circle'">
+                    </ion-icon>
+                    {{ getClasificacionIMC() }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Circunferencia de Cintura -->
+              <div class="anthro-item full-width">
+                <label class="input-label">
+                  <ion-icon name="body-outline"></ion-icon>
+                  Circunferencia de Cintura
+                </label>
+                <div class="input-wrapper">
+                  <ion-icon name="ellipse-outline" class="input-icon"></ion-icon>
+                  <ion-input 
+                    type="number" 
+                    [(ngModel)]="antropometriaForm.circunferenciaCintura" 
+                    name="cintura" 
+                    placeholder="85"
+                    class="custom-input">
+                  </ion-input>
+                  <span class="unit-badge">cm</span>
+                </div>
+              </div>
+
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 📚 Tarjeta de Referencia IMC -->
+        <ion-card class="imc-reference-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="information-circle-outline"></ion-icon> Clasificación IMC
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="imc-scale">
+              
+              <div class="imc-range">
+                <div class="range-bar bar-bajo"></div>
+                <div class="range-text">
+                  <div class="range-label label-bajo">Bajo peso</div>
+                  <div class="range-value">&lt; 18.5</div>
+                </div>
+                <ion-icon name="checkmark-circle-outline" class="range-icon"></ion-icon>
+              </div>
+              
+              <div class="imc-range">
+                <div class="range-bar bar-normal"></div>
+                <div class="range-text">
+                  <div class="range-label label-normal">Normal</div>
+                  <div class="range-value">18.5 - 24.9</div>
+                </div>
+                <ion-icon name="checkmark-circle-outline" class="range-icon"></ion-icon>
+              </div>
+              
+              <div class="imc-range">
+                <div class="range-bar bar-sobrepeso"></div>
+                <div class="range-text">
+                  <div class="range-label label-sobrepeso">Sobrepeso</div>
+                  <div class="range-value">25 - 29.9</div>
+                </div>
+                <ion-icon name="warning-outline" class="range-icon"></ion-icon>
+              </div>
+              
+              <div class="imc-range">
+                <div class="range-bar bar-obesidad"></div>
+                <div class="range-text">
+                  <div class="range-label label-obesidad">Obesidad</div>
+                  <div class="range-value">≥ 30</div>
+                </div>
+                <ion-icon name="alert-circle-outline" class="range-icon"></ion-icon>
+              </div>
+
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 🔘 Botones de Acción -->
+        <div class="form-actions">
+          <ion-button fill="outline" color="medium" (click)="volver()" type="button">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver
+          </ion-button>
+          <ion-button type="button" class="btn-submit" (click)="guardarYContinuar()">
+            <ion-icon slot="start" name="arrow-forward-outline"></ion-icon>
+            Siguiente Paso
+          </ion-button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

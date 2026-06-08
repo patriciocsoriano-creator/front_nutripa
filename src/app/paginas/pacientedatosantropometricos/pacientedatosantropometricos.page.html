@@ -1,0 +1,355 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Datos Antropométricos</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR DEL PACIENTE -->
+    <div class="sidebar" [class.open]="sidebarOpen">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-patient.png" alt="Paciente" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombrePaciente}}</h4>
+          <p>{{cedulaPaciente}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="navegarA('paciente')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('plan')">
+            <ion-icon name="nutrition-outline"></ion-icon>
+            <span>Plan Nutricional</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+            <li (click)="navegarA('pacienteverplan')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver mi plan</span>
+            </li>
+            <li (click)="navegarA('pacienteplanhistorial')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Historial de planes</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
+            <ion-icon name="pulse-outline"></ion-icon>
+            <span>Seguimiento Salud</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+            <li (click)="navegarA('pacientedatosantropometricos')">
+              <ion-icon name="body-outline"></ion-icon>
+              <span>Datos antropométricos</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Registrar glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteverglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarpresion')">
+              <ion-icon name="heart-outline"></ion-icon>
+              <span>Registrar presión arterial</span>
+            </li>
+            <li (click)="navegarA('pacienteverpresion')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de presion arterial</span>
+            </li>
+            <li (click)="navegarA('pacientehistorialmedico')">
+              <ion-icon name="analytics-outline"></ion-icon>
+              <span>Historial médico</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <span>Comunicación</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+            <li (click)="contactarWhatsApp()">
+              <ion-icon name="logo-whatsapp"></ion-icon>
+              <span>WhatsApp médico</span>
+            </li>
+            <li (click)="navegarA('pacientemensajes')">
+              <ion-icon name="mail-outline"></ion-icon>
+              <span>Mensajes al médico</span>
+            </li>
+          </ul>
+        </li>
+
+        <li (click)="navegarA('pacienteconfiguracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando datos antropométricos...</p>
+      </div>
+
+      <!-- Sin datos -->
+      <div *ngIf="!cargando && !datos" class="empty-state">
+        <ion-icon name="body-outline" class="empty-icon"></ion-icon>
+        <h3>Sin datos antropométricos</h3>
+        <p>Aún no se han registrado tus datos antropométricos. Contacta a tu médico para agendar una evaluación.</p>
+        <ion-button color="primary" (click)="contactarWhatsApp()">
+          <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+          Contactar médico
+        </ion-button>
+      </div>
+
+      <!-- Datos disponibles -->
+      <div *ngIf="!cargando && datos" class="datos-container">
+        
+        <!-- Header de información -->
+        <div class="info-header">
+          <div class="info-content">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <div>
+              <h3>Datos registrados el {{datos.fecha_registro | date:'dd/MM/yyyy'}}</h3>
+              <p>Registrado por: {{datos.registrado_por}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Métricas principales -->
+        <div class="metrics-grid">
+          
+          <!-- Peso -->
+          <div class="metric-card" *ngIf="datos.antropometricos?.peso">
+            <div class="metric-icon-wrapper peso">
+              <ion-icon name="scale-outline"></ion-icon>
+            </div>
+            <div class="metric-info">
+              <label>Peso</label>
+              <span class="metric-value">{{datos.antropometricos.peso}} kg</span>
+              <small class="metric-status" [ngClass]="getPesoStatus(datos.antropometricos.peso, datos.antropometricos.talla)">
+                {{getPesoLabel(datos.antropometricos.peso, datos.antropometricos.talla)}}
+              </small>
+            </div>
+          </div>
+
+          <!-- Talla -->
+          <div class="metric-card" *ngIf="datos.antropometricos?.talla">
+            <div class="metric-icon-wrapper talla">
+              <ion-icon name="resize-outline"></ion-icon>
+            </div>
+            <div class="metric-info">
+              <label>Talla</label>
+              <span class="metric-value">{{datos.antropometricos.talla}} m</span>
+              <small>{{(datos.antropometricos.talla * 100) | number:'1.0-0'}} cm</small>
+            </div>
+          </div>
+
+          <!-- IMC -->
+          <div class="metric-card" *ngIf="datos.antropometricos?.imc">
+            <div class="metric-icon-wrapper imc" [ngClass]="getIMCClass(datos.antropometricos.imc)">
+              <ion-icon name="analytics-outline"></ion-icon>
+            </div>
+            <div class="metric-info">
+              <label>Índice de Masa Corporal (IMC)</label>
+              <span class="metric-value">{{datos.antropometricos.imc}}</span>
+              <small class="metric-status" [ngClass]="getIMCClass(datos.antropometricos.imc)">
+                {{getIMCLabel(datos.antropometricos.imc)}}
+              </small>
+            </div>
+          </div>
+
+          <!-- Circunferencia de cintura -->
+          <div class="metric-card" *ngIf="datos.antropometricos?.circunferenciaCintura">
+            <div class="metric-icon-wrapper cintura">
+              <ion-icon name="radio-button-off-outline"></ion-icon>
+            </div>
+            <div class="metric-info">
+              <label>Circunferencia de Cintura</label>
+              <span class="metric-value">{{datos.antropometricos.circunferenciaCintura}} cm</span>
+              <small class="metric-status" [ngClass]="getCinturaStatus(datos.antropometricos.circunferenciaCintura)">
+                {{getCinturaLabel(datos.antropometricos.circunferenciaCintura)}}
+              </small>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Signos vitales -->
+        <div class="section-card" *ngIf="datos.signos_vitales">
+          <div class="section-header">
+            <ion-icon name="heart-outline"></ion-icon>
+            <h2>Signos Vitales</h2>
+          </div>
+          
+          <div class="signos-grid">
+            
+            <!-- Presión arterial -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.presionArterial">
+              <div class="signo-icon">
+                <ion-icon name="pulse-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Presión Arterial</label>
+                <span class="signo-value">{{datos.signos_vitales.presionArterial}} mmHg</span>
+                <small [ngClass]="getPresionClass(datos.signos_vitales.presionArterial)">
+                  {{getPresionLabel(datos.signos_vitales.presionArterial)}}
+                </small>
+              </div>
+            </div>
+
+            <!-- Frecuencia cardíaca -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.frecuenciaCardiaca">
+              <div class="signo-icon">
+                <ion-icon name="heart-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Frecuencia Cardíaca</label>
+                <span class="signo-value">{{datos.signos_vitales.frecuenciaCardiaca}} lpm</span>
+                <small>{{getFrecuenciaLabel(datos.signos_vitales.frecuenciaCardiaca)}}</small>
+              </div>
+            </div>
+
+            <!-- Frecuencia respiratoria -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.frecuenciaRespiratoria">
+              <div class="signo-icon">
+                <ion-icon name="air-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Frecuencia Respiratoria</label>
+                <span class="signo-value">{{datos.signos_vitales.frecuenciaRespiratoria}} rpm</span>
+                <small>Normal: 12-20 rpm</small>
+              </div>
+            </div>
+
+            <!-- Temperatura -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.temperatura">
+              <div class="signo-icon">
+                <ion-icon name="thermometer-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Temperatura</label>
+                <span class="signo-value">{{datos.signos_vitales.temperatura}}°C</span>
+                <small>{{getTemperaturaLabel(datos.signos_vitales.temperatura)}}</small>
+              </div>
+            </div>
+
+            <!-- SpO2 -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.spo2">
+              <div class="signo-icon">
+                <ion-icon name="water-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Saturación de Oxígeno (SpO2)</label>
+                <span class="signo-value">{{datos.signos_vitales.spo2}}%</span>
+                <small [ngClass]="getSpo2Class(datos.signos_vitales.spo2)">
+                  {{getSpo2Label(datos.signos_vitales.spo2)}}
+                </small>
+              </div>
+            </div>
+
+            <!-- Glucosa en ayunas -->
+            <div class="signo-item" *ngIf="datos.signos_vitales.glucosaAyunas">
+              <div class="signo-icon">
+                <ion-icon name="flask-outline"></ion-icon>
+              </div>
+              <div class="signo-info">
+                <label>Glucosa en Ayunas</label>
+                <span class="signo-value">{{datos.signos_vitales.glucosaAyunas}} mg/dL</span>
+                <small [ngClass]="getGlucosaClass(datos.signos_vitales.glucosaAyunas)">
+                  {{getGlucosaLabel(datos.signos_vitales.glucosaAyunas)}}
+                </small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Historial de mediciones -->
+        <div class="section-card" *ngIf="datos.historial && datos.historial.length > 1">
+          <div class="section-header">
+            <ion-icon name="time-outline"></ion-icon>
+            <h2>Historial de Mediciones</h2>
+          </div>
+          
+          <div class="historial-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Peso (kg)</th>
+                  <th>Talla (m)</th>
+                  <th>IMC</th>
+                  <th>Cintura (cm)</th>
+                  <th>Presión</th>
+                  <th>Glucosa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of datos.historial">
+                  <td>{{h.fecha | date:'dd/MM/yyyy'}}</td>
+                  <td>{{h.peso || '-'}}</td>
+                  <td>{{h.talla || '-'}}</td>
+                  <td>
+                    <span *ngIf="h.imc" [ngClass]="getIMCClass(h.imc)">
+                      {{h.imc}}
+                    </span>
+                    <span *ngIf="!h.imc">-</span>
+                  </td>
+                  <td>{{h.circunferenciaCintura || '-'}}</td>
+                  <td>{{h.presionArterial || '-'}}</td>
+                  <td>{{h.glucosaAyunas || '-'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recomendaciones -->
+        <div class="recomendaciones-card" *ngIf="datos.antropometricos?.imc">
+          <div class="section-header">
+            <ion-icon name="bulb-outline"></ion-icon>
+            <h2>Recomendaciones</h2>
+          </div>
+          <div class="recomendaciones-content">
+            <p [innerHTML]="getRecomendaciones(datos.antropometricos.imc)"></p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

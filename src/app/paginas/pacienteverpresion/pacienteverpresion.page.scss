@@ -1,0 +1,817 @@
+/* =========================================
+   🎨 VARIABLES
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+$radius-xl: 20px;
+
+// Colores para niveles de presión arterial
+$presion-normal: #10b981;
+$presion-elevada: #f59e0b;
+$presion-alto1: #f97316;
+$presion-alto2: #ef4444;
+$presion-crisis: #7f1d1d;
+
+/* =========================================
+   📦 HEADER
+   ========================================= */
+::ng-deep .main-header {
+  ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🧭 DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* =========================================
+   🧭 SIDEBAR
+   ========================================= */
+::ng-deep .sidebar {
+  width: 70px;
+  min-width: 70px;
+  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  color: white;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.open {
+    width: 260px !important;
+    min-width: 260px;
+    
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
+  }
+
+  .menu-icon {
+    margin: 1rem auto;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    width: fit-content;
+    align-self: center;
+    &:hover { background: rgba(255,255,255,0.15); }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0 0 4px;
+        font-weight: 500;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+      }
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      
+      ion-icon { 
+        font-size: 1.3rem; 
+        min-width: 30px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      
+      span { 
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+      
+      &.active {
+        background: rgba(255,255,255,0.2);
+        border-left: 3px solid $accent-color;
+      }
+    }
+  }
+
+  .menu-item-with-submenu {
+    position: relative;
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      
+      ion-icon:first-child {
+        width: 30px;
+        min-width: 30px;
+        text-align: center;
+      }
+      
+      span {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+        flex: 1;
+      }
+      
+      .submenu-arrow {
+        margin-left: auto;
+        padding-right: 20px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.3s ease;
+        
+        &.rotate { transform: rotate(180deg); }
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+    }
+    
+    .submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background: rgba(0,0,0,0.15);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+      
+      &.active { max-height: 500px; }
+      
+      li {
+        padding-left: 50px;
+        font-size: 0.85rem;
+        
+        span { opacity: 0; }
+        
+        &:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+      }
+    }
+  }
+  
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow {
+    opacity: 1;
+  }
+  
+  &.open .menu-item-with-submenu .submenu li span {
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   📦 MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: $bg-color;
+}
+
+/* =========================================
+   📋 PAGE HEADER
+   ========================================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    ion-icon {
+      font-size: 2rem;
+      color: $primary-color;
+      background: rgba($accent-color, 0.15);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 4px;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+/* =========================================
+   📊 STATS GRID
+   ========================================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: $radius-lg;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: $shadow-md;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    &.ultima { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    &.promedio { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    &.rango { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    &.total { background: linear-gradient(135deg, #10b981, #059669); }
+
+    &.nivel-normal { background: linear-gradient(135deg, $presion-normal, darken($presion-normal, 10%)); }
+    &.nivel-elevada { background: linear-gradient(135deg, $presion-elevada, darken($presion-elevada, 10%)); }
+    &.nivel-alto1 { background: linear-gradient(135deg, $presion-alto1, darken($presion-alto1, 10%)); }
+    &.nivel-alto2 { background: linear-gradient(135deg, $presion-alto2, darken($presion-alto2, 10%)); }
+    &.nivel-crisis { background: linear-gradient(135deg, $presion-crisis, darken($presion-crisis, 10%)); }
+  }
+
+  .stat-info {
+    flex: 1;
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    small {
+      display: block;
+      font-size: 0.75rem;
+      color: $text-muted;
+      margin-top: 4px;
+    }
+  }
+}
+
+/* =========================================
+   🔍 FILTROS
+   ========================================= */
+.filtros-bar {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: $radius-lg;
+  padding: 12px;
+  box-shadow: $shadow-md;
+
+  ion-segment {
+    --background: transparent;
+    --indicator-color: #{$primary-color};
+  }
+}
+
+/* =========================================
+   🔄 LOADING / EMPTY
+   ========================================= */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: $text-secondary;
+
+  ion-spinner { margin-bottom: 16px; }
+  .empty-icon { font-size: 5rem; color: $primary-color; margin-bottom: 16px; opacity: 0.5; }
+  h3 { color: $text-primary; margin: 0 0 8px; }
+  p { margin: 0 0 24px; max-width: 400px; }
+}
+
+/* =========================================
+   📋 LISTA DE MEDICIONES
+   ========================================= */
+.mediciones-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.medicion-card {
+  background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-left: 4px solid $border-color;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+  }
+
+  &.nivel-normal { border-left-color: $presion-normal; }
+  &.nivel-elevada { border-left-color: $presion-elevada; }
+  &.nivel-alto1 { border-left-color: $presion-alto1; }
+  &.nivel-alto2 { border-left-color: $presion-alto2; }
+  &.nivel-crisis { border-left-color: $presion-crisis; }
+
+  &.expanded {
+    box-shadow: $shadow-lg;
+  }
+
+  /* Resumen (siempre visible) */
+  .medicion-resumen {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+
+  .medicion-fecha {
+    text-align: center;
+    min-width: 70px;
+    padding: 8px 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    margin-right: 16px;
+
+    .fecha-dia {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    .fecha-mes {
+      font-size: 0.8rem;
+      color: $text-secondary;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .fecha-hora {
+      font-size: 0.75rem;
+      color: $text-muted;
+      margin-top: 4px;
+    }
+  }
+
+  .medicion-valor-container {
+    flex: 1;
+
+    .valor-principal {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+
+      &.nivel-normal { color: $presion-normal; }
+      &.nivel-elevada { color: $presion-elevada; }
+      &.nivel-alto1 { color: $presion-alto1; }
+      &.nivel-alto2 { color: $presion-alto2; }
+      &.nivel-crisis { color: $presion-crisis; }
+    }
+
+    .valor-unidad {
+      font-size: 0.8rem;
+      color: $text-muted;
+      margin-top: 2px;
+    }
+
+    .valor-clasificacion {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 4px;
+
+      &.nivel-normal { color: $presion-normal; }
+      &.nivel-elevada { color: $presion-elevada; }
+      &.nivel-alto1 { color: $presion-alto1; }
+      &.nivel-alto2 { color: $presion-alto2; }
+      &.nivel-crisis { color: $presion-crisis; }
+    }
+  }
+
+  .medicion-extra {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba($accent-color, 0.1);
+    border-radius: 8px;
+    margin: 0 16px;
+
+    ion-icon {
+      font-size: 1rem;
+      color: $secondary-color;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: $text-primary;
+      font-weight: 500;
+    }
+  }
+
+  .medicion-expand-icon {
+    margin-left: 16px;
+
+    ion-icon {
+      font-size: 1.3rem;
+      color: $text-muted;
+    }
+  }
+
+  /* Detalle expandible */
+  .medicion-detalle {
+    padding: 20px;
+    background: #f8fafc;
+    border-top: 1px solid $border-color;
+    animation: slideDown 0.3s ease;
+
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .detalle-item {
+      label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: $text-secondary;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+
+        ion-icon {
+          font-size: 0.9rem;
+        }
+      }
+
+      span {
+        display: block;
+        font-size: 0.95rem;
+        color: $text-primary;
+
+        &.valor-destacado {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: $secondary-color;
+        }
+      }
+    }
+
+    /* Clasificación visual */
+    .clasificacion-visual {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border-left: 4px solid;
+
+      &.nivel-normal { 
+        background: rgba($presion-normal, 0.1); 
+        border-color: $presion-normal;
+        ion-icon { color: $presion-normal; }
+      }
+      &.nivel-elevada { 
+        background: rgba($presion-elevada, 0.1); 
+        border-color: $presion-elevada;
+        ion-icon { color: $presion-elevada; }
+      }
+      &.nivel-alto1 { 
+        background: rgba($presion-alto1, 0.1); 
+        border-color: $presion-alto1;
+        ion-icon { color: $presion-alto1; }
+      }
+      &.nivel-alto2 { 
+        background: rgba($presion-alto2, 0.1); 
+        border-color: $presion-alto2;
+        ion-icon { color: $presion-alto2; }
+      }
+      &.nivel-crisis { 
+        background: rgba($presion-crisis, 0.1); 
+        border-color: $presion-crisis;
+        ion-icon { color: $presion-crisis; }
+      }
+
+      ion-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      strong {
+        display: block;
+        font-size: 0.85rem;
+        color: $text-primary;
+        margin-bottom: 4px;
+      }
+
+      p {
+        margin: 0 0 4px;
+        font-size: 0.9rem;
+        color: $text-primary;
+        font-weight: 500;
+      }
+
+      small {
+        display: block;
+        font-size: 0.8rem;
+        color: $text-secondary;
+        line-height: 1.4;
+      }
+    }
+
+    .detalle-notas {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border-left: 3px solid $primary-color;
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: $text-secondary;
+        font-weight: 600;
+        margin-bottom: 6px;
+
+        ion-icon {
+          font-size: 0.9rem;
+        }
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: $text-primary;
+        line-height: 1.5;
+      }
+    }
+
+    .detalle-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+/* =========================================
+   📱 RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    height: calc(100vh - 60px);
+    width: 280px !important;
+    min-width: 280px !important;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+
+    &.open {
+      left: 0;
+    }
+
+    .menu-icon { display: block; }
+    .user-info { display: block; }
+
+    .user-details {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    ul li span { opacity: 1 !important; }
+
+    .menu-item-with-submenu {
+      .menu-link span { opacity: 1 !important; }
+
+      .submenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        min-width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+      }
+    }
+  }
+
+  ::ng-deep .main-content {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .page-title {
+      ion-icon {
+        font-size: 1.5rem;
+        padding: 10px;
+      }
+
+      h1 { font-size: 1.3rem; }
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .medicion-resumen {
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .medicion-fecha {
+      margin-right: 0;
+    }
+
+    .medicion-extra {
+      margin: 0;
+    }
+  }
+
+  .medicion-detalle .detalle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   ♿ ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

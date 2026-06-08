@@ -1,0 +1,261 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clínico: Información del Paciente</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR (Mismo menú de enfermería) -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <!-- 👤 Info de Usuario -->
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <!-- 📋 Menú -->
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        
+        <li class="menu-item-with-submenu">
+          <div class="menu-link">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          </ul>
+        </li>
+        
+        <li>
+          <ion-icon name="clipboard-outline"></ion-icon>
+          <span>Registros</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL - FORMULARIO -->
+    <div class="main-content form-layout">
+      
+      <!-- 🆕 LOADING mientras se cargan datos -->
+      <div *ngIf="cargandoDatos" class="loading-datos">
+        <div class="loading-content">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <h3>Cargando datos del paciente...</h3>
+          <p>Por favor espere un momento</p>
+        </div>
+      </div>
+
+      <!-- FORMULARIO (solo cuando termina de cargar) -->
+      <div class="form-container" *ngIf="!cargandoDatos">
+        
+        <!-- Encabezado del Formulario -->
+        <div class="form-header-section">
+          <h1>Datos del Paciente</h1>
+          <p>Complete la información personal requerida para iniciar el registro clínico.</p>
+          
+          <!-- 🆕 Indicador de datos pre-llenados -->
+          <div class="prefill-notice" *ngIf="datosPrellenados">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>Los datos del paciente han sido cargados automáticamente desde el sistema.</span>
+          </div>
+        </div>
+
+        <form #personalForm="ngForm" (ngSubmit)="guardarYContinuar()">
+          
+          <div class="form-grid">
+            
+            <!-- Columna Izquierda: Identificación -->
+            <div class="form-column">
+              <ion-card class="input-card">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="id-card-outline"></ion-icon> Identificación
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  
+                  <div class="form-group">
+                    <label>Número de Identificación *</label>
+                    <ion-input 
+                      [(ngModel)]="pacienteForm.numeroIdentificacion" 
+                      name="numeroIdentificacion" 
+                      placeholder="Ej: 1712345678"
+                      class="custom-input"
+                      [readonly]="campoBloqueado"
+                      required>
+                    </ion-input>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Nombres *</label>
+                    <ion-input 
+                      [(ngModel)]="pacienteForm.nombres" 
+                      name="nombres" 
+                      placeholder="Nombres completos"
+                      class="custom-input"
+                      [readonly]="campoBloqueado"
+                      required>
+                    </ion-input>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Apellidos *</label>
+                    <ion-input 
+                      [(ngModel)]="pacienteForm.apellidos" 
+                      name="apellidos" 
+                      placeholder="Apellidos completos"
+                      class="custom-input"
+                      [readonly]="campoBloqueado"
+                      required>
+                    </ion-input>
+                  </div>
+
+                  <div class="form-group date-with-age">
+  <label>Fecha de Nacimiento</label>
+  <div class="date-age-container">
+    <ion-input 
+      type="date" 
+      [(ngModel)]="pacienteForm.fechaNacimiento" 
+      name="fechaNacimiento"
+      class="custom-input"
+      (ionBlur)="calcularEdad()">
+    </ion-input>
+    
+    <!-- Badge de edad calculada -->
+    <div class="age-badge" *ngIf="edadCalculada !== null && edadCalculada > 0">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>{{edadCalculada}} años</span>
+    </div>
+  </div>
+</div>
+
+                </ion-card-content>
+              </ion-card>
+            </div>
+
+            <!-- Columna Derecha: Contacto y Estilo de Vida -->
+            <div class="form-column">
+              <ion-card class="input-card">
+                <ion-card-header>
+                  <ion-card-title>
+                    <ion-icon name="call-outline"></ion-icon> Contacto y Estilo de Vida
+                  </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  
+                  <div class="form-row">
+                    <div class="form-group half">
+                      <label>Sexo</label>
+                      <ion-select 
+                        [(ngModel)]="pacienteForm.sexo" 
+                        name="sexo" 
+                        placeholder="Seleccione"
+                        interface="action-sheet"
+                        class="custom-select">
+                        <ion-select-option value="M">Masculino</ion-select-option>
+                        <ion-select-option value="F">Femenino</ion-select-option>
+                        <ion-select-option value="O">Otro</ion-select-option>
+                      </ion-select>
+                    </div>
+
+                    <div class="form-group half">
+                      <label>Actividad Física</label>
+                      <ion-select 
+                        [(ngModel)]="pacienteForm.actividadFisica" 
+                        name="actividadFisica" 
+                        placeholder="Seleccione"
+                        interface="action-sheet"
+                        class="custom-select">
+                        <ion-select-option value="sedentario">Sedentario</ion-select-option>
+                        <ion-select-option value="ligera">Ligera</ion-select-option>
+                        <ion-select-option value="moderada">Moderada</ion-select-option>
+                        <ion-select-option value="intensa">Intensa</ion-select-option>
+                      </ion-select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Dirección</label>
+                    <ion-input 
+                      [(ngModel)]="pacienteForm.direccion" 
+                      name="direccion" 
+                      placeholder="Calle principal, número..."
+                      class="custom-input">
+                    </ion-input>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group half">
+                      <label>Teléfono</label>
+                      <ion-input 
+                        type="tel" 
+                        [(ngModel)]="pacienteForm.telefono" 
+                        name="telefono" 
+                        placeholder="0999999999"
+                        class="custom-input">
+                      </ion-input>
+                    </div>
+                    <div class="form-group half">
+                      <label>Ocupación</label>
+                      <ion-input 
+                        [(ngModel)]="pacienteForm.ocupacion" 
+                        name="ocupacion" 
+                        placeholder="Ej: Comerciante"
+                        class="custom-input">
+                      </ion-input>
+                    </div>
+                  </div>
+
+                </ion-card-content>
+              </ion-card>
+            </div>
+
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="form-actions">
+            <ion-button fill="outline" color="medium" (click)="cancelar()" type="button">
+              Cancelar
+            </ion-button>
+            <ion-button type="submit" color="primary" class="btn-submit">
+              <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+              Guardar y Continuar
+            </ion-button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</ion-content>

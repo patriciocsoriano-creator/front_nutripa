@@ -1,0 +1,7 @@
+{
+  "name": "Nutricion",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

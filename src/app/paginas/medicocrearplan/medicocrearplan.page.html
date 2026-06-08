@@ -1,0 +1,309 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Crear Plan Nutricional</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')" class="active">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <div class="main-content">
+      
+      <!-- ⏳ Loading inicial -->
+      <div *ngIf="cargandoPaciente" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando datos del paciente...</p>
+      </div>
+
+      <!-- ✅ Formulario principal -->
+      <form *ngIf="!cargandoPaciente" (ngSubmit)="guardarPlan()" #planForm="ngForm">
+        
+        <!-- 📋 Header del paciente -->
+        <ion-card class="patient-summary-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              Paciente: {{ formulario.nombre_paciente || 'Sin seleccionar' }}
+            </ion-card-title>
+            <ion-card-subtitle *ngIf="pacienteData">
+              Edad: {{ pacienteData.edad }} años • Sexo: {{ pacienteData.sexo }}
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">IMC</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.imc" name="imc" placeholder="Ej: 24.5"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Peso (kg)</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.peso" name="peso" placeholder="Ej: 70"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Talla (cm)</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.talla" name="talla" placeholder="Ej: 170"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Cintura (cm)</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.cintura" name="cintura" placeholder="Ej: 85"></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Glucosa ayunas</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.glucosa_ayunas" name="glucosa" placeholder="mg/dL"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">HbA1c (%)</ion-label>
+                    <ion-input type="number" step="0.1" [(ngModel)]="formulario.hba1c" name="hba1c" placeholder="Ej: 6.5"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Colesterol LDL</ion-label>
+                    <ion-input type="number" [(ngModel)]="formulario.colesterol_ldl" name="ldl" placeholder="mg/dL"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item>
+                    <ion-label position="stacked">Actividad física</ion-label>
+                    <ion-select [(ngModel)]="formulario.actividad_fisica" name="actividad" placeholder="Seleccionar">
+                      <ion-select-option value="sedentario">Sedentario</ion-select-option>
+                      <ion-select-option value="ligera">Ligera</ion-select-option>
+                      <ion-select-option value="moderada">Moderada</ion-select-option>
+                      <ion-select-option value="intensa">Intensa</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 🧠 Sección de IA / Red Neuronal -->
+        <ion-card class="ml-section-card" [class.loading]="cargandoML">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="sparkles-outline" color="primary" slot="start"></ion-icon>
+              🧠 Recomendación de IA
+            </ion-card-title>
+            <ion-card-subtitle>
+              Perfil dietético sugerido según protocolo PAM
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            
+            <!-- Estado: Cargando predicción -->
+            <div *ngIf="cargandoML" class="ml-loading">
+              <ion-spinner name="circles" color="primary"></ion-spinner>
+              <p>Analizando datos clínicos con red neuronal...</p>
+            </div>
+
+            <!-- Estado: Error en ML -->
+            <div *ngIf="errorML" class="ml-error">
+              <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
+              <p>{{ errorML }}</p>
+              <ion-button fill="outline" size="small" (click)="ejecutarPrediccionML()">
+                Reintentar
+              </ion-button>
+            </div>
+
+            <!-- Estado: Resultado exitoso -->
+            <div *ngIf="!cargandoML && !errorML && perfilRecomendado" class="ml-result">
+              <!-- Chip con color obtenido por método helper -->
+              <ion-chip [color]="getColorPorPerfil(perfilRecomendado)">
+                <ion-icon name="medkit-outline"></ion-icon>
+                <ion-label>{{ perfilRecomendado }}</ion-label>
+              </ion-chip>
+              
+              <!-- Descripción obtenida por ID (usando perfilRecomendadoId) -->
+              <p class="ml-desc">
+                {{ getPerfilInfo(perfilRecomendadoId)?.desc || 'Perfil recomendado basado en tus datos clínicos' }}
+              </p>
+              
+              <div *ngIf="confianzaPrediccion" class="ml-confidence">
+                <ion-progress-bar value="{{ confianzaPrediccion }}" color="success"></ion-progress-bar>
+                <small>Confianza: {{ (confianzaPrediccion * 100) | number:'1.0-0' }}%</small>
+              </div>
+
+              <ion-note class="ml-hint">
+                <ion-icon name="lightbulb-outline"></ion-icon>
+                Objetivos sugeridos auto-seleccionados según el perfil
+              </ion-note>
+            </div>
+
+            <!-- Botón para ejecutar manualmente si no hay datos -->
+            <div *ngIf="!cargandoML && !errorML && !perfilRecomendado && formulario.imc" class="ml-manual">
+              <ion-button fill="outline" color="primary" (click)="ejecutarPrediccionML()">
+                <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+                Ejecutar análisis con IA
+              </ion-button>
+              <ion-note>Complete al menos IMC y glucosa para obtener recomendación</ion-note>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 🎯 Objetivos del plan -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>🎯 Objetivos del Plan</ion-card-title>
+            <ion-card-subtitle>Seleccione los objetivos prioritarios</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6" *ngFor="let obj of objetivosDisponibles">
+                  <ion-item 
+                    button 
+                    [color]="esObjetivoSeleccionado(obj.id) ? 'primary' : 'light'"
+                    (click)="toggleObjetivo(obj.id)"
+                    detail="false">
+                    <ion-icon [name]="obj.icon" slot="start" [color]="esObjetivoSeleccionado(obj.id) ? 'light' : 'medium'"></ion-icon>
+                    <ion-label>{{ obj.label }}</ion-label>
+                    <ion-checkbox slot="end" [checked]="esObjetivoSeleccionado(obj.id)" disabled></ion-checkbox>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- ⚙️ Preferencias y contexto -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>⚙️ Preferencias y Contexto</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="4">
+                  <ion-item>
+                    <ion-label position="stacked">Preferencias alimentarias</ion-label>
+                    <ion-select [(ngModel)]="formulario.preferencias_alimentarias" name="preferencias">
+                      <ion-select-option *ngFor="let p of preferenciasAlimentarias" [value]="p.id">{{ p.label }}</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="4">
+                  <ion-item>
+                    <ion-label position="stacked">Situación económica</ion-label>
+                    <ion-select [(ngModel)]="formulario.situacion_economica" name="economia">
+                      <ion-select-option *ngFor="let s of situacionesEconomicas" [value]="s.id">{{ s.label }}</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="4">
+                  <ion-item>
+                    <ion-label position="stacked">Duración (semanas)</ion-label>
+                    <ion-input type="number" min="1" max="24" [(ngModel)]="formulario.duracion_semanas" name="duracion"></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 📝 Recomendaciones y notas -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>📝 Recomendaciones Personalizadas</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Recomendaciones principales</ion-label>
+              <ion-textarea [(ngModel)]="formulario.recomendaciones" name="recomendaciones" rows="4" placeholder="Ej: Incrementar consumo de fibra, reducir azúcares simples..."></ion-textarea>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Notas adicionales</ion-label>
+              <ion-textarea [(ngModel)]="formulario.notas_adicionales" name="notas" rows="3" placeholder="Observaciones para el paciente o seguimiento..."></ion-textarea>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Alergias</ion-label>
+              <ion-textarea [(ngModel)]="formulario.alergias" name="alergias" rows="3" placeholder="Alergias para el paciente o seguimiento..."></ion-textarea>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- 👇 Botones de acción -->
+        <div class="form-actions">
+          <ion-button fill="outline" color="medium" (click)="volver()" type="button">
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+            Cancelar
+          </ion-button>
+          <ion-button fill="solid" color="success" type="submit" [disabled]="planForm.invalid || cargandoML">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            Guardar Plan Nutricional
+          </ion-button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</ion-content>

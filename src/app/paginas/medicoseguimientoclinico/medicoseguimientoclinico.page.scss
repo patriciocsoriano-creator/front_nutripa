@@ -1,0 +1,593 @@
+/* ==== VARIABLES ==== */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+
+/* ==== HEADER ==== */
+.main-header {
+  ion-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7fbff;
+    border-bottom: 1px solid #dce5f3;
+    padding: 0 20px;
+    height: 60px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.6rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
+
+/* ==== DASHBOARD ==== */
+.dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* ==== SIDEBAR ==== */
+.sidebar {
+  width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+
+  &.open { width: 240px; }
+
+  .menu-icon {
+    margin: 1rem 0;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    &:hover { background: rgba(255,255,255,0.15); }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+      img { border-radius: 50%; object-fit: cover; }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      h4 { font-size: 0.95rem; margin: 0 0 4px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      p { font-size: 0.75rem; color: #b0c7d9; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+  }
+
+  &.open .user-details { opacity: 1; }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin-top: 0.5rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+
+      ion-icon { font-size: 1.3rem; min-width: 20px; text-align: center; }
+      span { opacity: 0; transition: opacity 0.3s ease; white-space: nowrap; }
+      
+      &:hover { background: rgba(255,255,255,0.15); color: white; }
+      &.active { background: rgba(255,255,255,0.2); color: white; border-left: 3px solid $accent-color; }
+    }
+  }
+
+  &.open ul li span { opacity: 1; }
+  
+  .menu-item-with-submenu {
+    position: relative; 
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      .submenu-arrow { margin-left: auto; transition: transform 0.3s ease; &.rotate { transform: rotate(180deg); } }
+    }
+    .submenu {
+      position: absolute; // 👈 CAMBIO: absolute para que se superponga
+      left: 100%; // 👈 CAMBIO: a la derecha del sidebar
+      top: 0;
+      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
+      min-width: 220px; // 👈 CAMBIO: ancho fijo
+      border-radius: 0 8px 8px 0;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+      z-index: 1000; // 👈 CAMBIO: z-index alto
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0;
+      margin: 0;
+      
+      &.active {
+        max-height: 300px; // 👈 CAMBIO: altura suficiente para mostrar items
+      }
+      
+      li {
+        padding: 12px 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        
+        &:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+        
+        ion-icon {
+          font-size: 1.1rem;
+          margin-right: 10px;
+        }
+        
+        span {
+          opacity: 1; // 👈 Siempre visible en submenú
+        }
+      }
+    }
+  }
+}
+
+/* ==== MAIN CONTENT ==== */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: $bg-color;
+}
+
+/* ==== LOADING / EMPTY ==== */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: $text-secondary;
+
+  ion-spinner { margin-bottom: 16px; }
+  .empty-icon { font-size: 4rem; color: $text-muted; margin-bottom: 16px; }
+  h3 { color: $text-primary; font-size: 1.25rem; margin: 0 0 8px; }
+  p { margin: 0 0 24px; max-width: 400px; }
+}
+
+/* ==== PATIENT HEADER ==== */
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $card-bg;
+  padding: 20px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .patient-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .patient-avatar {
+      width: 64px;
+      height: 64px;
+      --background: rgba($accent-color, 0.15);
+      img { border-radius: 50%; object-fit: cover; }
+    }
+
+    .patient-details {
+      h2 { margin: 0 0 4px; color: $text-primary; font-size: 1.3rem; }
+      .patient-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: $text-secondary;
+        font-size: 0.9rem;
+        flex-wrap: wrap;
+        ion-icon { font-size: 1rem; color: $secondary-color; }
+        .separator { color: $border-color; }
+      }
+    }
+  }
+
+  .patient-actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+
+/* ==== SEGMENT ==== */
+ion-segment {
+  --background: #e2e8f0;
+  --indicator-color: #{$secondary-color};
+  --indicator-border-radius: 8px;
+  margin-bottom: 20px;
+  ion-segment-button {
+    --color: #{$text-secondary};
+    --color-checked: #{$primary-color};
+    font-weight: 500;
+  }
+}
+
+/* ==== INFO CARDS ==== */
+.info-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0 0 20px;
+
+  ion-card-header {
+    padding: 16px 20px 8px;
+    ion-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $text-primary;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      ion-icon { font-size: 1.3rem; }
+    }
+  }
+
+  ion-card-content { padding: 8px 20px 20px; }
+}
+
+/* ==== PLAN ACTIVO ==== */
+.plan-activo-info {
+  .plan-badge-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    ion-badge { font-size: 0.85rem; padding: 6px 12px; }
+  }
+
+  .plan-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .detail-item {
+      label { display: block; font-size: 0.75rem; color: $text-muted; text-transform: uppercase; margin-bottom: 2px; }
+      span { font-size: 0.95rem; color: $text-primary; font-weight: 500; }
+      .confianza.alta { color: #10b981; font-weight: 600; }
+    }
+  }
+
+  .plan-recomendacion {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    background: rgba($accent-color, 0.1);
+    border-radius: 8px;
+    ion-icon { color: $secondary-color; margin-top: 2px; }
+    span { font-size: 0.9rem; color: $text-secondary; }
+  }
+}
+
+/* ==== NO DATA ==== */
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: $text-muted;
+  ion-icon { font-size: 2rem; margin-bottom: 8px; }
+  p { margin: 0 0 16px; }
+}
+
+/* ==== FORMS ==== */
+ion-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 12px;
+  ion-label {
+    font-size: 0.85rem;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+  ion-input, ion-textarea, ion-select {
+    --padding-start: 12px;
+    --background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 4px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  ion-button { --border-radius: 8px; }
+}
+
+/* ==== TIMELINE ==== */
+.timeline {
+  position: relative;
+  padding-left: 20px;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: $border-color;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+
+    .timeline-marker {
+      position: absolute;
+      left: -16px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: $secondary-color;
+      border: 2px solid $card-bg;
+    }
+
+    .timeline-content {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+
+      .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        strong { color: $text-primary; }
+      }
+
+      p {
+        margin: 4px 0;
+        font-size: 0.9rem;
+        color: $text-secondary;
+        strong { color: $text-primary; }
+      }
+    }
+  }
+}
+
+/* ==== CITAS ==== */
+.citas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cita-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid $secondary-color;
+
+  &.pasada {
+    opacity: 0.6;
+    border-left-color: $text-muted;
+  }
+
+  .cita-date {
+    text-align: center;
+    min-width: 60px;
+    .cita-day { font-size: 1.5rem; font-weight: 700; color: $primary-color; line-height: 1; }
+    .cita-month { font-size: 0.8rem; color: $text-secondary; text-transform: uppercase; }
+    .cita-time { font-size: 0.85rem; color: $text-primary; margin-top: 4px; }
+  }
+
+  .cita-info {
+    flex: 1;
+    .cita-header { display: flex; gap: 6px; margin-bottom: 4px; }
+    .cita-motivo { margin: 0; font-size: 0.9rem; color: $text-secondary; }
+  }
+
+  .cita-actions {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+/* ==== MÉTRICAS ==== */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+
+  ion-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .metric-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    background: $secondary-color;
+    flex-shrink: 0;
+
+    &.normal { background: #10b981; }
+    &.pre-diabetes { background: #f59e0b; }
+    &.diabetes { background: #ef4444; }
+  }
+
+  .metric-info {
+    flex: 1;
+    label { display: block; font-size: 0.75rem; color: $text-muted; text-transform: uppercase; margin-bottom: 2px; }
+    .metric-value { display: block; font-size: 1.5rem; font-weight: 700; color: $text-primary; }
+    small { display: block; font-size: 0.8rem; color: $text-secondary; margin-top: 2px; }
+  }
+}
+
+/* ==== GLUCOSA TABLE ==== */
+.glucosa-table {
+  overflow-x: auto;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    thead {
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      color: white;
+      th {
+        padding: 12px;
+        text-align: left;
+        font-size: 0.85rem;
+        font-weight: 600;
+        &:first-child { border-top-left-radius: 8px; }
+        &:last-child { border-top-right-radius: 8px; }
+      }
+    }
+    tbody {
+      tr {
+        border-bottom: 1px solid $border-color;
+        &:last-child td:first-child { border-bottom-left-radius: 8px; }
+        &:last-child td:last-child { border-bottom-right-radius: 8px; }
+        td {
+          padding: 12px;
+          font-size: 0.9rem;
+          color: $text-primary;
+        }
+      }
+    }
+  }
+  .normal { color: #10b981; font-weight: 600; }
+  .pre-diabetes { color: #f59e0b; font-weight: 600; }
+  .diabetes { color: #ef4444; font-weight: 600; }
+}
+
+/* ==== WHATSAPP CARD ==== */
+.whatsapp-card {
+  .patient-contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      ion-icon { color: $secondary-color; }
+      span { color: $text-primary; }
+    }
+  }
+
+  .quick-messages {
+    margin: 16px 0;
+    h4 { font-size: 0.9rem; color: $text-primary; margin: 0 0 8px; }
+    .quick-messages-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  .dashboard-container { flex-direction: column; }
+  
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    &.open { width: 100% !important; }
+    .menu-icon { display: none; }
+    .user-info { display: none; }
+    ul {
+      display: flex;
+      flex-direction: row;
+      gap: 15px;
+      width: auto;
+      li { padding: 5px; span { display: none; } }
+    }
+  }
+
+  .patient-header {
+    flex-direction: column;
+    align-items: flex-start;
+    .patient-actions { width: 100%; ion-button { flex: 1; } }
+  }
+
+  .metrics-grid { grid-template-columns: 1fr; }
+  .cita-item { flex-direction: column; align-items: flex-start; }
+}

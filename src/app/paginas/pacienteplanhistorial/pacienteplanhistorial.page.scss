@@ -1,0 +1,722 @@
+/* =========================================
+   🎨 VARIABLES - Mismos colores que las otras páginas
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+$radius-xl: 20px;
+
+/* =========================================
+   📦 HEADER
+   ========================================= */
+::ng-deep .main-header {
+  ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🧭 DASHBOARD
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* =========================================
+   🧭 SIDEBAR - IGUAL QUE LAS OTRAS PÁGINAS
+   ========================================= */
+::ng-deep .sidebar {
+  width: 70px;
+  min-width: 70px;
+  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  color: white;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.open {
+    width: 260px !important;
+    min-width: 260px;
+    
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
+  }
+
+  .menu-icon {
+    margin: 1rem 0;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    &:hover { background: rgba(255,255,255,0.15); }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0 0 4px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      
+      ion-icon { 
+        font-size: 1.3rem; 
+        min-width: 30px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      
+      span { 
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        margin-left: 10px;
+        overflow: hidden;
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+      
+      &.active {
+        background: rgba(255,255,255,0.2);
+        border-left: 3px solid $accent-color;
+      }
+    }
+  }
+
+  .menu-item-with-submenu {
+    position: relative;
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 0 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      
+      .submenu-arrow {
+        margin-left: auto;
+        padding-right: 20px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.3s ease;
+        &.rotate { transform: rotate(180deg); }
+      }
+      
+      &:hover { background: rgba(255,255,255,0.15); }
+    }
+    
+    .submenu {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+      min-width: 240px;
+      border-radius: 0 12px 12px 0;
+      box-shadow: 4px 0 16px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      
+      &.active { max-height: 400px; }
+      
+      li {
+        padding: 12px 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        
+        &:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+        
+        &.active {
+          background: rgba(255,255,255,0.2);
+          border-left: 3px solid $accent-color;
+        }
+        
+        span { opacity: 1; }
+      }
+    }
+  }
+  
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow { opacity: 1; }
+}
+
+/* =========================================
+   📦 MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: $bg-color;
+}
+
+/* =========================================
+   📋 PAGE HEADER
+   ========================================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .page-icon {
+      font-size: 2rem;
+      color: $primary-color;
+      background: rgba($accent-color, 0.15);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 4px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  ion-button {
+    --border-radius: 10px;
+  }
+}
+
+/* =========================================
+   📊 RESUMEN STATS
+   ========================================= */
+.resumen-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-item {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: $shadow-md;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    ion-icon {
+      font-size: 1.8rem;
+      color: $primary-color;
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+
+      strong {
+        font-size: 1.4rem;
+        color: $text-primary;
+        line-height: 1;
+      }
+
+      span {
+        font-size: 0.8rem;
+        color: $text-secondary;
+        margin-top: 2px;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🔍 FILTROS BAR
+   ========================================= */
+.filtros-bar {
+  margin-bottom: 24px;
+
+  ion-segment {
+    --background: white;
+    --indicator-color: #{$primary-color};
+    --indicator-border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: $shadow-md;
+    padding: 4px;
+
+    ion-segment-button {
+      --color: #{$text-secondary};
+      --color-checked: white;
+      --indicator-color: #{$primary-color};
+      font-weight: 500;
+      min-height: 40px;
+      text-transform: none;
+    }
+  }
+}
+
+/* =========================================
+   📋 PLANES GRID
+   ========================================= */
+.planes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}
+
+.plan-card {
+  --background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid $border-color;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+
+  &.estado-activo {
+    border-left-color: #10b981;
+  }
+
+  &.estado-completado {
+    border-left-color: #3b82f6;
+  }
+
+  &.estado-cancelado {
+    border-left-color: #ef4444;
+    opacity: 0.85;
+  }
+
+  &.estado-borrador {
+    border-left-color: #94a3b8;
+  }
+
+  ion-card-header {
+    padding: 16px 20px 12px;
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .plan-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, $primary-color, $secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        ion-icon {
+          font-size: 1.4rem;
+          color: white;
+        }
+      }
+
+      .plan-title-info {
+        flex: 1;
+        min-width: 0;
+
+        h3 {
+          margin: 0 0 2px;
+          font-size: 1.05rem;
+          font-weight: 600;
+          color: $text-primary;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .medico-info {
+          margin: 0;
+          font-size: 0.8rem;
+          color: $text-secondary;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          ion-icon {
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .estado-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 8px 20px 16px;
+
+    .plan-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        ion-icon {
+          font-size: 1.1rem;
+          color: $secondary-color;
+          flex-shrink: 0;
+        }
+
+        .info-text {
+          display: flex;
+          flex-direction: column;
+
+          small {
+            font-size: 0.7rem;
+            color: $text-muted;
+          }
+
+          strong {
+            font-size: 0.85rem;
+            color: $text-primary;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
+    .alergias-section {
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #fef2f2;
+      border-radius: 8px;
+
+      .alergias-label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 4px;
+
+        small {
+          font-size: 0.75rem;
+          color: #991b1b;
+          font-weight: 600;
+        }
+      }
+
+      .alergias-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+
+        ion-chip {
+          font-size: 0.7rem;
+          --padding-start: 8px;
+          --padding-end: 8px;
+          min-height: 24px;
+        }
+      }
+    }
+
+    .recomendacion-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #fffbeb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+
+      ion-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #92400e;
+        line-height: 1.4;
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid $border-color;
+
+      ion-button {
+        flex: 1;
+        --border-radius: 8px;
+        font-size: 0.8rem;
+        --padding-start: 10px;
+        --padding-end: 10px;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🔄 LOADING / EMPTY
+   ========================================= */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: $text-secondary;
+
+  ion-spinner { margin-bottom: 16px; }
+  .empty-icon { font-size: 4rem; color: $primary-color; margin-bottom: 16px; opacity: 0.5; }
+  h3 { color: $text-primary; margin: 0 0 8px; }
+  p { margin: 0 0 24px; max-width: 400px; }
+}
+
+/* =========================================
+   📱 RESPONSIVE - MÓVIL
+   ========================================= */
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    width: 280px !important;
+    min-width: 280px !important;
+    height: calc(100vh - 60px);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+
+    &.open {
+      left: 0;
+      width: 280px !important;
+      min-width: 280px !important;
+    }
+
+    .menu-icon {
+      display: block;
+      margin: 1rem auto;
+    }
+
+    .user-info {
+      display: block;
+
+      .user-details {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+
+    ul li span {
+      opacity: 1 !important;
+    }
+
+    .menu-item-with-submenu {
+      .menu-link .submenu-arrow {
+        opacity: 1 !important;
+        padding-right: 20px;
+      }
+
+      .submenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        min-width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: rgba(0,0,0,0.2) !important;
+        max-height: 0;
+
+        &.active { max-height: 400px; }
+
+        li {
+          padding-left: 48px !important;
+          ion-icon { font-size: 1rem; }
+        }
+      }
+    }
+  }
+
+  ::ng-deep .main-content {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .page-title {
+      .page-icon {
+        font-size: 1.5rem;
+        padding: 10px;
+      }
+
+      h1 { font-size: 1.3rem; }
+    }
+
+    ion-button { width: 100%; }
+  }
+
+  .resumen-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .planes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card {
+    ion-card-header .card-header-row {
+      flex-wrap: wrap;
+    }
+
+    ion-card-content .plan-info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .card-actions {
+      flex-direction: column;
+    }
+  }
+}
+
+/* =========================================
+   ♿ ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

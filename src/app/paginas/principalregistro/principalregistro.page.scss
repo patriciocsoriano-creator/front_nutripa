@@ -1,0 +1,712 @@
+// ============================================
+// 🎨 VARIABLES NEUMÓRFICAS (BASE DEL DISEÑO)
+// ============================================
+$neu-bg: #e0e5ec !default;
+$neu-bg-dark: #bec3cf !default;
+$neu-bg-light: #ffffff !default;
+$neu-text-primary: #3d4468 !default;
+$neu-text-secondary: #9499b7 !default;
+$neu-text-accent: #6c7293 !default;
+$neu-success: #00c896 !default;
+$neu-error: #ff3b5c !default;
+$neu-warning: #ffc107 !default;
+
+$neu-radius-lg: 30px !default;
+$neu-radius-md: 20px !default;
+$neu-radius-sm: 15px !default;
+$neu-radius-xs: 10px !default;
+
+$neu-shadow-out: 20px 20px 60px $neu-bg-dark, -20px -20px 60px $neu-bg-light !default;
+$neu-shadow-in: inset 8px 8px 16px $neu-bg-dark, inset -8px -8px 16px $neu-bg-light !default;
+$neu-shadow-in-focus: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light !default;
+$neu-shadow-btn: 8px 8px 20px $neu-bg-dark, -8px -8px 20px $neu-bg-light !default;
+$neu-shadow-btn-active: inset 4px 4px 10px $neu-bg-dark, inset -4px -4px 10px $neu-bg-light !default;
+$neu-shadow-card: 12px 12px 40px $neu-bg-dark, -12px -12px 40px $neu-bg-light !default;
+
+// ============================================
+// 🔄 RESET Y BASE IONIC
+// ============================================
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ion-content {
+  --background: #{$neu-bg};
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+// ============================================
+// 📦 CONTENEDOR PRINCIPAL
+// ============================================
+.register-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 16px 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ============================================
+// 🖼️ HEADER DEL FORMULARIO
+// ============================================
+.form-header {
+  text-align: center;
+  padding: 24px 16px;
+  
+  ion-icon {
+    font-size: 48px;
+    color: $neu-text-accent;
+    background: $neu-bg;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 8px 8px 20px $neu-bg-dark, -8px -8px 20px $neu-bg-light;
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  h2 {
+    color: $neu-text-primary;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  
+  p {
+    color: $neu-text-secondary;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+// ============================================
+// 🧱 ION-CARD NEUMÓRFICO
+// ============================================
+ion-card.card-section {
+  --background: #{$neu-bg};
+  --color: #{$neu-text-primary};
+  margin: 0;
+  border-radius: $neu-radius-lg;
+  box-shadow: $neu-shadow-card;
+  transition: all 0.3s ease;
+  overflow: visible;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      16px 16px 50px $neu-bg-dark,
+      -16px -16px 50px $neu-bg-light;
+  }
+}
+
+ion-card-header {
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba($neu-bg-dark, 0.2);
+}
+
+ion-card-title {
+  color: $neu-text-primary;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  ion-icon {
+    font-size: 20px;
+    color: $neu-text-accent;
+  }
+}
+
+ion-card-content {
+  padding: 16px 24px 24px;
+}
+
+// ============================================
+// 📝 ION-ITEM Y INPUTS
+// ============================================
+ion-item {
+  --background: transparent;
+  --inner-padding-end: 0;
+  --inner-padding-start: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --border-width: 0;
+  --highlight-height: 0;
+  --highlight-color-focused: transparent;
+  margin-bottom: 16px;
+  --min-height: 56px;
+}
+
+ion-input,
+ion-select {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --color: #{$neu-text-primary};
+  --placeholder-color: #{$neu-text-secondary};
+  --highlight-color-focused: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+// ============================================
+// ☑️ CHECKBOX
+// ============================================
+ion-checkbox {
+  --background: #{$neu-bg};
+  --background-checked: #{$neu-text-accent};
+  --border-color: #{$neu-bg-dark};
+  --border-color-checked: #{$neu-text-accent};
+  --border-radius: 6px;
+  --size: 22px;
+  --checkmark-color: #{$neu-bg-light};
+  box-shadow: 3px 3px 8px $neu-bg-dark, -3px -3px 8px $neu-bg-light;
+  transition: all 0.3s ease;
+  margin-right: 12px;
+}
+
+.checkbox-label {
+  color: $neu-text-secondary;
+  font-size: 14px;
+  line-height: 1.5;
+  
+  .link-terminos {
+    color: $neu-text-accent;
+    text-decoration: none;
+    font-weight: 500;
+    
+    &:hover {
+      color: $neu-text-primary;
+      text-decoration: underline;
+    }
+  }
+}
+
+// ============================================
+// 🔘 BOTONES
+// ============================================
+ion-button {
+  --background: #{$neu-bg};
+  --color: #{$neu-text-primary};
+  --border-radius: #{$neu-radius-sm};
+  --box-shadow: #{$neu-shadow-btn};
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+  min-height: 52px;
+
+  &:not([disabled]):hover {
+    --box-shadow: 
+      12px 12px 30px $neu-bg-dark,
+      -12px -12px 30px $neu-bg-light;
+    transform: translateY(-2px);
+  }
+
+  &:not([disabled]):active {
+    --box-shadow: #{$neu-shadow-btn-active};
+    transform: translateY(0);
+  }
+
+  &[disabled] {
+    --background: #{$neu-bg};
+    --color: #{$neu-text-secondary};
+    opacity: 0.6;
+    cursor: not-allowed;
+    --box-shadow: none;
+  }
+}
+
+ion-button[fill="outline"] {
+  --background: transparent;
+  --box-shadow: none;
+  --border-width: 2px;
+  --border-color: #{$neu-text-accent};
+  --color: #{$neu-text-accent};
+  
+  &:hover:not([disabled]) {
+    --color: #{$neu-text-primary};
+    --border-color: #{$neu-text-primary};
+    transform: none;
+  }
+}
+
+ion-button.btn-primary {
+  --background: #{$neu-text-accent};
+  --color: #{$neu-bg-light};
+  
+  &:not([disabled]):hover {
+    --background: #{darken($neu-text-accent, 10%)};
+  }
+}
+
+// ============================================
+// 🎯 SECCIÓN DE BOTONES DE ACCIÓN
+// ============================================
+.action-buttons {
+  padding: 8px 8px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+// ============================================
+// 🎨 ANIMACIONES
+// ============================================
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+ion-card.card-section {
+  animation: fadeInUp 0.4s ease forwards;
+  opacity: 0;
+  
+  &:nth-child(1) { animation-delay: 0.1s; opacity: 1; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+}
+
+// ============================================
+// 📱 RESPONSIVE
+// ============================================
+@media (max-width: 768px) {
+  ion-content {
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  .form-header {
+    padding: 20px 12px;
+    
+    ion-icon {
+      width: 70px;
+      height: 70px;
+      font-size: 40px;
+    }
+    
+    h2 {
+      font-size: 1.3rem;
+    }
+  }
+  
+  ion-card.card-section {
+    border-radius: $neu-radius-md;
+  }
+  
+  ion-card-header {
+    padding: 16px 20px 10px;
+  }
+  
+  ion-card-content {
+    padding: 12px 20px 20px;
+  }
+  
+  ion-item {
+    margin-bottom: 12px;
+  }
+  
+  ion-button {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+}
+
+// ============================================
+// 🚨 FIX LABELS
+// ============================================
+ion-label[position="floating"] {
+  color: #3d4468 !important;
+  --color: #3d4468 !important;
+}
+
+ion-item.item-has-focus ion-label[position="floating"],
+ion-item.item-has-value ion-label[position="floating"] {
+  color: #6c7293 !important;
+  --color: #6c7293 !important;
+}
+
+ion-card ion-label {
+  color: #3d4468 !important;
+  --color: #3d4468 !important;
+}
+
+// ============================================
+// 🎉 BANNER DE AUTOCOMPLETADO
+// ============================================
+.autocompletado-banner {
+  --background: var(--ion-color-success);
+  margin: 16px 0;
+  border-radius: $neu-radius-md;
+  box-shadow: $neu-shadow-card;
+  animation: fadeInUp 0.4s ease forwards;
+  
+  ion-card-content {
+    padding: 16px 20px;
+  }
+  
+  .autocompletado-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .autocompletado-icon {
+      font-size: 2.5rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .autocompletado-text {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 4px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+.autocompletado-item {
+  --background: rgba(0, 200, 150, 0.05) !important;
+  border-left: 3px solid $neu-success !important;
+}
+
+.spinner-header {
+  margin-left: auto;
+  font-size: 18px;
+}
+
+.nota-paciente {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-left: 4px solid #dc2626;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+  
+  ion-icon {
+    font-size: 1.8rem;
+    color: #dc2626;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .nota-texto {
+    flex: 1;
+    
+    strong {
+      display: block;
+      color: #991b1b;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    
+    p {
+      margin: 0;
+      color: #7f1d1d;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      
+      strong {
+        display: inline;
+        color: #991b1b;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// ============================================
+// 🎯 FIX ION-SELECT
+// ============================================
+ion-select {
+  --color: #{$neu-text-primary} !important;
+  --placeholder-color: #{$neu-text-secondary} !important;
+  --placeholder-opacity: 0.7;
+}
+
+ion-select::part(text) {
+  color: #{$neu-text-primary} !important;
+  font-weight: 500;
+}
+
+ion-select::part(placeholder) {
+  color: #{$neu-text-secondary} !important;
+  opacity: 0.7;
+}
+
+ion-select::part(icon) {
+  color: #{$neu-text-accent} !important;
+  opacity: 0.8;
+}
+
+.alert-rol-custom {
+  --background: #{$neu-bg};
+  --border-radius: #{$neu-radius-md};
+  
+  .alert-title {
+    color: #{$neu-text-primary};
+    font-weight: 600;
+  }
+  
+  .alert-radio-label {
+    color: #{$neu-text-primary};
+    font-weight: 500;
+  }
+  
+  .alert-radio.alert-radio-checked .alert-radio-label {
+    color: #{$neu-text-accent};
+    font-weight: 600;
+  }
+}
+
+// ============================================
+// 🆕🔐 BARRA DE SEGURIDAD DE CONTRASEÑA
+// ============================================
+.password-security-container {
+  margin: -8px 0 16px 16px;
+  padding: 16px;
+  background: rgba($neu-bg-light, 0.5);
+  border-radius: $neu-radius-sm;
+  box-shadow: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light;
+  
+  .security-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    
+    .security-bar {
+      flex: 1;
+      height: 10px;
+      background: $neu-bg-dark;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1);
+      
+      .security-bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        
+        // Efecto de brillo animado
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.3),
+            transparent
+          );
+          animation: shimmer 2s infinite;
+        }
+        
+        &.nivel-muy-debil {
+          background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        &.nivel-debil {
+          background: linear-gradient(90deg, #f97316, #ea580c);
+        }
+        
+        &.nivel-media {
+          background: linear-gradient(90deg, #eab308, #ca8a04);
+        }
+        
+        &.nivel-fuerte {
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+        
+        &.nivel-muy-fuerte {
+          background: linear-gradient(90deg, #10b981, #059669);
+        }
+      }
+    }
+    
+    .security-level-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 90px;
+      text-align: right;
+      transition: color 0.3s ease;
+      
+      &.nivel-muy-debil { color: #ef4444; }
+      &.nivel-debil { color: #f97316; }
+      &.nivel-media { color: #eab308; }
+      &.nivel-fuerte { color: #22c55e; }
+      &.nivel-muy-fuerte { color: #10b981; }
+    }
+  }
+  
+  .password-requirements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    
+    .requirement-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba($neu-bg-dark, 0.3);
+      transition: all 0.3s ease;
+      
+      ion-icon {
+        font-size: 1.1rem;
+        color: #9499b7;
+        transition: all 0.3s ease;
+      }
+      
+      span {
+        font-size: 0.8rem;
+        color: #6c7293;
+        transition: color 0.3s ease;
+      }
+      
+      &.cumplido {
+        background: rgba(#10b981, 0.15);
+        
+        ion-icon {
+          color: #10b981;
+          transform: scale(1.1);
+        }
+        
+        span {
+          color: #059669;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+// Animación de brillo en la barra
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+// ============================================
+// 🆕🔐 INDICADOR DE COINCIDENCIA DE CONTRASEÑAS
+// ============================================
+.password-match-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 16px 16px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba($neu-bg-light, 0.5);
+  box-shadow: inset 2px 2px 4px $neu-bg-dark, inset -2px -2px 4px $neu-bg-light;
+  
+  ion-icon {
+    font-size: 1.2rem;
+  }
+  
+  span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    
+    &.coincide {
+      color: #10b981;
+    }
+    
+    &.no-coincide {
+      color: #ef4444;
+    }
+  }
+}
+
+// ============================================
+// 📱 RESPONSIVE - SEGURIDAD PASSWORD
+// ============================================
+@media (max-width: 480px) {
+  .password-security-container {
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 12px;
+    
+    .password-requirements {
+      grid-template-columns: 1fr;
+      
+      .requirement-item {
+        padding: 5px 8px;
+        
+        span {
+          font-size: 0.75rem;
+        }
+      }
+    }
+    
+    .security-bar-wrapper {
+      .security-level-text {
+        font-size: 0.75rem;
+        min-width: 70px;
+      }
+    }
+  }
+  
+  .password-match-indicator {
+    margin-left: 8px;
+    margin-right: 8px;
+    
+    span {
+      font-size: 0.8rem;
+    }
+  }
+}

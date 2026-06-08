@@ -1,0 +1,623 @@
+/* =====================================================
+   medicocrearplan.page.scss
+   ESTILOS COMPLETOS - Autocontenidos (sin global.scss)
+   Paleta: #0a4d68 | #f4f7fb | #667eea | #764ba2 | #2ecc71
+   ===================================================== */
+
+/* ==== HEADER ==== */
+.main-header {
+  ion-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    --background: #f7fbff;
+    --border-color: #dce5f3;
+    --min-height: 60px;
+    border-bottom: 1px solid #dce5f3;
+    padding: 0 20px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .logo-icon {
+        font-size: 1.8rem;
+        color: #0a4d68;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: #0a4d68;
+        font-size: 1.3rem;
+      }
+    }
+  }
+}
+
+/* ==== DASHBOARD CONTAINER ==== */
+.dashboard-container {
+  display: flex;
+  height: calc(100vh - var(--ion-toolbar-height, 56px));
+  background: #f4f7fb;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* ==== SIDEBAR ==== */
+.sidebar {
+  width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible; //  NECESARIO 
+  position: relative;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+
+  &.open {
+    width: 240px;
+  }
+
+  .menu-icon {
+    margin: 1rem 0;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    width: 100%;
+
+    ion-avatar {
+      margin: 0 auto 10px;
+      width: 56px;
+      height: 56px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      h4 {
+        font-size: 0.95rem;
+        margin: 0;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      p {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 2px 0 0;
+      }
+    }
+  }
+
+  &.open .user-details {
+    opacity: 1;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.9);
+      transition: background 0.2s, color 0.2s;
+      user-select: none;
+
+      ion-icon {
+        font-size: 1.4rem;
+        min-width: 24px;
+      }
+
+      span {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        white-space: nowrap;
+        font-size: 0.95rem;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+    }
+  }
+
+  &.open ul li span {
+    opacity: 1;
+  }
+}
+
+/* ==== SUBMENU EN SIDEBAR ==== */
+.menu-item-with-submenu {
+  position: relative;
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+    transition: background 0.2s;
+    justify-content: space-between;
+    width: 100%;
+
+    ion-icon {
+      font-size: 1.4rem;
+
+      &.submenu-arrow {
+        font-size: 1rem;
+        transition: transform 0.3s ease;
+        margin-left: auto;
+        opacity: 0;
+
+        .sidebar.open & {
+          opacity: 1;
+        }
+
+        &.rotate {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    span {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 0.95rem;
+    }
+  }
+
+  .sidebar.open & .menu-link span {
+    opacity: 1;
+  }
+
+  &:hover > .menu-link {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+  }
+
+  .submenu {
+      position: absolute; // 👈 CAMBIO: absolute para que se superponga
+      left: 100%; // 👈 CAMBIO: a la derecha del sidebar
+      top: 0;
+      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
+      min-width: 220px; // 👈 CAMBIO: ancho fijo
+      border-radius: 0 8px 8px 0;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+      z-index: 1000; // 👈 CAMBIO: z-index alto
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0;
+      margin: 0;
+      
+      &.active {
+        max-height: 300px; // 👈 CAMBIO: altura suficiente para mostrar items
+      }
+      
+      li {
+        padding: 12px 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        
+        &:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+         
+        ion-icon {
+          font-size: 1.1rem;
+          margin-right: 10px;
+        }
+        
+        span {
+          opacity: 1; // 👈 Siempre visible en submenú
+        }
+      }
+    }
+
+  .sidebar.open .submenu li span {
+    opacity: 1;
+  }
+}
+
+/* ==== MAIN CONTENT ==== */
+.main-content {
+  flex: 1;
+  padding: 20px 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ==== ESTADO DE CARGA INICIAL ==== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 30px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 16px;
+    --color: #0a4d68;
+  }
+
+  p {
+    color: #555;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+/* ==== CARD DE RESUMEN DEL PACIENTE ==== */
+.patient-summary-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  --background: #ffffff;
+
+  ion-card-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #0a4d68;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    ion-card-subtitle {
+      color: #6c757d;
+      margin-top: 4px;
+    }
+  }
+
+  ion-card-content ion-grid {
+    padding: 0;
+  }
+
+  ion-item {
+    --background: #f8f9fa;
+    --border-radius: 10px;
+    margin-bottom: 8px;
+    --min-height: 56px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease;
+
+    &:focus-within {
+      border-color: #667eea;
+      --background: #ffffff;
+    }
+
+    ion-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.85rem;
+    }
+
+    ion-input, ion-select {
+      --padding-start: 8px;
+      font-weight: 500;
+      font-size: 1rem;
+      color: #2c3e50;
+    }
+  }
+}
+
+/* ==== SECCIÓN DE IA / RED NEURONAL ==== */
+.ml-section-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+  border: 1px solid #b3d9ff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transition: all 0.3s ease;
+  --background: transparent;
+
+  &.loading {
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  ion-card-header {
+    padding-bottom: 8px;
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #0066cc;
+      font-weight: 600;
+    }
+
+    ion-card-subtitle {
+      color: #555;
+      font-size: 0.9rem;
+    }
+  }
+
+  .ml-loading, .ml-error, .ml-result, .ml-manual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .ml-loading {
+    ion-spinner {
+      margin-bottom: 12px;
+      --color: #0066cc;
+    }
+    p { color: #666; margin: 0; }
+  }
+
+  .ml-error {
+    color: #856404;
+    background: #fff3cd;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+
+    ion-icon { font-size: 1.5rem; margin-bottom: 8px; }
+    p { margin: 8px 0 12px; font-size: 0.95rem; line-height: 1.4; }
+  }
+
+  .ml-result {
+    ion-chip {
+      margin-bottom: 14px;
+      --padding-start: 12px;
+      --padding-end: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --background: #2ecc71;
+      --color: #ffffff;
+    }
+
+    .ml-desc {
+      color: #444;
+      margin: 0 0 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 90%;
+    }
+
+    .ml-confidence {
+      width: 100%;
+      max-width: 320px;
+      margin: 8px 0 12px;
+
+      ion-progress-bar {
+        margin-bottom: 6px;
+        --background: rgba(0,0,0,0.1);
+        --progress-background: #2ecc71;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      small {
+        color: #555;
+        font-weight: 500;
+        font-size: 0.85rem;
+      }
+    }
+
+    .ml-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      color: #666;
+      font-size: 0.85rem;
+
+      ion-icon { color: #f39c12; font-size: 1.1rem; }
+    }
+  }
+
+  .ml-manual {
+    ion-button { margin-bottom: 10px; }
+    ion-note {
+      color: #666;
+      font-size: 0.85rem;
+      display: block;
+      margin-top: 6px;
+    }
+  }
+}
+
+/* ==== OBJETIVOS DEL PLAN (Estado seleccionado) ==== */
+ion-item[color="primary"] {
+  --background: rgba(102, 126, 234, 0.12);
+  --border-color: rgba(102, 126, 234, 0.4);
+
+  ion-icon { color: #667eea !important; }
+  ion-label { color: #2c3e50; font-weight: 600; }
+}
+
+/* ==== TEXTAREA & SELECT OVERRIDES ==== */
+ion-textarea {
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  --border: 1px solid transparent;
+  
+  &:focus-within {
+    --border: 1px solid #667eea;
+    background: #ffffff;
+  }
+}
+
+ion-select {
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+}
+
+/* ==== FORMULARIO: ACCIONES ==== */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 24px 0 16px;
+  border-top: 1px solid #e9ecef;
+  margin-top: 20px;
+
+  ion-button {
+    min-width: 180px;
+    --border-radius: 10px;
+    font-weight: 500;
+    text-transform: none;
+    --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover:not([disabled]) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  }
+}
+
+/* ==== SCROLLBAR PERSONALIZADO ==== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 77, 104, 0.3);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(10, 77, 104, 0.5);
+  }
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 992px) {
+  .patient-summary-card ion-item {
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    max-height: 60px;
+
+    &.open {
+      max-height: 100vh;
+      height: auto;
+    }
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px;
+
+      li {
+        padding: 10px;
+
+        span {
+          opacity: 1 !important;
+          font-size: 0.8rem;
+        }
+      }
+    }
+
+    .submenu {
+      position: static;
+      max-height: none !important;
+      background: transparent;
+
+      li {
+        padding: 8px !important;
+        justify-content: center;
+      }
+    }
+  }
+
+  .main-content {
+    padding: 15px !important;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    ion-button {
+      width: 100%;
+      max-width: 300px;
+      margin: 4px auto;
+    }
+  }
+
+  .ml-section-card .ml-error,
+  .ml-section-card .ml-result {
+    width: 100%;
+  }
+
+  .ml-section-card .ml-confidence,
+  .ml-section-card .ml-desc {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .patient-summary-card ion-card-content ion-grid {
+    --ion-grid-padding: 0;
+  }
+
+  .form-actions {
+    padding: 16px 0 8px;
+  }
+
+  .ml-section-card ion-card-header ion-card-title {
+    font-size: 1.1rem;
+  }
+}

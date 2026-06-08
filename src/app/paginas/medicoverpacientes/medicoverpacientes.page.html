@@ -1,0 +1,190 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Pacientes Registrados</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')"><ion-icon name="home-outline"></ion-icon><span>Inicio</span></li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')"><ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span></li>
+       <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon>
+          <span>Seguimiento clinico</span>
+        </li>
+        <li><ion-icon name="stats-chart-outline"></ion-icon><span>Reportes</span></li>
+        <li><ion-icon name="settings-outline"></ion-icon><span>Configuración</span></li>
+      </ul>
+    </div>
+
+    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <div class="main-content">
+      
+      <div class="page-title-section">
+        <h2>Lista de Pacientes</h2>
+        <p>Total registrados en el sistema: {{ pacientes.length }}</p>
+      </div>
+
+      <ion-card class="patients-table-card">
+        <ion-card-content>
+          
+          <!-- Tabla de pacientes -->
+          <div class="table-responsive" *ngIf="pacientes.length > 0; else noData">
+            <table class="patients-table">
+              <thead>
+                <tr>
+                  <th>Nombre Completo</th>
+                  <th>Cédula</th>
+                  <th>Teléfono</th>
+                  <th>Sexo</th>
+                  <th>Edad</th>
+                  <th>Actividad Física</th>
+                  <th class="actions-header">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let paciente of pacientes">
+                  <!-- Nombre con avatar -->
+                  <td>
+                    <div class="patient-name-cell">
+                      <ion-avatar class="patient-avatar">
+                        <img src="assets/avatar-patient.png" alt="Paciente">
+                      </ion-avatar>
+                      <span class="patient-name-text">{{ paciente.nombre_completo }}</span>
+                    </div>
+                  </td>
+                  
+                  <!-- Datos del paciente -->
+                  <td class="text-center">{{ paciente.cedula || '---' }}</td>
+                  <td class="text-center">{{ paciente.telefono || '---' }}</td>
+                  <td class="text-center">
+                    <ion-badge [color]="paciente.sexo === 'M' ? 'primary' : 'tertiary'">
+                      {{ paciente.sexo === 'M' ? 'M' : paciente.sexo === 'F' ? 'F' : 'O' }}
+                    </ion-badge>
+                  </td>
+                  <td class="text-center">{{ paciente.edad || 'N/A' }} años</td>
+                  <td class="text-center">
+                    <ion-chip outline color="medium" class="activity-chip">
+                      {{ paciente.actividad_fisica || 'No registrada' }}
+                    </ion-chip>
+                  </td>
+                  
+                  <!-- 🔘 BOTONES DE ACCIÓN (4 botones) -->
+                  <td class="actions-cell">
+  <div class="action-buttons">
+    
+    <!-- 👁️ Ver historial clínico -->
+    <ion-button 
+      fill="clear" 
+      color="primary" 
+      size="small" 
+      (click)="verDetallePaciente(paciente)"
+      title="Ver historial clínico"
+      class="action-btn">
+      <ion-icon name="eye-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <!-- 📋 Ver plan alimenticio -->
+    <ion-button 
+      fill="clear" 
+      color="tertiary" 
+      size="small" 
+      (click)="verPlanAlimenticio(paciente)"
+      title="Ver plan alimenticio"
+      class="action-btn">
+      <ion-icon name="document-text-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <!-- 🩺 NUEVO: Seguimiento clínico -->
+    <ion-button 
+      fill="clear" 
+      color="secondary" 
+      size="small" 
+      (click)="verSeguimientoClinico(paciente)"
+      title="Seguimiento clínico"
+      class="action-btn">
+      <ion-icon name="pulse-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <!-- 💬 Contactar por WhatsApp -->
+    <ion-button 
+      fill="clear" 
+      color="success" 
+      size="small" 
+      (click)="contactarWhatsApp(paciente)"
+      title="Contactar por WhatsApp"
+      class="action-btn">
+      <ion-icon name="logo-whatsapp" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <!-- 🗑️ Eliminar paciente -->
+    <ion-button 
+      fill="clear" 
+      color="danger" 
+      size="small" 
+      (click)="eliminarPaciente(paciente)"
+      title="Eliminar paciente"
+      class="action-btn">
+      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+  </div>
+</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Estado vacío: sin pacientes -->
+          <ng-template #noData>
+            <div class="empty-state">
+              <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+              <h3>No hay pacientes registrados</h3>
+              <p>Los pacientes aparecerán aquí cuando enfermería los registre en el sistema.</p>
+              <ion-button fill="outline" color="primary" (click)="navegarA('agregar-paciente')" class="mt-3">
+                <ion-icon name="person-add-outline" slot="start"></ion-icon>
+                Registrar primer paciente
+              </ion-button>
+            </div>
+          </ng-template>
+
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
