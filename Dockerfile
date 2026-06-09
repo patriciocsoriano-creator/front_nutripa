@@ -1,5 +1,5 @@
 # ============================================
-# 🎨 FRONTEND - Ionic/Angular
+# FRONTEND - Ionic/Angular
 # ============================================
 
 # Etapa 1: Build
@@ -23,9 +23,6 @@ RUN npm run build -- --configuration=production
 
 # Etapa 2: Servir con Nginx
 FROM nginx:alpine
-
-# Copiar configuración personalizada de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiar build desde la etapa anterior
 COPY --from=builder /app/www /usr/share/nginx/html
