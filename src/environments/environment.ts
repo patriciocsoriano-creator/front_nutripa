@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   
   // 🌐 URL del Backend Node.js (API principal)
-  apiUrl: 'http://localhost:3000',
+  apiUrl: 'http://api.72.61.11.127.nip.io/nutricionapp-api',
 
   // 🍎 Configuración de FatSecret API
   // ⚠️ En desarrollo se pueden usar, pero en producción el backend debe hacer el proxy
