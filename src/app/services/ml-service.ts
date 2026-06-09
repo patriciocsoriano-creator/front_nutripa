@@ -22,12 +22,13 @@ export interface PrediccionResponse {
 })
 export class MlService {
 
-  // ✅ URL directa a tu API FastAPI
-  private readonly AI_API_URL = environment.aiApiUrl || 'http://127.0.0.1:8001';
+  // ✅ URL del proxy del backend Node.js (NO directamente a FastAPI)
+  // El backend reenvía las peticiones al servicio ML Python
+  private readonly ML_API_URL = `${environment.apiUrl}/nutricionapp-api/api/ml`;
 
   constructor(
     private http: HttpClient,
-    private dataUtil: PatientDataUtilService  // ✅ Inyectar servicio de utilidades
+    private dataUtil: PatientDataUtilService
   ) {}
 
   /**
@@ -35,42 +36,39 @@ export class MlService {
    * @param datosClinicos Datos completos del paciente
    * @returns Observable con la respuesta de la API
    */
-
-
-
-
-
   inferirPerfilDesdeDatosClinicos(datosClinicos: PatientClinicalData): Observable<PrediccionResponse> {
-  console.log('📥 [MlService] Datos clínicos recibidos:', datosClinicos);
-  
-  const validacion = this.dataUtil.validarDatosParaInferencia(datosClinicos);
-  
-  if (!validacion.valido) {
-    console.error('❌ [MlService] Validación fallida:', validacion.errores);
-    return throwError(() => new Error(
-      `Datos inválidos para inferencia: ${validacion.errores.join(', ')}`
-    ));
+    console.log('📥 [MlService] Datos clínicos recibidos:', datosClinicos);
+    
+    const validacion = this.dataUtil.validarDatosParaInferencia(datosClinicos);
+    
+    if (!validacion.valido) {
+      console.error('❌ [MlService] Validación fallida:', validacion.errores);
+      return throwError(() => new Error(
+        `Datos inválidos para inferencia: ${validacion.errores.join(', ')}`
+      ));
+    }
+
+    const payload = this.dataUtil.prepararPayloadInferencia(datosClinicos);
+    console.log('📤 [MlService] Payload final enviado al proxy:', payload);
+
+    return this.predecirPerfil(payload);
   }
 
-  const payload = this.dataUtil.prepararPayloadInferencia(datosClinicos);
-  console.log('📤 [MlService] Payload final enviado a FastAPI:', payload);
-
-  return this.predecirPerfil(payload);
-}
-
   /**
-   * 🚀 Llamar al endpoint de inferencia de FastAPI (método interno)
+   * 🚀 Llamar al endpoint de inferencia a través del proxy del backend
    * @param payload Payload ya preparado
    * @returns Observable con la respuesta
    */
   private predecirPerfil(payload: PayloadInferenciaIA): Observable<PrediccionResponse> {
+    // ✅ El proxy del backend REQUIERE token de autenticación
+    const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-      // ✅ FastAPI no requiere token para inferencia
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     });
 
     return this.http.post<PrediccionResponse>(
-      `${this.AI_API_URL}/prediccion-perfil`,
+      `${this.ML_API_URL}/prediccion-perfil`,
       payload,
       { headers }
     ).pipe(
@@ -80,18 +78,32 @@ export class MlService {
       }),
       catchError(error => {
         console.error('❌ Error en inferencia:', error);
-        return throwError(() => new Error(
-          'No se pudo obtener el perfil dietético. Verifica que el servicio de IA esté activo.'
-        ));
+        
+        let mensajeError = 'No se pudo obtener el perfil dietético.';
+        
+        if (error.status === 503) {
+          mensajeError = 'El servicio de IA no está disponible. Verifica que el servicio Python esté corriendo en el puerto 8001.';
+        } else if (error.status === 401) {
+          mensajeError = 'No autorizado. Por favor inicia sesión nuevamente.';
+        } else if (error.status === 0) {
+          mensajeError = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+        }
+        
+        return throwError(() => new Error(mensajeError));
       })
     );
   }
 
   /**
-   * 🔍 Verificar estado del servicio de IA
+   * 🔍 Verificar estado del servicio de IA a través del proxy
    */
   verificarSaludML(): Observable<any> {
-    return this.http.get(`${this.AI_API_URL}/health`).pipe(
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get(`${this.ML_API_URL}/health`, { headers }).pipe(
       catchError(error => {
         console.warn('⚠️ Servicio de IA no disponible:', error);
         return throwError(() => new Error(
@@ -110,7 +122,6 @@ export class MlService {
     localStorage.setItem('vital_signs_data', JSON.stringify(data));
   }
 
-  // 👇 AGREGAR ESTE MÉTODO GETTER (línea nueva)
   getVitalSignsData(): any | null {
     const data = localStorage.getItem('vital_signs_data');
     return data ? JSON.parse(data) : null;

@@ -3,15 +3,16 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,  // 
-  apiUrl: 'http://localhost:3000',           // Tu backend Node.js
-  aiApiUrl: 'http://127.0.0.1:8001', 
+  production: false,
+  
+  // 🌐 URL del Backend Node.js (API principal)
+  apiUrl: 'http://localhost:3000',
 
-
-
+  // 🍎 Configuración de FatSecret API
+  // ⚠️ En desarrollo se pueden usar, pero en producción el backend debe hacer el proxy
   fatsecret: {
-    consumer_key: 'd4151a9da81d4a61bda12909e8c8c944',        // ← Pega tu Consumer Key aquí
-    consumer_secret: '5053b6fe9f3743189507c1dc36258daa',     // ← Pega tu Consumer Secret aquí (en producción usa backend proxy)
+    consumer_key: 'd4151a9da81d4a61bda12909e8c8c944',
+    consumer_secret: '5053b6fe9f3743189507c1dc36258daa',
     api_base: 'https://platform.fatsecret.com/rest/server.api'
   }
 };
