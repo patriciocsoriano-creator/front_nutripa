@@ -4,7 +4,8 @@ export const environment = {
   // 🌐 URL del Backend Node.js en producción
   // ⚠️ CAMBIA ESTA URL POR TU DOMINIO REAL DE PRODUCCIÓN
   //apiUrl: 'https://tu-dominio.com',  // Ejemplo: 'https://api.nutripa.com'
-  apiUrl: 'http://localhost:3000',
+  //apiUrl: 'http://localhost:3000',
+  apiUrl: 'http://api.72.61.11.127.nip.io/nutricionapp-api',
   
   // 🍎 Configuración de FatSecret API
   // ⚠️ En producción, estas credenciales deberían venir del backend
