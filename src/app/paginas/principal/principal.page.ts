@@ -175,9 +175,9 @@ export class PrincipalPage implements OnInit {
         password: this.loginForm.value.password
       };
 
-      const apiUrl = `${environment.apiUrl}/login`;
+      const apiUrl = `${environment.apiUrl}/nutricionapp-api/login`;
       console.log('📤 [LOGIN] POST →', apiUrl);
-
+      console.log('API URL:', apiUrl);
       const response: any = await this.http.post(apiUrl, payload).toPromise();
       console.log('📥 [LOGIN] Respuesta:', response);
 
