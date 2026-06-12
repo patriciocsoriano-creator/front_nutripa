@@ -270,4 +270,22 @@ export class EnfermeriaverpacientesinfoPage implements OnInit, OnDestroy {
     });
     await toast.present();
   }
+
+   // 📅 Formatear fecha manualmente para evitar el bug de zona horaria (UTC-5)
+  formatearFecha(fecha: string): string {
+    if (!fecha) return 'No registrada';
+    
+    // Si viene en formato "YYYY-MM-DD", la dividimos manualmente
+    if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
+      const partes = fecha.substring(0, 10).split('-');
+      return `${partes[2]}/${partes[1]}/${partes[0]}`; // Retorna dd/MM/yyyy
+    }
+    
+    // Fallback por si viene en otro formato
+    const date = new Date(fecha);
+    const dia = String(date.getDate()).padStart(2, '0');
+    const mes = String(date.getMonth() + 1).padStart(2, '0');
+    const anio = date.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  }
 }

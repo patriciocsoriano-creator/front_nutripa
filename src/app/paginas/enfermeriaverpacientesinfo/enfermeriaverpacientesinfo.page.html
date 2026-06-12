@@ -131,7 +131,8 @@
               <div *ngIf="datosPersonales; else sinDatosPersonales">
                 <div class="info-row">
                   <label>Fecha de Nacimiento:</label>
-                  <span>{{paciente.fecha_nacimiento | date:'dd/MM/yyyy'}}</span>
+                  <!-- ✅ DESPUÉS (Formateo manual seguro) -->
+<span>{{formatearFecha(paciente.fecha_nacimiento)}}</span>
                 </div>
                 <div class="info-row">
                   <label>Sexo:</label>
