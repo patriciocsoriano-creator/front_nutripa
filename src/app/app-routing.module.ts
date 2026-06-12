@@ -139,6 +139,10 @@ const routes: Routes = [
     path: 'enfermeriaverpacientesinfo',
     loadChildren: () => import('./paginas/enfermeriaverpacientesinfo/enfermeriaverpacientesinfo.module').then( m => m.EnfermeriaverpacientesinfoPageModule)
   },
+  {
+    path: 'registrofinalizado',
+    loadChildren: () => import('./paginas/registrofinalizado/registrofinalizado.module').then( m => m.RegistrofinalizadoPageModule)
+  },
   
 ];
 

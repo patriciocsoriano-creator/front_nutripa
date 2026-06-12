@@ -1,0 +1,303 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clínico Finalizado</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="volverALista()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        <li (click)="volverALista()">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>Ver Pacientes</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- LOADING -->
+      <div *ngIf="cargandoDatos" class="loading-container">
+        <div class="loading-content">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <h3>Cargando registro finalizado...</h3>
+        </div>
+      </div>
+
+      <!-- CONTENIDO -->
+      <div *ngIf="!cargandoDatos && paciente" class="info-container">
+        
+        <!-- BANNER DE FINALIZADO -->
+        <div class="banner-finalizado">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <div class="banner-text">
+            <h2>Registro Clínico Completado</h2>
+            <p>Este registro fue finalizado el {{registro?.fecha_finalizacion | date:'dd/MM/yyyy HH:mm'}}</p>
+          </div>
+        </div>
+
+        <!-- ENCABEZADO DEL PACIENTE -->
+        <div class="paciente-header-card">
+          <div class="avatar-grande" [style.background]="getAvatarColor(paciente.nombres + ' ' + paciente.apellidos)">
+            <span>{{getIniciales(paciente.nombres + ' ' + paciente.apellidos)}}</span>
+          </div>
+          
+          <div class="paciente-info-principal">
+            <h1>{{paciente.nombres}} {{paciente.apellidos}}</h1>
+            <div class="info-badges">
+              <span class="badge-cedula">
+                <ion-icon name="card-outline"></ion-icon>
+                {{paciente.numero_identificacion}}
+              </span>
+              <span class="badge-edad" *ngIf="getEdad()">
+                <ion-icon name="person-outline"></ion-icon>
+                {{getEdad()}} años
+              </span>
+              <span class="badge-fecha">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{registro?.fecha_finalizacion | date:'dd/MM/yyyy'}}
+              </span>
+            </div>
+          </div>
+
+          <div class="acciones-rapidas">
+            <ion-button 
+              size="small" 
+              color="primary" 
+              fill="solid"
+              (click)="volverALista()">
+              <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+              Volver
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- GRID DE INFORMACIÓN -->
+        <div class="info-grid">
+          
+          <!-- DATOS PERSONALES -->
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="person-outline"></ion-icon>
+              <h2>Datos Personales</h2>
+            </div>
+            <div class="card-content">
+              <div class="info-row">
+                <label>Fecha de Nacimiento:</label>
+                <span>{{paciente.fecha_nacimiento | date:'dd/MM/yyyy'}}</span>
+              </div>
+              <div class="info-row">
+                <label>Sexo:</label>
+                <span>{{paciente.sexo === 'M' ? 'Masculino' : paciente.sexo === 'F' ? 'Femenino' : paciente.sexo}}</span>
+              </div>
+              <div class="info-row">
+                <label>Teléfono:</label>
+                <span>{{paciente.telefono || 'No registrado'}}</span>
+              </div>
+              <div class="info-row">
+                <label>Dirección:</label>
+                <span>{{paciente.direccion || 'No registrada'}}</span>
+              </div>
+              <div class="info-row">
+                <label>Ocupación:</label>
+                <span>{{paciente.ocupacion || 'No registrada'}}</span>
+              </div>
+              <div class="info-row">
+                <label>Actividad Física:</label>
+                <span>{{paciente.actividad_fisica || 'No registrada'}}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIGNOS VITALES -->
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="pulse-outline"></ion-icon>
+              <h2>Signos Vitales</h2>
+            </div>
+            <div class="card-content">
+              <div *ngIf="signosVitales">
+                <div class="signos-grid">
+                  <div class="signo-item">
+                    <ion-icon name="heart-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Frec. Cardíaca</label>
+                      <span>{{signosVitales.frecuenciaCardiaca || 'N/A'}} bpm</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="water-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Presión Arterial</label>
+                      <span>{{signosVitales.presionArterial || 'N/A'}} mmHg</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="wind-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Frec. Respiratoria</label>
+                      <span>{{signosVitales.frecuenciaRespiratoria || 'N/A'}} rpm</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="thermometer-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Temperatura</label>
+                      <span>{{signosVitales.temperatura || 'N/A'}} °C</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="analytics-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>SpO2</label>
+                      <span>{{signosVitales.spo2 || 'N/A'}}%</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="flask-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Glucosa Ayunas</label>
+                      <span>{{signosVitales.glucosaAyunas || 'N/A'}} mg/dL</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="flask-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>Glucosa Postprandial</label>
+                      <span>{{signosVitales.glucosaPostprandial || 'N/A'}} mg/dL</span>
+                    </div>
+                  </div>
+                  <div class="signo-item">
+                    <ion-icon name="bar-chart-outline"></ion-icon>
+                    <div class="signo-info">
+                      <label>HbA1c</label>
+                      <span>{{signosVitales.hemoglobinaGlicosilada || 'N/A'}}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!signosVitales" class="sin-datos">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <p>Signos vitales no registrados</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- DATOS ANTROPOMÉTRICOS -->
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="body-outline"></ion-icon>
+              <h2>Datos Antropométricos</h2>
+            </div>
+            <div class="card-content">
+              <div *ngIf="datosAntropometricos">
+                <div class="antropometricos-grid">
+                  <div class="antropo-item">
+                    <label>Peso:</label>
+                    <span>{{datosAntropometricos.peso || 'N/A'}} kg</span>
+                  </div>
+                  <div class="antropo-item">
+                    <label>Talla:</label>
+                    <span>{{datosAntropometricos.talla || 'N/A'}} m</span>
+                  </div>
+                  <div class="antropo-item imc-destacado">
+                    <label>IMC:</label>
+                    <span>{{datosAntropometricos.imc || 'N/A'}}</span>
+                    <small *ngIf="datosAntropometricos.imc">
+                      {{getIMCClasificacion(datosAntropometricos.imc)}}
+                    </small>
+                  </div>
+                  <div class="antropo-item">
+                    <label>Circ. Cintura:</label>
+                    <span>{{datosAntropometricos.circunferenciaCintura || 'N/A'}} cm</span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!datosAntropometricos" class="sin-datos">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <p>Datos antropométricos no registrados</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONDICIONES METABÓLICAS -->
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="medkit-outline"></ion-icon>
+              <h2>Condiciones Metabólicas</h2>
+            </div>
+            <div class="card-content">
+              <div *ngIf="condicionesMetabolicas">
+                <div class="condiciones-list">
+                  <div class="condicion-item" [class.activa]="condicionesMetabolicas.hipertension">
+                    <ion-icon [name]="condicionesMetabolicas.hipertension ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                    <span>Hipertensión</span>
+                  </div>
+                  <div class="condicion-item" [class.activa]="condicionesMetabolicas.obesidad">
+                    <ion-icon [name]="condicionesMetabolicas.obesidad ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                    <span>Obesidad</span>
+                  </div>
+                  <div class="condicion-item" [class.activa]="condicionesMetabolicas.dislipidemia">
+                    <ion-icon [name]="condicionesMetabolicas.dislipidemia ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                    <span>Dislipidemia</span>
+                  </div>
+                  <div class="condicion-item" [class.activa]="condicionesMetabolicas.higadoGraso">
+                    <ion-icon [name]="condicionesMetabolicas.higadoGraso ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                    <span>Hígado Graso</span>
+                  </div>
+                  <div class="condicion-item" [class.activa]="condicionesMetabolicas.resistenciaInsulina">
+                    <ion-icon [name]="condicionesMetabolicas.resistenciaInsulina ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                    <span>Resistencia a la Insulina</span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!condicionesMetabolicas" class="sin-datos">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <p>Condiciones metabólicas no registradas</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>
