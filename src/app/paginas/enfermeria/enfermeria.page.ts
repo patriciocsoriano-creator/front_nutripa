@@ -405,7 +405,7 @@ private async cargarEstadisticas(): Promise<void> {
               if (response?.registro_id) {
                 localStorage.setItem('registro_clinico_id', response.registro_id);
                 // ✅ CORREGIDO: Navegar a registroinfopaciente
-                this.router.navigate(['/enfermeria/registroinfopaciente'], {
+                this.router.navigate(['/registroinfopaciente'], {
                   queryParams: { registro_id: response.registro_id }
                 });
               }
@@ -532,7 +532,7 @@ private async cargarEstadisticas(): Promise<void> {
         console.log('🚀 [DEBUG] Navegando a registroinfopaciente con ID:', response.registro_id);
         
         // ✅ CORREGIDO: Navegar a la página correcta
-        await this.router.navigate(['/enfermeria/registroinfopaciente'], {
+        await this.router.navigate(['/registroinfopaciente'], {
           queryParams: { registro_id: response.registro_id }
         });
         
@@ -556,7 +556,7 @@ private async cargarEstadisticas(): Promise<void> {
               handler: () => {
                 localStorage.setItem('registro_clinico_id', backendError.registro_id);
                 // ✅ CORREGIDO: Navegar a la página correcta
-                this.router.navigate(['/enfermeria/registroinfopaciente'], {
+                this.router.navigate(['/registroinfopaciente'], {
                   queryParams: { registro_id: backendError.registro_id }
                 });
               }
