@@ -43,6 +43,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
   private readonly rutas: Record<string, string> = {
     'enfermeria': '/enfermeria',
     'medicoverpacientes': '/enfermeria/pacientes',
+    'enfermeriaverpacientes': '/enfermeriaverpacientes', 
     'agregar-paciente': '/enfermeria/registro',
     'buscar-paciente': '/enfermeria/buscar',
     'reportes': '/enfermeria/reportes',
