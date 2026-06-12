@@ -16,7 +16,7 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR (Mismo menú de enfermería) -->
+    <!-- 🧭 SIDEBAR -->
     <div
       class="sidebar"
       [class.open]="sidebarOpen"
@@ -81,11 +81,40 @@
         
         <!-- Encabezado del Formulario -->
         <div class="form-header-section">
-          <h1>Datos del Paciente</h1>
-          <p>Complete la información personal requerida para iniciar el registro clínico.</p>
+          <!-- 🆕 Título dinámico según el tipo de registro -->
+          <h1 *ngIf="esNuevaCita && esPacienteExistente">🔄 Nueva Cita - Datos del Paciente</h1>
+          <h1 *ngIf="!esNuevaCita && !esPacienteNuevo">📝 Completar Registro Clínico</h1>
+          <h1 *ngIf="esPacienteNuevo">🆕 Nuevo Registro Clínico</h1>
           
-          <!-- 🆕 Indicador de datos pre-llenados -->
-          <div class="prefill-notice" *ngIf="datosPrellenados">
+          <!-- 🆕 Descripción dinámica -->
+          <p *ngIf="esNuevaCita && esPacienteExistente">
+            Los datos del paciente han sido cargados de su última visita. 
+            Verifique la información y actualice los campos que hayan cambiado.
+          </p>
+          <p *ngIf="!esNuevaCita && !esPacienteNuevo">
+            Complete la información personal requerida para continuar con el registro clínico.
+          </p>
+          <p *ngIf="esPacienteNuevo">
+            Complete la información personal requerida para iniciar el registro clínico.
+          </p>
+          
+          <!-- 🆕 Banner NUEVA CITA (diferente al prefill normal) -->
+          <div class="nueva-cita-banner" *ngIf="esNuevaCita && esPacienteExistente">
+            <ion-icon name="refresh-circle"></ion-icon>
+            <div class="banner-content">
+              <h4>Nueva Cita Detectada</h4>
+              <p>
+                Los datos del paciente han sido cargados automáticamente de su última visita.
+                <br>
+                <strong>Los campos bloqueados</strong> (nombre, cédula) son datos básicos del paciente.
+                <br>
+                <strong>Los demás campos</strong> pueden actualizarse si la información ha cambiado.
+              </p>
+            </div>
+          </div>
+          
+          <!-- Banner pre-llenado normal (para continuación de registro) -->
+          <div class="prefill-notice" *ngIf="datosPrellenados && !esNuevaCita">
             <ion-icon name="information-circle-outline"></ion-icon>
             <span>Los datos del paciente han sido cargados automáticamente desde el sistema.</span>
           </div>
@@ -142,23 +171,23 @@
                   </div>
 
                   <div class="form-group date-with-age">
-  <label>Fecha de Nacimiento</label>
-  <div class="date-age-container">
-    <ion-input 
-      type="date" 
-      [(ngModel)]="pacienteForm.fechaNacimiento" 
-      name="fechaNacimiento"
-      class="custom-input"
-      (ionBlur)="calcularEdad()">
-    </ion-input>
-    
-    <!-- Badge de edad calculada -->
-    <div class="age-badge" *ngIf="edadCalculada !== null && edadCalculada > 0">
-      <ion-icon name="time-outline"></ion-icon>
-      <span>{{edadCalculada}} años</span>
-    </div>
-  </div>
-</div>
+                    <label>Fecha de Nacimiento</label>
+                    <div class="date-age-container">
+                      <ion-input 
+                        type="date" 
+                        [(ngModel)]="pacienteForm.fechaNacimiento" 
+                        name="fechaNacimiento"
+                        class="custom-input"
+                        (ionBlur)="calcularEdad()">
+                      </ion-input>
+                      
+                      <!-- Badge de edad calculada -->
+                      <div class="age-badge" *ngIf="edadCalculada !== null && edadCalculada > 0">
+                        <ion-icon name="time-outline"></ion-icon>
+                        <span>{{edadCalculada}} años</span>
+                      </div>
+                    </div>
+                  </div>
 
                 </ion-card-content>
               </ion-card>
@@ -173,6 +202,12 @@
                   </ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
+                  
+                  <!-- 🆕 Aviso si es nueva cita -->
+                  <div class="campo-editable-aviso" *ngIf="esNuevaCita && esPacienteExistente">
+                    <ion-icon name="create-outline"></ion-icon>
+                    <small>Estos campos pueden actualizarse si la información ha cambiado</small>
+                  </div>
                   
                   <div class="form-row">
                     <div class="form-group half">
@@ -250,7 +285,8 @@
             </ion-button>
             <ion-button type="submit" color="primary" class="btn-submit">
               <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
-              Guardar y Continuar
+              <span *ngIf="esNuevaCita">Confirmar y Continuar</span>
+              <span *ngIf="!esNuevaCita">Guardar y Continuar</span>
             </ion-button>
           </div>
 

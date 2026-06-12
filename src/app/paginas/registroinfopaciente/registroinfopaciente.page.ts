@@ -37,10 +37,15 @@ export class RegistroinfopacientePage implements OnInit {
   // 🎂 Edad calculada automáticamente
   edadCalculada: number | null = null;
   
-  // 🆕 Estados de carga
+  // 🆕 Estados de carga y modo
   cargandoDatos = true;
   datosPrellenados = false;
   campoBloqueado = false;
+  
+  // 🆕 NUEVO: Detectar si es nueva cita de paciente existente
+  esNuevaCita = false;
+  esPacienteExistente = false;
+  esPacienteNuevo = false;
 
   constructor(
     private router: Router,
@@ -80,15 +85,27 @@ export class RegistroinfopacientePage implements OnInit {
     }
   }
 
-  // 🆕 CARGAR DATOS DEL REGISTRO Y PACIENTE (SMART LOADING)
+  // 🆕 CARGAR DATOS DEL REGISTRO Y PACIENTE (SMART LOADING MEJORADO)
   private async cargarDatosRegistro(): Promise<void> {
     this.cargandoDatos = true;
     
     const registroId = this.activatedRoute.snapshot.queryParamMap.get('registro_id') 
                        || localStorage.getItem('registro_clinico_id');
     
+    // 🆕 Leer flags de queryParams
+    const params = this.activatedRoute.snapshot.queryParamMap;
+    this.esNuevaCita = params.get('nueva_cita') === 'true';
+    this.esPacienteExistente = params.get('paciente_existente') === 'true';
+    
+    console.log('🔍 [REGISTRO] Flags detectados:', {
+      registroId,
+      esNuevaCita: this.esNuevaCita,
+      esPacienteExistente: this.esPacienteExistente
+    });
+    
     if (!registroId) {
       console.warn('⚠️ No hay registro_id, mostrando formulario vacío');
+      this.esPacienteNuevo = true;
       this.cargandoDatos = false;
       return;
     }
@@ -114,7 +131,8 @@ export class RegistroinfopacientePage implements OnInit {
       console.log('📥 [REGISTRO] Datos cargados:', response);
 
       // 🧭 SMART REDIRECT: Si datos_personales ya está completo, ir al siguiente paso
-      if (response.pasosCompletos?.datos_personales) {
+      // ⚠️ PERO NO si es nueva cita (en nueva cita siempre se empieza desde datos personales)
+      if (response.pasosCompletos?.datos_personales && !this.esNuevaCita) {
         console.log('🧭 [SMART] datos_personales ya completo, redirigiendo a:', response.siguientePaso);
         await this.showToast('Este paso ya fue completado. Redirigiendo...', 'primary');
         
@@ -126,34 +144,65 @@ export class RegistroinfopacientePage implements OnInit {
         return;
       }
 
-      // 📝 PRE-LLENAR: Si datos_personales NO está completo, pre-llenar con datos del paciente
+      // 📝 PRE-LLENAR: Con datos del paciente
       if (response.paciente) {
         const p = response.paciente;
         
-        // Si hay datos básicos del paciente (cedula, nombres), bloquear esos campos
-        if (p.numero_identificacion || p.nombres) {
+        // 🆕 DETERMINAR MODO
+        if (this.esNuevaCita && this.esPacienteExistente) {
+          // 🆕 MODO NUEVA CITA: Paciente existente, nueva visita
+          this.campoBloqueado = true;  // Solo nombre y cédula bloqueados
+          this.datosPrellenados = true;
+          
+          console.log('🆕 [NUEVA CITA] Pre-llenando datos del paciente existente');
+          
+          // Pre-llenar TODOS los datos del paciente
+          this.pacienteForm.nombres = p.nombres || params.get('nombres') || '';
+          this.pacienteForm.apellidos = p.apellidos || params.get('apellidos') || '';
+          this.pacienteForm.numeroIdentificacion = p.numero_identificacion || params.get('numeroIdentificacion') || '';
+          this.pacienteForm.fechaNacimiento = p.fecha_nacimiento || '';
+          this.pacienteForm.sexo = p.sexo || '';
+          this.pacienteForm.direccion = p.direccion || '';
+          this.pacienteForm.telefono = p.telefono || '';
+          this.pacienteForm.ocupacion = p.ocupacion || '';
+          this.pacienteForm.actividadFisica = p.actividad_fisica || '';
+          
+          await this.showToast('🔄 Nueva cita: Datos del paciente cargados. Verifique y actualice si es necesario.', 'success', 4000);
+          
+        } else if (p.numero_identificacion || p.nombres) {
+          // MODO CONTINUACIÓN: Registro existente que se está completando
           this.campoBloqueado = true;
           this.datosPrellenados = true;
+          
+          this.pacienteForm.nombres = p.nombres || '';
+          this.pacienteForm.apellidos = p.apellidos || '';
+          this.pacienteForm.numeroIdentificacion = p.numero_identificacion || '';
+          this.pacienteForm.fechaNacimiento = p.fecha_nacimiento || '';
+          this.pacienteForm.sexo = p.sexo || '';
+          this.pacienteForm.direccion = p.direccion || '';
+          this.pacienteForm.telefono = p.telefono || '';
+          this.pacienteForm.ocupacion = p.ocupacion || '';
+          this.pacienteForm.actividadFisica = p.actividad_fisica || '';
+          
+          console.log('✅ [PRE-FILL] Formulario pre-llenado con datos del paciente');
+        } else {
+          // MODO PACIENTE NUEVO
+          this.esPacienteNuevo = true;
+          
+          // Solo pre-llenar con datos básicos del alert
+          this.pacienteForm.nombres = params.get('nombres') || '';
+          this.pacienteForm.apellidos = params.get('apellidos') || '';
+          this.pacienteForm.numeroIdentificacion = params.get('numeroIdentificacion') || '';
+          
+          console.log('🆕 [PACIENTE NUEVO] Formulario vacío para nuevo paciente');
         }
-        
-        this.pacienteForm.nombres = p.nombres || '';
-        this.pacienteForm.apellidos = p.apellidos || '';
-        this.pacienteForm.numeroIdentificacion = p.numero_identificacion || '';
-        this.pacienteForm.fechaNacimiento = p.fecha_nacimiento || '';
-        this.pacienteForm.sexo = p.sexo || '';
-        this.pacienteForm.direccion = p.direccion || '';
-        this.pacienteForm.telefono = p.telefono || '';
-        this.pacienteForm.ocupacion = p.ocupacion || '';
-        this.pacienteForm.actividadFisica = p.actividad_fisica || '';
-        
-        console.log('✅ [PRE-FILL] Formulario pre-llenado con datos del paciente');
+      } else {
+        // No hay datos del paciente, usar queryParams
+        this.esPacienteNuevo = true;
+        this.pacienteForm.nombres = params.get('nombres') || '';
+        this.pacienteForm.apellidos = params.get('apellidos') || '';
+        this.pacienteForm.numeroIdentificacion = params.get('numeroIdentificacion') || '';
       }
-
-      // Si también hay datos en queryParams (del alert), estos tienen prioridad
-      const params = this.activatedRoute.snapshot.queryParamMap;
-      if (params.get('nombres')) this.pacienteForm.nombres = params.get('nombres')!;
-      if (params.get('apellidos')) this.pacienteForm.apellidos = params.get('apellidos')!;
-      if (params.get('numeroIdentificacion')) this.pacienteForm.numeroIdentificacion = params.get('numeroIdentificacion')!;
 
       // Calcular edad si hay fecha
       if (this.pacienteForm.fechaNacimiento) {
@@ -182,63 +231,59 @@ export class RegistroinfopacientePage implements OnInit {
       if (nombres) this.pacienteForm.nombres = nombres;
       if (apellidos) this.pacienteForm.apellidos = apellidos;
       if (cedula) this.pacienteForm.numeroIdentificacion = cedula;
+      this.esPacienteNuevo = true;
     }
   }
 
-  // 🎂 Calcular edad desde fecha de nacimiento
   // 🎂 Calcular edad desde fecha de nacimiento - CORREGIDO
-calcularEdad(): void {
-  const fecha = this.pacienteForm.fechaNacimiento;
-  
-  if (!fecha) {
-    this.edadCalculada = null;
-    return;
+  calcularEdad(): void {
+    const fecha = this.pacienteForm.fechaNacimiento;
+    
+    if (!fecha) {
+      this.edadCalculada = null;
+      return;
+    }
+    
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(fecha)) {
+      console.log('⚠️ [EDAD] Formato de fecha inválido:', fecha);
+      this.edadCalculada = null;
+      return;
+    }
+    
+    const nacimiento = new Date(fecha);
+    
+    if (isNaN(nacimiento.getTime())) {
+      console.log('⚠️ [EDAD] Fecha inválida:', fecha);
+      this.edadCalculada = null;
+      return;
+    }
+    
+    const hoy = new Date();
+    
+    if (nacimiento > hoy) {
+      console.log('⚠️ [EDAD] Fecha futura:', fecha);
+      this.edadCalculada = null;
+      return;
+    }
+    
+    const anioNacimiento = nacimiento.getFullYear();
+    if (anioNacimiento < 1900 || anioNacimiento > hoy.getFullYear()) {
+      console.log('⚠️ [EDAD] Año fuera de rango:', anioNacimiento);
+      this.edadCalculada = null;
+      return;
+    }
+    
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    
+    this.edadCalculada = edad >= 0 && edad <= 120 ? edad : null;
+    console.log('🎂 [EDAD] Calculada correctamente:', this.edadCalculada, 'años (fecha:', fecha, ')');
   }
-  
-  // 🆕 VALIDAR FORMATO DE FECHA (YYYY-MM-DD)
-  const regex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!regex.test(fecha)) {
-    console.log('⚠️ [EDAD] Formato de fecha inválido:', fecha);
-    this.edadCalculada = null;
-    return;
-  }
-  
-  const nacimiento = new Date(fecha);
-  
-  // 🆕 VALIDAR QUE LA FECHA SEA VÁLIDA
-  if (isNaN(nacimiento.getTime())) {
-    console.log('⚠️ [EDAD] Fecha inválida:', fecha);
-    this.edadCalculada = null;
-    return;
-  }
-  
-  const hoy = new Date();
-  
-  // Validar que la fecha no sea futura
-  if (nacimiento > hoy) {
-    console.log('⚠️ [EDAD] Fecha futura:', fecha);
-    this.edadCalculada = null;
-    return;
-  }
-  
-  // Validar que el año sea razonable (entre 1900 y año actual)
-  const anioNacimiento = nacimiento.getFullYear();
-  if (anioNacimiento < 1900 || anioNacimiento > hoy.getFullYear()) {
-    console.log('⚠️ [EDAD] Año fuera de rango:', anioNacimiento);
-    this.edadCalculada = null;
-    return;
-  }
-  
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const mes = hoy.getMonth() - nacimiento.getMonth();
-  
-  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-    edad--;
-  }
-  
-  this.edadCalculada = edad >= 0 && edad <= 120 ? edad : null;
-  console.log('🎂 [EDAD] Calculada correctamente:', this.edadCalculada, 'años (fecha:', fecha, ')');
-}
 
   // 🧭 Métodos del Sidebar
   toggleSidebar(): void {

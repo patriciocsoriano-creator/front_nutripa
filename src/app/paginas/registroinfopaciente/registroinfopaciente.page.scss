@@ -847,3 +847,76 @@ label::after {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================
+   🆕 BANNER NUEVA CITA
+   ========================================= */
+.nueva-cita-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-left: 4px solid #f59e0b;
+  border-radius: $radius-sm;
+  color: #78350f;
+  font-size: 0.9rem;
+  animation: slideIn 0.4s ease;
+  
+  > ion-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    color: #d97706;
+    margin-top: 2px;
+  }
+  
+  .banner-content {
+    flex: 1;
+    
+    h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+    
+    p {
+      margin: 0;
+      line-height: 1.5;
+      color: #78350f;
+      font-size: 0.88rem;
+      
+      strong {
+        color: #92400e;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+/* =========================================
+   🆕 AVISO DE CAMPOS EDITABLES
+   ========================================= */
+.campo-editable-aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+  
+  ion-icon {
+    color: #3b82f6;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  
+  small {
+    color: #1e40af;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+}

@@ -26,10 +26,10 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
   
   // 📊 ESTADÍSTICAS
   totalPacientes: number = 0;
-  registrosMes: number = 0;      // ← Cambiado de planesCreados
+  registrosMes: number = 0;
   alertasActivas: number = 0;
   citasHoy: number = 0;
-  detalleAlertas: any[] = [];    // ← NUEVO: detalle de alertas
+  detalleAlertas: any[] = [];
   
   // 👥 PACIENTES
   pacientesRecientes: any[] = [];
@@ -78,7 +78,6 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     if (!sesionValida) return;
   }
 
-  // ✅ NUEVO: Se ejecuta cada vez que se entra a la página
   ionViewWillEnter() {
     console.log('🔄 [ENFERMERIA] Recargando panel...');
     this.cargarTodoElPanel();
@@ -136,46 +135,44 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
       this.cargando = false;
     }
   }
-  
 
-// 📈 Estadísticas - CORREGIDO
-private async cargarEstadisticas(): Promise<void> {
-  const token = localStorage.getItem('token');
-  if (!token || !this.usuario?.id) {
-    setTimeout(() => this.cargarEstadisticas(), 500);
-    return;
-  }
-
-  try {
-    const response: any = await this.http.get(
-      `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
-      { headers: this.getAuthHeaders() }
-    ).toPromise();
-
-    console.log('📊 [FRONTEND] Respuesta completa:', response);
-
-    if (response?.error === false) {
-      const datos = response.datos || response;
-      
-      this.totalPacientes = datos.total_pacientes || 0;
-      this.citasHoy = datos.registros_hoy || datos.citas_hoy || 0;
-      this.registrosMes = datos.registros_mes || datos.registros_totales || 0;  // ✅ CORREGIDO
-      this.alertasActivas = datos.alertas_activas || 0;
-      
-      console.log('✅ [FRONTEND] Datos asignados:', {
-        totalPacientes: this.totalPacientes,
-        citasHoy: this.citasHoy,
-        registrosMes: this.registrosMes,  // ✅ CORREGIDO
-        alertasActivas: this.alertasActivas
-      });
+  // 📈 Estadísticas
+  private async cargarEstadisticas(): Promise<void> {
+    const token = localStorage.getItem('token');
+    if (!token || !this.usuario?.id) {
+      setTimeout(() => this.cargarEstadisticas(), 500);
+      return;
     }
-  } catch (error) {
-    console.error('❌ Error cargando estadísticas:', error);
+
+    try {
+      const response: any = await this.http.get(
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
+        { headers: this.getAuthHeaders() }
+      ).toPromise();
+
+      console.log('📊 [FRONTEND] Respuesta completa:', response);
+
+      if (response?.error === false) {
+        const datos = response.datos || response;
+        
+        this.totalPacientes = datos.total_pacientes || 0;
+        this.citasHoy = datos.registros_hoy || datos.citas_hoy || 0;
+        this.registrosMes = datos.registros_mes || datos.registros_totales || 0;
+        this.alertasActivas = datos.alertas_activas || 0;
+        
+        console.log('✅ [FRONTEND] Datos asignados:', {
+          totalPacientes: this.totalPacientes,
+          citasHoy: this.citasHoy,
+          registrosMes: this.registrosMes,
+          alertasActivas: this.alertasActivas
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error cargando estadísticas:', error);
+    }
   }
-}
   
   // 👥 Pacientes recientes
-    // 👥 Pacientes recientes - ACTUALIZADO
   private async cargarPacientesRecientes(): Promise<void> {
     this.cargandoPacientes = true;
     
@@ -214,7 +211,6 @@ private async cargarEstadisticas(): Promise<void> {
       return;
     }
 
-    // Mostrar loading mientras se consulta el estado
     const loading = await this.loadingCtrl.create({
       message: 'Cargando registro...',
       spinner: 'crescent'
@@ -222,7 +218,6 @@ private async cargarEstadisticas(): Promise<void> {
     await loading.present();
 
     try {
-      // Consultar el estado completo del registro
       const response: any = await this.http.get(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/${paciente.registro_id}/estado`,
         { headers: this.getAuthHeaders() }
@@ -234,18 +229,13 @@ private async cargarEstadisticas(): Promise<void> {
         throw new Error(response.mensaje);
       }
 
-      // Guardar en localStorage
       localStorage.setItem('registro_clinico_id', paciente.registro_id);
 
-      // 🧭 NAVEGACIÓN INTELIGENTE según el siguiente paso
       const siguientePaso = response.siguientePaso;
       console.log(`🧭 [SMART NAV] Redirigiendo a: ${siguientePaso}`);
 
-      // Construir queryParams con datos del paciente
       const queryParams: any = { registro_id: paciente.registro_id };
       
-      // Si el siguiente paso es el primer paso (datos personales), 
-      // pre-llenar con datos del paciente
       if (siguientePaso === 'registroinfopaciente' && response.paciente) {
         queryParams.nombres = response.paciente.nombres;
         queryParams.apellidos = response.paciente.apellidos;
@@ -267,17 +257,15 @@ private async cargarEstadisticas(): Promise<void> {
     }
   }
 
-  // 👁️ Ver detalle de paciente (modo lectura si está finalizado)
+  // 👁️ Ver detalle de paciente
   async verDetallePaciente(paciente: any): Promise<void> {
     if (!paciente.registro_id) {
       this.showToast('No se encontró el registro', 'danger');
       return;
     }
 
-    // Guardar el registro_id en localStorage
     localStorage.setItem('registro_clinico_id', paciente.registro_id);
 
-    // Si está finalizado, ir a página de visualización en modo lectura
     if (paciente.estado_real === 'finalizado') {
       this.router.navigate(['/registrofinalizado'], {
         queryParams: { 
@@ -288,7 +276,6 @@ private async cargarEstadisticas(): Promise<void> {
       return;
     }
 
-    // Si no está finalizado, usar navegación inteligente
     await this.continuarRegistro(paciente);
   }
 
@@ -379,8 +366,6 @@ private async cargarEstadisticas(): Promise<void> {
     if (this.isMobile && this.sidebarOpen) this.sidebarOpen = false;
   }
   
-  
-  
   private async iniciarRegistroParaPacienteExistente(paciente: any): Promise<void> {
     const confirm = await this.alertCtrl.create({
       header: 'Nuevo Registro Clínico',
@@ -401,13 +386,25 @@ private async cargarEstadisticas(): Promise<void> {
                 { headers: this.getAuthHeaders() }
               ).toPromise();
               
-              
               if (response?.registro_id) {
                 localStorage.setItem('registro_clinico_id', response.registro_id);
-                // ✅ CORREGIDO: Navegar a registroinfopaciente
-                this.router.navigate(['/registroinfopaciente'], {
-                  queryParams: { registro_id: response.registro_id }
-                });
+                
+                // 🆕 NUEVA CITA: Pasar flag y datos del paciente
+                const queryParams: any = { 
+                  registro_id: response.registro_id,
+                  nueva_cita: 'true',
+                  paciente_existente: 'true'
+                };
+                
+                // Pre-llenar con datos del paciente existente
+                if (paciente.nombre_completo) {
+                  const partes = paciente.nombre_completo.split(' ');
+                  queryParams.nombres = partes[0] || '';
+                  queryParams.apellidos = partes.slice(1).join(' ') || '';
+                }
+                queryParams.numeroIdentificacion = paciente.cedula;
+                
+                this.router.navigate(['/registroinfopaciente'], { queryParams });
               }
             } catch (error) {
               await this.showToast('Error iniciando registro', 'danger');
@@ -511,7 +508,7 @@ private async cargarEstadisticas(): Promise<void> {
     }, 300);
   }
   
-  // ✅ CORREGIDO: procesarInicioRegistro con navegación correcta
+  // ✅ CORREGIDO: procesarInicioRegistro con detección de paciente existente
   private async procesarInicioRegistro(datos: any): Promise<void> {
     const loading = await this.loadingCtrl.create({ 
       message: 'Buscando paciente...', 
@@ -520,6 +517,23 @@ private async cargarEstadisticas(): Promise<void> {
     await loading.present();
 
     try {
+      // 🆕 PASO 1: Buscar si el paciente ya existe en el sistema
+      let pacienteExistente = null;
+      try {
+        const busquedaResponse: any = await this.http.get(
+          `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/buscar/${datos.cedula}`,
+          { headers: this.getAuthHeaders() }
+        ).toPromise();
+        
+        if (busquedaResponse?.paciente) {
+          pacienteExistente = busquedaResponse.paciente;
+          console.log('✅ [NUEVA CITA] Paciente existente encontrado:', pacienteExistente.nombre_completo);
+        }
+      } catch (error) {
+        console.log('ℹ️ [NUEVA CITA] Paciente no encontrado en registros previos');
+      }
+
+      // 🆕 PASO 2: Iniciar nuevo registro clínico
       const response: any = await this.http.post(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
         datos,
@@ -531,12 +545,38 @@ private async cargarEstadisticas(): Promise<void> {
         
         console.log('🚀 [DEBUG] Navegando a registroinfopaciente con ID:', response.registro_id);
         
-        // ✅ CORREGIDO: Navegar a la página correcta
-        await this.router.navigate(['/registroinfopaciente'], {
-          queryParams: { registro_id: response.registro_id }
-        });
+        // 🆕 PASO 3: Construir queryParams con información de nueva cita
+        const queryParams: any = { 
+          registro_id: response.registro_id
+        };
         
-        await this.showToast('✅ Registro iniciado correctamente', 'success');
+        // Si el paciente ya existe, marcar como nueva cita
+        if (pacienteExistente) {
+          queryParams.nueva_cita = 'true';
+          queryParams.paciente_existente = 'true';
+          
+          // Pre-llenar con datos del paciente existente
+          if (pacienteExistente.nombre_completo) {
+            const partes = pacienteExistente.nombre_completo.split(' ');
+            queryParams.nombres = partes[0] || datos.nombres;
+            queryParams.apellidos = partes.slice(1).join(' ') || datos.apellidos;
+          } else {
+            queryParams.nombres = datos.nombres;
+            queryParams.apellidos = datos.apellidos;
+          }
+          queryParams.numeroIdentificacion = pacienteExistente.cedula || datos.cedula;
+          
+          await this.showToast('✅ Paciente encontrado. Iniciando nueva cita...', 'success');
+        } else {
+          // Paciente nuevo
+          queryParams.nombres = datos.nombres;
+          queryParams.apellidos = datos.apellidos;
+          queryParams.numeroIdentificacion = datos.cedula;
+          
+          await this.showToast('✅ Registro iniciado correctamente', 'success');
+        }
+        
+        await this.router.navigate(['/registroinfopaciente'], { queryParams });
       } else {
         await this.showToast('Error: No se recibió ID de registro', 'danger');
       }
@@ -555,7 +595,6 @@ private async cargarEstadisticas(): Promise<void> {
               text: 'Continuar',
               handler: () => {
                 localStorage.setItem('registro_clinico_id', backendError.registro_id);
-                // ✅ CORREGIDO: Navegar a la página correcta
                 this.router.navigate(['/registroinfopaciente'], {
                   queryParams: { registro_id: backendError.registro_id }
                 });
