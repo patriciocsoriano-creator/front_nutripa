@@ -139,39 +139,44 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
 
   // 📈 Estadísticas
   private async cargarEstadisticas(): Promise<void> {
-    const token = localStorage.getItem('token');
-    if (!token || !this.usuario?.id) {
-      setTimeout(() => this.cargarEstadisticas(), 500);
-      return;
-    }
-
-    try {
-      const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
-        { headers: this.getAuthHeaders() }
-      ).toPromise();
-
-      console.log('📊 [FRONTEND] Respuesta completa:', response);
-
-      if (response?.error === false) {
-        const datos = response.datos || response;
-        
-        this.totalPacientes = datos.total_pacientes || 0;
-        this.citasHoy = datos.registros_hoy || datos.citas_hoy || 0;
-        this.registrosMes = datos.registros_mes || datos.registros_totales || 0;
-        this.alertasActivas = datos.alertas_activas || 0;
-        
-        console.log('✅ [FRONTEND] Datos asignados:', {
-          totalPacientes: this.totalPacientes,
-          citasHoy: this.citasHoy,
-          registrosMes: this.registrosMes,
-          alertasActivas: this.alertasActivas
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error cargando estadísticas:', error);
-    }
+  const token = localStorage.getItem('token');
+  
+  // Solo verificar token, NO requerir this.usuario
+  if (!token) {
+    console.warn('[ESTADISTICAS] No hay token, reintentando en 500ms...');
+    setTimeout(() => this.cargarEstadisticas(), 500);
+    return;
   }
+
+  try {
+    console.log('[ESTADISTICAS] Llamando al endpoint...');
+    
+    const response: any = await this.http.get(
+      `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
+      { headers: this.getAuthHeaders() }
+    ).toPromise();
+
+    console.log('[ESTADISTICAS] Respuesta recibida:', response);
+
+    if (response?.error === false) {
+      const datos = response.datos || response;
+      
+      this.totalPacientes = datos.total_pacientes || 0;
+      this.citasHoy = datos.registros_hoy || 0;
+      this.registrosMes = datos.registros_mes || 0;
+      this.alertasActivas = datos.alertas_activas || 0;
+      
+      console.log('[ESTADISTICAS] Datos asignados:', {
+        totalPacientes: this.totalPacientes,
+        citasHoy: this.citasHoy,
+        registrosMes: this.registrosMes,
+        alertasActivas: this.alertasActivas
+      });
+    }
+  } catch (error) {
+    console.error('[ESTADISTICAS] Error:', error);
+  }
+}
   
   // 👥 Pacientes recientes
   private async cargarPacientesRecientes(): Promise<void> {
