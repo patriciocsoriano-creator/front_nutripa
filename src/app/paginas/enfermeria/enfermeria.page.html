@@ -39,7 +39,7 @@
             <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
           </div>
           <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
-            <li (click)="navegarA('medicoverpacientes'); $event.stopPropagation()">
+            <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
               <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
             </li>
             <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">

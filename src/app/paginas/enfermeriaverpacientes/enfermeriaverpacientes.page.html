@@ -1,0 +1,206 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Ver Pacientes Registrados</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="irAInicio()">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- 🧭 SIDEBAR -->
+    <div
+      class="sidebar"
+      [class.open]="sidebarOpen"
+      (mouseenter)="sidebarOpen = true"
+      (mouseleave)="sidebarOpen = false"
+    >
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+
+      <div class="user-info">
+        <ion-avatar>
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente || 'Enfermera'}}</h4>
+          <p>{{especialidad || 'Asistente Médico'}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="irAInicio()">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        <li class="active">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>Ver Pacientes</span>
+        </li>
+        <li (click)="irANuevoRegistro()">
+          <ion-icon name="person-add-outline"></ion-icon>
+          <span>Nuevo Registro</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- ENCABEZADO -->
+      <div class="page-header">
+        <div class="header-info">
+          <h1>👥 Pacientes Registrados</h1>
+          <p>Total: <strong>{{totalPacientes}}</strong> pacientes | Mostrando: <strong>{{pacientesFiltrados.length}}</strong></p>
+        </div>
+        <ion-button color="primary" (click)="irANuevoRegistro()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Nuevo Paciente
+        </ion-button>
+      </div>
+
+      <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+      <div class="filtros-container">
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <ion-input 
+            [(ngModel)]="terminoBusqueda"
+            (ionInput)="aplicarFiltros()"
+            placeholder="Buscar por nombre, cédula o teléfono..."
+            clearInput>
+          </ion-input>
+        </div>
+
+        <div class="filtro-estado">
+          <ion-select 
+            [(ngModel)]="filtroEstado"
+            (ionChange)="aplicarFiltros()"
+            interface="popover"
+            placeholder="Filtrar por estado">
+            <ion-select-option value="todos">Todos</ion-select-option>
+            <ion-select-option value="finalizado">Completados</ion-select-option>
+            <ion-select-option value="en_proceso">En proceso</ion-select-option>
+            <ion-select-option value="iniciado">Iniciados</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="cargandoPacientes" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando pacientes...</p>
+      </div>
+
+      <!-- LISTA DE PACIENTES -->
+      <div *ngIf="!cargandoPacientes && pacientesFiltrados.length > 0" class="pacientes-grid">
+        
+        <div class="paciente-card" *ngFor="let paciente of pacientesPaginados">
+          
+          <!-- Avatar e Info -->
+          <div class="paciente-header">
+            <div class="avatar" [style.background]="getAvatarColor(paciente.nombre_completo)">
+              <span>{{getIniciales(paciente.nombre_completo)}}</span>
+            </div>
+            <div class="paciente-info">
+              <h3>{{paciente.nombre_completo}}</h3>
+              <p class="cedula">🆔 {{paciente.cedula}}</p>
+              <p class="telefono" *ngIf="paciente.telefono">📞 {{paciente.telefono}}</p>
+            </div>
+            <div class="estado-badge" [class]="'badge-' + getEstadoColor(paciente.estado_real)">
+              {{formatearEstado(paciente.estado_real)}}
+            </div>
+          </div>
+
+          <!-- Progreso -->
+          <div class="progreso-container" *ngIf="paciente.progreso !== undefined">
+            <div class="progreso-bar">
+              <div class="progreso-fill" [style.width.%]="paciente.progreso"></div>
+            </div>
+            <span class="progreso-text">{{paciente.progreso}}%</span>
+          </div>
+
+          <!-- Alertas -->
+          <div class="alertas-container" *ngIf="paciente.tiene_alerta">
+            <div class="alerta-item" *ngFor="let alerta of paciente.alertas">
+              <ion-icon name="warning" [class]="'alert-' + alerta.nivel"></ion-icon>
+              <span>{{alerta.tipo}}</span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="acciones-container">
+            <ion-button 
+              size="small" 
+              color="primary" 
+              fill="solid"
+              (click)="verInformacion(paciente)">
+              <ion-icon slot="start" name="eye-outline"></ion-icon>
+              Ver Info
+            </ion-button>
+
+            <ion-button 
+              size="small" 
+              color="success" 
+              fill="outline"
+              (click)="contactarWhatsApp(paciente)">
+              <ion-icon slot="start" name="logo-whatsapp"></ion-icon>
+              WhatsApp
+            </ion-button>
+
+            <ion-button 
+              size="small" 
+              color="danger" 
+              fill="outline"
+              (click)="eliminarPaciente(paciente)">
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SIN RESULTADOS -->
+      <div *ngIf="!cargandoPacientes && pacientesFiltrados.length === 0" class="sin-resultados">
+        <ion-icon name="search-outline"></ion-icon>
+        <h3>No se encontraron pacientes</h3>
+        <p *ngIf="terminoBusqueda">Intenta con otro término de búsqueda</p>
+        <p *ngIf="!terminoBusqueda">Aún no hay pacientes registrados</p>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      <div *ngIf="totalPaginas > 1" class="paginacion-container">
+        <ion-button 
+          fill="outline" 
+          size="small"
+          [disabled]="paginaActual === 1"
+          (click)="cambiarPagina(paginaActual - 1)">
+          <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+
+        <span class="pagina-info">
+          Página {{paginaActual}} de {{totalPaginas}}
+        </span>
+
+        <ion-button 
+          fill="outline" 
+          size="small"
+          [disabled]="paginaActual === totalPaginas"
+          (click)="cambiarPagina(paginaActual + 1)">
+          <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+    </div>
+  </div>
+</ion-content>
