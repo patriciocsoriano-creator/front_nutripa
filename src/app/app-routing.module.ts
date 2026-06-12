@@ -135,6 +135,10 @@ const routes: Routes = [
     path: 'enfermeriaverpacientes',
     loadChildren: () => import('./paginas/enfermeriaverpacientes/enfermeriaverpacientes.module').then( m => m.EnfermeriaverpacientesPageModule)
   },
+  {
+    path: 'enfermeriaverpacientesinfo',
+    loadChildren: () => import('./paginas/enfermeriaverpacientesinfo/enfermeriaverpacientesinfo.module').then( m => m.EnfermeriaverpacientesinfoPageModule)
+  },
   
 ];
 

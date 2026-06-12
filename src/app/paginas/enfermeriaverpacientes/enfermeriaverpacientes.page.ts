@@ -179,7 +179,7 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.router.navigate(['/registroinfopaciente'], {
+      this.router.navigate(['/enfermeriaverpacientesinfo'], {
         queryParams: { registro_id: paciente.registro_id }
       });
     }
