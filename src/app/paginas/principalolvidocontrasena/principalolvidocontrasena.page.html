@@ -10,64 +10,56 @@
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
     
-    <!-- 🖼️ Logo -->
     <ion-img src="assets/img/logo.jpeg" class="logo" alt="Logo NutriPA"></ion-img>
     
-    <!-- 📦 Card principal -->
     <form [formGroup]="recuperacionForm" (ngSubmit)="onSubmit()" novalidate>
       
       <!-- ======================== -->
-      <!-- 📱 PASO 1: Ingresar Celular -->
+      <!-- PASO 1: Ingresar CORREO -->
       <!-- ======================== -->
       <div *ngIf="pasoActual === 1" class="step-content">
         <div class="step-header">
-          <ion-icon name="phone-portrait-outline" class="step-icon"></ion-icon>
+          <ion-icon name="mail-outline" class="step-icon"></ion-icon>
           <h2>¿Olvidaste tu contraseña?</h2>
-          <p>Ingresa tu número de celular y te enviaremos un código por WhatsApp</p>
+          <p>Ingresa tu correo electrónico y te enviaremos un código de verificación</p>
         </div>
 
-        <!-- Teléfono Input -->
+        <!-- Correo Input -->
         <ion-item lines="none">
           <div class="neu-input-wrapper" 
-               [class.has-value]="recuperacionForm.get('telefono')?.value" 
-               [class.has-error]="hasError('telefono')">
+               [class.has-value]="recuperacionForm.get('correo')?.value" 
+               [class.has-error]="hasError('correo')">
             
             <span class="input-icon">
-              <ion-icon name="phone-portrait-outline"></ion-icon>
+              <ion-icon name="mail-outline"></ion-icon>
             </span>
             
             <ion-input 
-              type="tel" 
-              formControlName="telefono"
-              (ionBlur)="onBlur('telefono')"
-              (ionChange)="onInputChange('telefono')"
+              type="email" 
+              formControlName="correo"
+              (ionBlur)="onBlur('correo')"
+              (ionChange)="onInputChange('correo')"
               placeholder=" "
-              aria-label="Número de celular"
-              maxlength="10"
-              pattern="[0-9]*"
-              inputmode="numeric">
+              aria-label="Correo electrónico"
+              autocomplete="email">
             </ion-input>
             
             <span class="neu-label" 
-                  [class.floating]="recuperacionForm.get('telefono')?.touched || recuperacionForm.get('telefono')?.value">
-              Número de Celular
+                  [class.floating]="recuperacionForm.get('correo')?.touched || recuperacionForm.get('correo')?.value">
+              Correo Electrónico
             </span>
           </div>
         </ion-item>
 
-        <!-- Helper de formato -->
         <ion-text color="medium" class="helper-text">
-          <small>Ej: 0991234567 (10 dígitos)</small>
+          <small>Ej: usuario@gmail.com</small>
         </ion-text>
 
         <!-- Error message -->
-        <ion-text color="danger" class="error-message" [class.show]="hasError('telefono')">
+        <ion-text color="danger" class="error-message" [class.show]="hasError('correo')">
           <small>
-            <span *ngIf="recuperacionForm.get('telefono')?.errors?.['required']">El número es requerido</span>
-            <span *ngIf="recuperacionForm.get('telefono')?.errors?.['pattern']">Ingresa solo números</span>
-            <span *ngIf="recuperacionForm.get('telefono')?.errors?.['minlength']">Mínimo 10 dígitos</span>
-            <span *ngIf="recuperacionForm.get('telefono')?.errors?.['maxlength']">Máximo 10 dígitos</span>
-            <span *ngIf="recuperacionForm.get('telefono')?.errors?.['telefonoNoRegistrado']">Número no registrado</span>
+            <span *ngIf="recuperacionForm.get('correo')?.errors?.['required']">El correo es requerido</span>
+            <span *ngIf="recuperacionForm.get('correo')?.errors?.['email']">Formato de correo no válido</span>
           </small>
         </ion-text>
 
@@ -75,14 +67,13 @@
         <ion-button 
           expand="block" 
           type="submit" 
-          [disabled]="cargando || recuperacionForm.get('telefono')?.invalid"
+          [disabled]="cargando || recuperacionForm.get('correo')?.invalid"
           class="ion-margin-top">
           
           <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
-          {{ cargando ? 'Enviando...' : 'Enviar Código por WhatsApp' }}
+          {{ cargando ? 'Enviando...' : 'Enviar Código por Correo' }}
         </ion-button>
 
-        <!-- Link para volver -->
         <div class="step-footer">
           <ion-text color="medium" (click)="volverAlLogin()" role="link" tabindex="0">
             ← Volver al inicio de sesión
@@ -91,14 +82,14 @@
       </div>
 
       <!-- ======================== -->
-      <!-- 🔢 PASO 2: Verificar Código -->
+      <!-- PASO 2: Verificar Código -->
       <!-- ======================== -->
       <div *ngIf="pasoActual === 2" class="step-content">
         <div class="step-header">
-          <ion-icon name="logo-whatsapp" class="step-icon whatsapp-icon"></ion-icon>
+          <ion-icon name="mail-unread-outline" class="step-icon email-icon"></ion-icon>
           <h2>Verifica tu identidad</h2>
-          <p>Ingresa el código de 6 dígitos que enviamos por WhatsApp a:</p>
-          <p class="phone-highlight">📱 {{ telefonoEnviado }}</p>
+          <p>Ingresa el código de 6 dígitos que enviamos a:</p>
+          <p class="email-highlight">📧 {{ correoEnviado }}</p>
         </div>
 
         <!-- Code Input (6 digits) -->
@@ -119,10 +110,15 @@
           </div>
         </ion-item>
 
-        <!-- Error message for code -->
         <ion-text color="danger" class="error-message" [class.show]="errorCodigo">
           <small>{{ mensajeErrorCodigo }}</small>
         </ion-text>
+
+        <!-- Revisar carpeta de spam -->
+        <div class="spam-notice">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <small>Si no ves el correo, revisa tu carpeta de <strong>spam</strong> o <strong>correo no deseado</strong></small>
+        </div>
 
         <!-- Resend code -->
         <div class="resend-section">
@@ -137,7 +133,7 @@
             role="link" 
             tabindex="0"
             [class.disabled]="cargando">
-            {{ cargando ? 'Enviando...' : '¿No recibiste el código? Reenviar por WhatsApp' }}
+            {{ cargando ? 'Enviando...' : '¿No recibiste el código? Reenviar correo' }}
           </ion-text>
         </div>
 
@@ -166,7 +162,7 @@
       </div>
 
       <!-- ======================== -->
-      <!-- 🔐 PASO 3: Nueva Contraseña -->
+      <!-- PASO 3: Nueva Contraseña -->
       <!-- ======================== -->
       <div *ngIf="pasoActual === 3" class="step-content">
         <div class="step-header">
@@ -228,7 +224,7 @@
         <ion-text color="danger" class="error-message" [class.show]="hasError('nuevaPassword')">
           <small>
             <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['passwordSegura']">La contraseña no cumple los requisitos de seguridad</span>
+            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['passwordSegura']">La contraseña no cumple los requisitos</span>
           </small>
         </ion-text>
 
@@ -278,9 +274,7 @@
                  [class.strong]="fortalezaPassword === 'strong'">
             </div>
           </div>
-          <small class="strength-text">
-            {{ textoFortaleza }}
-          </small>
+          <small class="strength-text">{{ textoFortaleza }}</small>
         </div>
 
         <!-- Buttons -->
@@ -300,21 +294,21 @@
             [disabled]="cargando || recuperacionForm.invalid || passwordsNoCoinciden"
             class="ion-margin-top">
             
-            <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
+            <ion-spinner name="crescent" *If="cargando" slot="start"></ion-spinner>
             {{ cargando ? 'Guardando...' : 'Actualizar Contraseña' }}
           </ion-button>
         </div>
       </div>
 
       <!-- ======================== -->
-      <!-- ✅ PASO 4: Éxito -->
+      <!-- PASO 4: Éxito -->
       <!-- ======================== -->
       <div *ngIf="pasoActual === 4" class="step-content success-step">
         <div class="success-icon">
           <ion-icon name="checkmark-circle"></ion-icon>
         </div>
         <h2>¡Contraseña Actualizada!</h2>
-        <p>Tu contraseña ha sido cambiada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.</p>
+        <p>Tu contraseña ha sido cambiada exitosamente. También enviamos una confirmación a tu correo.</p>
         
         <ion-button 
           expand="block" 
