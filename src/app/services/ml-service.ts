@@ -22,8 +22,6 @@ export interface PrediccionResponse {
 })
 export class MlService {
 
-  // ✅ URL del proxy del backend Node.js (NO directamente a FastAPI)
-  // El backend reenvía las peticiones al servicio ML Python
   private readonly ML_API_URL = `${environment.apiUrl}/nutricionapp-api/api/ml`;
 
   constructor(
@@ -33,8 +31,6 @@ export class MlService {
 
   /**
    * 🚀 Inferir perfil dietético desde datos clínicos del paciente
-   * @param datosClinicos Datos completos del paciente
-   * @returns Observable con la respuesta de la API
    */
   inferirPerfilDesdeDatosClinicos(datosClinicos: PatientClinicalData): Observable<PrediccionResponse> {
     console.log('📥 [MlService] Datos clínicos recibidos:', datosClinicos);
@@ -48,6 +44,10 @@ export class MlService {
       ));
     }
 
+    if (validacion.advertencias.length > 0) {
+      console.warn('⚠️ [MlService] Advertencias:', validacion.advertencias);
+    }
+
     const payload = this.dataUtil.prepararPayloadInferencia(datosClinicos);
     console.log('📤 [MlService] Payload final enviado al proxy:', payload);
 
@@ -56,16 +56,15 @@ export class MlService {
 
   /**
    * 🚀 Llamar al endpoint de inferencia a través del proxy del backend
-   * @param payload Payload ya preparado
-   * @returns Observable con la respuesta
    */
   private predecirPerfil(payload: PayloadInferenciaIA): Observable<PrediccionResponse> {
-    // ✅ El proxy del backend REQUIERE token de autenticación
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
+
+    console.log('🚀 [MlService] Enviando petición a:', `${this.ML_API_URL}/prediccion-perfil`);
 
     return this.http.post<PrediccionResponse>(
       `${this.ML_API_URL}/prediccion-perfil`,
@@ -73,18 +72,20 @@ export class MlService {
       { headers }
     ).pipe(
       map(response => {
-        console.log('✅ Perfil obtenido:', response.perfil_nombre);
+        console.log('✅ [MlService] Perfil obtenido:', response.perfil_nombre);
         return response;
       }),
       catchError(error => {
-        console.error('❌ Error en inferencia:', error);
+        console.error('❌ [MlService] Error en inferencia:', error);
         
         let mensajeError = 'No se pudo obtener el perfil dietético.';
         
         if (error.status === 503) {
-          mensajeError = 'El servicio de IA no está disponible. Verifica que el servicio Python esté corriendo en el puerto 8001.';
+          mensajeError = 'El servicio de IA no está disponible. Verifica que el servicio Python esté corriendo.';
         } else if (error.status === 401) {
           mensajeError = 'No autorizado. Por favor inicia sesión nuevamente.';
+        } else if (error.status === 400) {
+          mensajeError = `Datos inválidos: ${error.error?.mensaje || error.error?.detail || 'Verifica los datos ingresados'}`;
         } else if (error.status === 0) {
           mensajeError = 'No se pudo conectar con el servidor. Verifica tu conexión.';
         }
@@ -95,7 +96,7 @@ export class MlService {
   }
 
   /**
-   * 🔍 Verificar estado del servicio de IA a través del proxy
+   * 🔍 Verificar estado del servicio de IA
    */
   verificarSaludML(): Observable<any> {
     const token = localStorage.getItem('token');
@@ -113,17 +114,7 @@ export class MlService {
     );
   }
 
-  // ✅ Exponer métodos del servicio de utilidades para uso directo si se necesita
   public get dataUtilService(): PatientDataUtilService {
     return this.dataUtil;
-  }
-
-  setVitalSignsData(data: any) {
-    localStorage.setItem('vital_signs_data', JSON.stringify(data));
-  }
-
-  getVitalSignsData(): any | null {
-    const data = localStorage.getItem('vital_signs_data');
-    return data ? JSON.parse(data) : null;
   }
 }

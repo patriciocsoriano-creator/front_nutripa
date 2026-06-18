@@ -1,17 +1,28 @@
-// src/app/services/patient-data-util
+// src/app/services/patient-data-util.ts
 import { Injectable } from '@angular/core';
 
+// ✅ INTERFAZ ACTUALIZADA con las 6 variables del modelo 2026
 export interface PatientClinicalData {
   imc: number | null;
-  fechaNacimiento: string | null;
-  edad?: number | null;  // ✅ NUEVO: edad ya calculada por el backend
-  sexo: string | null;
+  edad: number | null;
+  genero: string | null;
+  peso_kg: number | null;
+  talla_cm: number | null;
+  tiene_diabetes: number;
+  
+  // Campos opcionales para compatibilidad
+  fechaNacimiento?: string | null;
+  sexo?: string | null;
 }
 
+// ✅ INTERFAZ ACTUALIZADA para el payload de inferencia
 export interface PayloadInferenciaIA {
+  edad: number;
+  genero: 'M' | 'F';
+  peso_kg: number;
+  talla_cm: number;
   imc: number;
-  edad: number | null;
-  genero: 'M' | 'F' | null;
+  tiene_diabetes: number;
 }
 
 @Injectable({
@@ -23,49 +34,33 @@ export class PatientDataUtilService {
 
   /**
    * 🔢 Calcular edad a partir de fechaNacimiento (YYYY-MM-DD)
-   * @param fechaNacimiento Fecha en formato 'YYYY-MM-DD'
-   * @returns Edad en años o null si no se puede calcular
    */
   calcularEdad(fechaNacimiento: string | null): number | null {
-  console.log('🔍 [calcularEdad] Input:', { fechaNacimiento, tipo: typeof fechaNacimiento });
-  
-  if (!fechaNacimiento) {
-    console.warn('⚠️ [calcularEdad] fechaNacimiento es null o vacío');
-    return null;
+    if (!fechaNacimiento) return null;
+    
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    
+    if (isNaN(nacimiento.getTime())) return null;
+    
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mesDiff = hoy.getMonth() - nacimiento.getMonth();
+    
+    if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    
+    return edad >= 0 && edad <= 120 ? edad : null;
   }
-  
-  const hoy = new Date();
-  const nacimiento = new Date(fechaNacimiento);
-  
-  console.log('🔍 [calcularEdad] Fecha parseada:', { nacimiento, isValid: !isNaN(nacimiento.getTime()) });
-  
-  if (isNaN(nacimiento.getTime())) {
-    console.warn('⚠️ [calcularEdad] Fecha inválida:', fechaNacimiento);
-    return null;
-  }
-  
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const mesDiff = hoy.getMonth() - nacimiento.getMonth();
-  
-  if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < nacimiento.getDate())) {
-    edad--;
-  }
-  
-  console.log('✅ [calcularEdad] Edad calculada:', edad);
-  return edad >= 0 && edad <= 120 ? edad : null;
-}
 
   /**
    * 🔄 Mapear sexo del formulario a formato de API ('M' | 'F')
-   * @param sexo Valor del formulario (ej: 'Masculino', 'F', 'female')
-   * @returns 'M', 'F' o null si no se puede mapear
    */
   mapearGenero(sexo: string | null): 'M' | 'F' | null {
     if (!sexo) return null;
     
     const valor = sexo.toLowerCase().trim();
     
-    // Mapeo flexible para aceptar diferentes formatos
     if (['masculino', 'm', 'hombre', 'male', 'varón', 'varon'].includes(valor)) {
       return 'M';
     }
@@ -77,40 +72,78 @@ export class PatientDataUtilService {
   }
 
   /**
-   * 📦 Preparar payload para FastAPI desde datos clínicos del paciente
+   * 📦 Preparar payload para FastAPI con las 6 variables del modelo 2026
    * @param datos Datos clínicos del paciente
    * @returns Payload listo para enviar a la API de inferencia
-   * @throws Error si el IMC es null o inválido
    */
   prepararPayloadInferencia(datos: PatientClinicalData): PayloadInferenciaIA {
-  if (datos.imc === null || isNaN(datos.imc) || datos.imc <= 0) {
-    throw new Error('El IMC es requerido y debe ser un valor válido para la inferencia');
-  }
+    // Validar IMC
+    if (datos.imc === null || isNaN(datos.imc) || datos.imc <= 0) {
+      throw new Error('El IMC es requerido y debe ser un valor válido para la inferencia');
+    }
 
-  // ✅ PRIORIDAD: Usar edad directa si está disponible, sino calcular desde fechaNacimiento
-  let edadFinal: number | null = null;
-  
-  if (datos.edad !== undefined && datos.edad !== null) {
-    // Backend ya calculó la edad, usarla directamente
-    edadFinal = datos.edad;
-    console.log('✅ [Payload] Usando edad directa del backend:', edadFinal);
-  } else if (datos.fechaNacimiento) {
-    // Fallback: calcular edad desde fechaNacimiento
-    edadFinal = this.calcularEdad(datos.fechaNacimiento);
-    console.log('🔄 [Payload] Calculando edad desde fechaNacimiento:', edadFinal);
-  }
+    // Determinar edad
+    let edadFinal: number | null = datos.edad;
+    
+    if (!edadFinal && datos.fechaNacimiento) {
+      edadFinal = this.calcularEdad(datos.fechaNacimiento);
+    }
+    
+    if (!edadFinal) {
+      throw new Error('La edad es requerida para la inferencia');
+    }
 
-  return {
-    imc: Number(datos.imc.toFixed(2)),
-    edad: edadFinal,  // ✅ Ahora puede ser directa o calculada
-    genero: this.mapearGenero(datos.sexo)
-  };
-}
+    // Determinar género
+    const genero = this.mapearGenero(datos.genero || datos.sexo || null);
+    if (!genero) {
+      throw new Error('El género es requerido para la inferencia');
+    }
+
+    // Calcular peso y talla si faltan (usando IMC)
+    let pesoFinal = datos.peso_kg;
+    let tallaFinal = datos.talla_cm;
+    
+    if (!pesoFinal && tallaFinal && datos.imc) {
+      const tallaM = tallaFinal / 100;
+      pesoFinal = parseFloat((datos.imc * tallaM * tallaM).toFixed(2));
+      console.log(`⚠️ Peso calculado desde IMC: ${pesoFinal} kg`);
+    }
+    
+    if (!tallaFinal && pesoFinal && datos.imc) {
+      const tallaM = Math.sqrt(pesoFinal / datos.imc);
+      tallaFinal = parseFloat((tallaM * 100).toFixed(2));
+      console.log(`⚠️ Talla calculada desde IMC: ${tallaFinal} cm`);
+    }
+    
+    // Valores por defecto si aún faltan
+    if (!pesoFinal) {
+      pesoFinal = genero === 'M' ? 75 : 65;
+      console.log(`⚠️ Peso asumido por defecto: ${pesoFinal} kg`);
+    }
+    
+    if (!tallaFinal) {
+      tallaFinal = genero === 'M' ? 170 : 160;
+      console.log(`⚠️ Talla asumida por defecto: ${tallaFinal} cm`);
+    }
+
+    // Tiene diabetes (por defecto 0)
+    const tieneDiabetes = datos.tiene_diabetes !== undefined ? datos.tiene_diabetes : 0;
+
+    const payload: PayloadInferenciaIA = {
+      edad: edadFinal,
+      genero: genero,
+      peso_kg: parseFloat(pesoFinal.toFixed(2)),
+      talla_cm: parseFloat(tallaFinal.toFixed(2)),
+      imc: parseFloat(datos.imc.toFixed(2)),
+      tiene_diabetes: tieneDiabetes
+    };
+
+    console.log('📦 [PatientDataUtil] Payload preparado:', payload);
+    return payload;
+  }
 
   /**
    * ✅ Validar que los datos están completos para inferencia
-   * @param datos Datos a validar
-   * @returns Objeto con estado de validación y mensajes de error
    */
   validarDatosParaInferencia(datos: PatientClinicalData): {
     valido: boolean;
@@ -123,16 +156,29 @@ export class PatientDataUtilService {
     // IMC es obligatorio
     if (datos.imc === null || isNaN(datos.imc)) {
       errores.push('El IMC es requerido');
-    } else if (datos.imc < 10 || datos.imc > 60) {
-      errores.push('El IMC está fuera del rango válido (10-60)');
+    } else if (datos.imc < 10 || datos.imc > 80) {
+      errores.push('El IMC está fuera del rango válido (10-80)');
     }
 
-    // Edad y género son opcionales pero recomendados
-    if (!datos.fechaNacimiento) {
-      advertencias.push('La fecha de nacimiento no está disponible. La inferencia será menos precisa.');
+    // Edad es obligatoria (o fechaNacimiento para calcularla)
+    if (!datos.edad && !datos.fechaNacimiento) {
+      errores.push('La edad o fecha de nacimiento es requerida');
+    } else if (datos.edad && (datos.edad < 18 || datos.edad > 120)) {
+      errores.push('La edad debe estar entre 18 y 120 años');
     }
-    if (!datos.sexo) {
-      advertencias.push('El género no está disponible. La inferencia será menos precisa.');
+
+    // Género es obligatorio
+    if (!datos.genero && !datos.sexo) {
+      errores.push('El género es requerido');
+    }
+
+    // Advertencias para datos opcionales
+    if (!datos.peso_kg && !datos.talla_cm) {
+      advertencias.push('Peso y talla no disponibles. Se calcularán desde el IMC.');
+    }
+
+    if (datos.tiene_diabetes === undefined || datos.tiene_diabetes === null) {
+      advertencias.push('Estado de diabetes no especificado. Se asumirá: No diabético.');
     }
 
     return {

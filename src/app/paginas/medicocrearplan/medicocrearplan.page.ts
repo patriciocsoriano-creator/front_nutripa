@@ -6,6 +6,7 @@ import { LoadingController, ToastController, AlertController } from '@ionic/angu
 import { environment } from 'src/environments/environment';
 import { MlService, PrediccionResponse } from 'src/app/services/ml-service';  // ✅ Verificar ruta
 import { firstValueFrom } from 'rxjs';
+import { PatientClinicalData } from 'src/app/services/patient-data-util';
 
 // 👤 Interfaces para tipado seguro
 interface PacienteData {
@@ -238,15 +239,25 @@ export class MedicocrearplanPage implements OnInit {
   this.errorML = null;
 
   try {
-    // 🔍 Debug: Ver qué datos tenemos disponibles
     console.log('🔍 [DEBUG] pacienteData completa:', this.pacienteData);
-    console.log('🔍 [DEBUG] formulario.imc:', this.formulario.imc);
+    console.log('🔍 [DEBUG] formulario completo:', this.formulario);
 
-    // ✅ Preparar datos clínicos INCLUYENDO edad si está disponible
-    const datosClinicos = {
+    // ✅ Preparar datos clínicos COMPLETOS con las 6 variables requeridas
+    const datosClinicos: PatientClinicalData = {
+      // Variables básicas
       imc: this.formulario.imc,
+      edad: this.pacienteData?.edad || null,
+      genero: this.pacienteData?.sexo || null,
+      
+      // ✅ NUEVAS VARIABLES REQUERIDAS POR EL MODELO 2026
+      peso_kg: this.formulario.peso || null,
+      talla_cm: this.formulario.talla || null,
+      
+      // ✅ INFERIR tiene_diabetes de los datos disponibles
+      tiene_diabetes: this.inferirTieneDiabetes(),
+      
+      // Compatibilidad con campos opcionales
       fechaNacimiento: this.pacienteData?.fechaNacimiento || null,
-      edad: this.pacienteData?.edad || null,  // ✅ PASAR EDAD DIRECTA
       sexo: this.pacienteData?.sexo || null
     };
 
@@ -269,43 +280,66 @@ export class MedicocrearplanPage implements OnInit {
       this.mlService.inferirPerfilDesdeDatosClinicos(datosClinicos)
     );
 
-
-      if (this.respuestaIA?.perfil_id !== undefined) {
-        const perfilInfo = this.perfilesDieteticos[this.respuestaIA.perfil_id];
-        
-        this.perfilRecomendadoId = this.respuestaIA.perfil_id;
-        this.perfilRecomendado = perfilInfo?.nombre || 'Desconocido';
-        this.confianzaPrediccion = this.respuestaIA.confianza || null;
-        
-        this.sugerirObjetivosPorPerfil(this.respuestaIA.perfil_id);
-        
-        if (!this.formulario.recomendaciones && this.respuestaIA.recomendacion) {
-          this.formulario.recomendaciones = this.respuestaIA.recomendacion;
-        }
-        
-        const confianzaPorcentaje = this.respuestaIA.confianza 
-          ? (this.respuestaIA.confianza * 100).toFixed(1) 
-          : 'N/A';
-        await this.showToast(
-          `✅ Perfil: ${this.perfilRecomendado} (${confianzaPorcentaje}% confianza)`, 
-          'success'
-        );
-      }
-
-    } catch (error: any) {
-      console.error('❌ Error en predicción ML:', error);
-      this.errorML = error.message || 'No se pudo conectar con el servicio de IA.';
+    if (this.respuestaIA?.perfil_id !== undefined) {
+      const perfilInfo = this.perfilesDieteticos[this.respuestaIA.perfil_id];
       
-      // ✅ VERIFICAR NULL antes de usar .includes() (evita TS2531)
-      if (this.errorML && (this.errorML.includes('Datos inválidos') || this.errorML.includes('IMC'))) {
-        await this.showToast(this.errorML, 'danger');
-      } else {
-        await this.showToast('Predicción IA no disponible. Continuando con formulario manual.', 'warning');
+      this.perfilRecomendadoId = this.respuestaIA.perfil_id;
+      this.perfilRecomendado = perfilInfo?.nombre || 'Desconocido';
+      this.confianzaPrediccion = this.respuestaIA.confianza || null;
+      
+      this.sugerirObjetivosPorPerfil(this.respuestaIA.perfil_id);
+      
+      if (!this.formulario.recomendaciones && this.respuestaIA.recomendacion) {
+        this.formulario.recomendaciones = this.respuestaIA.recomendacion;
       }
-    } finally {
-      this.cargandoML = false;
+      
+      const confianzaPorcentaje = this.respuestaIA.confianza 
+        ? (this.respuestaIA.confianza * 100).toFixed(1) 
+        : 'N/A';
+      await this.showToast(
+        `✅ Perfil: ${this.perfilRecomendado} (${confianzaPorcentaje}% confianza)`, 
+        'success'
+      );
+    }
+
+  } catch (error: any) {
+    console.error('❌ Error en predicción ML:', error);
+    this.errorML = error.message || 'No se pudo conectar con el servicio de IA.';
+    
+    if (this.errorML && (this.errorML.includes('Datos inválidos') || this.errorML.includes('IMC'))) {
+      await this.showToast(this.errorML, 'danger');
+    } else {
+      await this.showToast('Predicción IA no disponible. Continuando con formulario manual.', 'warning');
+    }
+  } finally {
+    this.cargandoML = false;
+  }
+}
+
+// ✅ MÉTODO: Inferir si el paciente tiene diabetes
+private inferirTieneDiabetes(): number {
+  // Si hay datos bioquímicos claros, usarlos
+  if (this.formulario.glucosa_ayunas && this.formulario.glucosa_ayunas >= 126) {
+    return 1;
+  }
+  
+  if (this.formulario.hba1c && this.formulario.hba1c >= 6.5) {
+    return 1;
+  }
+  
+  // Si hay condiciones metabólicas que sugieren diabetes
+  if (this.pacienteData?.ultimos_datos?.condiciones_metabolicas) {
+    const cm = this.pacienteData.ultimos_datos.condiciones_metabolicas;
+    if (cm.diabetes || cm.diabetesTipo2 || cm.dm2) {
+      return 1;
     }
   }
+  
+  // Por defecto, asumir que NO tiene diabetes
+  return 0;
+}
+
+
 
   private sugerirObjetivosPorPerfil(perfilId: number) {
     const sugerencias: Record<number, string[]> = {
