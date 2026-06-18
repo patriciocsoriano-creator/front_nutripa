@@ -768,46 +768,49 @@ ion-textarea textarea {
 }
 
 /* ================================================================
-   🔧 FIX AGRESIVO: Texto visible en ion-textarea (contenido IA y usuario)
+   ✅ SOLUCIÓN DEFINITIVA: Texto visible en ion-textarea
+   Usando las variables oficiales de Ionic 7+
    ================================================================ */
 
-/* Selector directo al textarea nativo */
-ion-textarea textarea,
-ion-textarea .native-textarea,
-ion-textarea .input-wrapper textarea {
-  color: #2c3e50 !important;
-  -webkit-text-fill-color: #2c3e50 !important;
-  caret-color: #2c3e50 !important;
-}
-
-/* Selector para el contenido renderizado */
-ion-textarea .sc-ion-textarea-md,
-ion-textarea .sc-ion-textarea-ios,
-ion-textarea ion-textarea {
-  color: #2c3e50 !important;
-}
-
-/* Forzar color en todos los niveles de shadow DOM */
-ion-textarea {
-  --color: #2c3e50 !important;
-  --highlight-color-focused: #2c3e50 !important;
-  
-  .input-wrapper {
-    color: #2c3e50 !important;
-  }
-  
-  &.has-focus .input-wrapper {
-    color: #2c3e50 !important;
-  }
-}
-
-/* Fallback universal para cualquier textarea dentro del card */
+/* 1️⃣ Forzar color oscuro en TODO el card de recomendaciones */
 .recomendaciones-card {
-  ion-textarea,
-  ion-textarea *,
-  ion-textarea::part(native),
-  textarea {
-    color: #2c3e50 !important;
-    -webkit-text-fill-color: #2c3e50 !important;
+  --ion-text-color: #2c3e50 !important;
+  --color: #2c3e50 !important;
+  color: #2c3e50 !important;
+  
+  /* 2️⃣ Los ion-item dentro deben tener color oscuro */
+  ion-item {
+    --color: #2c3e50 !important;
+    --ion-text-color: #2c3e50 !important;
+    
+    /* 3️⃣ Los labels */
+    ion-label {
+      color: #495057 !important;
+    }
+    
+    /* 4️⃣ Los textareas - forma oficial de Ionic 7+ */
+    ion-textarea {
+      --color: #2c3e50 !important;
+      color: #2c3e50 !important;
+      
+      /* Penetrar shadow DOM con ::part() */
+      &::part(native) {
+        color: #2c3e50 !important;
+        -webkit-text-fill-color: #2c3e50 !important;
+        caret-color: #2c3e50 !important;
+      }
+    }
+  }
+}
+
+/* 5️⃣ Fallback: aplicar a cualquier textarea en la página */
+app-medicocrearplan {
+  ion-textarea {
+    --color: #2c3e50 !important;
+    
+    &::part(native) {
+      color: #2c3e50 !important;
+      -webkit-text-fill-color: #2c3e50 !important;
+    }
   }
 }
