@@ -403,7 +403,7 @@ private inferirTieneDiabetes(): number {
         alimentarias: this.formulario.preferencias_alimentarias,
         economicas: this.formulario.situacion_economica
       },
-      fecha_creacion: new Date().toISOString(),
+      fecha_creacion: new Date().toISOString().slice(0, 19).replace('T', ' '),
       estado: 'activo',
       validado_por_ia: this.respuestaIA !== null
     };
