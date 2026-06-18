@@ -4,9 +4,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
-import { MlService, PrediccionResponse } from 'src/app/services/ml-service';  // ✅ Verificar ruta
+import { MlService, PrediccionResponse } from 'src/app/services/ml-service';  // 
 import { firstValueFrom } from 'rxjs';
 import { PatientClinicalData } from 'src/app/services/patient-data-util';
+import { FormControl } from '@angular/forms';
 
 // 👤 Interfaces para tipado seguro
 interface PacienteData {
@@ -57,6 +58,8 @@ export class MedicocrearplanPage implements OnInit {
   submenuAbierto: string | null = null;
   nombreDoctor: string = 'Dr. Usuario';
   especialidad: string = 'Especialista';
+
+  preferenciasControl = new FormControl('equilibrada');
 
   // 📋 Datos del paciente
   pacienteId: string | null = null;
@@ -136,6 +139,13 @@ export class MedicocrearplanPage implements OnInit {
 
   async ngOnInit() {
     this.cargarDatosUsuario();
+
+    this.preferenciasControl.valueChanges.subscribe(value => {
+    if (value) {
+      this.formulario.preferencias_alimentarias = value;
+    }
+  });
+
     await this.inicializarFormulario();
   }
 
@@ -354,22 +364,21 @@ private inferirTieneDiabetes(): number {
 
   // 🍽️ Preferencia alimentaria sugerida según perfil
   const preferenciasPorPerfil: Record<number, string> = {
-    0: 'baja_carbo',        // Hipocalórico → baja en carbohidratos
-    1: 'mediterranea',      // Control Glucémico → mediterránea
-    2: 'vegetariana',       // Hipo-grasa → vegetariana
-    3: 'equilibrada'        // Normocalórico → equilibrada (mantenimiento)
+    0: 'baja_carbo',
+    1: 'mediterranea',
+    2: 'vegetariana',
+    3: 'equilibrada'
   };
   
-  // ✅ Forzar cambio de valor y notificar a Ionic
   const nuevaPreferencia = preferenciasPorPerfil[perfilId] || 'equilibrada';
   
-  // Truco: primero limpiamos, luego asignamos (fuerza re-render del ion-select)
-  this.formulario.preferencias_alimentarias = '';
+  console.log(`🍽️ Perfil ${perfilId} → Preferencia: ${nuevaPreferencia}`);
   
-  setTimeout(() => {
-    this.formulario.preferencias_alimentarias = nuevaPreferencia;
-    this.cdr.detectChanges();  // ← Forzar detección de cambios
-  }, 50);
+  // ✅ SOLUCIÓN DEFINITIVA: Actualizar FormControl
+  this.preferenciasControl.setValue(nuevaPreferencia);
+  this.formulario.preferencias_alimentarias = nuevaPreferencia;
+  
+  console.log(`✅ FormControl actualizado a: ${this.preferenciasControl.value}`);
 }
   
 
@@ -522,26 +531,30 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
 
 
   limpiarFormulario() {
-    this.formulario = {
-      paciente_id: '',
-      nombre_paciente: '',
-      imc: null, peso: null, talla: null,
-      glucosa_ayunas: null, hba1c: null, cintura: null, colesterol_ldl: null,
-      actividad_fisica: 'moderada',
-      preferencias_alimentarias: 'equilibrada',
-      situacion_economica: 'media',
-      objetivos: [],
-      recomendaciones: '',
-      duracion_semanas: 4,
-      notas_adicionales: '',
-      alergias: ''
-    };
-    this.perfilRecomendado = null;
-    this.perfilRecomendadoId = null;
-    this.confianzaPrediccion = null;
-    this.respuestaIA = null;
-    this.errorML = null;
-  }
+  this.formulario = {
+    paciente_id: '',
+    nombre_paciente: '',
+    imc: null, peso: null, talla: null,
+    glucosa_ayunas: null, hba1c: null, cintura: null, colesterol_ldl: null,
+    actividad_fisica: 'moderada',
+    preferencias_alimentarias: 'equilibrada',
+    situacion_economica: 'media',
+    objetivos: [],
+    recomendaciones: '',
+    duracion_semanas: 4,
+    notas_adicionales: '',
+    alergias: ''
+  };
+  
+  //  NUEVO: Resetear FormControl también
+  this.preferenciasControl.setValue('equilibrada');
+  
+  this.perfilRecomendado = null;
+  this.perfilRecomendadoId = null;
+  this.confianzaPrediccion = null;
+  this.respuestaIA = null;
+  this.errorML = null;
+}
 
   volver() {
     this.router.navigate(['/medicoverpacientes']);
