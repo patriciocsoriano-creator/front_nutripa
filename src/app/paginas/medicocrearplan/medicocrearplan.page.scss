@@ -1,6 +1,6 @@
 /* =====================================================
    medicocrearplan.page.scss
-   ESTILOS COMPLETOS - Autocontenidos (sin global.scss)
+   ESTILOS COMPLETOS - Autocontenidos
    Paleta: #0a4d68 | #f4f7fb | #667eea | #764ba2 | #2ecc71
    ===================================================== */
 
@@ -53,7 +53,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: visible; //  NECESARIO 
+  overflow: visible;
   position: relative;
   z-index: 100;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -203,45 +203,45 @@
   }
 
   .submenu {
-      position: absolute; // 👈 CAMBIO: absolute para que se superponga
-      left: 100%; // 👈 CAMBIO: a la derecha del sidebar
-      top: 0;
-      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
-      min-width: 220px; // 👈 CAMBIO: ancho fijo
-      border-radius: 0 8px 8px 0;
-      box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-      z-index: 1000; // 👈 CAMBIO: z-index alto
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-      padding: 0;
-      margin: 0;
-      
-      &.active {
-        max-height: 300px; // 👈 CAMBIO: altura suficiente para mostrar items
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
+    min-width: 220px;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0;
+    margin: 0;
+
+    &.active {
+      max-height: 300px;
+    }
+
+    li {
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+
+      &:hover {
+        background: rgba(255,255,255,0.15);
+        color: white;
       }
-      
-      li {
-        padding: 12px 20px;
-        font-size: 0.85rem;
-        color: rgba(255,255,255,0.9);
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-        
-        &:hover {
-          background: rgba(255,255,255,0.15);
-          color: white;
-        }
-         
-        ion-icon {
-          font-size: 1.1rem;
-          margin-right: 10px;
-        }
-        
-        span {
-          opacity: 1; // 👈 Siempre visible en submenú
-        }
+
+      ion-icon {
+        font-size: 1.1rem;
+        margin-right: 10px;
+      }
+
+      span {
+        opacity: 1;
       }
     }
+  }
 
   .sidebar.open .submenu li span {
     opacity: 1;
@@ -460,33 +460,178 @@
   }
 }
 
-/* ==== OBJETIVOS DEL PLAN (Estado seleccionado) ==== */
-ion-item[color="primary"] {
-  --background: rgba(102, 126, 234, 0.12);
-  --border-color: rgba(102, 126, 234, 0.4);
+/* ================================================================
+   🆕 CARDS CON COLORES DIFERENCIADOS (Adiós al plomo feo)
+   ================================================================ */
 
-  ion-icon { color: #667eea !important; }
-  ion-label { color: #2c3e50; font-weight: 600; }
-}
+/* 🎯 Card de OBJETIVOS - Tono azul/violeta suave */
+.objetivos-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f3f0ff 0%, #e8e3ff 100%);
+  border: 1px solid #c9bfff;
+  box-shadow: 0 4px 14px rgba(118, 75, 162, 0.12);
+  --background: transparent;
 
-/* ==== TEXTAREA & SELECT OVERRIDES ==== */
-ion-textarea {
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  --border: 1px solid transparent;
-  
-  &:focus-within {
-    --border: 1px solid #667eea;
-    background: #ffffff;
+  ion-card-header {
+    padding-bottom: 10px;
+
+    ion-card-title {
+      color: #5a3d9e;
+      font-weight: 600;
+      font-size: 1.15rem;
+    }
+
+    ion-card-subtitle {
+      color: #6b5b95;
+      font-size: 0.9rem;
+    }
+  }
+
+  ion-item {
+    --background: rgba(255, 255, 255, 0.7);
+    --border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      --background: rgba(255, 255, 255, 0.95);
+    }
+
+    ion-label {
+      color: #2c3e50;
+      font-weight: 500;
+    }
   }
 }
 
-ion-select {
-  --padding-top: 8px;
-  --padding-bottom: 8px;
+/* ⚙️ Card de PREFERENCIAS - Tono verde suave */
+.preferencias-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f0faf4 0%, #e0f5e9 100%);
+  border: 1px solid #b8e6c8;
+  box-shadow: 0 4px 14px rgba(46, 204, 113, 0.12);
+  --background: transparent;
+
+  ion-card-header {
+    padding-bottom: 10px;
+
+    ion-card-title {
+      color: #1a7a42;
+      font-weight: 600;
+      font-size: 1.15rem;
+    }
+  }
+
+  ion-item {
+    --background: rgba(255, 255, 255, 0.7);
+    --border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: #2ecc71;
+      --background: rgba(255, 255, 255, 0.95);
+    }
+
+    ion-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.85rem;
+    }
+
+    ion-select, ion-input {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+  }
+}
+
+/* 📝 Card de RECOMENDACIONES - Tono naranja/ámbar suave */
+.recomendaciones-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fffbf0 0%, #fff4e0 100%);
+  border: 1px solid #f5d5a8;
+  box-shadow: 0 4px 14px rgba(243, 156, 18, 0.12);
+  --background: transparent;
+
+  ion-card-header {
+    padding-bottom: 10px;
+
+    ion-card-title {
+      color: #b36b00;
+      font-weight: 600;
+      font-size: 1.15rem;
+    }
+  }
+
+  ion-item {
+    --background: rgba(255, 255, 255, 0.7);
+    --border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: #f39c12;
+      --background: rgba(255, 255, 255, 0.95);
+    }
+
+    ion-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+/* ================================================================
+   🆕 CORRECCIÓN CRÍTICA: Texto visible en ion-textarea
+   (Esto arregla que lo que escribe el usuario y lo que pone la IA
+    no se vea por tener color blanco/gris muy claro sobre fondo claro)
+   ================================================================ */
+ion-textarea {
+  --color: #2c3e50 !important;
+  --placeholder-color: #999;
+  --placeholder-opacity: 0.8;
+  color: #2c3e50 !important;
+  font-size: 0.95rem;
+  font-weight: 400;
+
+  /* El textarea nativo interno */
+  &::part(native) {
+    color: #2c3e50 !important;
+    font-size: 0.95rem;
+    padding: 8px 10px;
+  }
+
+  /* El placeholder */
+  &::part(placeholder) {
+    color: #999 !important;
+    opacity: 0.8;
+  }
+}
+
+/* Fallback para versiones antiguas de Ionic */
+.recomendaciones-card ion-textarea textarea,
+.recomendaciones-card ion-textarea .native-input,
+ion-textarea textarea {
+  color: #2c3e50 !important;
+}
+
+/* ================================================================
+   OBJETIVOS DEL PLAN (Estado seleccionado)
+   ================================================================ */
+.objetivos-card ion-item[color="primary"] {
+  --background: rgba(102, 126, 234, 0.15) !important;
+  --border-color: rgba(102, 126, 234, 0.5) !important;
+
+  ion-icon { color: #667eea !important; }
+  ion-label { color: #2c3e50; font-weight: 600; }
 }
 
 /* ==== FORMULARIO: ACCIONES ==== */

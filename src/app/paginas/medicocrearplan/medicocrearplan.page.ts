@@ -349,7 +349,17 @@ private inferirTieneDiabetes(): number {
       3: ['aumentar_energia', 'educacion_nutricional']
     };
     this.formulario.objetivos = sugerencias[perfilId] || [];
-  }
+
+     // 🍽️ NUEVO: Preferencia alimentaria sugerida según perfil
+  const preferenciasPorPerfil: Record<number, string> = {
+    0: 'baja_carbo',        // Hipocalórico → baja en carbohidratos
+    1: 'mediterranea',      // Control Glucémico → mediterránea (bajo índice glucémico)
+    2: 'vegetariana',      // Hipo-grasa → vegetariana (naturalmente baja en grasas saturadas)
+    3: 'sin_restricciones'  // Normocalórico → sin restricciones
+  };
+  this.formulario.preferencias_alimentarias = preferenciasPorPerfil[perfilId] || 'occidental';
+}
+  
 
   toggleObjetivo(objetivoId: string) {
     const index = this.formulario.objetivos.indexOf(objetivoId);
@@ -434,7 +444,7 @@ private inferirTieneDiabetes(): number {
       },
       allergies: this.formulario.alergias.split(',').map((a: string) => a.trim()).filter((a: string) => a),
       preferences: {
-        dietary_style: this.formulario.preferencias_alimentarias as 'occidental' | 'mediterranea' | 'baja_carbo' | 'vegetariana',
+        dietary_style: this.formulario.preferencias_alimentarias as 'equilibrada' | 'mediterranea' | 'baja_carbo' | 'vegetariana',
         economic_level: this.formulario.situacion_economica as 'baja' | 'media' | 'alta',
         activity_level: this.formulario.actividad_fisica as 'sedentario' | 'ligera' | 'moderada' | 'intensa'
       },
@@ -506,7 +516,7 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
       imc: null, peso: null, talla: null,
       glucosa_ayunas: null, hba1c: null, cintura: null, colesterol_ldl: null,
       actividad_fisica: 'moderada',
-      preferencias_alimentarias: 'occidental',
+      preferencias_alimentarias: 'equilibrada',
       situacion_economica: 'media',
       objetivos: [],
       recomendaciones: '',
