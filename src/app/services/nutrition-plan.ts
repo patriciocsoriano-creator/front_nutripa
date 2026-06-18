@@ -191,6 +191,9 @@ export class NutritionPlanService {
         foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
       }
       
+      // 🔥 NUEVO: Ajustar porciones según calorías objetivo
+      foods = this._adjustPortionsToTargetCalories(foods, targetCalories);
+      
       const totals = foods.reduce((acc: any, food: FoodItem) => ({
         calories: this._round(acc.calories + food.calories),
         protein: this._round(acc.protein + food.protein),
@@ -213,6 +216,31 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
+  // 🔥 NUEVO: AJUSTAR PORCIONES SEGÚN CALORÍAS OBJETIVO
+  // ============================================================================
+  private _adjustPortionsToTargetCalories(foods: FoodItem[], targetCalories: number): FoodItem[] {
+    if (foods.length === 0 || targetCalories === 0) return foods;
+    
+    const currentCalories = foods.reduce((sum, f) => sum + f.calories, 0);
+    
+    // Solo ajustar si la diferencia es > 15%
+    const ratio = targetCalories / currentCalories;
+    if (Math.abs(ratio - 1) < 0.15) return foods;
+    
+    console.log(`🔧 Ajustando porciones: ${currentCalories} kcal → ${targetCalories} kcal (factor: ${ratio.toFixed(2)})`);
+    
+    return foods.map(food => ({
+      ...food,
+      serving_size: this._round(food.serving_size * ratio),
+      calories: this._round(food.calories * ratio),
+      protein: this._round(food.protein * ratio),
+      carbs: this._round(food.carbs * ratio),
+      fat: this._round(food.fat * ratio),
+      fiber: food.fiber ? this._round(food.fiber * ratio) : undefined
+    }));
+  }
+
+  // ============================================================================
   // 🔍 SELECCIONAR ALIMENTOS POR COMIDA (LÓGICA CORREGIDA)
   // ============================================================================
   private async selectFoodsForMeal(
@@ -225,11 +253,6 @@ export class NutritionPlanService {
     
     const searchQuery = this.getMainFoodQuery(mealType, input.preferences.dietary_style, dayIndex, needsGlycemicControl);
     
-    // 🔥 REGLA DE ORO: 
-    // - Almuerzo/Cena → SIEMPRE mockDB con combinación proteína+carbohidrato+verdura
-    // - Snacks (media_manana, media_tarde, colacion) → SIEMPRE mockDB con rotación
-    // - Desayuno → FatSecret primero, fallback a mockDB con rotación
-    
     if (mealType === 'almuerzo' || mealType === 'cena') {
       return this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies)
         .slice(0, 3)
@@ -237,8 +260,10 @@ export class NutritionPlanService {
     }
     
     if (['media_manana', 'media_tarde', 'colacion'].includes(mealType)) {
-      return this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies)
-        .slice(0, 2)  // Snacks: máximo 2 alimentos
+      // 🔥 CORRECCIÓN: Usar índice DIFERENTE para cada tipo de snack
+      const snackIndex = this._getSnackIndex(mealType, dayIndex);
+      return this._getMockFoodsForMeal(mealType, snackIndex, needsGlycemicControl, input.allergies)
+        .slice(0, 2)
         .map((f: FoodItem) => this._roundFoodValues(f));
     }
     
@@ -250,7 +275,7 @@ export class NutritionPlanService {
       
       const filtered = apiFoods
         .filter((food: FoodItem) => food.calories > 0)
-        .slice(0, 2);  // Desayuno: máximo 2 alimentos
+        .slice(0, 2);
       
       if (filtered.length >= 2) {
         return filtered
@@ -264,104 +289,12 @@ export class NutritionPlanService {
       console.warn(`⚠️ FatSecret fallback para ${mealType}`);
     }
     
-    // Fallback desayuno: mockDB con rotación
     return this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies)
       .slice(0, 2)
       .map((f: FoodItem) => this._roundFoodValues(f));
   }
 
-  // ============================================================================
-  // 🎯 QUERIES DE BÚSQUEDA
-  // ============================================================================
-  private getMainFoodQuery(
-    mealType: MealType, 
-    dietaryStyle: DietaryStyle, 
-    dayIndex: number, 
-    needsGlycemicControl: boolean
-  ): string {
-    if (needsGlycemicControl) {
-      const glycemicOptions: Record<MealType, string[]> = {
-        desayuno: ['egg', 'greek yogurt', 'oatmeal', 'cottage cheese'],
-        media_manana: ['almonds', 'apple', 'pear', 'berries'],
-        almuerzo: ['grilled chicken', 'salmon', 'white fish', 'lentils'],
-        media_tarde: ['greek yogurt', 'walnuts', 'cucumber'],
-        cena: ['grilled fish', 'chicken breast', 'turkey', 'vegetable soup'],
-        colacion: ['cottage cheese', 'almonds']
-      };
-      return glycemicOptions[mealType]?.[dayIndex % glycemicOptions[mealType].length] || 'vegetables';
-    }
-    
-    const breakfastOptions = ['oatmeal', 'egg', 'whole wheat bread', 'greek yogurt'];
-    const lunchOptions = ['chicken breast', 'white fish', 'lentils', 'quinoa'];
-    const dinnerOptions = ['vegetable soup', 'grilled fish', 'tofu', 'salad'];
-    const snackOptions = ['apple', 'almonds', 'greek yogurt', 'carrot'];
-    
-    let options: string[];
-    switch(mealType) {
-      case 'desayuno': options = breakfastOptions; break;
-      case 'almuerzo': options = lunchOptions; break;
-      case 'cena': options = dinnerOptions; break;
-      case 'media_manana':
-      case 'media_tarde':
-      case 'colacion': options = snackOptions; break;
-      default: return 'vegetables';
-    }
-    
-    return options[dayIndex % options.length];
-  }
-
-  // ============================================================================
-  // 🗣️ TRADUCCIÓN: Query inglés → español
-  // ============================================================================
-  private _translateQuery(query: string): string {
-    const EN_TO_ES: Record<string, string> = {
-      'chicken': 'pollo', 'chicken breast': 'pechuga de pollo', 'chicken thigh': 'muslo de pollo',
-      'fish': 'pescado', 'white fish': 'pescado blanco', 'salmon': 'salmón', 'grilled fish': 'pescado a la plancha',
-      'beef': 'res', 'pork': 'cerdo', 'turkey': 'pavo', 'tofu': 'tofu', 'lentils': 'lentejas',
-      'egg': 'huevo', 'eggs': 'huevo', 'shrimp': 'camarones', 'tuna': 'atún', 'cod': 'bacalao',
-      'ground beef': 'carne molida', 'pork chop': 'chuleta de cerdo', 'lamb': 'cordero',
-      'rice': 'arroz', 'white rice': 'arroz blanco', 'brown rice': 'arroz integral',
-      'quinoa': 'quinoa', 'oatmeal': 'avena', 'whole wheat bread': 'pan integral',
-      'pasta': 'pasta', 'bread': 'pan', 'oats': 'avena', 'barley': 'cebada',
-      'wheat': 'trigo', 'corn': 'maíz', 'tortilla': 'tortilla',
-      'yogurt': 'yogur', 'greek yogurt': 'yogur griego', 'cottage cheese': 'queso cottage',
-      'milk': 'leche', 'cheese': 'queso', 'butter': 'mantequilla', 'cream': 'crema',
-      'mozzarella': 'queso mozzarella', 'cheddar': 'queso cheddar',
-      'apple': 'manzana', 'pear': 'pera', 'banana': 'banana', 'orange': 'naranja',
-      'strawberry': 'fresa', 'strawberries': 'fresas', 'grape': 'uva', 'grapes': 'uvas',
-      'pineapple': 'piña', 'mango': 'mango', 'papaya': 'papaya', 'watermelon': 'sandía',
-      'melon': 'melón', 'peach': 'durazno', 'plum': 'ciruela', 'kiwi': 'kiwi',
-      'blueberry': 'arándano', 'raspberry': 'frambuesa', 'blackberry': 'mora',
-      'broccoli': 'brócoli', 'carrot': 'zanahoria', 'spinach': 'espinacas',
-      'cucumber': 'pepino', 'celery': 'apio', 'lettuce': 'lechuga',
-      'vegetable soup': 'sopa de verduras', 'salad': 'ensalada',
-      'tomato': 'tomate', 'tomatoes': 'tomates', 'onion': 'cebolla', 'garlic': 'ajo',
-      'pepper': 'pimiento', 'bell pepper': 'pimiento', 'zucchini': 'calabacín',
-      'cauliflower': 'coliflor', 'cabbage': 'repollo', 'asparagus': 'espárragos',
-      'green beans': 'ejotes', 'peas': 'guisantes', 
-      'avocado': 'aguacate', 'mushroom': 'champiñón', 'mushrooms': 'champiñones',
-      'almonds': 'almendras', 'walnuts': 'nueces', 'peanuts': 'maní',
-      'cashews': 'anacardos', 'pistachios': 'pistachos', 'hazelnuts': 'avellanas',
-      'trail mix': 'mix de frutos secos', 'granola': 'granola',
-      'honey': 'miel', 'jam': 'mermelada', 'peanut butter': 'mantequilla de maní',
-      'chocolate': 'chocolate', 'cookies': 'galletas', 'crackers': 'galletas saladas',
-      'water': 'agua', 'juice': 'jugo', 'orange juice': 'jugo de naranja',
-      'coffee': 'café', 'tea': 'té', 'green tea': 'té verde',
-      'soda': 'refresco', 'beer': 'cerveza', 'wine': 'vino'
-    };
-    
-    const queryLower = query.toLowerCase().trim();
-    if (EN_TO_ES[queryLower]) return EN_TO_ES[queryLower];
-    
-    const sortedKeys = Object.keys(EN_TO_ES).sort((a, b) => b.length - a.length);
-    for (const en of sortedKeys) {
-      if (queryLower.includes(en)) return EN_TO_ES[en];
-    }
-    
-    return query.charAt(0).toUpperCase() + query.slice(1);
-  }
-
-  // ============================================================================
+    // ============================================================================
   // 🗣️ TRADUCCIÓN: Nombre de alimento inglés → español
   // ============================================================================
   private _translateFoodName(name: string): string {
@@ -817,7 +750,60 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🎭 FALLBACK MOCK INTELIGENTE (SIN INCONSISTENCIAS)
+  // 🔥 NUEVO: ÍNDICE DIFERENTE PARA CADA SNACK
+  // ============================================================================
+  private _getSnackIndex(mealType: MealType, dayIndex: number): number {
+    // Cada tipo de snack tiene su propio ciclo de rotación
+    const offsets: Record<string, number> = {
+      'media_manana': 0,
+      'media_tarde': 2,
+      'colacion': 4
+    };
+    return (dayIndex + (offsets[mealType] || 0)) % 7;
+  }
+
+  // ============================================================================
+  // 🎯 QUERIES DE BÚSQUEDA
+  // ============================================================================
+  private getMainFoodQuery(
+    mealType: MealType, 
+    dietaryStyle: DietaryStyle, 
+    dayIndex: number, 
+    needsGlycemicControl: boolean
+  ): string {
+    if (needsGlycemicControl) {
+      const glycemicOptions: Record<MealType, string[]> = {
+        desayuno: ['egg', 'greek yogurt', 'oatmeal', 'cottage cheese'],
+        media_manana: ['almonds', 'apple', 'pear', 'berries'],
+        almuerzo: ['grilled chicken', 'salmon', 'white fish', 'lentils'],
+        media_tarde: ['greek yogurt', 'walnuts', 'cucumber'],
+        cena: ['grilled fish', 'chicken breast', 'turkey', 'vegetable soup'],
+        colacion: ['cottage cheese', 'almonds']
+      };
+      return glycemicOptions[mealType]?.[dayIndex % glycemicOptions[mealType].length] || 'vegetables';
+    }
+    
+    const breakfastOptions = ['oatmeal', 'egg', 'whole wheat bread', 'greek yogurt'];
+    const lunchOptions = ['chicken breast', 'white fish', 'lentils', 'quinoa'];
+    const dinnerOptions = ['vegetable soup', 'grilled fish', 'tofu', 'salad'];
+    const snackOptions = ['apple', 'almonds', 'greek yogurt', 'carrot'];
+    
+    let options: string[];
+    switch(mealType) {
+      case 'desayuno': options = breakfastOptions; break;
+      case 'almuerzo': options = lunchOptions; break;
+      case 'cena': options = dinnerOptions; break;
+      case 'media_manana':
+      case 'media_tarde':
+      case 'colacion': options = snackOptions; break;
+      default: return 'vegetables';
+    }
+    
+    return options[dayIndex % options.length];
+  }
+
+  // ============================================================================
+  // 🎭 FALLBACK MOCK INTELIGENTE (CORREGIDO)
   // ============================================================================
   private _getMockFoodsForMeal(
     mealType: MealType, 
@@ -841,10 +827,11 @@ export class NutritionPlanService {
         { food_id: 'mock_lentejas_1', name: 'Lentejas cocidas', brand: '', serving_size: 100, serving_unit: 'g', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 8 },
         { food_id: 'mock_tofu_1', name: 'Tofu firme', brand: '', serving_size: 100, serving_unit: 'g', calories: 144, protein: 17, carbs: 3, fat: 9, fiber: 2 }
       ],
+      // 🔥 CORRECCIÓN: Para Control Glucémico, preferir carbohidratos de bajo IG
       carbohidrato_principal: [
-        { food_id: 'mock_arroz_1', name: 'Arroz blanco cocido', brand: '', serving_size: 100, serving_unit: 'g', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4 },
         { food_id: 'mock_arroz_integral_1', name: 'Arroz integral cocido', brand: '', serving_size: 100, serving_unit: 'g', calories: 112, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8 },
         { food_id: 'mock_quinoa_1', name: 'Quinoa cocida', brand: '', serving_size: 100, serving_unit: 'g', calories: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8 },
+        { food_id: 'mock_lentejas_carb_1', name: 'Lentejas cocidas', brand: '', serving_size: 100, serving_unit: 'g', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 8 },
         { food_id: 'mock_papa_1', name: 'Papa cocida', brand: '', serving_size: 100, serving_unit: 'g', calories: 87, protein: 1.9, carbs: 20, fat: 0.1, fiber: 2.2 }
       ],
       verduras_bajo_ig: [
@@ -859,7 +846,9 @@ export class NutritionPlanService {
         { food_id: 'mock_yogur_griego_1', name: 'Yogur griego natural', brand: '', serving_size: 150, serving_unit: 'g', calories: 90, protein: 16, carbs: 6, fat: 0, fiber: 0 },
         { food_id: 'mock_pepino_1', name: 'Pepino en rodajas', brand: '', serving_size: 100, serving_unit: 'g', calories: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5 },
         { food_id: 'mock_cottage_1', name: 'Queso cottage', brand: '', serving_size: 100, serving_unit: 'g', calories: 98, protein: 11, carbs: 3.4, fat: 4.3, fiber: 0 },
-        { food_id: 'mock_pera_1', name: 'Pera fresca', brand: '', serving_size: 100, serving_unit: 'g', calories: 57, protein: 0.4, carbs: 15, fat: 0.1, fiber: 3.1 }
+        { food_id: 'mock_pera_1', name: 'Pera fresca', brand: '', serving_size: 100, serving_unit: 'g', calories: 57, protein: 0.4, carbs: 15, fat: 0.1, fiber: 3.1 },
+        { food_id: 'mock_nueces_1', name: 'Nueces crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, fiber: 1.9 },
+        { food_id: 'mock_zanahoria_1', name: 'Zanahoria en bastones', brand: '', serving_size: 100, serving_unit: 'g', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2, fiber: 2.8 }
       ]
     };
 
@@ -890,15 +879,11 @@ export class NutritionPlanService {
       ];
 
     } else {
-      // 🔥 Snacks: rotación EXPLÍCITA por grupo de 3 días
-      const dayGroup = dayIndex % 3;
-      const snackGroups: Record<number, [string, string]> = {
-        0: ['mock_almendras_1', 'mock_manzana_1'],    // Frutos secos + fruta
-        1: ['mock_yogur_griego_1', 'mock_pepino_1'],  // Lácteo + verdura
-        2: ['mock_cottage_1', 'mock_pera_1']          // Queso + fruta
-      };
-      const [food1, food2] = snackGroups[dayGroup];
-      candidates = mockDB['snack_rotativo'].filter(f => f.food_id === food1 || f.food_id === food2);
+      // 🔥 Snacks: rotación con 8 opciones para mayor variedad
+      const snackPool = mockDB['snack_rotativo'];
+      const idx1 = dayIndex % snackPool.length;
+      const idx2 = (dayIndex + 1) % snackPool.length;
+      candidates = [snackPool[idx1], snackPool[idx2]];
     }
 
     return candidates
@@ -917,7 +902,7 @@ export class NutritionPlanService {
       ],
       almuerzo: [
         { food_id: 'min_pollo', name: 'Pechuga de pollo', serving_size: 100, serving_unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
-        { food_id: 'min_arroz', name: 'Arroz blanco', serving_size: 100, serving_unit: 'g', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4 },
+        { food_id: 'min_arroz_integral', name: 'Arroz integral', serving_size: 100, serving_unit: 'g', calories: 112, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8 },
         { food_id: 'min_brocoli', name: 'Brócoli', serving_size: 100, serving_unit: 'g', calories: 35, protein: 2.4, carbs: 7, fat: 0.4, fiber: 3.3 }
       ],
       cena: [
