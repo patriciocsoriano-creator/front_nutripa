@@ -1,5 +1,5 @@
 // src/app/paginas/medicocrearplan/medicocrearplan.page.ts
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
@@ -83,7 +83,7 @@ export class MedicocrearplanPage implements OnInit {
     cintura: null,
     colesterol_ldl: null,
     actividad_fisica: 'moderada',
-    preferencias_alimentarias: 'occidental',
+    preferencias_alimentarias: 'equilibrada',
     situacion_economica: 'media',
     objetivos: [],
     recomendaciones: '',
@@ -102,7 +102,7 @@ export class MedicocrearplanPage implements OnInit {
   ];
 
   preferenciasAlimentarias = [
-    { id: 'occidental', label: 'Occidental tradicional' },
+    { id: 'equilibrada', label: 'equilibrada' },
     { id: 'mediterranea', label: 'Mediterránea' },
     { id: 'baja_carbo', label: 'Baja en carbohidratos' },
     { id: 'vegetariana', label: 'Vegetariana' },
@@ -130,7 +130,8 @@ export class MedicocrearplanPage implements OnInit {
     private mlService: MlService,  // ✅ Ahora funcionará si MlService tiene @Injectable
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private cdr: ChangeDetectorRef 
   ) {}
 
   async ngOnInit() {
@@ -342,22 +343,33 @@ private inferirTieneDiabetes(): number {
 
 
   private sugerirObjetivosPorPerfil(perfilId: number) {
-    const sugerencias: Record<number, string[]> = {
-      0: ['perder_peso', 'mejorar_lipidos'],
-      1: ['control_glucosa', 'educacion_nutricional'],
-      2: ['mejorar_lipidos', 'control_glucosa'],
-      3: ['aumentar_energia', 'educacion_nutricional']
-    };
-    this.formulario.objetivos = sugerencias[perfilId] || [];
+  // 🎯 Objetivos sugeridos
+  const sugerencias: Record<number, string[]> = {
+    0: ['perder_peso', 'mejorar_lipidos'],
+    1: ['control_glucosa', 'educacion_nutricional'],
+    2: ['mejorar_lipidos', 'control_glucosa'],
+    3: ['aumentar_energia', 'educacion_nutricional']
+  };
+  this.formulario.objetivos = sugerencias[perfilId] || [];
 
-     // 🍽️ NUEVO: Preferencia alimentaria sugerida según perfil
+  // 🍽️ Preferencia alimentaria sugerida según perfil
   const preferenciasPorPerfil: Record<number, string> = {
     0: 'baja_carbo',        // Hipocalórico → baja en carbohidratos
-    1: 'mediterranea',      // Control Glucémico → mediterránea (bajo índice glucémico)
-    2: 'vegetariana',      // Hipo-grasa → vegetariana (naturalmente baja en grasas saturadas)
-    3: 'sin_restricciones'  // Normocalórico → sin restricciones
+    1: 'mediterranea',      // Control Glucémico → mediterránea
+    2: 'vegetariana',       // Hipo-grasa → vegetariana
+    3: 'equilibrada'        // Normocalórico → equilibrada (mantenimiento)
   };
-  this.formulario.preferencias_alimentarias = preferenciasPorPerfil[perfilId] || 'occidental';
+  
+  // ✅ Forzar cambio de valor y notificar a Ionic
+  const nuevaPreferencia = preferenciasPorPerfil[perfilId] || 'equilibrada';
+  
+  // Truco: primero limpiamos, luego asignamos (fuerza re-render del ion-select)
+  this.formulario.preferencias_alimentarias = '';
+  
+  setTimeout(() => {
+    this.formulario.preferencias_alimentarias = nuevaPreferencia;
+    this.cdr.detectChanges();  // ← Forzar detección de cambios
+  }, 50);
 }
   
 
