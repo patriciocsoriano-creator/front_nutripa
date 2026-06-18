@@ -766,3 +766,48 @@ ion-textarea textarea {
     font-size: 1.1rem;
   }
 }
+
+/* ================================================================
+   🔧 FIX AGRESIVO: Texto visible en ion-textarea (contenido IA y usuario)
+   ================================================================ */
+
+/* Selector directo al textarea nativo */
+ion-textarea textarea,
+ion-textarea .native-textarea,
+ion-textarea .input-wrapper textarea {
+  color: #2c3e50 !important;
+  -webkit-text-fill-color: #2c3e50 !important;
+  caret-color: #2c3e50 !important;
+}
+
+/* Selector para el contenido renderizado */
+ion-textarea .sc-ion-textarea-md,
+ion-textarea .sc-ion-textarea-ios,
+ion-textarea ion-textarea {
+  color: #2c3e50 !important;
+}
+
+/* Forzar color en todos los niveles de shadow DOM */
+ion-textarea {
+  --color: #2c3e50 !important;
+  --highlight-color-focused: #2c3e50 !important;
+  
+  .input-wrapper {
+    color: #2c3e50 !important;
+  }
+  
+  &.has-focus .input-wrapper {
+    color: #2c3e50 !important;
+  }
+}
+
+/* Fallback universal para cualquier textarea dentro del card */
+.recomendaciones-card {
+  ion-textarea,
+  ion-textarea *,
+  ion-textarea::part(native),
+  textarea {
+    color: #2c3e50 !important;
+    -webkit-text-fill-color: #2c3e50 !important;
+  }
+}
