@@ -295,11 +295,18 @@ export class NutritionPlanService {
       notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
     });
   }
-  const adjustedMeals = this.adjustPortionsToMeetCalories(meals, input.daily_calories);
-
-return adjustedMeals;
   
- 
+    // AJUSTAR PORCIONES PARA CUMPLIR CALORÍAS DIARIAS
+  let adjustedMeals = this.adjustPortionsToMeetCalories(meals, input.daily_calories);
+  
+  // VALIDAR CALORÍAS MÍNIMAS POR COMIDA
+  adjustedMeals = this.validateMinimumCaloriesPerMeal(
+    adjustedMeals, 
+    input.daily_calories, 
+    mealDist
+  );
+  
+  return adjustedMeals;
 }
 
   private _esAlimentoApropiado(food: FoodItem): boolean {
@@ -990,6 +997,66 @@ private adjustPortionsToMeetCalories(
   
   const newTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
   console.log(`✅ [AJUSTE] Nuevo total: ${newTotal.toFixed(0)} kcal`);
+  
+  return meals;
+}
+// ========================================
+// VALIDAR CALORÍAS MÍNIMAS POR COMIDA
+// ========================================
+private validateMinimumCaloriesPerMeal(
+  meals: MealPlan[], 
+  dailyCalories: number,
+  mealDist: Record<MealType, number>
+): MealPlan[] {
+  
+  meals.forEach(meal => {
+    const targetCalories = dailyCalories * mealDist[meal.meal_type];
+    const minCalories = targetCalories * 0.7; // Mínimo 70% del objetivo
+    
+    if (meal.total_calories < minCalories) {
+      console.warn(
+        `⚠️ [VALIDACIÓN] ${meal.meal_type} tiene solo ${meal.total_calories.toFixed(0)} kcal ` +
+        `(mínimo esperado: ${minCalories.toFixed(0)} kcal)`
+      );
+      
+      // Calcular factor de ajuste para esta comida específica
+      const factor = targetCalories / meal.total_calories;
+      const limitedFactor = Math.min(2.0, factor); // Máximo duplicar
+      
+      meal.foods.forEach(food => {
+        if (food.serving_unit === 'unidad' || food.serving_unit === 'rebanada') {
+          return;
+        }
+        
+        const newServing = food.serving_size * limitedFactor;
+        const scale = newServing / food.serving_size;
+        
+        food.serving_size = this._round(newServing);
+        food.calories = this._round(food.calories * scale);
+        food.protein = this._round(food.protein * scale);
+        food.carbs = this._round(food.carbs * scale);
+        food.fat = this._round(food.fat * scale);
+        if (food.fiber) {
+          food.fiber = this._round(food.fiber * scale);
+        }
+      });
+      
+      // Recalcular totales
+      const mealTotals = meal.foods.reduce((acc: any, food: FoodItem) => ({
+        calories: acc.calories + food.calories,
+        protein: acc.protein + food.protein,
+        carbs: acc.carbs + food.carbs,
+        fat: acc.fat + food.fat
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      
+      meal.total_calories = this._round(mealTotals.calories);
+      meal.total_protein = this._round(mealTotals.protein);
+      meal.total_carbs = this._round(mealTotals.carbs);
+      meal.total_fat = this._round(mealTotals.fat);
+      
+      console.log(`✅ [VALIDACIÓN] ${meal.meal_type} ajustado a ${meal.total_calories.toFixed(0)} kcal`);
+    }
+  });
   
   return meals;
 }
