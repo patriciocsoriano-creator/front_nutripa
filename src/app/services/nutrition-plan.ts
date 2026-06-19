@@ -204,13 +204,20 @@ export class NutritionPlanService {
         fiber: this._round((acc.fiber || 0) + meal.foods.reduce((s: number, f: FoodItem) => s + (f.fiber || 0), 0))
       }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
       
+      let specialNotes = this.getDailyNotes(needsGlycemicControl ? 'Control Glucemico' : input.profile_type, i);
+      
+      // Validación de fibra mínima
+      if (daily_totals.fiber < 25) {
+        specialNotes += ' Incrementar fibra.';
+      }
+      
       days.push({
         date: date.toISOString().split('T')[0],
         day_name: dayName.charAt(0).toUpperCase() + dayName.slice(1),
         meals,
         daily_totals,
         hydration_goal_liters: this.calculateHydrationGoal(input.preferences.activity_level),
-        special_notes: this.getDailyNotes(needsGlycemicControl ? 'Control Glucemico' : input.profile_type, i)
+        special_notes: specialNotes
       });
     }
     
@@ -259,6 +266,7 @@ export class NutritionPlanService {
       
       foods = foods.filter(food => this._esAlimentoApropiado(food));
       foods = this._eliminarDuplicados(foods);
+      foods = this.removeDoubleCarbs(foods);
       
       if (foods.length === 0) {
         foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
@@ -279,7 +287,22 @@ export class NutritionPlanService {
         }
       }
       
-      foods = this._adjustPortionsToTargetCalories(foods, targetCalories);
+      // NUEVO: Optimizar macros en lugar de solo calorías
+      const macroTargets = this.getMacroTargetsForMeal(
+        input.daily_calories,
+        needsGlycemicControl ? 'Control Glucemico' : input.profile_type,
+        mealType
+      );
+      
+      foods = this.optimizeMealMacros(
+        foods,
+        macroTargets.protein,
+        macroTargets.carbs,
+        macroTargets.fat
+      );
+      
+      // Validar macros de cada alimento
+      foods = foods.map(food => this.validateFoodMacros(food));
       
       const totals = foods.reduce((acc: any, food: FoodItem) => ({
         calories: this._round(acc.calories + food.calories),
@@ -299,7 +322,26 @@ export class NutritionPlanService {
         notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
       });
     }
-    return meals;
+    
+    // Validar calorías del día completo
+    let dayPlan: DayPlan = {
+  date: new Date().toISOString().split('T')[0],
+  day_name: dayName,
+  meals,
+  daily_totals: { 
+    calories: 0, 
+    protein: 0, 
+    carbs: 0, 
+    fat: 0, 
+    fiber: 0 
+  },
+  hydration_goal_liters: 0,
+  special_notes: ''
+};
+
+dayPlan = this.validateDayCalories(dayPlan, input.daily_calories);
+
+return dayPlan.meals;
   }
 
   private _esAlimentoApropiado(food: FoodItem): boolean {
@@ -333,48 +375,195 @@ export class NutritionPlanService {
     return unique;
   }
 
-  // SOLUCION 3: Factor de escala más agresivo (0.8-1.5)
-  private _adjustPortionsToTargetCalories(foods: FoodItem[], targetCalories: number): FoodItem[] {
-    if (foods.length === 0 || targetCalories === 0) return foods;
+  // NUEVO: Evitar combinaciones de carbohidratos complejos
+  private removeDoubleCarbs(foods: FoodItem[]): FoodItem[] {
+    const carbFoods = foods.filter(f => f.carbs > 15);
     
-    const currentCalories = foods.reduce((sum, f) => sum + f.calories, 0);
-    const ratio = targetCalories / currentCalories;
+    if (carbFoods.length <= 1) {
+      return foods;
+    }
     
-    if (Math.abs(ratio - 1) < 0.15) return foods;
+    const hasLentils = carbFoods.some(f => 
+      f.name.toLowerCase().includes('lenteja')
+    );
     
-    const factorLimitado = Math.max(0.8, Math.min(1.5, ratio));
+    const hasBeans = carbFoods.some(f => 
+      f.name.toLowerCase().includes('frijol') || 
+      f.name.toLowerCase().includes('bean')
+    );
     
-    return foods.map(food => {
-      const esHuevo = food.name.toLowerCase().includes('huevo') || 
-                      food.name.toLowerCase().includes('egg');
+    if (!hasLentils && !hasBeans) {
+      return foods;
+    }
+    
+    return foods.filter(f => {
+      const name = f.name.toLowerCase();
       
-      if (esHuevo || food.serving_unit?.toLowerCase() === 'unidad') {
-        return food;
+      if (hasLentils && (name.includes('arroz') || name.includes('quinoa'))) {
+        return false;
       }
       
-      const nuevaPorcion = food.serving_size * factorLimitado;
-      const porcionFinal = Math.max(10, Math.min(300, nuevaPorcion));
-      const factorFinal = porcionFinal / food.serving_size;
+      if (hasBeans && (name.includes('arroz') || name.includes('quinoa') || name.includes('papa'))) {
+        return false;
+      }
       
-      return {
-        ...food,
-        serving_size: this._round(porcionFinal),
-        calories: this._round(food.calories * factorFinal),
-        protein: this._round(food.protein * factorFinal),
-        carbs: this._round(food.carbs * factorFinal),
-        fat: this._round(food.fat * factorFinal),
-        fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
-      };
+      return true;
     });
   }
 
-  private _getMaxUnidades(nameLower: string): number {
-    for (const [key, max] of Object.entries(this.LIMITES_UNIDADES)) {
-      if (nameLower.includes(key)) {
-        return max;
+  // NUEVO: Optimizar por macros en lugar de solo calorías
+  private optimizeMealMacros(
+    foods: FoodItem[],
+    targetProtein: number,
+    targetCarbs: number,
+    targetFat: number
+  ): FoodItem[] {
+    
+    const result = [...foods];
+    
+    // Identificar alimento principal de proteína
+    const proteinFood = result.find(f => 
+      f.protein > f.carbs && 
+      f.protein > f.fat
+    );
+    
+    // Identificar alimento principal de carbohidratos
+    const carbFood = result.find(f => 
+      f.carbs > f.protein && 
+      f.carbs > f.fat
+    );
+    
+    // Ajustar proteína
+    if (proteinFood) {
+      const factor = targetProtein / Math.max(proteinFood.protein, 1);
+      const newServing = proteinFood.serving_size * Math.max(0.8, Math.min(1.8, factor));
+      const scale = newServing / proteinFood.serving_size;
+      
+      proteinFood.serving_size = this._round(newServing);
+      proteinFood.calories = this._round(proteinFood.calories * scale);
+      proteinFood.protein = this._round(proteinFood.protein * scale);
+      proteinFood.carbs = this._round(proteinFood.carbs * scale);
+      proteinFood.fat = this._round(proteinFood.fat * scale);
+      if (proteinFood.fiber) {
+        proteinFood.fiber = this._round(proteinFood.fiber * scale);
       }
     }
-    return 5;
+    
+    // Ajustar carbohidratos
+    if (carbFood) {
+      const factor = targetCarbs / Math.max(carbFood.carbs, 1);
+      const newServing = carbFood.serving_size * Math.max(0.7, Math.min(1.5, factor));
+      const scale = newServing / carbFood.serving_size;
+      
+      carbFood.serving_size = this._round(newServing);
+      carbFood.calories = this._round(carbFood.calories * scale);
+      carbFood.protein = this._round(carbFood.protein * scale);
+      carbFood.carbs = this._round(carbFood.carbs * scale);
+      carbFood.fat = this._round(carbFood.fat * scale);
+      if (carbFood.fiber) {
+        carbFood.fiber = this._round(carbFood.fiber * scale);
+      }
+    }
+    
+    return result;
+  }
+
+  // NUEVO: Calcular macros objetivo diarios
+  private getMacroTargets(calories: number, profile: string) {
+    const macros = this._getMacrosForProfile(profile);
+    
+    return {
+      proteinGrams: this._round((calories * (macros.protein / 100)) / 4),
+      carbsGrams: this._round((calories * (macros.carbs / 100)) / 4),
+      fatGrams: this._round((calories * (macros.fat / 100)) / 9)
+    };
+  }
+
+  // NUEVO: Calcular macros objetivo por comida
+  private getMacroTargetsForMeal(
+    dailyCalories: number,
+    profile: string,
+    mealType: MealType
+  ) {
+    const daily = this.getMacroTargets(dailyCalories, profile);
+    
+    const distribution: Record<MealType, number> = {
+      desayuno: 0.20,
+      media_manana: 0.10,
+      almuerzo: 0.30,
+      media_tarde: 0.10,
+      cena: 0.20,
+      colacion: 0.10
+    };
+    
+    const factor = distribution[mealType];
+    
+    return {
+      protein: this._round(daily.proteinGrams * factor),
+      carbs: this._round(daily.carbsGrams * factor),
+      fat: this._round(daily.fatGrams * factor)
+    };
+  }
+
+  // NUEVO: Validar consistencia de macros
+  private validateFoodMacros(food: FoodItem): FoodItem {
+    const totalMacroCalories = 
+      (food.protein * 4) + 
+      (food.carbs * 4) + 
+      (food.fat * 9);
+    
+    if (totalMacroCalories > food.calories * 1.4) {
+      console.warn('Macros inconsistentes:', food.name);
+      return {
+        ...food,
+        protein: 0,
+        fat: 0
+      };
+    }
+    
+    return food;
+  }
+
+  // NUEVO: Validar calorías del día ±5%
+  private validateDayCalories(day: DayPlan, targetCalories: number): DayPlan {
+    const min = targetCalories * 0.95;
+    const max = targetCalories * 1.05;
+    
+    const current = day.daily_totals.calories;
+    
+    if (current >= min && current <= max) {
+      return day;
+    }
+    
+    const factor = targetCalories / current;
+    
+    day.meals.forEach(meal => {
+      meal.foods.forEach(food => {
+        if (food.serving_unit === 'unidad') {
+          return;
+        }
+        
+        food.serving_size = this._round(food.serving_size * factor);
+        food.calories = this._round(food.calories * factor);
+        food.protein = this._round(food.protein * factor);
+        food.carbs = this._round(food.carbs * factor);
+        food.fat = this._round(food.fat * factor);
+        if (food.fiber) {
+          food.fiber = this._round(food.fiber * factor);
+        }
+      });
+    });
+    
+    // Recalcular totales
+    day.daily_totals = day.meals.reduce((acc: any, meal: MealPlan) => ({
+      calories: this._round(acc.calories + meal.total_calories),
+      protein: this._round(acc.protein + meal.total_protein),
+      carbs: this._round(acc.carbs + meal.total_carbs),
+      fat: this._round(acc.fat + meal.total_fat),
+      fiber: this._round((acc.fiber || 0) + meal.foods.reduce((s: number, f: FoodItem) => s + (f.fiber || 0), 0))
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+    
+    return day;
   }
 
   private async selectFoodsForMeal(
