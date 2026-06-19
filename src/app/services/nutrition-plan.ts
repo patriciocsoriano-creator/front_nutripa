@@ -17,7 +17,6 @@ import {
 } from '../models/nutrition-plan.model';
 import { FatsecretApiService } from 'src/app/services/fatsecret-api';
 import { environment } from 'src/environments/environment';
-import { NutritionOptimizerService } from 'src/app/services/nutrition-optimizer';
 
 @Injectable({ providedIn: 'root' })
 export class NutritionPlanService {
@@ -32,94 +31,26 @@ export class NutritionPlanService {
     'supplement', 'suplemento', 'powder', 'polvo', 'concentrate'
   ];
 
-  private readonly PORCIONES_TIPICAS: Record<string, { size: number; unit: string }> = {
-    'huevo': { size: 50, unit: 'unidad' },
-    'egg': { size: 50, unit: 'unidad' },
-    'leche': { size: 240, unit: 'ml' },
-    'milk': { size: 240, unit: 'ml' },
-    'yogur': { size: 150, unit: 'g' },
-    'yogurt': { size: 150, unit: 'g' },
-    'queso': { size: 30, unit: 'g' },
-    'cheese': { size: 30, unit: 'g' },
-    'cottage': { size: 100, unit: 'g' },
-    'arroz': { size: 150, unit: 'g' },
-    'rice': { size: 150, unit: 'g' },
-    'pasta': { size: 150, unit: 'g' },
-    'pollo': { size: 120, unit: 'g' },
-    'chicken': { size: 120, unit: 'g' },
-    'pescado': { size: 120, unit: 'g' },
-    'fish': { size: 120, unit: 'g' },
-    'salmon': { size: 120, unit: 'g' },
-    'salmón': { size: 120, unit: 'g' },
-    'carne': { size: 120, unit: 'g' },
-    'beef': { size: 120, unit: 'g' },
-    'res': { size: 120, unit: 'g' },
-    'cerdo': { size: 120, unit: 'g' },
-    'pork': { size: 120, unit: 'g' },
-    'tofu': { size: 100, unit: 'g' },
-    'manzana': { size: 150, unit: 'g' },
-    'apple': { size: 150, unit: 'g' },
-    'banana': { size: 120, unit: 'g' },
-    'plátano': { size: 120, unit: 'g' },
-    'pera': { size: 150, unit: 'g' },
-    'pear': { size: 150, unit: 'g' },
-    'naranja': { size: 150, unit: 'g' },
-    'orange': { size: 150, unit: 'g' },
-    'brócoli': { size: 100, unit: 'g' },
-    'broccoli': { size: 100, unit: 'g' },
-    'espinaca': { size: 100, unit: 'g' },
-    'spinach': { size: 100, unit: 'g' },
-    'zanahoria': { size: 100, unit: 'g' },
-    'carrot': { size: 100, unit: 'g' },
-    'pepino': { size: 100, unit: 'g' },
-    'cucumber': { size: 100, unit: 'g' },
-    'nueces': { size: 30, unit: 'g' },
-    'nuts': { size: 30, unit: 'g' },
-    'almendras': { size: 30, unit: 'g' },
-    'almonds': { size: 30, unit: 'g' },
-    'avena': { size: 40, unit: 'g' },
-    'oatmeal': { size: 40, unit: 'g' },
-    'oats': { size: 40, unit: 'g' },
-    'pan': { size: 30, unit: 'g' },
-    'bread': { size: 30, unit: 'g' },
-    'quinoa': { size: 100, unit: 'g' },
-    'lentejas': { size: 100, unit: 'g' },
-    'lentils': { size: 100, unit: 'g' },
-    'frijoles': { size: 100, unit: 'g' },
-    'beans': { size: 100, unit: 'g' },
-    'papa': { size: 150, unit: 'g' },
-    'potato': { size: 150, unit: 'g' }
-  };
-
   constructor(
     private http: HttpClient,
-    private fatsecretApi: FatsecretApiService,
-    private optimizer: NutritionOptimizerService
+    private fatsecretApi: FatsecretApiService
   ) {}
 
-  // ========================================
-  // MÉTODO PRINCIPAL
-  // ========================================
   async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
     const needsGlycemicControl = this._needsGlycemicControl(input);
     const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
     
-    const clinicalProfile = this.getClinicalProfile(profileType);
     const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
-    
-    console.log(`🎯 [NutritionPlan] Generando plan para perfil: ${profileType}`);
-    console.log(`📊 [NutritionPlan] Macros objetivo: P=${clinicalProfile.protein}% C=${clinicalProfile.carbs}% G=${clinicalProfile.fat}%`);
-    
     const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
     const monthlySummary = this.generateMonthlySummary(weekPlan);
     
-    const plan: GeneratedNutritionPlan = {
+    return {
       patient_id: input.patient_id,
       patient_name: input.patient_name,
       profile_type: profileType,
       profile_id: needsGlycemicControl ? 1 : input.profile_id,
       daily_calorie_target: input.daily_calories,
-      macro_distribution: clinicalProfile,
+      macro_distribution: this._getMacrosForProfile(profileType),
       restrictions: {
         allergies: input.allergies,
         intolerances: [],
@@ -140,39 +71,6 @@ export class NutritionPlanService {
         glycemic_control_applied: needsGlycemicControl
       }
     };
-
-    // ========================================
-    // OPTIMIZACIÓN FINAL CON SERVICIO DEDICADO
-    // ========================================
-    const targets = {
-      calories: input.daily_calories,
-      proteinGrams: (input.daily_calories * clinicalProfile.protein / 100) / 4,
-      carbGrams: (input.daily_calories * clinicalProfile.carbs / 100) / 4,
-      fatGrams: (input.daily_calories * clinicalProfile.fat / 100) / 9,
-      fiberMin: profileType === 'Control Glucemico' ? 25 : 20,
-      tolerance: 5
-    };
-
-    console.log('🎯 [NutritionPlan] Objetivos nutricionales:', targets);
-
-    const optimizedPlan = this.optimizer.optimizePlan(plan, targets);
-
-    return optimizedPlan;
-  }
-
-  // ========================================
-  // PERFILES CLÍNICOS
-  // ========================================
-  private getClinicalProfile(profile: string): { protein: number; carbs: number; fat: number } {
-    const profiles: Record<string, { protein: number; carbs: number; fat: number }> = {
-      'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
-      'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
-      'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
-      'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 },
-      'Perdida Peso': { protein: 35, carbs: 35, fat: 30 },
-      'Hipertension': { protein: 25, carbs: 45, fat: 30 }
-    };
-    return profiles[profile] || profiles['Normocalorico'];
   }
 
   private _needsGlycemicControl(input: PlanGenerationInput): boolean {
@@ -184,6 +82,16 @@ export class NutritionPlanService {
     if (glucosaAyunas && glucosaAyunas >= 126) return true;
     if (hba1c && hba1c >= 6.5) return true;
     return false;
+  }
+
+  private _getMacrosForProfile(profile: string): { protein: number; carbs: number; fat: number } {
+    const macros: Record<string, { protein: number; carbs: number; fat: number }> = {
+      'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
+      'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
+      'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
+      'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 }
+    };
+    return macros[profile] || macros['Normocalorico'];
   }
 
   private _getRecommendations(profile: string, base: NutritionPlanRecommendations): NutritionPlanRecommendations {
@@ -198,9 +106,6 @@ export class NutritionPlanService {
     return base;
   }
 
-  // ========================================
-  // GENERACIÓN SEMANAL
-  // ========================================
   private async generateWeekPlan(
     input: PlanGenerationInput, 
     mealDist: Record<MealType, number>,
@@ -208,7 +113,6 @@ export class NutritionPlanService {
   ): Promise<WeekPlan> {
     const days: DayPlan[] = [];
     const today = new Date();
-    const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
@@ -217,9 +121,15 @@ export class NutritionPlanService {
       
       const meals = await this.generateDayMeals(input, mealDist, dayName, i, needsGlycemicControl);
       
-      const daily_totals = this.calculateDayTotals(meals);
+      const daily_totals = meals.reduce((acc: any, meal: MealPlan) => ({
+        calories: this._round(acc.calories + meal.total_calories),
+        protein: this._round(acc.protein + meal.total_protein),
+        carbs: this._round(acc.carbs + meal.total_carbs),
+        fat: this._round(acc.fat + meal.total_fat),
+        fiber: this._round((acc.fiber || 0) + meal.foods.reduce((s: number, f: FoodItem) => s + (f.fiber || 0), 0))
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
       
-      let specialNotes = this.getDailyNotes(profileType, i);
+      let specialNotes = this.getDailyNotes(needsGlycemicControl ? 'Control Glucemico' : input.profile_type, i);
       
       if (daily_totals.fiber < 25) {
         specialNotes += ' Incrementar fibra.';
@@ -229,13 +139,7 @@ export class NutritionPlanService {
         date: date.toISOString().split('T')[0],
         day_name: dayName.charAt(0).toUpperCase() + dayName.slice(1),
         meals,
-        daily_totals: {
-          calories: this._round(daily_totals.calories),
-          protein: this._round(daily_totals.protein),
-          carbs: this._round(daily_totals.carbs),
-          fat: this._round(daily_totals.fat),
-          fiber: this._round(daily_totals.fiber)
-        },
+        daily_totals,
         hydration_goal_liters: this.calculateHydrationGoal(input.preferences.activity_level),
         special_notes: specialNotes
       });
@@ -248,15 +152,12 @@ export class NutritionPlanService {
       days,
       weekly_goals: {
         avg_daily_calories: Math.round(days.reduce((s: number, d: DayPlan) => s + d.daily_totals.calories, 0) / 7),
-        target_macros: this.getClinicalProfile(profileType),
-        focus_areas: this.getWeeklyFocusAreas(profileType)
+        target_macros: this._getMacrosForProfile(needsGlycemicControl ? 'Control Glucemico' : input.profile_type),
+        focus_areas: this.getWeeklyFocusAreas(needsGlycemicControl ? 'Control Glucemico' : input.profile_type)
       }
     };
   }
 
-  // ========================================
-  // GENERACIÓN DE COMIDAS DEL DÍA (SOLO GENERA, NO OPTIMIZA)
-  // ========================================
   private async generateDayMeals(
     input: PlanGenerationInput, 
     mealDist: Record<MealType, number>, 
@@ -266,7 +167,6 @@ export class NutritionPlanService {
   ): Promise<MealPlan[]> {
     const meals: MealPlan[] = [];
     const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
-    const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
     
     for (const mealType of mealOrder) {
       if (mealDist[mealType] === 0) continue;
@@ -281,7 +181,6 @@ export class NutritionPlanService {
         needsGlycemicControl
       );
       
-      // Filtrar alergias
       foods = foods.filter((food: FoodItem) => 
         !input.allergies.some((allergy: string) => 
           food.name.toLowerCase().includes(allergy.toLowerCase()) ||
@@ -289,21 +188,14 @@ export class NutritionPlanService {
         )
       );
       
-      // Filtrar alimentos no apropiados
       foods = foods.filter(food => this._esAlimentoApropiado(food));
-      
-      // Eliminar duplicados dentro de la comida
       foods = this._eliminarDuplicados(foods);
-      
-      // Evitar combinaciones de carbohidratos complejos
       foods = this.removeDoubleCarbs(foods);
       
-      // Si no hay alimentos, usar mínimos
       if (foods.length === 0) {
         foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
       }
       
-      // Garantizar proteína en almuerzo/cena
       if (mealType === 'almuerzo' || mealType === 'cena') {
         const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
         const minProtein = targetCalories * 0.25 / 4;
@@ -317,7 +209,6 @@ export class NutritionPlanService {
         }
       }
       
-      // Redondear valores
       foods = foods.map(f => this._roundFoodValues(f));
       
       const totals = foods.reduce((acc: any, food: FoodItem) => ({
@@ -335,28 +226,13 @@ export class NutritionPlanService {
         total_protein: totals.protein,
         total_carbs: totals.carbs,
         total_fat: totals.fat,
-        notes: this.getMealNotes(mealType, profileType, dayName)
+        notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
       });
     }
     
     return meals;
   }
 
-  private calculateDayTotals(meals: MealPlan[]): {
-    calories: number; protein: number; carbs: number; fat: number; fiber: number
-  } {
-    return meals.reduce((acc, meal) => ({
-      calories: acc.calories + meal.total_calories,
-      protein: acc.protein + meal.total_protein,
-      carbs: acc.carbs + meal.total_carbs,
-      fat: acc.fat + meal.total_fat,
-      fiber: acc.fiber + meal.foods.reduce((s, f) => s + (f.fiber || 0), 0)
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
-  }
-
-  // ========================================
-  // FILTROS Y VALIDACIONES BÁSICAS
-  // ========================================
   private _esAlimentoApropiado(food: FoodItem): boolean {
     const nameLower = food.name.toLowerCase();
     
@@ -423,9 +299,6 @@ export class NutritionPlanService {
     });
   }
 
-  // ========================================
-  // SELECCIÓN DE ALIMENTOS
-  // ========================================
   private async selectFoodsForMeal(
     input: PlanGenerationInput, 
     mealType: MealType, 
@@ -436,14 +309,12 @@ export class NutritionPlanService {
     
     const searchQuery = this.getMainFoodQuery(mealType, input.preferences.dietary_style, dayIndex, needsGlycemicControl);
     
-    // Almuerzo y cena: usar mock DB
     if (mealType === 'almuerzo' || mealType === 'cena') {
       return this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies)
         .slice(0, 3)
         .map((f: FoodItem) => this._roundFoodValues(f));
     }
     
-    // Snacks: usar mock DB
     if (['media_manana', 'media_tarde', 'colacion'].includes(mealType)) {
       const snackIndex = this._getSnackIndex(mealType, dayIndex);
       return this._getMockFoodsForMeal(mealType, snackIndex, needsGlycemicControl, input.allergies)
@@ -451,7 +322,6 @@ export class NutritionPlanService {
         .map((f: FoodItem) => this._roundFoodValues(f));
     }
     
-    // Desayuno: intentar API, fallback a mock
     try {
       const apiFoods: FoodItem[] = await firstValueFrom(
         this.fatsecretApi.searchFoods(searchQuery, 10).pipe(timeout(10000))
@@ -539,55 +409,36 @@ export class NutritionPlanService {
   private _translateFoodName(name: string): string {
     const EN_TO_ES_FOODS: Record<string, string> = {
       'chicken breast, grilled': 'Pechuga de pollo a la plancha',
-      'chicken breast, roasted': 'Pechuga de pollo asada',
-      'chicken breast, skinless': 'Pechuga de pollo sin piel',
       'chicken breast': 'Pechuga de pollo',
       'chicken': 'Pollo',
       'turkey': 'Pavo',
       'beef': 'Res',
       'pork': 'Cerdo',
       'fish, white': 'Pescado blanco',
-      'white fish': 'Pescado blanco',
       'salmon': 'Salmón',
       'tuna': 'Atún',
-      'cod': 'Bacalao',
-      'tilapia': 'Tilapia',
-      'shrimp': 'Camarones',
       'tofu': 'Tofu',
       'lentils': 'Lentejas',
-      'chickpeas': 'Garbanzos',
-      'black beans': 'Frijoles negros',
-      'egg, whole, boiled': 'Huevo de gallina cocido',
       'egg': 'Huevo',
-      'rice, white, cooked': 'Arroz blanco cocido',
-      'rice, brown, cooked': 'Arroz integral cocido',
       'rice': 'Arroz',
-      'quinoa, cooked': 'Quinoa cocida',
       'quinoa': 'Quinoa',
       'oatmeal': 'Avena',
-      'oats': 'Avena',
-      'bread, whole wheat': 'Pan integral de trigo',
       'bread': 'Pan',
       'pasta': 'Pasta',
       'milk': 'Leche',
       'yogurt': 'Yogur',
       'greek yogurt': 'Yogur griego',
       'cheese': 'Queso',
-      'cheese, cottage': 'Queso cottage',
       'broccoli': 'Brócoli',
       'carrot': 'Zanahoria',
       'spinach': 'Espinacas',
       'cucumber': 'Pepino',
-      'tomato': 'Tomate',
       'apple': 'Manzana',
       'banana': 'Banana',
-      'orange': 'Naranja',
       'pear': 'Pera',
       'strawberry': 'Fresa',
-      'blueberry': 'Arándano',
       'almonds': 'Almendras',
       'walnuts': 'Nueces',
-      'peanuts': 'Maní',
       'avocado': 'Aguacate'
     };
     
@@ -619,38 +470,28 @@ export class NutritionPlanService {
   ): string {
     if (needsGlycemicControl) {
       const glycemicOptions: Record<MealType, string[]> = {
-        desayuno: ['egg', 'greek yogurt', 'oatmeal', 'cottage cheese'],
-        media_manana: ['almonds', 'apple', 'pear', 'berries'],
-        almuerzo: ['grilled chicken', 'salmon', 'white fish', 'lentils'],
-        media_tarde: ['greek yogurt', 'walnuts', 'cucumber'],
-        cena: ['grilled fish', 'chicken breast', 'turkey', 'vegetable soup'],
+        desayuno: ['egg', 'greek yogurt', 'oatmeal'],
+        media_manana: ['almonds', 'apple'],
+        almuerzo: ['grilled chicken', 'salmon', 'white fish'],
+        media_tarde: ['greek yogurt', 'walnuts'],
+        cena: ['grilled fish', 'chicken breast'],
         colacion: ['cottage cheese', 'almonds']
       };
       return glycemicOptions[mealType]?.[dayIndex % glycemicOptions[mealType].length] || 'vegetables';
     }
     
-    const breakfastOptions = ['oatmeal', 'egg', 'whole wheat bread', 'greek yogurt'];
-    const lunchOptions = ['chicken breast', 'white fish', 'lentils', 'quinoa'];
-    const dinnerOptions = ['vegetable soup', 'grilled fish', 'tofu', 'salad'];
-    const snackOptions = ['apple', 'almonds', 'greek yogurt', 'carrot'];
+    const options: Record<MealType, string[]> = {
+      desayuno: ['oatmeal', 'egg'],
+      media_manana: ['apple', 'almonds'],
+      almuerzo: ['chicken breast', 'white fish'],
+      media_tarde: ['greek yogurt', 'carrot'],
+      cena: ['grilled fish', 'tofu'],
+      colacion: ['apple', 'almonds']
+    };
     
-    let options: string[];
-    switch(mealType) {
-      case 'desayuno': options = breakfastOptions; break;
-      case 'almuerzo': options = lunchOptions; break;
-      case 'cena': options = dinnerOptions; break;
-      case 'media_manana':
-      case 'media_tarde':
-      case 'colacion': options = snackOptions; break;
-      default: return 'vegetables';
-    }
-    
-    return options[dayIndex % options.length];
+    return options[mealType]?.[dayIndex % options[mealType].length] || 'vegetables';
   }
 
-  // ========================================
-  // BASE DE DATOS MOCK
-  // ========================================
   private _getMockFoodsForMeal(
     mealType: MealType, 
     dayIndex: number, 
@@ -688,11 +529,9 @@ export class NutritionPlanService {
         { food_id: 'mock_almendras_1', name: 'Almendras crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3.5 },
         { food_id: 'mock_manzana_1', name: 'Manzana con cáscara', brand: '', serving_size: 150, serving_unit: 'g', calories: 78, protein: 0.5, carbs: 21, fat: 0.3, fiber: 3.6 },
         { food_id: 'mock_yogur_griego_1', name: 'Yogur griego natural', brand: '', serving_size: 150, serving_unit: 'g', calories: 90, protein: 16, carbs: 6, fat: 0, fiber: 0 },
-        { food_id: 'mock_pepino_2', name: 'Pepino en rodajas', brand: '', serving_size: 100, serving_unit: 'g', calories: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5 },
         { food_id: 'mock_cottage_1', name: 'Queso cottage', brand: '', serving_size: 100, serving_unit: 'g', calories: 98, protein: 11, carbs: 3.4, fat: 4.3, fiber: 0 },
         { food_id: 'mock_pera_1', name: 'Pera fresca', brand: '', serving_size: 150, serving_unit: 'g', calories: 86, protein: 0.6, carbs: 22.5, fat: 0.2, fiber: 4.7 },
-        { food_id: 'mock_nueces_1', name: 'Nueces crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, fiber: 1.9 },
-        { food_id: 'mock_zanahoria_2', name: 'Zanahoria en bastones', brand: '', serving_size: 100, serving_unit: 'g', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2, fiber: 2.8 }
+        { food_id: 'mock_nueces_1', name: 'Nueces crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, fiber: 1.9 }
       ]
     };
 
@@ -768,9 +607,6 @@ export class NutritionPlanService {
     );
   }
 
-  // ========================================
-  // UTILIDADES
-  // ========================================
   private _roundFoodValues(food: FoodItem): FoodItem {
     return {
       ...food,
@@ -817,56 +653,41 @@ export class NutritionPlanService {
       const notes = [
         'Monitorear glucosa 2h post-almuerzo',
         'Evitar picos de carbohidratos en la tarde',
-        'Incluir fibra en cada comida para estabilidad glucémica',
+        'Incluir fibra en cada comida',
         'Recordar hidratación constante',
-        'Cena ligera para evitar hipoglucemia nocturna',
+        'Cena ligera',
         'Revisar síntomas de hipoglucemia',
-        'Planificar snacks de emergencia (15g carbohidratos)'
+        'Planificar snacks de emergencia'
       ];
       return notes[dayIndex % notes.length];
     }
-    
-    const notes: Record<string, string[]> = {
-      'Hipocalorico': [
-        'Enfocarse en alimentos de alta saciedad',
-        'Evitar bebidas azucaradas',
-        'Caminar 30 min post-comidas principales',
-        'Registrar hambre emocional vs física',
-        'Preparar snacks saludables con anticipación',
-        'Dormir 7-8h para regular hormonas del apetito',
-        'Celebrar pequeños logros no relacionados con peso'
-      ]
-    };
-    return notes[profile]?.[dayIndex % (notes[profile]?.length || 1)] || '';
+    return '';
   }
 
   private getMealNotes(mealType: MealType, profile: string, _dayName: string): string {
     if (profile === 'Control Glucemico') {
       if (mealType === 'desayuno') return 'Incluir proteína para estabilizar glucosa matutina';
       if (mealType === 'cena') return 'Cena ligera, al menos 3h antes de dormir';
-      return 'Combinar carbohidratos con proteína/fibra para menor impacto glucémico';
-    }
-    if (profile === 'Hipocalorico' && mealType === 'cena') {
-      return 'Cena al menos 3h antes de dormir para mejor metabolismo';
+      return 'Combinar carbohidratos con proteína/fibra';
     }
     return '';
   }
 
   private getFoodsToAvoid(profile: string, allergies: string[]): string[] {
     const baseAvoid: Record<string, string[]> = {
-      'Control Glucemico': ['azúcar refinada', 'jugos industriales', 'pan blanco', 'arroz blanco en exceso', 'bebidas azucaradas'],
-      'Hipocalorico': ['fritos', 'salsas cremosas', 'bebidas azucaradas', 'snacks ultraprocesados'],
-      'Hipo-grasa': ['manteca', 'embutidos', 'frituras', 'productos de pastelería']
+      'Control Glucemico': ['azúcar refinada', 'jugos industriales', 'pan blanco'],
+      'Hipocalorico': ['fritos', 'salsas cremosas', 'bebidas azucaradas'],
+      'Hipo-grasa': ['manteca', 'embutidos', 'frituras']
     };
     return [...(baseAvoid[profile] || []), ...allergies];
   }
 
   private getWeeklyFocusAreas(profile: string): string[] {
     const focuses: Record<string, string[]> = {
-      'Normocalorico': ['Mantener horarios regulares', 'Variedad de colores en vegetales', 'Hidratación constante'],
-      'Control Glucemico': ['Monitoreo glucémico', 'Carbohidratos de bajo índice glucémico', 'Fibra en cada comida'],
-      'Hipocalorico': ['Saciedad con baja densidad calórica', 'Actividad física diaria', 'Mindful eating'],
-      'Hipo-grasa': ['Grasas saludables (aguacate, nueces)', 'Cocción al vapor/horno', 'Lectura de etiquetas']
+      'Normocalorico': ['Mantener horarios regulares', 'Variedad de vegetales', 'Hidratación'],
+      'Control Glucemico': ['Monitoreo glucémico', 'Carbohidratos de bajo IG', 'Fibra en cada comida'],
+      'Hipocalorico': ['Saciedad con baja densidad', 'Actividad física', 'Mindful eating'],
+      'Hipo-grasa': ['Grasas saludables', 'Cocción al vapor/horno', 'Lectura de etiquetas']
     };
     return focuses[profile] || focuses['Normocalorico'];
   }
@@ -876,16 +697,16 @@ export class NutritionPlanService {
       total_days: 28,
       avg_calories: week1.weekly_goals.avg_daily_calories,
       adherence_tips: [
-        'Preparar comidas con anticipación los domingos',
-        'Mantener un diario de alimentación las primeras 2 semanas',
-        'Revisar progreso con el profesional en la semana 2 y 4',
-        'Ajustar porciones según saciedad y energía'
+        'Preparar comidas con anticipación',
+        'Mantener diario de alimentación',
+        'Revisar progreso semana 2 y 4',
+        'Ajustar porciones según saciedad'
       ],
       progress_checkpoints: [
-        { week: 1, goal: 'Adaptación a nuevos horarios y alimentos' },
-        { week: 2, goal: 'Evaluación de saciedad y energía diaria' },
-        { week: 3, goal: 'Ajuste fino de porciones según respuesta' },
-        { week: 4, goal: 'Planificación de mantenimiento a largo plazo' }
+        { week: 1, goal: 'Adaptación a nuevos horarios' },
+        { week: 2, goal: 'Evaluación de saciedad' },
+        { week: 3, goal: 'Ajuste de porciones' },
+        { week: 4, goal: 'Planificación de mantenimiento' }
       ]
     };
   }
@@ -896,9 +717,6 @@ export class NutritionPlanService {
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
-  // ========================================
-  // GUARDADO EN BACKEND
-  // ========================================
   async saveCompletePlan(plan: GeneratedNutritionPlan, registro_id: string): Promise<PlanSaveResponse> {
     const token = localStorage.getItem('token');
     
@@ -962,8 +780,8 @@ export class NutritionPlanService {
       );
       return response;
     } catch (error: any) {
-      console.error('Error actualizando plan detallado:', error);
-      return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar el plan detallado' };
+      console.error('Error actualizando plan:', error);
+      return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar' };
     }
   }
 }
