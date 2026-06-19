@@ -365,6 +365,71 @@ export class NutritionPlanService {
     });
   }
 
+
+
+  // ========================================
+// VALIDACIÓN DE MACROS FÍSICAMENTE POSIBLES
+// ========================================
+private validateFoodMacros(food: FoodItem): FoodItem {
+  const nameLower = food.name.toLowerCase();
+  const servingSize = food.serving_size || 100;
+  const multiplier = servingSize / 100;
+  
+  // Límites máximos físicamente posibles por 100g según categoría
+  let maxProteinPer100g = 50;
+  let maxCarbsPer100g = 100;
+  let maxFatPer100g = 100;
+  
+  // Frutas: máximo 2g proteína, 25g carbs, 1g grasa por 100g
+  if (nameLower.match(/fresa|manzana|pera|banana|plátano|naranja|uva|kiwi|sandía|melón|durazno|mango|piña|arándano|fruit|berry|apple|pear|orange/)) {
+    maxProteinPer100g = 2;
+    maxCarbsPer100g = 25;
+    maxFatPer100g = 1;
+  }
+  // Verduras: máximo 5g proteína, 12g carbs, 1g grasa por 100g
+  else if (nameLower.match(/brócoli|broccoli|espinaca|zanahoria|pepino|tomate|lechuga|verdura|vegetable|spinach|carrot|cucumber/)) {
+    maxProteinPer100g = 5;
+    maxCarbsPer100g = 12;
+    maxFatPer100g = 1;
+  }
+  
+  const maxProtein = maxProteinPer100g * multiplier;
+  const maxCarbs = maxCarbsPer100g * multiplier;
+  const maxFat = maxFatPer100g * multiplier;
+  
+  // Verificar si los macros exceden los límites
+  if (food.protein > maxProtein || food.carbs > maxCarbs || food.fat > maxFat) {
+    console.warn(
+      `⚠️ [VALIDACIÓN] Macros imposibles detectados: ${food.name}`,
+      `\n   Proteína: ${food.protein}g (máx: ${maxProtein}g)`,
+      `\n   Carbs: ${food.carbs}g (máx: ${maxCarbs}g)`,
+      `\n   Grasa: ${food.fat}g (máx: ${maxFat}g)`
+    );
+    
+    // Corregir macros limitándolos a los valores máximos
+    const correctedProtein = Math.min(food.protein, maxProtein);
+    const correctedCarbs = Math.min(food.carbs, maxCarbs);
+    const correctedFat = Math.min(food.fat, maxFat);
+    
+    // Recalcular calorías basándose en macros corregidos
+    const recalculatedCalories = 
+      (correctedProtein * 4) + 
+      (correctedCarbs * 4) + 
+      (correctedFat * 9);
+    
+    return {
+      ...food,
+      protein: this._round(correctedProtein),
+      carbs: this._round(correctedCarbs),
+      fat: this._round(correctedFat),
+      calories: this._round(recalculatedCalories)
+    };
+  }
+  
+  return food;
+}
+
+
   private async selectFoodsForMeal(
     input: PlanGenerationInput, 
     mealType: MealType, 
@@ -396,6 +461,7 @@ export class NutritionPlanService {
       const filtered = apiFoods
         .filter((food: FoodItem) => this._esAlimentoApropiado(food))
         .filter((food: FoodItem) => food.calories > 0 && food.calories < 400)
+        .map((food: FoodItem) => this.validateFoodMacros(food))
         .slice(0, 2);
       
       if (filtered.length >= 1) {
