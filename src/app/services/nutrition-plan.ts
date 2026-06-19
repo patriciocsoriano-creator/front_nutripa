@@ -1,4 +1,3 @@
-// src/app/services/nutrition-plan.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom, timeout } from 'rxjs';
@@ -113,7 +112,6 @@ export class NutritionPlanService {
   ) {}
 
   async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
-    
     const needsGlycemicControl = this._needsGlycemicControl(input);
     const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
     
@@ -266,9 +264,19 @@ export class NutritionPlanService {
         foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
       }
       
-      // CORRECCION: Validar proteina minima en almuerzo/cena
+      // SOLUCION 1: Validar proteína en almuerzo/cena
       if (mealType === 'almuerzo' || mealType === 'cena') {
-        foods = this._validarProteinaMinima(foods, targetCalories, mealType, dayIndex, needsGlycemicControl, input.allergies);
+        const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
+        const minProtein = targetCalories * 0.25 / 4; // 25% kcal de proteína
+        
+        if (totalProtein < minProtein * 0.7) {
+          const mockFoods = this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies);
+          const proteinFood = mockFoods.find(f => f.protein > 15);
+          if (proteinFood) {
+            foods.unshift(proteinFood);
+            console.log(`Agregando proteína a ${mealType}: ${proteinFood.name} (${proteinFood.protein}g)`);
+          }
+        }
       }
       
       foods = this._adjustPortionsToTargetCalories(foods, targetCalories);
@@ -294,49 +302,16 @@ export class NutritionPlanService {
     return meals;
   }
 
-  // NUEVO: Validar proteina minima en almuerzo/cena
-  private _validarProteinaMinima(
-    foods: FoodItem[], 
-    targetCalories: number, 
-    mealType: MealType, 
-    dayIndex: number,
-    needsGlycemicControl: boolean,
-    allergies: string[]
-  ): FoodItem[] {
-    const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
-    const minProteinGrams = (targetCalories * 0.25) / 4; // 25% de calorias de proteina
-    
-    if (totalProtein < minProteinGrams * 0.7) {
-      console.log(`[NUTRITION] Agregando proteina a ${mealType}: ${totalProtein.toFixed(1)}g < ${minProteinGrams.toFixed(1)}g`);
-      
-      const mockFoods = this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, allergies);
-      const proteinFood = mockFoods.find(f => 
-        f.name.toLowerCase().includes('pollo') || 
-        f.name.toLowerCase().includes('pescado') ||
-        f.name.toLowerCase().includes('lentejas') ||
-        f.name.toLowerCase().includes('tofu')
-      );
-      
-      if (proteinFood && !foods.some(f => f.name === proteinFood.name)) {
-        foods.unshift(proteinFood);
-      }
-    }
-    
-    return foods;
-  }
-
   private _esAlimentoApropiado(food: FoodItem): boolean {
     const nameLower = food.name.toLowerCase();
     
     for (const noApropiado of this.ALIMENTOS_NO_APROPIADOS) {
       if (nameLower.includes(noApropiado)) {
-        console.log(`[NUTRITION] Filtrando alimento inapropiado: ${food.name}`);
         return false;
       }
     }
     
     if (food.calories > 800) {
-      console.log(`[NUTRITION] Filtrando alimento con calorías extremas: ${food.name} (${food.calories} kcal/100g)`);
       return false;
     }
     
@@ -352,23 +327,22 @@ export class NutritionPlanService {
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(food);
-      } else {
-        console.log(`[NUTRITION] Eliminando duplicado: ${food.name}`);
       }
     }
     
     return unique;
   }
 
+  // SOLUCION 3: Factor de escala más agresivo (0.8-1.5)
   private _adjustPortionsToTargetCalories(foods: FoodItem[], targetCalories: number): FoodItem[] {
     if (foods.length === 0 || targetCalories === 0) return foods;
     
     const currentCalories = foods.reduce((sum, f) => sum + f.calories, 0);
     const ratio = targetCalories / currentCalories;
     
-    if (Math.abs(ratio - 1) < 0.20) return foods;
+    if (Math.abs(ratio - 1) < 0.15) return foods;
     
-    const factorLimitado = Math.max(0.7, Math.min(1.8, ratio));
+    const factorLimitado = Math.max(0.8, Math.min(1.5, ratio));
     
     return foods.map(food => {
       const esHuevo = food.name.toLowerCase().includes('huevo') || 
@@ -436,19 +410,18 @@ export class NutritionPlanService {
         .filter((food: FoodItem) => food.calories > 0 && food.calories < 400)
         .slice(0, 2);
       
-      // CORRECCION: Si solo hay 1 alimento, agregar uno del mockDB
-      if (filtered.length === 1) {
-        console.log(`[NUTRITION] Solo 1 alimento de USDA para ${mealType}, agregando complemento`);
-        const backup = this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies);
-        const backupFiltered = backup.filter(f => 
-          !filtered.some(ff => ff.name.toLowerCase() === f.name.toLowerCase())
-        );
-        if (backupFiltered.length > 0) {
-          filtered.push(backupFiltered[0]);
+      // SOLUCION 2: Garantizar 2 alimentos en desayuno
+      if (filtered.length >= 1) {
+        if (filtered.length === 1) {
+          const backup = this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies);
+          const backupFiltered = backup.filter(f => 
+            !filtered.some(ff => ff.name.toLowerCase() === f.name.toLowerCase())
+          );
+          if (backupFiltered.length > 0) {
+            filtered.push(backupFiltered[0]);
+          }
         }
-      }
-      
-      if (filtered.length >= 2) {
+        
         const caloriesPerFood = targetCalories / filtered.length;
         return filtered
           .map((f: FoodItem) => ({
@@ -459,7 +432,7 @@ export class NutritionPlanService {
           .map((f: FoodItem) => this._roundFoodValues(f));
       }
     } catch (error) {
-      console.warn(`[NUTRITION] USDA fallback para ${mealType}`);
+      console.warn(`USDA fallback para ${mealType}`);
     }
     
     return this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies)
@@ -487,8 +460,6 @@ export class NutritionPlanService {
       const gramosTotales = unidadesNecesarias * GRAMOS_POR_HUEVO;
       const factor = gramosTotales / (food.serving_size || 100);
       
-      console.log(`[NUTRITION] ${food.name}: ${unidadesNecesarias} unidades (${gramosTotales}g, factor: ${factor.toFixed(2)})`);
-      
       return {
         ...food,
         serving_size: unidadesNecesarias,
@@ -505,8 +476,6 @@ export class NutritionPlanService {
     const porcionIdeal = targetCalories / caloriasPorGramo;
     const porcionFinal = Math.max(10, Math.min(300, porcionIdeal));
     const factor = porcionFinal / (food.serving_size || 100);
-    
-    console.log(`[NUTRITION] ${food.name}: ${porcionFinal.toFixed(0)}g (factor: ${factor.toFixed(2)})`);
     
     return {
       ...food,
@@ -916,7 +885,7 @@ export class NutritionPlanService {
       );
       return response;
     } catch (error: any) {
-      console.error('[NUTRITION] Error guardando plan:', error);
+      console.error('Error guardando plan:', error);
       return { error: true, mensaje: error.error?.mensaje || 'Error al guardar el plan' };
     }
   }
@@ -939,7 +908,7 @@ export class NutritionPlanService {
       );
       return response;
     } catch (error: any) {
-      console.error('[NUTRITION] Error actualizando plan detallado:', error);
+      console.error('Error actualizando plan detallado:', error);
       return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar el plan detallado' };
     }
   }
