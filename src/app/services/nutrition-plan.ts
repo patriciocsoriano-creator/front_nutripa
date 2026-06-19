@@ -295,8 +295,11 @@ export class NutritionPlanService {
       notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
     });
   }
+  const adjustedMeals = this.adjustPortionsToMeetCalories(meals, input.daily_calories);
+
+return adjustedMeals;
   
-  return meals;
+ 
 }
 
   private _esAlimentoApropiado(food: FoodItem): boolean {
@@ -683,15 +686,28 @@ private validateFoodMacros(food: FoodItem): FoodItem {
       candidates = mockDB['desayuno'].filter(f => f.food_id === food1 || f.food_id === food2);
 
     } else if (mealType === 'almuerzo' || mealType === 'cena') {
-      const proteins = mockDB['proteina_principal'];
-      const carbs = mockDB['carbohidrato_principal'];
-      const veggies = mockDB['verduras_bajo_ig'];
-      
-      candidates = [
-        proteins[dayIndex % proteins.length],
-        carbs[dayIndex % carbs.length],
-        veggies[dayIndex % veggies.length]
-      ];
+  const proteins = mockDB['proteina_principal'];
+  const carbs = mockDB['carbohidrato_principal'];
+  const veggies = mockDB['verduras_bajo_ig'];
+  
+  // Usar índice diferente para cena (desplazado)
+  const proteinIndex = mealType === 'cena' 
+    ? (dayIndex + 3) % proteins.length 
+    : dayIndex % proteins.length;
+  
+  const carbIndex = mealType === 'cena'
+    ? (dayIndex + 2) % carbs.length
+    : dayIndex % carbs.length;
+  
+  const veggieIndex = mealType === 'cena'
+    ? (dayIndex + 1) % veggies.length
+    : dayIndex % veggies.length;
+  
+  candidates = [
+    proteins[proteinIndex],
+    carbs[carbIndex],
+    veggies[veggieIndex]
+  ];
 
     } else {
       const snackPool = mockDB['snack_rotativo'];
@@ -916,4 +932,65 @@ private validateFoodMacros(food: FoodItem): FoodItem {
       return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar' };
     }
   }
+  // ========================================
+// AJUSTAR PORCIONES PARA CUMPLIR CALORÍAS DIARIAS
+// ========================================
+private adjustPortionsToMeetCalories(
+  meals: MealPlan[], 
+  targetDailyCalories: number
+): MealPlan[] {
+  const currentTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
+  const deficit = targetDailyCalories - currentTotal;
+  
+  // Si ya estamos dentro del rango ±5%, no ajustar
+  if (Math.abs(deficit) <= targetDailyCalories * 0.05) {
+    return meals;
+  }
+  
+  console.log(`🔧 [AJUSTE] Déficit calórico: ${deficit.toFixed(0)} kcal (${currentTotal.toFixed(0)} → ${targetDailyCalories})`);
+  
+  const factor = targetDailyCalories / currentTotal;
+  
+  // Limitar el factor para evitar cambios extremos
+  const limitedFactor = Math.max(0.8, Math.min(1.4, factor));
+  
+  meals.forEach(meal => {
+    meal.foods.forEach(food => {
+      // No ajustar alimentos en unidades (huevos, rebanadas)
+      if (food.serving_unit === 'unidad' || food.serving_unit === 'rebanada') {
+        return;
+      }
+      
+      const newServing = food.serving_size * limitedFactor;
+      const scale = newServing / food.serving_size;
+      
+      food.serving_size = this._round(newServing);
+      food.calories = this._round(food.calories * scale);
+      food.protein = this._round(food.protein * scale);
+      food.carbs = this._round(food.carbs * scale);
+      food.fat = this._round(food.fat * scale);
+      if (food.fiber) {
+        food.fiber = this._round(food.fiber * scale);
+      }
+    });
+    
+    // Recalcular totales de la comida
+    const mealTotals = meal.foods.reduce((acc: any, food: FoodItem) => ({
+      calories: acc.calories + food.calories,
+      protein: acc.protein + food.protein,
+      carbs: acc.carbs + food.carbs,
+      fat: acc.fat + food.fat
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    
+    meal.total_calories = this._round(mealTotals.calories);
+    meal.total_protein = this._round(mealTotals.protein);
+    meal.total_carbs = this._round(mealTotals.carbs);
+    meal.total_fat = this._round(mealTotals.fat);
+  });
+  
+  const newTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
+  console.log(`✅ [AJUSTE] Nuevo total: ${newTotal.toFixed(0)} kcal`);
+  
+  return meals;
+}
 }
