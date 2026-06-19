@@ -37,72 +37,95 @@ export class NutritionPlanService {
   ) {}
 
   async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
-
-
-    console.log('═══════════════════════════════════════');
-  console.log('🔍 [SERVICE] DIAGNÓSTICO DE PLAN');
+  // 🔧 NORMALIZAR PERFIL: Mapear a valores válidos del modelo
+  const perfilesValidos = [
+    'Normocalorico', 
+    'Control Glucemico', 
+    'Hipocalorico', 
+    'Hipo-grasa'
+  ] as const;
+  
+  const perfilOriginal = input.profile_type;
+  const perfilNormalizado = perfilOriginal
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Elimina tildes
+    .toLowerCase()
+    .trim();
+  
+  // Buscar el perfil válido que coincida (sin importar tildes/mayúsculas)
+  const perfilEncontrado = perfilesValidos.find(p => 
+    p.normalize('NFD')
+     .replace(/[\u0300-\u036f]/g, '')
+     .toLowerCase() === perfilNormalizado
+  ) || 'Normocalorico';
+  
   console.log('═══════════════════════════════════════');
-  console.log('📥 Perfil recibido:', JSON.stringify(input.profile_type));
-  console.log('📥 Perfil recibido (char codes):', Array.from(input.profile_type).map(c => c.charCodeAt(0)));
-  console.log('📥 Datos clínicos:', (input as any).datos_clinicos_base);
-  console.log('📥 Calorías:', input.daily_calories);
+  console.log('🔧 Perfil original:', perfilOriginal);
+  console.log('🔧 Perfil normalizado:', perfilNormalizado);
+  console.log('✅ Perfil mapeado:', perfilEncontrado);
+  
+  // Actualizar input con el perfil válido
+  input.profile_type = perfilEncontrado;
   
   const needsGlycemicControl = this._needsGlycemicControl(input);
-  const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
+  const profileType = needsGlycemicControl ? 'Control Glucemico' as const : perfilEncontrado;
   
   console.log('🎯 needsGlycemicControl:', needsGlycemicControl);
-  console.log('🎯 profileType final:', JSON.stringify(profileType));
-  
-  const macros = this._getMacrosForProfile(profileType);
-  console.log('📊 Macros calculados:', macros);
+  console.log('🎯 profileType final:', profileType);
+  console.log('📊 Macros:', this._getMacrosForProfile(profileType));
   console.log('═══════════════════════════════════════');
   
   const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
-  // ... resto del código
-    
-    
-    
-    const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
-    const monthlySummary = this.generateMonthlySummary(weekPlan);
-    
-    return {
-      patient_id: input.patient_id,
-      patient_name: input.patient_name,
-      profile_type: profileType,
-      profile_id: needsGlycemicControl ? 1 : input.profile_id,
-      daily_calorie_target: input.daily_calories,
-      macro_distribution: this._getMacrosForProfile(profileType),
-      restrictions: {
-        allergies: input.allergies,
-        intolerances: [],
-        avoid_foods: this.getFoodsToAvoid(profileType, input.allergies)
-      },
-      preferences: input.preferences,
-      recommendations: this._getRecommendations(profileType, input.recommendations),
-      plan: {
-        weekly: weekPlan,
-        monthly_summary: monthlySummary
-      },
-      generated_at: new Date().toISOString(),
-      valid_until: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-      metadata: {
-        ai_confidence: needsGlycemicControl ? 0.98 : 0.95,
-        clinical_validation_required: needsGlycemicControl,
-        source: 'fatsecret_api',
-        glycemic_control_applied: needsGlycemicControl
-      }
-    };
-  }
+  const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
+  const monthlySummary = this.generateMonthlySummary(weekPlan);
+  
+  return {
+    patient_id: input.patient_id,
+    patient_name: input.patient_name,
+    profile_type: profileType,
+    profile_id: needsGlycemicControl ? 1 : input.profile_id,
+    daily_calorie_target: input.daily_calories,
+    macro_distribution: this._getMacrosForProfile(profileType),
+    restrictions: {
+      allergies: input.allergies,
+      intolerances: [],
+      avoid_foods: this.getFoodsToAvoid(profileType, input.allergies)
+    },
+    preferences: input.preferences,
+    recommendations: this._getRecommendations(profileType, input.recommendations),
+    plan: {
+      weekly: weekPlan,
+      monthly_summary: monthlySummary
+    },
+    generated_at: new Date().toISOString(),
+    valid_until: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
+    metadata: {
+      ai_confidence: needsGlycemicControl ? 0.98 : 0.95,
+      clinical_validation_required: needsGlycemicControl,
+      source: 'fatsecret_api',
+      glycemic_control_applied: needsGlycemicControl
+    }
+  };
+}
 
   private _needsGlycemicControl(input: PlanGenerationInput): boolean {
-    if (input.profile_type === 'Control Glucemico') return true;
-    const clinical = (input as any).datos_clinicos_base;
-    if (!clinical) return false;
-    const glucosaAyunas = clinical.glucosa_ayunas;
-    const hba1c = clinical.hba1c;
-    if (glucosaAyunas && glucosaAyunas >= 126) return true;
-    if (hba1c && hba1c >= 6.5) return true;
-    return false;
+    // Normalizar para comparación
+  const perfilNormalizado = input.profile_type
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  
+  if (perfilNormalizado === 'Control Glucemico') return true;
+  
+  const clinical = (input as any).datos_clinicos_base;
+  if (!clinical) return false;
+  
+  const glucosaAyunas = clinical.glucosa_ayunas;
+  const hba1c = clinical.hba1c;
+  
+  if (glucosaAyunas && glucosaAyunas >= 126) return true;
+  if (hba1c && hba1c >= 6.5) return true;
+  
+  return false;
   }
 
   private _getMacrosForProfile(profile: string): { protein: number; carbs: number; fat: number } {
