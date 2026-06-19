@@ -1,14 +1,266 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>Panel de Administración</ion-title>
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel de Administración</ion-title>
+    </div>
+
     <ion-buttons slot="end">
-      <ion-button (click)="toggleSidebar()">
-        <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
+      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Administrador" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
+        </div>
+      </div>
+      
+      <ul>
+        <!-- INICIO -->
+        <li (click)="navegarA('admin-inicio')" [class.active]="rutaActual === 'admin-inicio'">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <!-- GESTIÓN DE USUARIOS -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- GESTIÓN DE MÉDICOS -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Médicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver médicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar médico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- PACIENTES -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadísticas</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- REPORTES DEL SISTEMA -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoría / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
+
+        <!-- CONFIGURACIÓN -->
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuración</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parámetros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>Bienvenido, {{nombreAdmin}}</h1>
+        <p class="subtitle">Panel de administración del sistema NutriPA</p>
+      </div>
+
+      <!-- TARJETAS DE ESTADÍSTICAS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon users">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{stats.totalUsuarios || 0}}</h3>
+            <p>Usuarios registrados</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon doctors">
+            <ion-icon name="medkit-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{stats.totalMedicos || 0}}</h3>
+            <p>Médicos activos</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon patients">
+            <ion-icon name="accessibility-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{stats.totalPacientes || 0}}</h3>
+            <p>Pacientes atendidos</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon plans">
+            <ion-icon name="nutrition-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{stats.totalPlanes || 0}}</h3>
+            <p>Planes generados</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES RÁPIDAS -->
+      <div class="quick-actions">
+        <h2>Acciones rápidas</h2>
+        <div class="actions-grid">
+          <button class="action-btn" (click)="navegarA('admin-agregar-usuario')">
+            <ion-icon name="person-add-outline"></ion-icon>
+            <span>Nuevo usuario</span>
+          </button>
+          <button class="action-btn" (click)="navegarA('admin-agregar-medico')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Nuevo médico</span>
+          </button>
+          <button class="action-btn" (click)="navegarA('admin-reportes-globales')">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span>Generar reporte</span>
+          </button>
+          <button class="action-btn" (click)="navegarA('admin-auditoria')">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <span>Ver auditoría</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ACTIVIDAD RECIENTE -->
+      <div class="recent-activity">
+        <h2>Actividad reciente del sistema</h2>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let activity of actividadesRecientes">
+            <div class="activity-icon" [ngClass]="activity.tipo">
+              <ion-icon [name]="activity.icono"></ion-icon>
+            </div>
+            <div class="activity-info">
+              <p class="activity-text">{{activity.descripcion}}</p>
+              <p class="activity-time">{{activity.tiempo}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>
