@@ -584,7 +584,7 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     await this.showToast('Sesión cerrada', 'success');
-    this.router.navigate(['/login'], { replaceUrl: true });
+    this.router.navigate(['/principal'], { replaceUrl: true });
   }
   
   async showToast(message: string, color: 'primary'|'success'|'danger'|'warning' = 'primary') {

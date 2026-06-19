@@ -24,12 +24,12 @@ export class NutritionPlanService {
 
   private readonly API_URL = `${environment.apiUrl}/nutricionapp-api/medico/plan-nutricional`;
 
-  // 🔥 NUEVO: Constantes para controlar porciones
+  //  NUEVO: Constantes para controlar porciones
   private readonly MAX_PORTION_GRAMS = 300; // Máximo 300g por alimento
   private readonly MIN_PORTION_GRAMS = 10;  // Mínimo 10g por alimento
   private readonly MAX_CALORIES_PER_FOOD = 500; // Máximo 500 kcal por alimento en una comida
 
-  // 🔥 NUEVO: Alimentos inapropiados para el plan
+  //  NUEVO: Alimentos inapropiados para el plan
   private readonly ALIMENTOS_NO_APROPIADOS = [
     'especia', 'fenogreco', 'galleta', 'cookie', 'spice', 'seasoning',
     'candy', 'dulce', 'soda', 'refresco', 'alcohol', 'beer', 'wine',
@@ -38,7 +38,7 @@ export class NutritionPlanService {
     'supplement', 'suplemento', 'powder', 'polvo', 'concentrate'
   ];
 
-  // 🔥 NUEVO: Límites de unidades por tipo de alimento
+  //  NUEVO: Límites de unidades por tipo de alimento
   private readonly LIMITES_UNIDADES: Record<string, number> = {
     'huevo': 3,        // Máximo 3 huevos por comida
     'egg': 3,
@@ -47,7 +47,7 @@ export class NutritionPlanService {
     'slice': 4
   };
 
-  // 🔥 NUEVO: Porciones típicas por tipo de alimento
+  //  NUEVO: Porciones típicas por tipo de alimento
   private readonly PORCIONES_TIPICAS: Record<string, { size: number; unit: string }> = {
     'huevo': { size: 50, unit: 'unidad' },
     'egg': { size: 50, unit: 'unidad' },
@@ -117,7 +117,7 @@ export class NutritionPlanService {
   ) {}
 
   // ============================================================================
-  // 🧠 GENERAR PLAN (con adaptación para diabetes y alergias)
+  //  GENERAR PLAN (con adaptación para diabetes y alergias)
   // ============================================================================
   async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
     
@@ -191,7 +191,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🗓️ GENERAR SEMANA
+  //  GENERAR SEMANA
   // ============================================================================
   private async generateWeekPlan(
     input: PlanGenerationInput, 
@@ -240,7 +240,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🍽️ GENERAR COMIDAS DEL DÍA
+  // GENERAR COMIDAS DEL DÍA
   // ============================================================================
   private async generateDayMeals(
     input: PlanGenerationInput, 
@@ -265,7 +265,7 @@ export class NutritionPlanService {
         needsGlycemicControl
       );
       
-      // 🔍 Filtrar alergias
+      //  Filtrar alergias
       foods = foods.filter((food: FoodItem) => 
         !input.allergies.some((allergy: string) => 
           food.name.toLowerCase().includes(allergy.toLowerCase()) ||
@@ -273,18 +273,18 @@ export class NutritionPlanService {
         )
       );
       
-      // 🔥 NUEVO: Filtrar alimentos inapropiados
+      //  NUEVO: Filtrar alimentos inapropiados
       foods = foods.filter(food => this._esAlimentoApropiado(food));
       
-      // 🔥 NUEVO: Eliminar duplicados en la misma comida
+      //  NUEVO: Eliminar duplicados en la misma comida
       foods = this._eliminarDuplicados(foods);
       
-      // 🛡️ Garantizar que nunca quede una comida vacía
+      //  Garantizar que nunca quede una comida vacía
       if (foods.length === 0) {
         foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
       }
       
-      // 🔥 NUEVO: Ajustar porciones de forma inteligente (con límites)
+      //  NUEVO: Ajustar porciones de forma inteligente (con límites)
       foods = this._adjustPortionsToTargetCalories(foods, targetCalories);
       
       const totals = foods.reduce((acc: any, food: FoodItem) => ({
@@ -309,7 +309,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔥 NUEVO: VERIFICAR SI ALIMENTO ES APROPIADO
+  //  NUEVO: VERIFICAR SI ALIMENTO ES APROPIADO
   // ============================================================================
   private _esAlimentoApropiado(food: FoodItem): boolean {
     const nameLower = food.name.toLowerCase();
@@ -317,14 +317,14 @@ export class NutritionPlanService {
     // Filtrar alimentos no apropiados
     for (const noApropiado of this.ALIMENTOS_NO_APROPIADOS) {
       if (nameLower.includes(noApropiado)) {
-        console.log(`⚠️ Filtrando alimento inapropiado: ${food.name}`);
+        console.log(` Filtrando alimento inapropiado: ${food.name}`);
         return false;
       }
     }
     
     // Filtrar alimentos con calorías extremas por 100g
     if (food.calories > 800) {
-      console.log(`⚠️ Filtrando alimento con calorías extremas: ${food.name} (${food.calories} kcal/100g)`);
+      console.log(` Filtrando alimento con calorías extremas: ${food.name} (${food.calories} kcal/100g)`);
       return false;
     }
     
@@ -332,7 +332,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔥 NUEVO: ELIMINAR DUPLICADOS EN LA MISMA COMIDA
+  //  NUEVO: ELIMINAR DUPLICADOS EN LA MISMA COMIDA
   // ============================================================================
   private _eliminarDuplicados(foods: FoodItem[]): FoodItem[] {
     const seen = new Set<string>();
@@ -344,7 +344,7 @@ export class NutritionPlanService {
         seen.add(key);
         unique.push(food);
       } else {
-        console.log(`⚠️ Eliminando duplicado: ${food.name}`);
+        console.log(` Eliminando duplicado: ${food.name}`);
       }
     }
     
@@ -352,74 +352,48 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔥 MEJORADO: AJUSTAR PORCIONES SEGÚN CALORÍAS OBJETIVO (CON LÍMITES)
+  //  MEJORADO: AJUSTAR PORCIONES SEGÚN CALORÍAS OBJETIVO (CON LÍMITES)
   // ============================================================================
   private _adjustPortionsToTargetCalories(foods: FoodItem[], targetCalories: number): FoodItem[] {
-    if (foods.length === 0 || targetCalories === 0) return foods;
+  if (foods.length === 0 || targetCalories === 0) return foods;
+  
+  const currentCalories = foods.reduce((sum, f) => sum + f.calories, 0);
+  const ratio = targetCalories / currentCalories;
+  
+  // Solo ajustar si la diferencia es > 20%
+  if (Math.abs(ratio - 1) < 0.20) return foods;
+  
+  // Limitar factor entre 0.5 y 1.5
+  const factorLimitado = Math.max(0.5, Math.min(1.5, ratio));
+  
+  return foods.map(food => {
+    //  SI ES HUEVO, NO AJUSTAR (ya tiene límite)
+    const esHuevo = food.name.toLowerCase().includes('huevo') || 
+                    food.name.toLowerCase().includes('egg');
     
-    const currentCalories = foods.reduce((sum, f) => sum + f.calories, 0);
+    if (esHuevo || food.serving_unit?.toLowerCase() === 'unidad') {
+      return food; //  NO MODIFICAR
+    }
     
-    // Solo ajustar si la diferencia es > 20% (más conservador)
-    const ratio = targetCalories / currentCalories;
-    if (Math.abs(ratio - 1) < 0.20) return foods;
+    // Para alimentos en gramos
+    const nuevaPorcion = food.serving_size * factorLimitado;
+    const porcionFinal = Math.max(10, Math.min(300, nuevaPorcion));
+    const factorFinal = porcionFinal / food.serving_size;
     
-    // 🔥 Limitar el factor de escala entre 0.5 y 2.0
-    const factorLimitado = Math.max(0.5, Math.min(2.0, ratio));
-    
-    console.log(`🔧 Ajustando porciones: ${currentCalories.toFixed(0)} kcal → ${targetCalories.toFixed(0)} kcal (factor: ${factorLimitado.toFixed(2)})`);
-    
-    return foods.map(food => {
-      // 🔥 NUEVO: Verificar si es un alimento por unidades
-      const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
-                       food.serving_unit?.toLowerCase() === 'unit' ||
-                       food.name.toLowerCase().includes('huevo') ||
-                       food.name.toLowerCase().includes('egg');
-      
-      if (esUnidad) {
-        // Para alimentos por unidades, limitar a máximo 3
-        const maxUnidades = this._getMaxUnidades(food.name.toLowerCase());
-        const unidadesActuales = food.serving_size;
-        const unidadesNuevas = Math.min(unidadesActuales * factorLimitado, maxUnidades);
-        
-        const factorFinal = unidadesNuevas / unidadesActuales;
-        
-        console.log(`🔧 ${food.name}: ${unidadesActuales} unidades → ${unidadesNuevas.toFixed(1)} unidades (máx: ${maxUnidades})`);
-        
-        return {
-          ...food,
-          serving_size: this._round(unidadesNuevas),
-          calories: this._round(food.calories * factorFinal),
-          protein: this._round(food.protein * factorFinal),
-          carbs: this._round(food.carbs * factorFinal),
-          fat: this._round(food.fat * factorFinal),
-          fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
-        };
-      }
-      
-      // Para alimentos en gramos, usar la lógica anterior
-      const nuevaPorcion = food.serving_size * factorLimitado;
-      const porcionFinal = Math.max(this.MIN_PORTION_GRAMS, Math.min(this.MAX_PORTION_GRAMS, nuevaPorcion));
-      
-      if (nuevaPorcion > this.MAX_PORTION_GRAMS) {
-        console.warn(`⚠️ Porción limitada: ${food.name} ${nuevaPorcion.toFixed(0)}g → ${this.MAX_PORTION_GRAMS}g`);
-      }
-      
-      const factorFinal = porcionFinal / food.serving_size;
-      
-      return {
-        ...food,
-        serving_size: this._round(porcionFinal),
-        calories: this._round(food.calories * factorFinal),
-        protein: this._round(food.protein * factorFinal),
-        carbs: this._round(food.carbs * factorFinal),
-        fat: this._round(food.fat * factorFinal),
-        fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
-      };
-    });
-  }
+    return {
+      ...food,
+      serving_size: this._round(porcionFinal),
+      calories: this._round(food.calories * factorFinal),
+      protein: this._round(food.protein * factorFinal),
+      carbs: this._round(food.carbs * factorFinal),
+      fat: this._round(food.fat * factorFinal),
+      fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
+    };
+  });
+}
 
   // ============================================================================
-  // 🔥 NUEVO: OBTENER MÁXIMO DE UNIDADES SEGÚN EL ALIMENTO
+  //  NUEVO: OBTENER MÁXIMO DE UNIDADES SEGÚN EL ALIMENTO
   // ============================================================================
   private _getMaxUnidades(nameLower: string): number {
     for (const [key, max] of Object.entries(this.LIMITES_UNIDADES)) {
@@ -431,7 +405,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔍 SELECCIONAR ALIMENTOS POR COMIDA (MEJORADO)
+  // SELECCIONAR ALIMENTOS POR COMIDA (MEJORADO)
   // ============================================================================
   private async selectFoodsForMeal(
     input: PlanGenerationInput, 
@@ -464,14 +438,14 @@ export class NutritionPlanService {
         this.fatsecretApi.searchFoods(searchQuery, 10).pipe(timeout(10000))
       );
       
-      // 🔥 Filtrar alimentos apropiados
+      //  Filtrar alimentos apropiados
       const filtered = apiFoods
         .filter((food: FoodItem) => this._esAlimentoApropiado(food))
         .filter((food: FoodItem) => food.calories > 0 && food.calories < 400) // Máximo 400 kcal por 100g
         .slice(0, 2);
       
       if (filtered.length >= 2) {
-        // 🔥 Ajustar porciones de forma inteligente
+        //  Ajustar porciones de forma inteligente
         const caloriesPerFood = targetCalories / filtered.length;
         return filtered
           .map((f: FoodItem) => ({
@@ -482,7 +456,7 @@ export class NutritionPlanService {
           .map((f: FoodItem) => this._roundFoodValues(f));
       }
     } catch (error) {
-      console.warn(`⚠️ USDA fallback para ${mealType}`);
+      console.warn(` USDA fallback para ${mealType}`);
     }
     
     // Fallback a mockDB
@@ -492,75 +466,37 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔥 NUEVO: AJUSTAR PORCIÓN DE FORMA INTELIGENTE
+  //  NUEVO: AJUSTAR PORCIÓN DE FORMA INTELIGENTE
   // ============================================================================
   private _ajustarPorcionInteligente(food: FoodItem, targetCalories: number): FoodItem {
-    const nameLower = food.name.toLowerCase();
+  const nameLower = food.name.toLowerCase();
+  
+  //  PASO 1: Detectar si es huevo O alimento por unidades
+  const esHuevo = nameLower.includes('huevo') || nameLower.includes('egg');
+  const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
+                   food.serving_unit?.toLowerCase() === 'unit' ||
+                   esHuevo;
+  
+  //  PASO 2: Si es huevo, LIMITAR A MÁXIMO 2 UNIDADES
+  if (esHuevo || esUnidad) {
+    const MAX_HUEVOS = 2; //  LÍMITE ABSOLUTO
     
-    // 🔥 NUEVO: Verificar si es un alimento por unidades
-    const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
-                     food.serving_unit?.toLowerCase() === 'unit' ||
-                     nameLower.includes('huevo') ||
-                     nameLower.includes('egg');
+    // Calcular cuántas unidades necesitamos para alcanzar las calorías
+    const caloriasPorUnidad = food.calories / (food.serving_size || 1);
+    let unidadesNecesarias = targetCalories / caloriasPorUnidad;
     
-    if (esUnidad) {
-      // Para alimentos por unidades, calcular cuántas unidades necesitamos
-      const caloriasPorUnidad = food.calories / (food.serving_size || 1);
-      let unidadesNecesarias = targetCalories / caloriasPorUnidad;
-      
-      // 🔥 LIMITAR unidades (máximo 3 huevos, 4 rebanadas, etc.)
-      const maxUnidades = this._getMaxUnidades(nameLower);
-      unidadesNecesarias = Math.min(unidadesNecesarias, maxUnidades);
-      
-      // 🔥 MÍNIMO 1 unidad
-      unidadesNecesarias = Math.max(1, Math.round(unidadesNecesarias * 10) / 10);
-      
-      const factor = unidadesNecesarias / (food.serving_size || 1);
-      
-      console.log(`🔧 Ajustando ${food.name}: ${food.serving_size}${food.serving_unit} → ${unidadesNecesarias} unidades (máx: ${maxUnidades})`);
-      
-      return {
-        ...food,
-        serving_size: unidadesNecesarias,
-        serving_unit: 'unidad',
-        calories: this._round(food.calories * factor),
-        protein: this._round(food.protein * factor),
-        carbs: this._round(food.carbs * factor),
-        fat: this._round(food.fat * factor),
-        fiber: food.fiber ? this._round(food.fiber * factor) : undefined
-      };
-    }
+    //  APLICAR LÍMITE
+    unidadesNecesarias = Math.min(unidadesNecesarias, MAX_HUEVOS);
+    unidadesNecesarias = Math.max(1, Math.round(unidadesNecesarias)); // Mínimo 1, redondear
     
-    // Buscar porción típica para alimentos en gramos
-    let porcionTipica = 100; // default
-    let unidadTipica = 'g';
+    const factor = unidadesNecesarias / (food.serving_size || 1);
     
-    for (const [key, value] of Object.entries(this.PORCIONES_TIPICAS)) {
-      if (nameLower.includes(key)) {
-        porcionTipica = value.size;
-        unidadTipica = value.unit;
-        break;
-      }
-    }
-    
-    // Calcular factor de escala basado en calorías objetivo
-    const caloriasPorGramo = food.calories / (food.serving_size || 100);
-    const porcionIdeal = targetCalories / caloriasPorGramo;
-    
-    // Limitar entre min y max
-    const porcionFinal = Math.max(
-      this.MIN_PORTION_GRAMS,
-      Math.min(this.MAX_PORTION_GRAMS, porcionIdeal)
-    );
-    
-    const factor = porcionFinal / (food.serving_size || 100);
-    
-    console.log(`🔧 Ajustando ${food.name}: ${food.serving_size}${food.serving_unit} → ${porcionFinal.toFixed(0)}${unidadTipica} (factor: ${factor.toFixed(2)})`);
+    console.log(` ${food.name}: ${unidadesNecesarias} unidades (límite: ${MAX_HUEVOS})`);
     
     return {
       ...food,
-      serving_size: Math.round(porcionFinal),
-      serving_unit: unidadTipica,
+      serving_size: unidadesNecesarias,
+      serving_unit: 'unidad',
       calories: this._round(food.calories * factor),
       protein: this._round(food.protein * factor),
       carbs: this._round(food.carbs * factor),
@@ -568,9 +504,31 @@ export class NutritionPlanService {
       fiber: food.fiber ? this._round(food.fiber * factor) : undefined
     };
   }
+  
+  //  PASO 3: Para alimentos en gramos, lógica normal
+  const caloriasPorGramo = food.calories / (food.serving_size || 100);
+  const porcionIdeal = targetCalories / caloriasPorGramo;
+  
+  // Limitar entre 10g y 300g
+  const porcionFinal = Math.max(10, Math.min(300, porcionIdeal));
+  const factor = porcionFinal / (food.serving_size || 100);
+  
+  console.log(` ${food.name}: ${porcionFinal.toFixed(0)}g`);
+  
+  return {
+    ...food,
+    serving_size: Math.round(porcionFinal),
+    serving_unit: 'g',
+    calories: this._round(food.calories * factor),
+    protein: this._round(food.protein * factor),
+    carbs: this._round(food.carbs * factor),
+    fat: this._round(food.fat * factor),
+    fiber: food.fiber ? this._round(food.fiber * factor) : undefined
+  };
+}
 
   // ============================================================================
-  // 🗣️ TRADUCCIÓN: Nombre de alimento inglés → español
+  //  TRADUCCIÓN: Nombre de alimento inglés → español
   // ============================================================================
   private _translateFoodName(name: string): string {
     const EN_TO_ES_FOODS: Record<string, string> = {
@@ -640,7 +598,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🔥 ÍNDICE DIFERENTE PARA CADA SNACK
+  //  ÍNDICE DIFERENTE PARA CADA SNACK
   // ============================================================================
   private _getSnackIndex(mealType: MealType, dayIndex: number): number {
     const offsets: Record<string, number> = {
@@ -652,7 +610,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🎯 QUERIES DE BÚSQUEDA
+  //  QUERIES DE BÚSQUEDA
   // ============================================================================
   private getMainFoodQuery(
     mealType: MealType, 
@@ -692,7 +650,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🎭 FALLBACK MOCK INTELIGENTE
+  //  FALLBACK MOCK INTELIGENTE
   // ============================================================================
   private _getMockFoodsForMeal(
     mealType: MealType, 
@@ -780,7 +738,7 @@ export class NutritionPlanService {
       .slice(0, 3);
   }
 
-  // 🛡️ Fallback de seguridad
+  //  Fallback de seguridad
   private _getMinimumFoodsForMeal(mealType: MealType, needsGlycemicControl: boolean, allergies: string[]): FoodItem[] {
     const minimums: Record<MealType, FoodItem[]> = {
       desayuno: [
@@ -830,7 +788,7 @@ export class NutritionPlanService {
   }
 
   // ============================================================================
-  // 🎨 HELPERS DE UI
+  //  HELPERS DE UI
   // ============================================================================
   private calculateMealDistribution(profile: string, activity: ActivityLevel): Record<MealType, number> {
     const distributions: Record<string, Record<MealType, number>> = {
@@ -984,7 +942,7 @@ export class NutritionPlanService {
       );
       return response;
     } catch (error: any) {
-      console.error('❌ Error guardando plan:', error);
+      console.error(' Error guardando plan:', error);
       return { error: true, mensaje: error.error?.mensaje || 'Error al guardar el plan' };
     }
   }
@@ -1007,7 +965,7 @@ export class NutritionPlanService {
       );
       return response;
     } catch (error: any) {
-      console.error('❌ Error actualizando plan detallado:', error);
+      console.error(' Error actualizando plan detallado:', error);
       return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar el plan detallado' };
     }
   }
