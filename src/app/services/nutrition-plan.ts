@@ -159,79 +159,101 @@ export class NutritionPlanService {
   }
 
   private async generateDayMeals(
-    input: PlanGenerationInput, 
-    mealDist: Record<MealType, number>, 
-    dayName: string, 
-    dayIndex: number,
-    needsGlycemicControl: boolean
-  ): Promise<MealPlan[]> {
-    const meals: MealPlan[] = [];
-    const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
+  input: PlanGenerationInput, 
+  mealDist: Record<MealType, number>, 
+  dayName: string, 
+  dayIndex: number,
+  needsGlycemicControl: boolean
+): Promise<MealPlan[]> {
+  const meals: MealPlan[] = [];
+  const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
+  
+  // NUEVO: Rastrear alimentos usados en todo el día
+  const usedFoodsToday = new Set<string>();
+  
+  for (const mealType of mealOrder) {
+    if (mealDist[mealType] === 0) continue;
     
-    for (const mealType of mealOrder) {
-      if (mealDist[mealType] === 0) continue;
-      
-      const targetCalories = Math.round(input.daily_calories * mealDist[mealType]);
-      
-      let foods = await this.selectFoodsForMeal(
-        input, 
-        mealType, 
-        targetCalories, 
-        dayIndex, 
-        needsGlycemicControl
-      );
-      
-      foods = foods.filter((food: FoodItem) => 
-        !input.allergies.some((allergy: string) => 
-          food.name.toLowerCase().includes(allergy.toLowerCase()) ||
-          food.brand?.toLowerCase().includes(allergy.toLowerCase())
-        )
-      );
-      
-      foods = foods.filter(food => this._esAlimentoApropiado(food));
-      foods = this._eliminarDuplicados(foods);
-      foods = this.removeDoubleCarbs(foods);
-      
-      if (foods.length === 0) {
-        foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
+    const targetCalories = Math.round(input.daily_calories * mealDist[mealType]);
+    
+    let foods = await this.selectFoodsForMeal(
+      input, 
+      mealType, 
+      targetCalories, 
+      dayIndex, 
+      needsGlycemicControl
+    );
+    
+    // Filtrar alergias
+    foods = foods.filter((food: FoodItem) => 
+      !input.allergies.some((allergy: string) => 
+        food.name.toLowerCase().includes(allergy.toLowerCase()) ||
+        food.brand?.toLowerCase().includes(allergy.toLowerCase())
+      )
+    );
+    
+    foods = foods.filter(food => this._esAlimentoApropiado(food));
+    
+    // NUEVO: Eliminar duplicados dentro de la comida
+    foods = this._eliminarDuplicados(foods);
+    
+    // NUEVO: Eliminar alimentos ya usados en otras comidas del día
+    foods = foods.filter(food => {
+      const key = food.name.toLowerCase().trim();
+      if (usedFoodsToday.has(key)) {
+        return false;
       }
-      
-      if (mealType === 'almuerzo' || mealType === 'cena') {
-        const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
-        const minProtein = targetCalories * 0.25 / 4;
-        
-        if (totalProtein < minProtein * 0.7) {
-          const mockFoods = this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies);
-          const proteinFood = mockFoods.find(f => f.protein > 15);
-          if (proteinFood) {
-            foods.unshift(proteinFood);
-          }
-        }
-      }
-      
-      foods = foods.map(f => this._roundFoodValues(f));
-      
-      const totals = foods.reduce((acc: any, food: FoodItem) => ({
-        calories: this._round(acc.calories + food.calories),
-        protein: this._round(acc.protein + food.protein),
-        carbs: this._round(acc.carbs + food.carbs),
-        fat: this._round(acc.fat + food.fat)
-      }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-      
-      meals.push({
-        meal_type: mealType,
-        time_suggestion: this.getSuggestedTime(mealType),
-        foods,
-        total_calories: totals.calories,
-        total_protein: totals.protein,
-        total_carbs: totals.carbs,
-        total_fat: totals.fat,
-        notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
-      });
+      usedFoodsToday.add(key);
+      return true;
+    });
+    
+    foods = this.removeDoubleCarbs(foods);
+    
+    if (foods.length === 0) {
+      foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
     }
     
-    return meals;
+    // Garantizar proteína en almuerzo/cena
+    if (mealType === 'almuerzo' || mealType === 'cena') {
+      const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
+      const minProtein = targetCalories * 0.25 / 4;
+      
+      if (totalProtein < minProtein * 0.7) {
+        const mockFoods = this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies);
+        const proteinFood = mockFoods.find(f => 
+          f.protein > 15 && 
+          !usedFoodsToday.has(f.name.toLowerCase().trim())
+        );
+        if (proteinFood) {
+          foods.unshift(proteinFood);
+          usedFoodsToday.add(proteinFood.name.toLowerCase().trim());
+        }
+      }
+    }
+    
+    foods = foods.map(f => this._roundFoodValues(f));
+    
+    const totals = foods.reduce((acc: any, food: FoodItem) => ({
+      calories: this._round(acc.calories + food.calories),
+      protein: this._round(acc.protein + food.protein),
+      carbs: this._round(acc.carbs + food.carbs),
+      fat: this._round(acc.fat + food.fat)
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    
+    meals.push({
+      meal_type: mealType,
+      time_suggestion: this.getSuggestedTime(mealType),
+      foods,
+      total_calories: totals.calories,
+      total_protein: totals.protein,
+      total_carbs: totals.carbs,
+      total_fat: totals.fat,
+      notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
+    });
   }
+  
+  return meals;
+}
 
   private _esAlimentoApropiado(food: FoodItem): boolean {
     const nameLower = food.name.toLowerCase();

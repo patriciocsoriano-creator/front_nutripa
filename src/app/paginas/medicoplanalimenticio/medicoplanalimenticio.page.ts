@@ -108,11 +108,25 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
       
       // Generar plan detallado con alimentos
       this.plan = await this.nutritionPlanService.generatePlan(this.planInput);
-      
-      if (this.plan?.plan.weekly.days.length) {
-        this.fechaSeleccionada = this.plan.plan.weekly.days[0].date;
-        this.diaSeleccionado = this.plan.plan.weekly.days[0];
-      }
+
+// 🔧 FORZAR MACROS CORRECTOS SEGÚN EL PERFIL CLÍNICO
+if (this.plan) {
+  const profileMacros: Record<string, { protein: number; carbs: number; fat: number }> = {
+    'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
+    'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
+    'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
+    'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 }
+  };
+  
+  this.plan.macro_distribution = profileMacros[this.plan.profile_type] || profileMacros['Normocalorico'];
+  
+  console.log('✅ [PLAN] Macros forzados para perfil', this.plan.profile_type, ':', this.plan.macro_distribution);
+}
+
+if (this.plan?.plan.weekly.days.length) {
+  this.fechaSeleccionada = this.plan.plan.weekly.days[0].date;
+  this.diaSeleccionado = this.plan.plan.weekly.days[0];
+}
       
     } catch (error: any) {
       console.error('❌ Error generando plan:', error);
