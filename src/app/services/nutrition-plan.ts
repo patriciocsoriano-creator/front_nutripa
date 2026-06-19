@@ -471,49 +471,49 @@ export class NutritionPlanService {
   private _ajustarPorcionInteligente(food: FoodItem, targetCalories: number): FoodItem {
   const nameLower = food.name.toLowerCase();
   
-  //  PASO 1: Detectar si es huevo O alimento por unidades
+  //  DETECTAR SI ES HUEVO O ALIMENTO POR UNIDADES
   const esHuevo = nameLower.includes('huevo') || nameLower.includes('egg');
   const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
                    food.serving_unit?.toLowerCase() === 'unit' ||
                    esHuevo;
   
-  //  PASO 2: Si es huevo, LIMITAR A MÁXIMO 2 UNIDADES
   if (esHuevo || esUnidad) {
-    const MAX_HUEVOS = 2; //  LÍMITE ABSOLUTO
+    //  LÓGICA ESPECIAL PARA HUEVOS
+    // Un huevo = 50g = ~78 kcal
+    const CALORIAS_POR_HUEVO = 78;
+    const GRAMOS_POR_HUEVO = 50;
+    const MAX_HUEVOS = 3;
     
-    // Calcular cuántas unidades necesitamos para alcanzar las calorías
-    const caloriasPorUnidad = food.calories / (food.serving_size || 1);
-    let unidadesNecesarias = targetCalories / caloriasPorUnidad;
-    
-    //  APLICAR LÍMITE
+    // Calcular cuántos huevos necesitamos
+    let unidadesNecesarias = targetCalories / CALORIAS_POR_HUEVO;
     unidadesNecesarias = Math.min(unidadesNecesarias, MAX_HUEVOS);
-    unidadesNecesarias = Math.max(1, Math.round(unidadesNecesarias)); // Mínimo 1, redondear
+    unidadesNecesarias = Math.max(1, Math.round(unidadesNecesarias));
     
-    const factor = unidadesNecesarias / (food.serving_size || 1);
+    // Factor real basado en gramos por huevo
+    const gramosTotales = unidadesNecesarias * GRAMOS_POR_HUEVO;
+    const factor = gramosTotales / (food.serving_size || 100);
     
-    console.log(` ${food.name}: ${unidadesNecesarias} unidades (límite: ${MAX_HUEVOS})`);
+    console.log(` ${food.name}: ${unidadesNecesarias} unidades (${gramosTotales}g, factor: ${factor.toFixed(2)})`);
     
     return {
       ...food,
       serving_size: unidadesNecesarias,
       serving_unit: 'unidad',
-      calories: this._round(food.calories * factor),
-      protein: this._round(food.protein * factor),
-      carbs: this._round(food.carbs * factor),
-      fat: this._round(food.fat * factor),
-      fiber: food.fiber ? this._round(food.fiber * factor) : undefined
+      calories: this._round(CALORIAS_POR_HUEVO * unidadesNecesarias),
+      protein: this._round(6.3 * unidadesNecesarias),
+      carbs: this._round(0.6 * unidadesNecesarias),
+      fat: this._round(5.3 * unidadesNecesarias),
+      fiber: 0
     };
   }
   
-  //  PASO 3: Para alimentos en gramos, lógica normal
+  //  LÓGICA NORMAL PARA ALIMENTOS EN GRAMOS
   const caloriasPorGramo = food.calories / (food.serving_size || 100);
   const porcionIdeal = targetCalories / caloriasPorGramo;
-  
-  // Limitar entre 10g y 300g
   const porcionFinal = Math.max(10, Math.min(300, porcionIdeal));
   const factor = porcionFinal / (food.serving_size || 100);
   
-  console.log(` ${food.name}: ${porcionFinal.toFixed(0)}g`);
+  console.log(`🔧 ${food.name}: ${porcionFinal.toFixed(0)}g (factor: ${factor.toFixed(2)})`);
   
   return {
     ...food,
