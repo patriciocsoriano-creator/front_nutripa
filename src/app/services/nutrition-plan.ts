@@ -37,10 +37,31 @@ export class NutritionPlanService {
   ) {}
 
   async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
-    const needsGlycemicControl = this._needsGlycemicControl(input);
-    const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
+
+
+    console.log('═══════════════════════════════════════');
+  console.log('🔍 [SERVICE] DIAGNÓSTICO DE PLAN');
+  console.log('═══════════════════════════════════════');
+  console.log('📥 Perfil recibido:', JSON.stringify(input.profile_type));
+  console.log('📥 Perfil recibido (char codes):', Array.from(input.profile_type).map(c => c.charCodeAt(0)));
+  console.log('📥 Datos clínicos:', (input as any).datos_clinicos_base);
+  console.log('📥 Calorías:', input.daily_calories);
+  
+  const needsGlycemicControl = this._needsGlycemicControl(input);
+  const profileType = needsGlycemicControl ? 'Control Glucemico' : input.profile_type;
+  
+  console.log('🎯 needsGlycemicControl:', needsGlycemicControl);
+  console.log('🎯 profileType final:', JSON.stringify(profileType));
+  
+  const macros = this._getMacrosForProfile(profileType);
+  console.log('📊 Macros calculados:', macros);
+  console.log('═══════════════════════════════════════');
+  
+  const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
+  // ... resto del código
     
-    const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
+    
+    
     const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
     const monthlySummary = this.generateMonthlySummary(weekPlan);
     
