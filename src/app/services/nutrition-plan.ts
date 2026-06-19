@@ -38,6 +38,15 @@ export class NutritionPlanService {
     'supplement', 'suplemento', 'powder', 'polvo', 'concentrate'
   ];
 
+  // 🔥 NUEVO: Límites de unidades por tipo de alimento
+  private readonly LIMITES_UNIDADES: Record<string, number> = {
+    'huevo': 3,        // Máximo 3 huevos por comida
+    'egg': 3,
+    'unidad': 3,       // Genérico para unidades
+    'rebanada': 4,     // Máximo 4 rebanadas de pan
+    'slice': 4
+  };
+
   // 🔥 NUEVO: Porciones típicas por tipo de alimento
   private readonly PORCIONES_TIPICAS: Record<string, { size: number; unit: string }> = {
     'huevo': { size: 50, unit: 'unidad' },
@@ -360,7 +369,34 @@ export class NutritionPlanService {
     console.log(`🔧 Ajustando porciones: ${currentCalories.toFixed(0)} kcal → ${targetCalories.toFixed(0)} kcal (factor: ${factorLimitado.toFixed(2)})`);
     
     return foods.map(food => {
-      // 🔥 Calcular nueva porción con límites
+      // 🔥 NUEVO: Verificar si es un alimento por unidades
+      const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
+                       food.serving_unit?.toLowerCase() === 'unit' ||
+                       food.name.toLowerCase().includes('huevo') ||
+                       food.name.toLowerCase().includes('egg');
+      
+      if (esUnidad) {
+        // Para alimentos por unidades, limitar a máximo 3
+        const maxUnidades = this._getMaxUnidades(food.name.toLowerCase());
+        const unidadesActuales = food.serving_size;
+        const unidadesNuevas = Math.min(unidadesActuales * factorLimitado, maxUnidades);
+        
+        const factorFinal = unidadesNuevas / unidadesActuales;
+        
+        console.log(`🔧 ${food.name}: ${unidadesActuales} unidades → ${unidadesNuevas.toFixed(1)} unidades (máx: ${maxUnidades})`);
+        
+        return {
+          ...food,
+          serving_size: this._round(unidadesNuevas),
+          calories: this._round(food.calories * factorFinal),
+          protein: this._round(food.protein * factorFinal),
+          carbs: this._round(food.carbs * factorFinal),
+          fat: this._round(food.fat * factorFinal),
+          fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
+        };
+      }
+      
+      // Para alimentos en gramos, usar la lógica anterior
       const nuevaPorcion = food.serving_size * factorLimitado;
       const porcionFinal = Math.max(this.MIN_PORTION_GRAMS, Math.min(this.MAX_PORTION_GRAMS, nuevaPorcion));
       
@@ -380,6 +416,18 @@ export class NutritionPlanService {
         fiber: food.fiber ? this._round(food.fiber * factorFinal) : undefined
       };
     });
+  }
+
+  // ============================================================================
+  // 🔥 NUEVO: OBTENER MÁXIMO DE UNIDADES SEGÚN EL ALIMENTO
+  // ============================================================================
+  private _getMaxUnidades(nameLower: string): number {
+    for (const [key, max] of Object.entries(this.LIMITES_UNIDADES)) {
+      if (nameLower.includes(key)) {
+        return max;
+      }
+    }
+    return 5; // Default: máximo 5 unidades
   }
 
   // ============================================================================
@@ -449,7 +497,41 @@ export class NutritionPlanService {
   private _ajustarPorcionInteligente(food: FoodItem, targetCalories: number): FoodItem {
     const nameLower = food.name.toLowerCase();
     
-    // Buscar porción típica
+    // 🔥 NUEVO: Verificar si es un alimento por unidades
+    const esUnidad = food.serving_unit?.toLowerCase() === 'unidad' || 
+                     food.serving_unit?.toLowerCase() === 'unit' ||
+                     nameLower.includes('huevo') ||
+                     nameLower.includes('egg');
+    
+    if (esUnidad) {
+      // Para alimentos por unidades, calcular cuántas unidades necesitamos
+      const caloriasPorUnidad = food.calories / (food.serving_size || 1);
+      let unidadesNecesarias = targetCalories / caloriasPorUnidad;
+      
+      // 🔥 LIMITAR unidades (máximo 3 huevos, 4 rebanadas, etc.)
+      const maxUnidades = this._getMaxUnidades(nameLower);
+      unidadesNecesarias = Math.min(unidadesNecesarias, maxUnidades);
+      
+      // 🔥 MÍNIMO 1 unidad
+      unidadesNecesarias = Math.max(1, Math.round(unidadesNecesarias * 10) / 10);
+      
+      const factor = unidadesNecesarias / (food.serving_size || 1);
+      
+      console.log(`🔧 Ajustando ${food.name}: ${food.serving_size}${food.serving_unit} → ${unidadesNecesarias} unidades (máx: ${maxUnidades})`);
+      
+      return {
+        ...food,
+        serving_size: unidadesNecesarias,
+        serving_unit: 'unidad',
+        calories: this._round(food.calories * factor),
+        protein: this._round(food.protein * factor),
+        carbs: this._round(food.carbs * factor),
+        fat: this._round(food.fat * factor),
+        fiber: food.fiber ? this._round(food.fiber * factor) : undefined
+      };
+    }
+    
+    // Buscar porción típica para alimentos en gramos
     let porcionTipica = 100; // default
     let unidadTipica = 'g';
     
@@ -462,8 +544,8 @@ export class NutritionPlanService {
     }
     
     // Calcular factor de escala basado en calorías objetivo
-    const caloriasPorGram = food.calories / (food.serving_size || 100);
-    const porcionIdeal = targetCalories / caloriasPorGram;
+    const caloriasPorGramo = food.calories / (food.serving_size || 100);
+    const porcionIdeal = targetCalories / caloriasPorGramo;
     
     // Limitar entre min y max
     const porcionFinal = Math.max(
@@ -471,10 +553,9 @@ export class NutritionPlanService {
       Math.min(this.MAX_PORTION_GRAMS, porcionIdeal)
     );
     
-    // Calcular factor de escala
     const factor = porcionFinal / (food.serving_size || 100);
     
-    console.log(`🔧 ${food.name}: ${food.serving_size}g → ${porcionFinal.toFixed(0)}g (factor: ${factor.toFixed(2)})`);
+    console.log(`🔧 Ajustando ${food.name}: ${food.serving_size}${food.serving_unit} → ${porcionFinal.toFixed(0)}${unidadTipica} (factor: ${factor.toFixed(2)})`);
     
     return {
       ...food,
@@ -623,8 +704,8 @@ export class NutritionPlanService {
     const mockDB: Record<string, FoodItem[]> = {
       desayuno: [
         { food_id: 'mock_avena_1', name: 'Avena en hojuelas', brand: 'Quaker', serving_size: 40, serving_unit: 'g', calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4 },
-        { food_id: 'mock_huevo_1', name: 'Huevo de gallina cocido', brand: '', serving_size: 50, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 },
-        { food_id: 'mock_pan_1', name: 'Pan integral de trigo', brand: '', serving_size: 30, serving_unit: 'rebanada', calories: 80, protein: 4, carbs: 15, fat: 1, fiber: 2 },
+        { food_id: 'mock_huevo_1', name: 'Huevo de gallina cocido', brand: '', serving_size: 1, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 },
+        { food_id: 'mock_pan_1', name: 'Pan integral de trigo', brand: '', serving_size: 1, serving_unit: 'rebanada', calories: 80, protein: 4, carbs: 15, fat: 1, fiber: 2 },
         { food_id: 'mock_yogur_1', name: 'Yogur natural sin azúcar', brand: '', serving_size: 125, serving_unit: 'g', calories: 70, protein: 6, carbs: 8, fat: 2, fiber: 0 }
       ],
       proteina_principal: [
@@ -704,7 +785,7 @@ export class NutritionPlanService {
     const minimums: Record<MealType, FoodItem[]> = {
       desayuno: [
         { food_id: 'min_avena', name: 'Avena cocida', serving_size: 40, serving_unit: 'g', calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4 },
-        { food_id: 'min_huevo', name: 'Huevo cocido', serving_size: 50, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 }
+        { food_id: 'min_huevo', name: 'Huevo cocido', serving_size: 1, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 }
       ],
       almuerzo: [
         { food_id: 'min_pollo', name: 'Pechuga de pollo', serving_size: 120, serving_unit: 'g', calories: 198, protein: 37.2, carbs: 0, fat: 4.3, fiber: 0 },
