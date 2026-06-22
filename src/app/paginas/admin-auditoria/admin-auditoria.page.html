@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Auditoría del Sistema</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Logs del Sistema</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-icon name="search" slot="start"></ion-icon>
+        <ion-input [(ngModel)]="terminoBusqueda" placeholder="Buscar en logs..."></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Filtrar por tipo</ion-label>
+        <ion-select [(ngModel)]="filtroTipo">
+          <ion-select-option value="todos">Todos</ion-select-option>
+          <ion-select-option value="login">Login</ion-select-option>
+          <ion-select-option value="user">Usuarios</ion-select-option>
+          <ion-select-option value="registro">Registros</ion-select-option>
+          <ion-select-option value="error">Errores</ion-select-option>
+          <ion-select-option value="plan">Planes</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div *ngIf="cargando" class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <ion-list *ngIf="!cargando">
+        <ion-item *ngFor="let log of logsFiltrados">
+          <ion-icon [name]="getIconoTipo(log.tipo)" 
+                    [color]="getColorTipo(log.tipo)" 
+                    slot="start">
+          </ion-icon>
+          <ion-label>
+            <h2>{{log.descripcion}}</h2>
+            <p>👤 {{log.usuario_nombre}} | 🌐 {{log.ip_address}}</p>
+            <p><small>{{log.fecha | date:'dd/MM/yyyy HH:mm:ss'}}</small></p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <div *ngIf="!cargando && logsFiltrados.length === 0" class="ion-text-center ion-padding">
+        <ion-icon name="file-tray-outline" size="large"></ion-icon>
+        <p>No hay logs disponibles</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

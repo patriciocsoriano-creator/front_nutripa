@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Usuarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Usuarios Registrados ({{usuariosFiltrados.length}})</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Búsqueda -->
+      <ion-item>
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        <ion-input 
+          [(ngModel)]="terminoBusqueda" 
+          (ionInput)="aplicarFiltros()"
+          placeholder="Buscar por nombre, correo o cédula...">
+        </ion-input>
+      </ion-item>
+
+      <!-- Filtro por rol -->
+      <ion-item>
+        <ion-label>Filtrar por rol</ion-label>
+        <ion-select [(ngModel)]="filtroRol" (ionChange)="aplicarFiltros()">
+          <ion-select-option value="todos">Todos</ion-select-option>
+          <ion-select-option value="admin">Administrador</ion-select-option>
+          <ion-select-option value="doctor">Médico</ion-select-option>
+          <ion-select-option value="nutricionista">Nutricionista</ion-select-option>
+          <ion-select-option value="enfermera">Enfermera</ion-select-option>
+          <ion-select-option value="paciente">Paciente</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Loading -->
+      <div *ngIf="cargando" class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <!-- Lista -->
+      <ion-list *ngIf="!cargando">
+        <ion-item-sliding *ngFor="let u of usuariosFiltrados">
+          <ion-item>
+            <ion-avatar slot="start">
+              <div class="avatar-circle">{{u.nombre?.charAt(0)}}{{u.apellido?.charAt(0)}}</div>
+            </ion-avatar>
+            <ion-label>
+              <h2>{{u.nombre}} {{u.apellido}}</h2>
+              <p>{{u.correo}}</p>
+              <p><ion-badge [color]="u.activo ? 'success' : 'danger'">
+                {{u.activo ? 'Activo' : 'Inactivo'}}
+              </ion-badge> - {{getRolLabel(u.rol)}}</p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item-options side="end">
+            <ion-item-option color="warning" (click)="toggleActivo(u)">
+              <ion-icon slot="icon-only" [name]="u.activo ? 'person-remove' : 'person-add'"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="eliminarUsuario(u)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+
+      <div *ngIf="!cargando && usuariosFiltrados.length === 0" class="ion-text-center ion-padding">
+        <ion-icon name="people-outline" size="large" color="medium"></ion-icon>
+        <p>No se encontraron usuarios</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

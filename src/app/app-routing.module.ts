@@ -143,6 +143,22 @@ const routes: Routes = [
     path: 'registrofinalizado',
     loadChildren: () => import('./paginas/registrofinalizado/registrofinalizado.module').then( m => m.RegistrofinalizadoPageModule)
   },
+  {
+    path: 'admin-ver-usuarios',
+    loadChildren: () => import('./paginas/admin-ver-usuarios/admin-ver-usuarios.module').then( m => m.AdminVerUsuariosPageModule)
+  },
+  {
+    path: 'admin-agregar-medico',
+    loadChildren: () => import('./paginas/admin-agregar-medico/admin-agregar-medico.module').then( m => m.AdminAgregarMedicoPageModule)
+  },
+  {
+    path: 'admin-asignaciones',
+    loadChildren: () => import('./paginas/admin-asignaciones/admin-asignaciones.module').then( m => m.AdminAsignacionesPageModule)
+  },
+  {
+    path: 'admin-auditoria',
+    loadChildren: () => import('./paginas/admin-auditoria/admin-auditoria.module').then( m => m.AdminAuditoriaPageModule)
+  },
   
 ];
 

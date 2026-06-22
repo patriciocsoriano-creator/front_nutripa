@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Asignaciones Médico-Paciente</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Nueva Asignación</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Médico</ion-label>
+        <ion-select [(ngModel)]="nuevaAsignacion.medico_id" placeholder="Seleccione médico">
+          <ion-select-option *ngFor="let m of medicos" [value]="m.id">
+            Dr. {{m.nombre}} {{m.apellido}} - {{m.especialidad}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Paciente</ion-label>
+        <ion-select [(ngModel)]="nuevaAsignacion.paciente_id" placeholder="Seleccione paciente">
+          <ion-select-option *ngFor="let p of pacientes" [value]="p.id">
+            {{p.nombres}} {{p.apellidos}} - {{p.numero_identificacion}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button expand="block" (click)="crearAsignacion()" class="ion-margin-top">
+        <ion-icon slot="start" name="link-outline"></ion-icon>
+        Crear Asignación
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Asignaciones Actuales ({{asignaciones.length}})</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngIf="cargando" class="ion-text-center">
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <ion-list *ngIf="!cargando">
+        <ion-item-sliding *ngFor="let a of asignaciones">
+          <ion-item>
+            <ion-icon name="medkit" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h2>{{getMedicoNombre(a.medico_id)}}</h2>
+              <p>👤 {{getPacienteNombre(a.paciente_id)}}</p>
+              <p><small>Asignado: {{a.fecha_asignacion | date:'dd/MM/yyyy'}}</small></p>
+            </ion-label>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="eliminarAsignacion(a)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+
+      <div *ngIf="!cargando && asignaciones.length === 0" class="ion-text-center ion-padding">
+        <p>No hay asignaciones</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
