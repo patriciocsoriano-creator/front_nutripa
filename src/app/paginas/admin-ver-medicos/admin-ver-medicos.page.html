@@ -1,0 +1,78 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Médicos y Enfermeras</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarMedicos()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="medkit-outline" color="primary"></ion-icon>
+        Personal Médico ({{medicosFiltrados.length}})
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Búsqueda -->
+      <ion-item>
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        <ion-input 
+          [(ngModel)]="terminoBusqueda" 
+          (ionInput)="aplicarFiltros()"
+          placeholder="Buscar por nombre, correo o cédula...">
+        </ion-input>
+      </ion-item>
+
+      <!-- Loading -->
+      <div *ngIf="cargando" class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+        <p>Cargando médicos...</p>
+      </div>
+
+      <!-- Lista -->
+      <ion-list *ngIf="!cargando">
+        <ion-item-sliding *ngFor="let m of medicosFiltrados">
+          <ion-item>
+            <ion-avatar slot="start">
+              <div class="avatar-circle doctor">{{m.nombre?.charAt(0)}}{{m.apellido?.charAt(0)}}</div>
+            </ion-avatar>
+            <ion-label>
+              <h2>Dr(a). {{m.nombre}} {{m.apellido}}</h2>
+              <p>📧 {{m.correo}}</p>
+              <p>📱 {{m.telefono || 'Sin teléfono'}}</p>
+              <p>
+                <ion-badge [color]="m.activo ? 'success' : 'danger'">
+                  {{m.activo ? '✅ Activo' : '⏸️ Inactivo'}}
+                </ion-badge>
+              </p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item-options side="end">
+            <ion-item-option color="warning" (click)="toggleActivo(m)">
+              <ion-icon slot="icon-only" [name]="m.activo ? 'person-remove' : 'person-add'"></ion-icon>
+              {{m.activo ? 'Desactivar' : 'Activar'}}
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+
+      <div *ngIf="!cargando && medicosFiltrados.length === 0" class="ion-text-center ion-padding">
+        <ion-icon name="medkit-outline" size="large" color="medium"></ion-icon>
+        <p>No se encontraron médicos registrados</p>
+        <ion-button (click)="router.navigate(['/admin-agregar-medico'])">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Agregar Médico
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

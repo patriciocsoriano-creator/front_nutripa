@@ -159,6 +159,14 @@ const routes: Routes = [
     path: 'admin-auditoria',
     loadChildren: () => import('./paginas/admin-auditoria/admin-auditoria.module').then( m => m.AdminAuditoriaPageModule)
   },
+  {
+    path: 'admin-ver-medicos',
+    loadChildren: () => import('./paginas/admin-ver-medicos/admin-ver-medicos.module').then( m => m.AdminVerMedicosPageModule)
+  },
+  {
+    path: 'admin-ver-pacientes',
+    loadChildren: () => import('./paginas/admin-ver-pacientes/admin-ver-pacientes.module').then( m => m.AdminVerPacientesPageModule)
+  },
   
 ];
 

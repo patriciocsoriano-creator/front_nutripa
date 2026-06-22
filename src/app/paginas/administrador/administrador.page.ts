@@ -343,18 +343,19 @@ export class AdministradorPage implements OnInit, OnDestroy {
   const rutas: Record<string, string> = {
     'admin-inicio': '/administrador',
     
-    // 📋 Usuarios
+    // 👥 Usuarios (todos)
     'admin-ver-usuarios': '/admin-ver-usuarios',
-    'admin-agregar-usuario': '/admin-agregar-usuario',
+    'admin-agregar-usuario': '/admin-ver-usuarios', // Por ahora reutiliza
+    'admin-roles-permisos': '/admin-ver-usuarios',
     
-    // 👨‍⚕️ Médicos
-    'admin-ver-medicos': '/admin-ver-usuarios',  // Reutiliza ver-usuarios con filtro
+    // 👨‍⚕️ Médicos (solo doctores y enfermeras)
+    'admin-ver-medicos': '/admin-ver-medicos',
     'admin-agregar-medico': '/admin-agregar-medico',
     'admin-asignaciones': '/admin-asignaciones',
     
-    // 👥 Pacientes
-    'admin-ver-pacientes': '/admin-ver-usuarios',  // Reutiliza con filtro
-    'admin-estadisticas-pacientes': '/admin-ver-usuarios',
+    // 👤 Pacientes (solo pacientes)
+    'admin-ver-pacientes': '/admin-ver-pacientes',
+    'admin-estadisticas-pacientes': '/admin-ver-pacientes',
     
     // 📊 Reportes
     'admin-reportes-globales': '/admin-auditoria',
@@ -364,16 +365,16 @@ export class AdministradorPage implements OnInit, OnDestroy {
     // ⚙️ Configuración
     'admin-config-general': '/administrador',
     'admin-config-parametros': '/administrador',
-    'admin-config-backup': '/administrador',
-    
-    // 🔐 Roles
-    'admin-roles-permisos': '/admin-ver-usuarios'
+    'admin-config-backup': '/administrador'
   };
 
   this.rutaActual = ruta;
   const rutaDestino = rutas[ruta] || `/${ruta}`;
   
-  console.log(`🧭 Navegando a: ${rutaDestino}`);
+  if (this.isMobile) {
+    this.sidebarOpen = false;
+  }
+  
   this.router.navigate([rutaDestino]);
 }
 

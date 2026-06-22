@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pacientes Registrados</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarPacientes()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="accessibility-outline" color="primary"></ion-icon>
+        Pacientes ({{pacientesFiltrados.length}})
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Búsqueda -->
+      <ion-item>
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        <ion-input 
+          [(ngModel)]="terminoBusqueda" 
+          (ionInput)="aplicarFiltros()"
+          placeholder="Buscar por nombre, cédula o teléfono...">
+        </ion-input>
+      </ion-item>
+
+      <!-- Loading -->
+      <div *ngIf="cargando" class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+        <p>Cargando pacientes...</p>
+      </div>
+
+      <!-- Lista -->
+      <ion-list *ngIf="!cargando">
+        <ion-item *ngFor="let p of pacientesFiltrados">
+          <ion-avatar slot="start">
+            <div class="avatar-circle patient">{{p.nombres?.charAt(0)}}{{p.apellidos?.charAt(0)}}</div>
+          </ion-avatar>
+          <ion-label>
+            <h2>{{p.nombres}} {{p.apellidos}}</h2>
+            <p>🆔 {{p.numero_identificacion}}</p>
+            <p>📱 {{p.telefono || 'Sin teléfono'}}</p>
+            <p>
+              <ion-badge color="tertiary">
+                {{getSexoLabel(p.sexo)}} - {{calcularEdad(p.fecha_nacimiento)}} años
+              </ion-badge>
+              <ion-badge color="medium" *ngIf="p.total_registros > 0">
+                {{p.total_registros}} registro(s)
+              </ion-badge>
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <div *ngIf="!cargando && pacientesFiltrados.length === 0" class="ion-text-center ion-padding">
+        <ion-icon name="accessibility-outline" size="large" color="medium"></ion-icon>
+        <p>No se encontraron pacientes registrados</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
