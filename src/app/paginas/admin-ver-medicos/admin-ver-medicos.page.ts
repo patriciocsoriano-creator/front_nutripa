@@ -90,4 +90,8 @@ export class AdminVerMedicosPage implements OnInit {
     const toast = await this.toastCtrl.create({ message: msg, color, duration: 2500, position: 'bottom' });
     await toast.present();
   }
+
+  irAAgregarMedico() {
+  this.router.navigate(['/admin-agregar-medico']);
+}
 }
