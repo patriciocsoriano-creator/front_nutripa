@@ -25,7 +25,7 @@ export class PrincipalregistroPage implements OnInit {
     { value: 'paciente', label: 'Paciente', icon: 'person-outline' },
     { value: 'nutricionista', label: 'Nutricionista', icon: 'restaurant-outline' },
     { value: 'enfermera', label: 'Enfermera', icon: 'heart-outline' },
-    { value: 'administrador', label: 'Administrador', icon: 'settings-outline' }
+    { value: 'admin', label: 'Administrador', icon: 'settings-outline' }
   ];
 
   // 🌍 Datos de ubicaciones
