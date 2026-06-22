@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Respaldos de BD</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="cargando" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <div *ngIf="!cargando">
+    <!-- Resumen -->
+    <ion-card class="resumen-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="server-outline" color="primary"></ion-icon>
+          Resumen de Base de Datos
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="resumen-grid">
+          <div class="resumen-item">
+            <div class="resumen-valor">{{totalTablas}}</div>
+            <div class="resumen-label">Tablas</div>
+          </div>
+          <div class="resumen-item">
+            <div class="resumen-valor">{{tamanioTotal.toFixed(2)}} MB</div>
+            <div class="resumen-label">Tamaño Total</div>
+          </div>
+          <div class="resumen-item">
+            <div class="resumen-valor">{{fechaBackup | date:'dd/MM/yyyy'}}</div>
+            <div class="resumen-label">Última Actualización</div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Tablas -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="list-outline" color="primary"></ion-icon>
+          Tablas del Sistema
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let tabla of tablas">
+            <ion-icon name="table-portrait-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h2>{{tabla.tabla}}</h2>
+              <p>
+                ~{{tabla.filas_aprox}} filas |
+                Creada: {{tabla.creado_en | date:'dd/MM/yyyy'}}
+              </p>
+            </ion-label>
+            <ion-badge [color]="getTamanioColor(tabla.tamanio_mb)" slot="end">
+              {{tabla.tamanio_mb}} MB
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Acciones -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="construct-outline" color="primary"></ion-icon>
+          Acciones de Respaldo
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="action-buttons">
+          <ion-button expand="block" (click)="confirmarExportar()">
+            <ion-icon slot="start" name="download-outline"></ion-icon>
+            Exportar Base de Datos (.sql)
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" color="warning" (click)="confirmarImportar()">
+            <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+            Importar Base de Datos
+          </ion-button>
+
+          <ion-button expand="block" fill="clear" (click)="cargarInfoBackup()">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Actualizar Información
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

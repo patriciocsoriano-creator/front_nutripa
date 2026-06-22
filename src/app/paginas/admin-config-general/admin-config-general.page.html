@@ -1,0 +1,130 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Configuración General</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="cargando" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+    <p>Cargando configuración...</p>
+  </div>
+
+  <div *ngIf="!cargando">
+    <!-- Información del Sistema -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+          Información del Sistema
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Nombre del Sistema</ion-label>
+          <ion-input [(ngModel)]="config.nombre_sistema"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Versión</ion-label>
+          <ion-input [(ngModel)]="config.version"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Descripción</ion-label>
+          <ion-textarea [(ngModel)]="config.descripcion" rows="2"></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Contacto -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="mail-outline" color="primary"></ion-icon>
+          Información de Contacto
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Email de Contacto</ion-label>
+          <ion-input [(ngModel)]="config.email_contacto" type="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Teléfono</ion-label>
+          <ion-input [(ngModel)]="config.telefono_contacto" type="tel"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Dirección</ion-label>
+          <ion-textarea [(ngModel)]="config.direccion" rows="2"></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Seguridad -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+          Seguridad y Sesiones
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Máximo de Intentos de Login</ion-label>
+          <ion-input [(ngModel)]="config.max_intentos_login" type="number" min="1" max="20"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Tiempo de Sesión (minutos)</ion-label>
+          <ion-input [(ngModel)]="config.tiempo_sesion_minutos" type="number" min="5" max="480"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Registro -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-add-outline" color="primary"></ion-icon>
+          Configuración de Registro
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Permitir Auto-registro</ion-label>
+          <ion-toggle [(ngModel)]="config.permitir_autoregistro" slot="end"></ion-toggle>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Requerir Aprobación del Admin</ion-label>
+          <ion-toggle [(ngModel)]="config.requerir_aprobacion_admin" slot="end"></ion-toggle>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Modo Mantenimiento</ion-label>
+          <ion-toggle [(ngModel)]="config.modo_mantenimiento" slot="end" color="danger"></ion-toggle>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones -->
+    <div class="action-buttons">
+      <ion-button expand="block" (click)="guardarConfiguracion()" [disabled]="guardando">
+        <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+        {{guardando ? 'Guardando...' : 'Guardar Configuración'}}
+      </ion-button>
+
+      <ion-button expand="block" fill="outline" color="warning" (click)="confirmarReset()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Resetear Valores
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

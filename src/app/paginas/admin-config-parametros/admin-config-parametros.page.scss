@@ -1,0 +1,44 @@
+.metricas-card {
+  background: linear-gradient(135deg, #f0faf5, #e0f5ed);
+}
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.metrica-item {
+  text-align: center;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.metrica-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0d6b4e;
+}
+
+.metrica-label {
+  font-size: 0.8rem;
+  color: #6b7c75;
+  margin-top: 5px;
+}
+
+.action-buttons {
+  margin-top: 20px;
+  ion-button {
+    margin-bottom: 10px;
+  }
+}
+
+ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
