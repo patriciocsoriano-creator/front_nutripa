@@ -7,15 +7,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
 interface ActividadReciente {
-  tipo: 'login' | 'user' | 'plan' | 'alert';
+  tipo: 'login' | 'user' | 'plan' | 'alert' | 'registro' | 'error';
   icono: string;
   descripcion: string;
   tiempo: string;
+  usuario_nombre?: string;
+  ip_address?: string;
 }
-
-// ========================================
-// 🎯 COMPONENTE PRINCIPAL
-// ========================================
 
 @Component({
   selector: 'app-administrador',
@@ -23,7 +21,6 @@ interface ActividadReciente {
   styleUrls: ['./administrador.page.scss'],
   standalone: false,
 })
-
 export class AdministradorPage implements OnInit, OnDestroy {
 
   sidebarOpen = false;
@@ -35,14 +32,33 @@ export class AdministradorPage implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private isMobile = false;
 
+  // 📊 Estadísticas del dashboard
   stats = {
     totalUsuarios: 0,
     totalMedicos: 0,
     totalPacientes: 0,
-    totalPlanes: 0
+    totalPlanes: 0,
+    registrosHoy: 0
   };
 
+  // 🕐 Actividad reciente (desde backend)
   actividadesRecientes: ActividadReciente[] = [];
+  cargandoActividad = false;
+
+  // 📈 Reportes globales
+  reportesGlobales = {
+    pacientesPorMes: [] as any[],
+    registrosPorEstado: [] as any[],
+    planesPorPerfil: [] as any[],
+    topMedicos: [] as any[]
+  };
+
+  // 📍 Estadísticas de ubicaciones
+  statsUbicaciones = {
+    provincias: 0,
+    cantones: 0,
+    parroquias: 0
+  };
 
   constructor(
     private router: Router,
@@ -63,8 +79,10 @@ export class AdministradorPage implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.cargarDatosAdmin();
-    this.cargarEstadisticas();
-    this.cargarActividadesRecientes();
+    await this.cargarEstadisticas();
+    await this.cargarActividadReciente();
+    await this.cargarReportesGlobales();
+    await this.cargarStatsUbicaciones();
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd), takeUntil(this.destroy$))
@@ -78,6 +96,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // 👤 Cargar datos del administrador desde localStorage
   private cargarDatosAdmin() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -91,9 +110,14 @@ export class AdministradorPage implements OnInit, OnDestroy {
     }
   }
 
+  // 📊 Cargar estadísticas del dashboard
   private async cargarEstadisticas() {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.warn('⚠️ No hay token, redirigiendo a login');
+      this.router.navigate(['/principal']);
+      return;
+    }
 
     try {
       const response = await this.http.get<any>(
@@ -110,57 +134,161 @@ export class AdministradorPage implements OnInit, OnDestroy {
           totalUsuarios: response.total_usuarios || 0,
           totalMedicos: response.total_medicos || 0,
           totalPacientes: response.total_pacientes || 0,
-          totalPlanes: response.total_planes || 0
+          totalPlanes: response.total_planes || 0,
+          registrosHoy: response.registros_hoy || 0
         };
+        console.log('✅ [ADMIN] Estadísticas cargadas:', this.stats);
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar estadísticas:', error);
-      // Valores por defecto para desarrollo
-      this.stats = {
-        totalUsuarios: 127,
-        totalMedicos: 15,
-        totalPacientes: 892,
-        totalPlanes: 1456
-      };
+      console.error('❌ Error cargando estadísticas:', error);
+      await this.showToast('Error al cargar estadísticas', 'danger');
     }
   }
 
-  private cargarActividadesRecientes() {
-    // Datos de ejemplo - reemplazar con llamada a backend
-    this.actividadesRecientes = [
-      {
-        tipo: 'user',
-        icono: 'person-add-outline',
-        descripcion: 'Nuevo médico registrado: Dr. Carlos Mendoza',
-        tiempo: 'Hace 5 minutos'
-      },
-      {
-        tipo: 'plan',
-        icono: 'nutrition-outline',
-        descripcion: 'Plan nutricional generado para paciente Rosalba Chalen',
-        tiempo: 'Hace 15 minutos'
-      },
-      {
-        tipo: 'login',
-        icono: 'log-in-outline',
-        descripcion: 'Inicio de sesión: Dr. Patricia Ordoñez',
-        tiempo: 'Hace 30 minutos'
-      },
-      {
-        tipo: 'alert',
-        icono: 'warning-outline',
-        descripcion: 'Intento de acceso no autorizado detectado',
-        tiempo: 'Hace 1 hora'
-      },
-      {
-        tipo: 'user',
-        icono: 'create-outline',
-        descripcion: 'Perfil actualizado: María González',
-        tiempo: 'Hace 2 horas'
+  // 🕐 Cargar actividad reciente desde auditoría
+  private async cargarActividadReciente() {
+    this.cargandoActividad = true;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await this.http.get<any>(
+        `${environment.apiUrl}/nutricionapp-api/admin/auditoria`,
+        {
+          headers: new HttpHeaders({
+            'Authorization': `Bearer ${token}`
+          })
+        }
+      ).toPromise();
+
+      if (response && !response.error && response.logs) {
+        this.actividadesRecientes = response.logs.slice(0, 10).map((log: any) => ({
+          tipo: this.mapearTipoActividad(log.tipo),
+          icono: this.obtenerIcono(log.tipo),
+          descripcion: log.descripcion || 'Actividad del sistema',
+          tiempo: this.formatearTiempo(log.fecha),
+          usuario_nombre: log.usuario_nombre,
+          ip_address: log.ip_address
+        }));
+        console.log('✅ [ADMIN] Actividad reciente cargada:', this.actividadesRecientes.length, 'registros');
       }
-    ];
+    } catch (error) {
+      console.error('❌ Error cargando actividad:', error);
+      // Datos de ejemplo si falla
+      this.actividadesRecientes = [
+        {
+          tipo: 'alert',
+          icono: 'warning-outline',
+          descripcion: 'No se pudo cargar la actividad del sistema',
+          tiempo: 'Ahora'
+        }
+      ];
+    } finally {
+      this.cargandoActividad = false;
+    }
   }
 
+  // 📈 Cargar reportes globales
+  private async cargarReportesGlobales() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await this.http.get<any>(
+        `${environment.apiUrl}/nutricionapp-api/admin/reportes/globales`,
+        {
+          headers: new HttpHeaders({
+            'Authorization': `Bearer ${token}`
+          })
+        }
+      ).toPromise();
+
+      if (response && !response.error) {
+        this.reportesGlobales = {
+          pacientesPorMes: response.pacientes_por_mes || [],
+          registrosPorEstado: response.registros_por_estado || [],
+          planesPorPerfil: response.planes_por_perfil || [],
+          topMedicos: response.top_medicos || []
+        };
+        console.log('✅ [ADMIN] Reportes globales cargados');
+      }
+    } catch (error) {
+      console.error('❌ Error cargando reportes:', error);
+    }
+  }
+
+  // 📍 Cargar estadísticas de ubicaciones
+  private async cargarStatsUbicaciones() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await this.http.get<any>(
+        `${environment.apiUrl}/nutricionapp-api/admin/ubicaciones/stats`,
+        {
+          headers: new HttpHeaders({
+            'Authorization': `Bearer ${token}`
+          })
+        }
+      ).toPromise();
+
+      if (response && !response.error && response.stats) {
+        this.statsUbicaciones = {
+          provincias: response.stats.provincias || 0,
+          cantones: response.stats.cantones || 0,
+          parroquias: response.stats.parroquias || 0
+        };
+      }
+    } catch (error) {
+      console.error('❌ Error cargando stats ubicaciones:', error);
+    }
+  }
+
+  // 🔧 Mapear tipo de actividad
+  private mapearTipoActividad(tipo: string): 'login' | 'user' | 'plan' | 'alert' | 'registro' | 'error' {
+    const mapeo: Record<string, any> = {
+      'login': 'login',
+      'user': 'user',
+      'plan': 'plan',
+      'registro': 'registro',
+      'error': 'error',
+      'alert': 'alert'
+    };
+    return mapeo[tipo] || 'user';
+  }
+
+  // 🎨 Obtener icono según tipo
+  private obtenerIcono(tipo: string): string {
+    const iconos: Record<string, string> = {
+      'login': 'log-in-outline',
+      'user': 'person-outline',
+      'plan': 'nutrition-outline',
+      'registro': 'document-text-outline',
+      'error': 'alert-circle-outline',
+      'alert': 'warning-outline'
+    };
+    return iconos[tipo] || 'information-circle-outline';
+  }
+
+  // 🕐 Formatear tiempo relativo
+  private formatearTiempo(fecha: string): string {
+    if (!fecha) return 'Ahora';
+    
+    const ahora = new Date();
+    const fechaActividad = new Date(fecha);
+    const diffMs = ahora.getTime() - fechaActividad.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffHours < 24) return `Hace ${diffHours}h`;
+    if (diffDays < 7) return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    return fechaActividad.toLocaleDateString('es-EC');
+  }
+
+  // 🔄 Refrescar todos los datos
   async refrescarDatos() {
     const loading = await this.loadingCtrl.create({
       message: 'Actualizando datos...',
@@ -168,13 +296,18 @@ export class AdministradorPage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    await this.cargarEstadisticas();
-    await this.cargarActividadesRecientes();
+    await Promise.all([
+      this.cargarEstadisticas(),
+      this.cargarActividadReciente(),
+      this.cargarReportesGlobales(),
+      this.cargarStatsUbicaciones()
+    ]);
 
     await loading.dismiss();
     await this.showToast('✅ Datos actualizados', 'success');
   }
 
+  // 🚪 Cerrar sesión
   async cerrarSesion() {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar sesión',
@@ -195,17 +328,20 @@ export class AdministradorPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
+  // 📱 Toggle sidebar
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
+  // 📂 Toggle submenú
   toggleSubmenu(item: string) {
     this.submenuAbierto = this.submenuAbierto === item ? null : item;
   }
 
+  // 🧭 Navegar a página
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
-      'admin-inicio': '/admin-inicio',
+      'admin-inicio': '/administrador',
       'admin-ver-usuarios': '/admin/usuarios',
       'admin-agregar-usuario': '/admin/usuarios/nuevo',
       'admin-roles-permisos': '/admin/roles',
@@ -224,9 +360,15 @@ export class AdministradorPage implements OnInit, OnDestroy {
 
     this.rutaActual = ruta;
     const rutaDestino = rutas[ruta] || `/${ruta}`;
+    
+    if (this.isMobile) {
+      this.sidebarOpen = false;
+    }
+    
     this.router.navigate([rutaDestino]);
   }
 
+  // 🔔 Mostrar toast
   async showToast(message: string, color: 'primary' | 'success' | 'danger' | 'warning' = 'primary') {
     await this.toastCtrl.create({
       message,
@@ -235,5 +377,4 @@ export class AdministradorPage implements OnInit, OnDestroy {
       position: 'bottom'
     }).then(t => t.present());
   }
-
 }

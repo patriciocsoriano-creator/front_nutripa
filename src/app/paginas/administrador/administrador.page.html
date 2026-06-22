@@ -30,7 +30,7 @@
       
       <div class="user-info">
         <ion-avatar>
-          <img src="assets/avatar-placeholder.png" alt="Administrador" />
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombreAdmin}}</h4>
@@ -187,7 +187,7 @@
             <ion-icon name="people-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <h3>{{stats.totalUsuarios || 0}}</h3>
+            <h3>{{stats.totalUsuarios}}</h3>
             <p>Usuarios registrados</p>
           </div>
         </div>
@@ -197,7 +197,7 @@
             <ion-icon name="medkit-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <h3>{{stats.totalMedicos || 0}}</h3>
+            <h3>{{stats.totalMedicos}}</h3>
             <p>Médicos activos</p>
           </div>
         </div>
@@ -207,7 +207,7 @@
             <ion-icon name="accessibility-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <h3>{{stats.totalPacientes || 0}}</h3>
+            <h3>{{stats.totalPacientes}}</h3>
             <p>Pacientes atendidos</p>
           </div>
         </div>
@@ -217,8 +217,28 @@
             <ion-icon name="nutrition-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <h3>{{stats.totalPlanes || 0}}</h3>
+            <h3>{{stats.totalPlanes}}</h3>
             <p>Planes generados</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon today">
+            <ion-icon name="today-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{stats.registrosHoy}}</h3>
+            <p>Registros hoy</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon location">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{statsUbicaciones.provincias}}</h3>
+            <p>Provincias cargadas</p>
           </div>
         </div>
       </div>
@@ -235,6 +255,10 @@
             <ion-icon name="medkit-outline"></ion-icon>
             <span>Nuevo médico</span>
           </button>
+          <button class="action-btn" (click)="navegarA('admin-asignaciones')">
+            <ion-icon name="link-outline"></ion-icon>
+            <span>Asignaciones</span>
+          </button>
           <button class="action-btn" (click)="navegarA('admin-reportes-globales')">
             <ion-icon name="document-text-outline"></ion-icon>
             <span>Generar reporte</span>
@@ -243,22 +267,65 @@
             <ion-icon name="shield-checkmark-outline"></ion-icon>
             <span>Ver auditoría</span>
           </button>
+          <button class="action-btn" (click)="navegarA('admin-ver-pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Ver pacientes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TOP MÉDICOS -->
+      <div class="top-medicos" *ngIf="reportesGlobales.topMedicos.length > 0">
+        <h2>🏆 Top Médicos con más pacientes</h2>
+        <div class="medicos-list">
+          <div class="medico-item" *ngFor="let medico of reportesGlobales.topMedicos.slice(0, 5); let i = index">
+            <div class="medico-rank">#{{i + 1}}</div>
+            <div class="medico-info">
+              <h4>{{medico.nombre}}</h4>
+              <p>{{medico.total_pacientes}} pacientes atendidos</p>
+            </div>
+            <div class="medico-bar">
+              <div class="bar-fill" [style.width.%]="(medico.total_pacientes / reportesGlobales.topMedicos[0].total_pacientes) * 100"></div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- ACTIVIDAD RECIENTE -->
       <div class="recent-activity">
         <h2>Actividad reciente del sistema</h2>
-        <div class="activity-list">
+        
+        <div *ngIf="cargandoActividad" class="loading-activity">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p>Cargando actividad...</p>
+        </div>
+
+        <div class="activity-list" *ngIf="!cargandoActividad">
           <div class="activity-item" *ngFor="let activity of actividadesRecientes">
             <div class="activity-icon" [ngClass]="activity.tipo">
               <ion-icon [name]="activity.icono"></ion-icon>
             </div>
             <div class="activity-info">
               <p class="activity-text">{{activity.descripcion}}</p>
+              <p class="activity-meta">
+                <span *ngIf="activity.usuario_nombre">👤 {{activity.usuario_nombre}}</span>
+                <span *ngIf="activity.ip_address">🌐 {{activity.ip_address}}</span>
+              </p>
               <p class="activity-time">{{activity.tiempo}}</p>
             </div>
           </div>
+
+          <div *ngIf="actividadesRecientes.length === 0" class="no-activity">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <p>No hay actividad reciente</p>
+          </div>
+        </div>
+
+        <div class="view-all-link">
+          <ion-button fill="clear" size="small" (click)="navegarA('admin-auditoria')">
+            Ver toda la auditoría
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+          </ion-button>
         </div>
       </div>
     </div>
