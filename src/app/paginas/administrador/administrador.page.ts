@@ -320,30 +320,20 @@ export class AdministradorPage implements OnInit, OnDestroy {
   navegarA(ruta: string): void {
   const rutas: Record<string, string> = {
     'admin-inicio': '/administrador',
-    
-    //  Usuarios (todos)
     'admin-ver-usuarios': '/admin-ver-usuarios',
-    'admin-agregar-usuario': '/admin-ver-usuarios', // Por ahora reutiliza
+    'admin-agregar-usuario': '/admin-ver-usuarios',
     'admin-roles-permisos': '/admin-ver-usuarios',
-    
-    //  Médicos (solo doctores y enfermeras)
     'admin-ver-medicos': '/admin-ver-medicos',
     'admin-agregar-medico': '/admin-agregar-medico',
     'admin-asignaciones': '/admin-asignaciones',
-    
-    //  Pacientes (solo pacientes)
     'admin-ver-pacientes': '/admin-ver-pacientes',
     'admin-estadisticas-pacientes': '/admin-ver-pacientes',
-    
-    //  Reportes
     'admin-reportes-globales': '/admin-auditoria',
     'admin-auditoria': '/admin-auditoria',
     'admin-actividad-usuarios': '/admin-auditoria',
-    
-    //  Configuración
-    'admin-config-general': '/administrador',
-    'admin-config-parametros': '/administrador',
-    'admin-config-backup': '/administrador'
+    'admin-config-general': '/admin-config-general',
+    'admin-config-parametros': '/admin-config-parametros',
+    'admin-config-backup': '/admin-config-backup'
   };
 
   this.rutaActual = ruta;

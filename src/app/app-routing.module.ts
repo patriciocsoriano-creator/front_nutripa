@@ -167,6 +167,18 @@ const routes: Routes = [
     path: 'admin-ver-pacientes',
     loadChildren: () => import('./paginas/admin-ver-pacientes/admin-ver-pacientes.module').then( m => m.AdminVerPacientesPageModule)
   },
+  {
+    path: 'admin-config-general',
+    loadChildren: () => import('./paginas/admin-config-general/admin-config-general.module').then( m => m.AdminConfigGeneralPageModule)
+  },
+  {
+    path: 'admin-config-parametros',
+    loadChildren: () => import('./paginas/admin-config-parametros/admin-config-parametros.module').then( m => m.AdminConfigParametrosPageModule)
+  },
+  {
+    path: 'admin-config-backup',
+    loadChildren: () => import('./paginas/admin-config-backup/admin-config-backup.module').then( m => m.AdminConfigBackupPageModule)
+  },
   
 ];
 
