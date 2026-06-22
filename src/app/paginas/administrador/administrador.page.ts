@@ -187,7 +187,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
           handler: () => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            this.router.navigate(['/login']);
+            this.router.navigate(['/principal']);
           }
         }
       ]

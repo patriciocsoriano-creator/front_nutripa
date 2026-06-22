@@ -292,20 +292,25 @@ export class PrincipalregistroPage implements OnInit {
     }
   }
 
-  // 🔐 Validar contraseñas
-  validarPasswords(): void {
-    const { password, confirmarPassword } = this.registroForm;
-    
-    if (confirmarPassword && password !== confirmarPassword) {
+  //  Validar contraseñas
+validarPasswords(): void {
+  const password = this.registroForm.password || '';
+  const confirmarPassword = this.registroForm.confirmarPassword || '';
+  
+  // Si ambos tienen valor, comparar
+  if (password && confirmarPassword) {
+    if (password !== confirmarPassword) {
       this.passwordError = 'Las contraseñas no coinciden';
       this.passwordsCoinciden = false;
     } else {
       this.passwordError = '';
-      if (confirmarPassword && password) {
-        this.passwordsCoinciden = true;
-      }
+      this.passwordsCoinciden = true;
     }
+  } else {
+    this.passwordError = '';
+    this.passwordsCoinciden = false;
   }
+}
 
   // 🌍 Cargar ubicaciones
   async cargarUbicaciones(): Promise<void> {
