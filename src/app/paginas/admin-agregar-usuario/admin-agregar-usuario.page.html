@@ -1,0 +1,530 @@
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Agregar Usuario</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
+        </div>
+      </div>
+      
+      <ul>
+        <li (click)="navegarA('admin-inicio')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')" class="active">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Medicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver medicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar medico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadisticas</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoria / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuracion</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parametros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>
+          <ion-icon name="person-add-outline"></ion-icon>
+          Agregar Nuevo Usuario
+        </h1>
+        <p class="subtitle">Complete el formulario para registrar un nuevo usuario en el sistema</p>
+      </div>
+
+      <form #formDirective="ngForm" (ngSubmit)="guardarUsuario()">
+        
+        <!-- Seccion 1: Datos Personales -->
+        <ion-card class="form-section">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              Datos Personales
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="nombreError">
+                    <ion-label position="stacked">Nombre *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.nombre" 
+                      name="nombre"
+                      required
+                      maxlength="50"
+                      placeholder="Ingrese el nombre"
+                      (ionInput)="validarNombre()">
+                    </ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="nombreError" class="error-message">
+                    <small>{{nombreError}}</small>
+                  </ion-text>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="apellidoError">
+                    <ion-label position="stacked">Apellido *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.apellido" 
+                      name="apellido"
+                      required
+                      maxlength="50"
+                      placeholder="Ingrese el apellido"
+                      (ionInput)="validarApellido()">
+                    </ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="apellidoError" class="error-message">
+                    <small>{{apellidoError}}</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="cedulaError" [class.valid]="cedulaValida">
+                    <ion-label position="stacked">Cedula *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.cedula" 
+                      name="cedula"
+                      required
+                      maxlength="10"
+                      type="tel"
+                      inputmode="numeric"
+                      placeholder="Ej: 1712345678"
+                      (ionInput)="validarCedula()">
+                    </ion-input>
+                    <ion-icon *ngIf="cedulaValida" slot="end" name="checkmark-circle" color="success"></ion-icon>
+                    <ion-icon *ngIf="cedulaError" slot="end" name="close-circle" color="danger"></ion-icon>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="cedulaError" class="error-message">
+                    <small>{{cedulaError}}</small>
+                  </ion-text>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Genero *</ion-label>
+                    <ion-select 
+                      [(ngModel)]="form.genero" 
+                      name="genero"
+                      required
+                      placeholder="Seleccione"
+                      interface="popover">
+                      <ion-select-option value="M">Masculino</ion-select-option>
+                      <ion-select-option value="F">Femenino</ion-select-option>
+                      <ion-select-option value="O">Otro</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="telefonoError">
+                    <ion-label position="stacked">Telefono *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.telefono" 
+                      name="telefono"
+                      required
+                      maxlength="10"
+                      type="tel"
+                      inputmode="numeric"
+                      placeholder="Ej: 0991234567"
+                      (ionInput)="validarTelefono()">
+                    </ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="telefonoError" class="error-message">
+                    <small>{{telefonoError}}</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Seccion 2: Credenciales de Acceso -->
+        <ion-card class="form-section">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="lock-closed-outline" color="primary"></ion-icon>
+              Credenciales de Acceso
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="correoError">
+                    <ion-label position="stacked">Correo Electronico *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.correo" 
+                      name="correo"
+                      required
+                      type="email"
+                      placeholder="usuario@ejemplo.com"
+                      (ionInput)="validarCorreo()">
+                    </ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="correoError" class="error-message">
+                    <small>{{correoError}}</small>
+                  </ion-text>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Rol *</ion-label>
+                    <ion-select 
+                      [(ngModel)]="form.rol" 
+                      name="rol"
+                      required
+                      placeholder="Seleccione un rol"
+                      interface="popover">
+                      <ion-select-option value="admin">Administrador</ion-select-option>
+                      <ion-select-option value="doctor">Medico</ion-select-option>
+                      <ion-select-option value="nutricionista">Nutricionista</ion-select-option>
+                      <ion-select-option value="enfermera">Enfermera</ion-select-option>
+                      <ion-select-option value="paciente">Paciente</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="passwordError">
+                    <ion-label position="stacked">Contrasena *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.password" 
+                      name="password"
+                      required
+                      [type]="showPassword ? 'text' : 'password'"
+                      placeholder="Minimo 8 caracteres"
+                      (ionInput)="validarPassword()">
+                    </ion-input>
+                    <ion-button fill="clear" slot="end" (click)="showPassword = !showPassword">
+                      <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="passwordError" class="error-message">
+                    <small>{{passwordError}}</small>
+                  </ion-text>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" [class.invalid]="confirmarPasswordError">
+                    <ion-label position="stacked">Confirmar Contrasena *</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.confirmarPassword" 
+                      name="confirmarPassword"
+                      required
+                      [type]="showConfirmPassword ? 'text' : 'password'"
+                      placeholder="Repita la contrasena"
+                      (ionInput)="validarConfirmarPassword()">
+                    </ion-input>
+                    <ion-button fill="clear" slot="end" (click)="showConfirmPassword = !showConfirmPassword">
+                      <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="confirmarPasswordError" class="error-message">
+                    <small>{{confirmarPasswordError}}</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Indicador de seguridad de contrasena -->
+            <div class="password-strength" *ngIf="form.password">
+              <div class="strength-bar">
+                <div 
+                  class="strength-fill"
+                  [class.weak]="fortalezaPassword === 'weak'"
+                  [class.medium]="fortalezaPassword === 'medium'"
+                  [class.strong]="fortalezaPassword === 'strong'"
+                  [style.width.%]="fortalezaPorcentaje">
+                </div>
+              </div>
+              <span class="strength-text"
+                    [class.weak]="fortalezaPassword === 'weak'"
+                    [class.medium]="fortalezaPassword === 'medium'"
+                    [class.strong]="fortalezaPassword === 'strong'">
+                {{fortalezaTexto}}
+              </span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Seccion 3: Ubicacion (Opcional) -->
+        <ion-card class="form-section">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="location-outline" color="primary"></ion-icon>
+              Ubicacion (Opcional)
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Direccion</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.direccion" 
+                      name="direccion"
+                      placeholder="Ej: Av. Principal y Calle Secundaria">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Ciudad</ion-label>
+                    <ion-input 
+                      [(ngModel)]="form.ciudad" 
+                      name="ciudad"
+                      placeholder="Ej: Quito">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="4">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Provincia</ion-label>
+                    <ion-select 
+                      [(ngModel)]="form.provinciaCodigo" 
+                      name="provinciaCodigo"
+                      placeholder="Seleccione"
+                      interface="popover"
+                      (ionChange)="onProvinciaChange($event.detail.value)">
+                      <ion-select-option *ngFor="let p of provincias" [value]="p.codigo">
+                        {{p.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+
+                <ion-col size="12" size-md="4">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Canton</ion-label>
+                    <ion-select 
+                      [(ngModel)]="form.cantonCodigo" 
+                      name="cantonCodigo"
+                      [disabled]="!form.provinciaCodigo"
+                      placeholder="Seleccione"
+                      interface="popover"
+                      (ionChange)="onCantonChange($event.detail.value)">
+                      <ion-select-option *ngFor="let c of cantones" [value]="c.codigo">
+                        {{c.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+
+                <ion-col size="12" size-md="4">
+                  <ion-item lines="full">
+                    <ion-label position="stacked">Parroquia</ion-label>
+                    <ion-select 
+                      [(ngModel)]="form.parroquiaCodigo" 
+                      name="parroquiaCodigo"
+                      [disabled]="!form.cantonCodigo"
+                      placeholder="Seleccione"
+                      interface="popover">
+                      <ion-select-option *ngFor="let par of parroquias" [value]="par.codigo">
+                        {{par.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Botones de Accion -->
+        <div class="action-buttons">
+          <ion-button 
+            expand="block" 
+            color="primary" 
+            size="large"
+            type="submit"
+            [disabled]="guardando || !esFormularioValido()"
+            class="btn-primary">
+            <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+            {{guardando ? 'Guardando...' : 'Crear Usuario'}}
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            color="medium"
+            type="button"
+            (click)="limpiarFormulario()"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Limpiar Formulario
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            color="medium"
+            type="button"
+            (click)="navegarA('admin-ver-usuarios')"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver a la Lista
+          </ion-button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</ion-content>
