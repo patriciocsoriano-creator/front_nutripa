@@ -224,7 +224,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
 
     try {
       const response = await this.http.get<any>(
-        `${environment.apiUrl}/nutricionapp-api/admin/ubicaciones/stats`,
+        `${environment.apiUrl}/nutricionapp-api/admin-ubicaciones/ubicaciones/stats`,
         {
           headers: new HttpHeaders({
             'Authorization': `Bearer ${token}`
@@ -340,33 +340,42 @@ export class AdministradorPage implements OnInit, OnDestroy {
 
   // 🧭 Navegar a página
   navegarA(ruta: string): void {
-    const rutas: Record<string, string> = {
-      'admin-inicio': '/administrador',
-      'admin-ver-usuarios': '/admin/usuarios',
-      'admin-agregar-usuario': '/admin/usuarios/nuevo',
-      'admin-roles-permisos': '/admin/roles',
-      'admin-ver-medicos': '/admin/medicos',
-      'admin-agregar-medico': '/admin/medicos/nuevo',
-      'admin-asignaciones': '/admin/asignaciones',
-      'admin-ver-pacientes': '/admin/pacientes',
-      'admin-estadisticas-pacientes': '/admin/pacientes/estadisticas',
-      'admin-reportes-globales': '/admin/reportes',
-      'admin-auditoria': '/admin/auditoria',
-      'admin-actividad-usuarios': '/admin/actividad',
-      'admin-config-general': '/admin/configuracion',
-      'admin-config-parametros': '/admin/configuracion/parametros',
-      'admin-config-backup': '/admin/configuracion/backup'
-    };
+  const rutas: Record<string, string> = {
+    'admin-inicio': '/administrador',
+    
+    // 📋 Usuarios
+    'admin-ver-usuarios': '/admin-ver-usuarios',
+    'admin-agregar-usuario': '/admin-agregar-usuario',
+    
+    // 👨‍⚕️ Médicos
+    'admin-ver-medicos': '/admin-ver-usuarios',  // Reutiliza ver-usuarios con filtro
+    'admin-agregar-medico': '/admin-agregar-medico',
+    'admin-asignaciones': '/admin-asignaciones',
+    
+    // 👥 Pacientes
+    'admin-ver-pacientes': '/admin-ver-usuarios',  // Reutiliza con filtro
+    'admin-estadisticas-pacientes': '/admin-ver-usuarios',
+    
+    // 📊 Reportes
+    'admin-reportes-globales': '/admin-auditoria',
+    'admin-auditoria': '/admin-auditoria',
+    'admin-actividad-usuarios': '/admin-auditoria',
+    
+    // ⚙️ Configuración
+    'admin-config-general': '/administrador',
+    'admin-config-parametros': '/administrador',
+    'admin-config-backup': '/administrador',
+    
+    // 🔐 Roles
+    'admin-roles-permisos': '/admin-ver-usuarios'
+  };
 
-    this.rutaActual = ruta;
-    const rutaDestino = rutas[ruta] || `/${ruta}`;
-    
-    if (this.isMobile) {
-      this.sidebarOpen = false;
-    }
-    
-    this.router.navigate([rutaDestino]);
-  }
+  this.rutaActual = ruta;
+  const rutaDestino = rutas[ruta] || `/${ruta}`;
+  
+  console.log(`🧭 Navegando a: ${rutaDestino}`);
+  this.router.navigate([rutaDestino]);
+}
 
   // 🔔 Mostrar toast
   async showToast(message: string, color: 'primary' | 'success' | 'danger' | 'warning' = 'primary') {
