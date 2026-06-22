@@ -32,7 +32,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private isMobile = false;
 
-  // 📊 Estadísticas del dashboard
+  //  Estadísticas del dashboard
   stats = {
     totalUsuarios: 0,
     totalMedicos: 0,
@@ -41,11 +41,11 @@ export class AdministradorPage implements OnInit, OnDestroy {
     registrosHoy: 0
   };
 
-  // 🕐 Actividad reciente (desde backend)
+  //  Actividad reciente (desde backend)
   actividadesRecientes: ActividadReciente[] = [];
   cargandoActividad = false;
 
-  // 📈 Reportes globales
+  // Reportes globales
   reportesGlobales = {
     pacientesPorMes: [] as any[],
     registrosPorEstado: [] as any[],
@@ -53,12 +53,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     topMedicos: [] as any[]
   };
 
-  // 📍 Estadísticas de ubicaciones
-  statsUbicaciones = {
-    provincias: 0,
-    cantones: 0,
-    parroquias: 0
-  };
+  
 
   constructor(
     private router: Router,
@@ -81,8 +76,8 @@ export class AdministradorPage implements OnInit, OnDestroy {
     this.cargarDatosAdmin();
     await this.cargarEstadisticas();
     await this.cargarActividadReciente();
-    await this.cargarReportesGlobales();
-    await this.cargarStatsUbicaciones();
+    await this.cargarReportesGlobales()
+   
 
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd), takeUntil(this.destroy$))
@@ -96,7 +91,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // 👤 Cargar datos del administrador desde localStorage
+  //  Cargar datos del administrador desde localStorage
   private cargarDatosAdmin() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -110,42 +105,51 @@ export class AdministradorPage implements OnInit, OnDestroy {
     }
   }
 
-  // 📊 Cargar estadísticas del dashboard
+  //  Cargar estadísticas del dashboard
   private async cargarEstadisticas() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('⚠️ No hay token, redirigiendo a login');
-      this.router.navigate(['/principal']);
-      return;
-    }
-
-    try {
-      const response = await this.http.get<any>(
-        `${environment.apiUrl}/nutricionapp-api/admin/dashboard/stats`,
-        {
-          headers: new HttpHeaders({
-            'Authorization': `Bearer ${token}`
-          })
-        }
-      ).toPromise();
-
-      if (response && !response.error) {
-        this.stats = {
-          totalUsuarios: response.total_usuarios || 0,
-          totalMedicos: response.total_medicos || 0,
-          totalPacientes: response.total_pacientes || 0,
-          totalPlanes: response.total_planes || 0,
-          registrosHoy: response.registros_hoy || 0
-        };
-        console.log('✅ [ADMIN] Estadísticas cargadas:', this.stats);
-      }
-    } catch (error) {
-      console.error('❌ Error cargando estadísticas:', error);
-      await this.showToast('Error al cargar estadísticas', 'danger');
-    }
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('⚠️ No hay token, redirigiendo a login');
+    this.router.navigate(['/principal']);
+    return;
   }
 
-  // 🕐 Cargar actividad reciente desde auditoría
+  try {
+    const response = await this.http.get<any>(
+      `${environment.apiUrl}/nutricionapp-api/admin/dashboard/stats`,
+      {
+        headers: new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        })
+      }
+    ).toPromise();
+
+    console.log(' Respuesta completa del backend:', response);
+
+    if (response && !response.error) {
+      // Forzar actualización creando un nuevo objeto
+      this.stats = {
+        totalUsuarios: response.total_usuarios || 0,
+        totalMedicos: response.total_medicos || 0,
+        totalPacientes: response.total_pacientes || 0,
+        totalPlanes: response.total_planes || 0,
+        registrosHoy: response.registros_hoy || 0
+      };
+      
+      console.log(' [ADMIN] Estadísticas actualizadas:', this.stats);
+      
+      // Forzar detección de cambios
+      setTimeout(() => {
+        console.log(' Vista actualizada con stats:', this.stats);
+      }, 100);
+    }
+  } catch (error) {
+    console.error(' Error cargando estadísticas:', error);
+    await this.showToast('Error al cargar estadísticas', 'danger');
+  }
+}
+
+  //  Cargar actividad reciente desde auditoría
   private async cargarActividadReciente() {
     this.cargandoActividad = true;
     const token = localStorage.getItem('token');
@@ -170,10 +174,10 @@ export class AdministradorPage implements OnInit, OnDestroy {
           usuario_nombre: log.usuario_nombre,
           ip_address: log.ip_address
         }));
-        console.log('✅ [ADMIN] Actividad reciente cargada:', this.actividadesRecientes.length, 'registros');
+        console.log(' [ADMIN] Actividad reciente cargada:', this.actividadesRecientes.length, 'registros');
       }
     } catch (error) {
-      console.error('❌ Error cargando actividad:', error);
+      console.error(' Error cargando actividad:', error);
       // Datos de ejemplo si falla
       this.actividadesRecientes = [
         {
@@ -188,7 +192,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     }
   }
 
-  // 📈 Cargar reportes globales
+  //  Cargar reportes globales
   private async cargarReportesGlobales() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -210,41 +214,15 @@ export class AdministradorPage implements OnInit, OnDestroy {
           planesPorPerfil: response.planes_por_perfil || [],
           topMedicos: response.top_medicos || []
         };
-        console.log('✅ [ADMIN] Reportes globales cargados');
+        console.log(' [ADMIN] Reportes globales cargados');
       }
     } catch (error) {
-      console.error('❌ Error cargando reportes:', error);
+      console.error(' Error cargando reportes:', error);
     }
   }
 
-  // 📍 Cargar estadísticas de ubicaciones
-  private async cargarStatsUbicaciones() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
 
-    try {
-      const response = await this.http.get<any>(
-        `${environment.apiUrl}/nutricionapp-api/admin-ubicaciones/ubicaciones/stats`,
-        {
-          headers: new HttpHeaders({
-            'Authorization': `Bearer ${token}`
-          })
-        }
-      ).toPromise();
-
-      if (response && !response.error && response.stats) {
-        this.statsUbicaciones = {
-          provincias: response.stats.provincias || 0,
-          cantones: response.stats.cantones || 0,
-          parroquias: response.stats.parroquias || 0
-        };
-      }
-    } catch (error) {
-      console.error('❌ Error cargando stats ubicaciones:', error);
-    }
-  }
-
-  // 🔧 Mapear tipo de actividad
+  //  Mapear tipo de actividad
   private mapearTipoActividad(tipo: string): 'login' | 'user' | 'plan' | 'alert' | 'registro' | 'error' {
     const mapeo: Record<string, any> = {
       'login': 'login',
@@ -257,7 +235,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     return mapeo[tipo] || 'user';
   }
 
-  // 🎨 Obtener icono según tipo
+  //  Obtener icono según tipo
   private obtenerIcono(tipo: string): string {
     const iconos: Record<string, string> = {
       'login': 'log-in-outline',
@@ -270,7 +248,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     return iconos[tipo] || 'information-circle-outline';
   }
 
-  // 🕐 Formatear tiempo relativo
+  //  Formatear tiempo relativo
   private formatearTiempo(fecha: string): string {
     if (!fecha) return 'Ahora';
     
@@ -288,7 +266,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     return fechaActividad.toLocaleDateString('es-EC');
   }
 
-  // 🔄 Refrescar todos los datos
+  //  Refrescar todos los datos
   async refrescarDatos() {
     const loading = await this.loadingCtrl.create({
       message: 'Actualizando datos...',
@@ -299,12 +277,12 @@ export class AdministradorPage implements OnInit, OnDestroy {
     await Promise.all([
       this.cargarEstadisticas(),
       this.cargarActividadReciente(),
-      this.cargarReportesGlobales(),
-      this.cargarStatsUbicaciones()
+      this.cargarReportesGlobales()
+     
     ]);
 
     await loading.dismiss();
-    await this.showToast('✅ Datos actualizados', 'success');
+    await this.showToast(' Datos actualizados', 'success');
   }
 
   // 🚪 Cerrar sesión
@@ -328,41 +306,41 @@ export class AdministradorPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  // 📱 Toggle sidebar
+  //  Toggle sidebar
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  // 📂 Toggle submenú
+  //  Toggle submenú
   toggleSubmenu(item: string) {
     this.submenuAbierto = this.submenuAbierto === item ? null : item;
   }
 
-  // 🧭 Navegar a página
+  //  Navegar a página
   navegarA(ruta: string): void {
   const rutas: Record<string, string> = {
     'admin-inicio': '/administrador',
     
-    // 👥 Usuarios (todos)
+    //  Usuarios (todos)
     'admin-ver-usuarios': '/admin-ver-usuarios',
     'admin-agregar-usuario': '/admin-ver-usuarios', // Por ahora reutiliza
     'admin-roles-permisos': '/admin-ver-usuarios',
     
-    // 👨‍⚕️ Médicos (solo doctores y enfermeras)
+    //  Médicos (solo doctores y enfermeras)
     'admin-ver-medicos': '/admin-ver-medicos',
     'admin-agregar-medico': '/admin-agregar-medico',
     'admin-asignaciones': '/admin-asignaciones',
     
-    // 👤 Pacientes (solo pacientes)
+    //  Pacientes (solo pacientes)
     'admin-ver-pacientes': '/admin-ver-pacientes',
     'admin-estadisticas-pacientes': '/admin-ver-pacientes',
     
-    // 📊 Reportes
+    //  Reportes
     'admin-reportes-globales': '/admin-auditoria',
     'admin-auditoria': '/admin-auditoria',
     'admin-actividad-usuarios': '/admin-auditoria',
     
-    // ⚙️ Configuración
+    //  Configuración
     'admin-config-general': '/administrador',
     'admin-config-parametros': '/administrador',
     'admin-config-backup': '/administrador'
@@ -378,7 +356,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
   this.router.navigate([rutaDestino]);
 }
 
-  // 🔔 Mostrar toast
+  //  Mostrar toast
   async showToast(message: string, color: 'primary' | 'success' | 'danger' | 'warning' = 'primary') {
     await this.toastCtrl.create({
       message,
