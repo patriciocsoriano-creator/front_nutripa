@@ -199,6 +199,18 @@ const routes: Routes = [
     path: 'admin-actividad-usuarios',
     loadChildren: () => import('./paginas/admin-actividad-usuarios/admin-actividad-usuarios.module').then( m => m.AdminActividadUsuariosPageModule)
   },
+  {
+    path: 'medico-agregar-paciente',
+    loadChildren: () => import('./paginas/medico-agregar-paciente/medico-agregar-paciente.module').then( m => m.MedicoAgregarPacientePageModule)
+  },
+  {
+    path: 'medico-buscar-paciente',
+    loadChildren: () => import('./paginas/medico-buscar-paciente/medico-buscar-paciente.module').then( m => m.MedicoBuscarPacientePageModule)
+  },
+  {
+    path: 'medico-configuracion',
+    loadChildren: () => import('./paginas/medico-configuracion/medico-configuracion.module').then( m => m.MedicoConfiguracionPageModule)
+  },
   
 ];
 

@@ -259,10 +259,9 @@ $radius-lg: 16px;
 }
 
 /* =========================================
-   ESTADOS: LOADING / EMPTY
+   LOADING
    ========================================= */
-.loading-state,
-.empty-state {
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -276,69 +275,81 @@ $radius-lg: 16px;
     margin-bottom: 16px;
   }
 
-  .empty-icon {
-    font-size: 4rem;
-    color: $text-muted;
-    margin-bottom: 16px;
-  }
-
-  h3 {
-    color: $text-primary;
-    font-size: 1.25rem;
-    margin: 0 0 8px;
-  }
-
   p {
-    margin: 0 0 24px;
-    max-width: 400px;
+    margin: 0;
   }
 }
 
 /* =========================================
-   HEADER DEL PACIENTE
+   CONFIG CONTAINER
    ========================================= */
-.patient-header {
+.config-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================================
+   PROFILE HEADER
+   ========================================= */
+.profile-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: $card-bg;
-  padding: 20px;
+  padding: 24px;
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
 
-  .patient-info {
+  .profile-avatar-section {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 
-    .patient-avatar {
-      width: 64px;
-      height: 64px;
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
       --background: rgba($accent-color, 0.15);
-      img { border-radius: 50%; object-fit: cover; }
+      border: 3px solid $accent-color;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
     }
 
-    .patient-details {
-      h2 { margin: 0 0 4px; color: $text-primary; font-size: 1.3rem; }
-      .patient-meta {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: $text-secondary;
+    .profile-info {
+      h2 {
+        margin: 0 0 4px;
+        color: $text-primary;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .profile-role {
+        margin: 0 0 4px;
+        color: $secondary-color;
         font-size: 0.9rem;
-        flex-wrap: wrap;
-        ion-icon { font-size: 1rem; color: $secondary-color; }
-        .separator { color: $border-color; }
+        font-weight: 500;
+      }
+
+      .profile-email {
+        margin: 0;
+        color: $text-secondary;
+        font-size: 0.85rem;
       }
     }
   }
 
-  .patient-actions {
-    display: flex;
-    gap: 8px;
+  .profile-actions {
+    ion-button {
+      --border-radius: 10px;
+      font-weight: 600;
+    }
   }
 }
 
@@ -349,7 +360,8 @@ ion-segment {
   --background: #e2e8f0;
   --indicator-color: #{$secondary-color};
   --indicator-border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  
   ion-segment-button {
     --color: #{$text-secondary};
     --color-checked: #{$primary-color};
@@ -358,320 +370,102 @@ ion-segment {
 }
 
 /* =========================================
-   INFO CARDS
+   CONFIG CARD
    ========================================= */
-.info-card {
+.config-card {
   --background: #{$card-bg};
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
   margin: 0 0 20px;
 
   ion-card-header {
-    padding: 16px 20px 8px;
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+    
     ion-card-title {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 600;
       color: $text-primary;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       margin: 0;
-      ion-icon { font-size: 1.3rem; }
+      
+      ion-icon {
+        font-size: 1.4rem;
+      }
     }
   }
 
-  ion-card-content { padding: 8px 20px 20px; }
+  ion-card-content {
+    padding: 20px 24px 24px;
+  }
 }
 
 /* =========================================
-   PLAN ACTIVO
+   FORM GRID
    ========================================= */
-.plan-activo-info {
-  .plan-badge-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    ion-badge { font-size: 0.85rem; padding: 6px 12px; }
-  }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
 
-  .plan-details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-
-    .detail-item {
-      label { display: block; font-size: 0.75rem; color: $text-muted; text-transform: uppercase; margin-bottom: 2px; }
-      span { font-size: 0.95rem; color: $text-primary; font-weight: 500; }
-      .confianza.alta { color: #10b981; font-weight: 600; }
-    }
-  }
-
-  .plan-recomendacion {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 12px;
-    background: rgba($accent-color, 0.1);
-    border-radius: 8px;
-    ion-icon { color: $secondary-color; margin-top: 2px; }
-    span { font-size: 0.9rem; color: $text-secondary; }
+  .full-width {
+    grid-column: 1 / -1;
   }
 }
 
 /* =========================================
-   NO DATA
-   ========================================= */
-.no-data {
-  text-align: center;
-  padding: 20px;
-  color: $text-muted;
-  ion-icon { font-size: 2rem; margin-bottom: 8px; }
-  p { margin: 0 0 16px; }
-}
-
-/* =========================================
-   FORMS
+   FORM ITEMS
    ========================================= */
 ion-item {
   --background: transparent;
   --padding-start: 0;
   --inner-padding-end: 0;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  
   ion-label {
     font-size: 0.85rem;
     color: $text-secondary;
     font-weight: 500;
+    margin-bottom: 4px;
   }
+  
   ion-input, ion-textarea, ion-select {
     --padding-start: 12px;
     --background: #f8fafc;
     --color: #{$text-primary};
     --placeholder-color: #{$text-muted};
     border-radius: 8px;
+    border: 1px solid $border-color;
     margin-top: 4px;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: $secondary-color;
+    }
   }
 }
 
+.field-hint {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #ef4444;
+}
+
+/* =========================================
+   FORM ACTIONS
+   ========================================= */
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
-  ion-button { --border-radius: 8px; }
-}
-
-/* =========================================
-   TIMELINE
-   ========================================= */
-.timeline {
-  position: relative;
-  padding-left: 20px;
-  &::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: $border-color;
-  }
-
-  .timeline-item {
-    position: relative;
-    padding-bottom: 20px;
-
-    .timeline-marker {
-      position: absolute;
-      left: -16px;
-      top: 4px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: $secondary-color;
-      border: 2px solid $card-bg;
-    }
-
-    .timeline-content {
-      background: #f8fafc;
-      padding: 12px;
-      border-radius: 8px;
-
-      .timeline-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        strong { color: $text-primary; }
-      }
-
-      p {
-        margin: 4px 0;
-        font-size: 0.9rem;
-        color: $text-secondary;
-        strong { color: $text-primary; }
-      }
-    }
-  }
-}
-
-/* =========================================
-   CITAS
-   ========================================= */
-.citas-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.cita-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 4px solid $secondary-color;
-
-  &.pasada {
-    opacity: 0.6;
-    border-left-color: $text-muted;
-  }
-
-  .cita-date {
-    text-align: center;
-    min-width: 60px;
-    .cita-day { font-size: 1.5rem; font-weight: 700; color: $primary-color; line-height: 1; }
-    .cita-month { font-size: 0.8rem; color: $text-secondary; text-transform: uppercase; }
-    .cita-time { font-size: 0.85rem; color: $text-primary; margin-top: 4px; }
-  }
-
-  .cita-info {
-    flex: 1;
-    .cita-header { display: flex; gap: 6px; margin-bottom: 4px; }
-    .cita-motivo { margin: 0; font-size: 0.9rem; color: $text-secondary; }
-  }
-
-  .cita-actions {
-    display: flex;
-    gap: 4px;
-  }
-}
-
-/* =========================================
-   MÉTRICAS
-   ========================================= */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.metric-card {
-  --background: #{$card-bg};
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
-
-  ion-card-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .metric-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-    background: $secondary-color;
-    flex-shrink: 0;
-
-    &.normal { background: #10b981; }
-    &.pre-diabetes { background: #f59e0b; }
-    &.diabetes { background: #ef4444; }
-  }
-
-  .metric-info {
-    flex: 1;
-    label { display: block; font-size: 0.75rem; color: $text-muted; text-transform: uppercase; margin-bottom: 2px; }
-    .metric-value { display: block; font-size: 1.5rem; font-weight: 700; color: $text-primary; }
-    small { display: block; font-size: 0.8rem; color: $text-secondary; margin-top: 2px; }
-  }
-}
-
-/* =========================================
-   GLUCOSA TABLE
-   ========================================= */
-.glucosa-table {
-  overflow-x: auto;
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    thead {
-      background: linear-gradient(135deg, $primary-color, $secondary-color);
-      color: white;
-      th {
-        padding: 12px;
-        text-align: left;
-        font-size: 0.85rem;
-        font-weight: 600;
-        &:first-child { border-top-left-radius: 8px; }
-        &:last-child { border-top-right-radius: 8px; }
-      }
-    }
-    tbody {
-      tr {
-        border-bottom: 1px solid $border-color;
-        &:last-child td:first-child { border-bottom-left-radius: 8px; }
-        &:last-child td:last-child { border-bottom-right-radius: 8px; }
-        td {
-          padding: 12px;
-          font-size: 0.9rem;
-          color: $text-primary;
-        }
-      }
-    }
-  }
-  .normal { color: #10b981; font-weight: 600; }
-  .pre-diabetes { color: #f59e0b; font-weight: 600; }
-  .diabetes { color: #ef4444; font-weight: 600; }
-}
-
-/* =========================================
-   WHATSAPP CARD
-   ========================================= */
-.whatsapp-card {
-  .patient-contact-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      ion-icon { color: $secondary-color; }
-      span { color: $text-primary; }
-    }
-  }
-
-  .quick-messages {
-    margin: 16px 0;
-    h4 { font-size: 0.9rem; color: $text-primary; margin: 0 0 8px; }
-    .quick-messages-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid $border-color;
+  
+  ion-button {
+    --border-radius: 8px;
+    font-weight: 600;
   }
 }
 
@@ -679,7 +473,9 @@ ion-item {
    RESPONSIVE
    ========================================= */
 @media (max-width: 768px) {
-  ::ng-deep .dashboard-container { flex-direction: column; }
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
   
   ::ng-deep .sidebar {
     width: 100% !important;
@@ -706,14 +502,24 @@ ion-item {
     }
   }
 
-  .patient-header {
+  .profile-header {
     flex-direction: column;
     align-items: flex-start;
-    .patient-actions { width: 100%; ion-button { flex: 1; } }
+    
+    .profile-avatar-section {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .profile-actions {
+      width: 100%;
+      ion-button { width: 100%; }
+    }
   }
 
-  .metrics-grid { grid-template-columns: 1fr; }
-  .cita-item { flex-direction: column; align-items: flex-start; }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* =========================================

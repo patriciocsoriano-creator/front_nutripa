@@ -310,7 +310,7 @@ if (this.plan?.plan.weekly.days.length) {
       'buscar-paciente': '/buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'reportes': '/reportes-medico',
+      'medico-informes': '/medico-informes',
       'configuracion': '/configuracion-medico'
     };
 

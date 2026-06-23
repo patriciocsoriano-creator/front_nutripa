@@ -1,4 +1,4 @@
-<!-- 🔝 HEADER PRINCIPAL -->
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
@@ -7,6 +7,9 @@
     </div>
 
     <ion-buttons slot="end">
+      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="cerrarSesion()">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
@@ -16,83 +19,54 @@
 
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
-    
-    <!-- 🧭 SIDEBAR CON MENÚ DESPLEGABLE -->
+
+    <!-- SIDEBAR -->
     <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
-      
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
       </div>
-
       <div class="user-info">
         <ion-avatar>
           <img src="assets/avatar-placeholder.png" alt="Usuario" />
         </ion-avatar>
         <div class="user-details">
-          <h4>{{nombreDoctor || 'Dr. Usuario'}}</h4>
-          <p>{{especialidad || 'Especialista'}}</p>
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
         </div>
       </div>
-
       <ul>
         <li (click)="navegarA('medico')">
-          <ion-icon name="home-outline"></ion-icon>
-          <span>Inicio</span>
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
         </li>
-        
         <li class="menu-item-with-submenu">
-          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
-            <ion-icon name="people-outline"></ion-icon>
-            <span>Pacientes</span>
-            <ion-icon 
-              name="chevron-down-outline" 
-              class="submenu-arrow" 
-              [class.rotate]="submenuAbierto === 'pacientes'">
-            </ion-icon>
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
           </div>
-          
           <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
-            <li (click)="navegarA('medicoverpacientes'); $event.stopPropagation()">
-              <ion-icon name="eye-outline"></ion-icon>
-              <span>Ver pacientes</span>
-            </li>
-            <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">
-              <ion-icon name="person-add-outline"></ion-icon>
-              <span>Agregar paciente</span>
-            </li>
-            <li (click)="navegarA('buscar-paciente'); $event.stopPropagation()">
-              <ion-icon name="search-outline"></ion-icon>
-              <span>Buscar paciente</span>
-            </li>
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
           </ul>
         </li>
-        
-        <!-- Planes (ACTIVO) -->
-        <li (click)="navegarA('planes-nutricionales')" class="active-menu">
-          <ion-icon name="clipboard-outline"></ion-icon>
-          <span>Planes Nutricionales</span>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')" class="active">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
         </li>
-
         <li (click)="navegarA('medicoseguimientoclinico')">
-          <ion-icon name="pulse-outline"></ion-icon>
-          <span>Seguimiento clinico</span>
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
         </li>
-        
-        <li (click)="navegarA('reportes')">
-          <ion-icon name="stats-chart-outline"></ion-icon>
-          <span>Reportes</span>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
         </li>
-        
-        <li (click)="navegarA('configuracion')">
-          <ion-icon name="settings-outline"></ion-icon>
-          <span>Configuración</span>
+        <li (click)="navegarA('medico-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content">
-      
+
       <!-- Header de página -->
       <div class="page-header">
         <div class="page-title">
@@ -102,7 +76,7 @@
             <p class="subtitle">Gestiona los planes alimenticios creados para tus pacientes</p>
           </div>
         </div>
-        
+
         <ion-button color="primary" (click)="crearNuevoPlan()">
           <ion-icon name="add-outline" slot="start"></ion-icon>
           Crear Nuevo Plan
@@ -111,7 +85,7 @@
 
       <!-- Barra de filtros -->
       <div class="filters-bar">
-        <ion-searchbar 
+        <ion-searchbar
           [(ngModel)]="searchTerm"
           (ionInput)="filtrarPlanes()"
           placeholder="Buscar por paciente..."
@@ -119,7 +93,7 @@
         </ion-searchbar>
 
         <div class="filter-controls">
-          <ion-select 
+          <ion-select
             [(ngModel)]="filtroEstado"
             (ionChange)="filtrarPlanes()"
             placeholder="Estado"
@@ -132,7 +106,7 @@
             <ion-select-option value="cancelado">Cancelados</ion-select-option>
           </ion-select>
 
-          <ion-select 
+          <ion-select
             [(ngModel)]="ordenPor"
             (ionChange)="filtrarPlanes()"
             placeholder="Ordenar"
@@ -165,11 +139,11 @@
 
       <!-- Lista de planes -->
       <div *ngIf="!cargando && planesFiltrados.length > 0" class="plans-container">
-        
+
         <!-- Vista Cards (móvil) -->
         <div class="plans-cards">
           <ion-card *ngFor="let plan of planesFiltrados" class="plan-card" [ngClass]="'estado-' + plan.estado">
-            
+
             <ion-card-header>
               <div class="card-header-row">
                 <ion-card-title>{{ plan.paciente_nombre }}</ion-card-title>
@@ -215,7 +189,7 @@
                 <ion-icon name="eye-outline" slot="start"></ion-icon>
                 Ver Plan
               </ion-button>
-              
+
               <ion-button fill="outline" size="small" color="medium" (click)="descargarPlan(plan)">
                 <ion-icon name="download-outline" slot="start"></ion-icon>
                 PDF
@@ -267,7 +241,7 @@
                   </ion-badge>
                 </td>
                 <td>
-                  <span *ngIf="plan.confianza_ia" class="confianza-badge" 
+                  <span *ngIf="plan.confianza_ia" class="confianza-badge"
                         [ngClass]="{
                           'alta': plan.confianza_ia >= 0.9,
                           'media': plan.confianza_ia >= 0.7 && plan.confianza_ia < 0.9,

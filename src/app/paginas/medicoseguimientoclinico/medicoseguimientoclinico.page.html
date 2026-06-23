@@ -1,3 +1,4 @@
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
@@ -5,6 +6,9 @@
       <ion-title>Seguimiento Clínico</ion-title>
     </div>
     <ion-buttons slot="end">
+      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="contactarWhatsApp()" title="Contactar por WhatsApp" *ngIf="pacienteSeleccionado">
         <ion-icon slot="icon-only" name="logo-whatsapp" color="success"></ion-icon>
       </ion-button>
@@ -18,7 +22,7 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- ================= SIDEBAR ================= -->
+    <!-- SIDEBAR -->
     <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
@@ -33,7 +37,9 @@
         </div>
       </div>
       <ul>
-        <li (click)="navegarA('medico')"><ion-icon name="home-outline"></ion-icon><span>Inicio</span></li>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
         <li class="menu-item-with-submenu">
           <div class="menu-link" (click)="toggleSubmenu('pacientes')">
             <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
@@ -41,18 +47,26 @@
           </div>
           <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
             <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
-            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
-            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
           </ul>
         </li>
-        <li (click)="navegarA('medicoplanesnutricionalescreados')"><ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span></li>
-        <li (click)="navegarA('medicoseguimientoclinico')" class="active"><ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span></li>
-        <li (click)="navegarA('reportes')"><ion-icon name="stats-chart-outline"></ion-icon><span>Reportes</span></li>
-        <li (click)="navegarA('configuracion')"><ion-icon name="settings-outline"></ion-icon><span>Configuración</span></li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')" class="active">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('medico-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
       </ul>
     </div>
 
-    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content">
       
       <!-- Loading -->

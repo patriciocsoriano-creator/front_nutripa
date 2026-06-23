@@ -1,0 +1,598 @@
+/* ============================================
+   HEADER
+   ============================================ */
+.main-header {
+  ion-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7fbff;
+    border-bottom: 1px solid #dce5f3;
+    padding: 0 20px;
+    height: 60px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.6rem;
+        color: #0a4d68;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: #0a4d68;
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
+
+/* ============================================
+   DASHBOARD CONTAINER
+   ============================================ */
+.dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: #f4f7fb;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar {
+  width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+
+  &.open {
+    width: 240px;
+  }
+
+  .menu-icon {
+    margin: 1rem 0;
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    
+    &:hover {
+      background: rgba(255,255,255,0.15);
+    }
+  }
+
+  .user-info {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    
+    ion-avatar {
+      margin: 0 auto 8px;
+      width: 56px;
+      height: 56px;
+      --background: rgba(255,255,255,0.2);
+    }
+    
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      h4 {
+        font-size: 0.95rem;
+        margin: 0 0 4px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  &.open .user-details {
+    opacity: 1;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    margin-top: 0.5rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+
+      ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      span {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+      }
+      
+      &:hover {
+        background: rgba(255,255,255,0.15);
+        color: white;
+      }
+      
+      &.active {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-left: 3px solid #4fc3f7;
+      }
+    }
+  }
+
+  &.open ul li span {
+    opacity: 1;
+  }
+  
+  .menu-item-with-submenu {
+    position: relative;
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      
+      .submenu-arrow {
+        margin-left: auto;
+        transition: transform 0.3s ease;
+        
+        &.rotate {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    
+    .submenu {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
+      min-width: 220px;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0;
+      margin: 0;
+      
+      &.active {
+        max-height: 300px;
+      }
+      
+      li {
+        padding: 12px 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        
+        &:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+        
+        &.active {
+          background: rgba(255,255,255,0.2);
+          border-left: 3px solid #4fc3f7;
+        }
+         
+        ion-icon {
+          font-size: 1.1rem;
+          margin-right: 10px;
+        }
+        
+        span {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+/* ============================================
+   AVATAR PLACEHOLDER
+   ============================================ */
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a4d68, #4fc3f7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-radius: 50%;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL
+   ============================================ */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.page-title-section {
+  margin-bottom: 2rem;
+
+  h2 {
+    color: #0a4d68;
+    font-size: 1.8rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+/* ============================================
+   SEARCH CARD
+   ============================================ */
+.search-card {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(10, 77, 104, 0.08);
+  border: 1px solid #e2e8f0;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0a4d68;
+    font-size: 1.15rem;
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 1.4rem;
+    }
+  }
+
+  .search-input-item {
+    --background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 12px;
+
+    &:focus-within {
+      border-color: #0a4d68;
+      background: white;
+    }
+
+    ion-icon[slot="start"] {
+      font-size: 1.3rem;
+      margin-right: 10px;
+    }
+
+    ion-input {
+      --color: #1a1f36;
+      --placeholder-color: #9499b7;
+      font-size: 1rem;
+      padding: 8px 0;
+    }
+  }
+
+  .quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    ion-chip {
+      --background: #f1f5f9;
+      --color: #475569;
+      font-size: 0.85rem;
+      
+      ion-icon {
+        font-size: 1rem;
+      }
+
+      &[color="primary"] {
+        --background: #0a4d68;
+        --color: white;
+      }
+    }
+  }
+}
+
+/* ============================================
+   LOADING
+   ============================================ */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
+
+  p {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================
+   RESULTS SECTION
+   ============================================ */
+.results-section {
+  .results-header {
+    margin-bottom: 1rem;
+
+    h3 {
+      color: #0a4d68;
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+
+      ion-icon {
+        font-size: 1.4rem;
+      }
+
+      ion-badge {
+        margin-left: 8px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+/* ============================================
+   RESULTS GRID
+   ============================================ */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 1rem;
+}
+
+.patient-result-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(10, 77, 104, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  margin: 0;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(10, 77, 104, 0.12);
+  }
+
+  ion-card-content {
+    padding: 1.2rem;
+  }
+
+  .result-top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .patient-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0a4d68, #4fc3f7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .patient-info {
+      flex: 1;
+      min-width: 0;
+
+      h3 {
+        margin: 0 0 6px 0;
+        color: #1a1f36;
+        font-size: 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .patient-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          color: #64748b;
+          font-size: 0.82rem;
+
+          ion-icon {
+            font-size: 0.9rem;
+            color: #0a4d68;
+          }
+        }
+      }
+    }
+
+    .patient-actions {
+      display: flex;
+      gap: 2px;
+
+      ion-button {
+        --padding-start: 0;
+        --padding-end: 0;
+        --min-width: 36px;
+        --height: 36px;
+        
+        ion-icon {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  .result-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      font-size: 0.85rem;
+
+      ion-icon {
+        font-size: 1rem;
+        color: #0a4d68;
+      }
+    }
+  }
+}
+
+/* ============================================
+   INITIAL STATE
+   ============================================ */
+.initial-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+
+  ion-icon {
+    font-size: 5rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: #0a4d68;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+  }
+
+  p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+
+  ion-icon {
+    font-size: 4rem;
+    color: #f59e0b;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: #0a4d68;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+  }
+
+  p {
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    height: calc(100vh - 60px);
+    left: 0;
+    top: 60px;
+    
+    &:not(.open) {
+      width: 0;
+      overflow: hidden;
+    }
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .page-title-section h2 {
+    font-size: 1.4rem;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-result-card .result-top {
+    flex-wrap: wrap;
+
+    .patient-actions {
+      width: 100%;
+      justify-content: center;
+      margin-top: 8px;
+    }
+  }
+}

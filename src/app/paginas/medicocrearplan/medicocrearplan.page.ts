@@ -572,9 +572,8 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
       'crear-plan': '/medicocrearplan',
-      'medicoinformes': '/medicoinformes',
-      
-      'configuracion': '/configuracion-medico'
+      'medico-informes': '/medico-informes',
+      'medico-configuracion': '/medico-configuracion'
     };
     this.router.navigate([rutas[ruta] || `/${ruta}`]);
     this.submenuAbierto = null;

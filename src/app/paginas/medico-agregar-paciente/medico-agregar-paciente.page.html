@@ -1,0 +1,241 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Agregar Paciente</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="navegarA('medico')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreDoctor.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('medico-agregar-paciente')" class="active">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('medico-buscar-paciente')">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Buscar paciente</span>
+            </li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon>
+          <span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon>
+          <span>Seguimiento clinico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          <span>Informes</span>
+        </li>
+        <li (click)="navegarA('medico-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuracion</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <div class="main-content">
+      
+      <div class="page-title-section">
+        <h2>Registrar Nuevo Paciente</h2>
+        <p>Complete el formulario para agregar un nuevo paciente al sistema</p>
+      </div>
+
+      <form [formGroup]="pacienteForm" (ngSubmit)="guardarPaciente()">
+        
+        <!-- Seccion 1: Datos Basicos (iguales a enfermeria) -->
+        <ion-card class="form-section">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              Datos Basicos del Paciente
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('nombres')">
+                    <ion-label position="stacked">Nombres *</ion-label>
+                    <ion-input formControlName="nombres" placeholder="Ingrese los nombres"></ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('nombres')">
+                    <small>Los nombres son obligatorios</small>
+                  </ion-text>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('apellidos')">
+                    <ion-label position="stacked">Apellidos *</ion-label>
+                    <ion-input formControlName="apellidos" placeholder="Ingrese los apellidos"></ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('apellidos')">
+                    <small>Los apellidos son obligatorios</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('numero_identificacion')">
+                    <ion-label position="stacked">Cedula *</ion-label>
+                    <ion-input formControlName="numero_identificacion" placeholder="10 digitos" maxlength="10"></ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('numero_identificacion')">
+                    <small>La cedula es obligatoria y debe tener 10 digitos</small>
+                  </ion-text>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('fecha_nacimiento')">
+                    <ion-label position="stacked">Fecha de Nacimiento *</ion-label>
+                    <ion-input type="date" formControlName="fecha_nacimiento"></ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('fecha_nacimiento')">
+                    <small>La fecha de nacimiento es obligatoria</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('sexo')">
+                    <ion-label position="stacked">Sexo *</ion-label>
+                    <ion-select formControlName="sexo" placeholder="Seleccione" interface="popover">
+                      <ion-select-option value="M">Masculino</ion-select-option>
+                      <ion-select-option value="F">Femenino</ion-select-option>
+                      <ion-select-option value="O">Otro</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('sexo')">
+                    <small>El sexo es obligatorio</small>
+                  </ion-text>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item [class.invalid]="isInvalid('telefono')">
+                    <ion-label position="stacked">Telefono *</ion-label>
+                    <ion-input formControlName="telefono" placeholder="0991234567" maxlength="10"></ion-input>
+                  </ion-item>
+                  <ion-text color="danger" *ngIf="isInvalid('telefono')">
+                    <small>El telefono es obligatorio y debe tener 10 digitos</small>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12">
+                  <ion-item>
+                    <ion-label position="stacked">Direccion</ion-label>
+                    <ion-input formControlName="direccion" placeholder="Calle principal y numeracion"></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item>
+                    <ion-label position="stacked">Ocupacion</ion-label>
+                    <ion-input formControlName="ocupacion" placeholder="Ej: Estudiante, Ingeniero, etc."></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item>
+                    <ion-label position="stacked">Actividad Fisica</ion-label>
+                    <ion-select formControlName="actividad_fisica" placeholder="Seleccione" interface="popover">
+                      <ion-select-option value="sedentario">Sedentario</ion-select-option>
+                      <ion-select-option value="ligera">Actividad Ligera</ion-select-option>
+                      <ion-select-option value="moderada">Actividad Moderada</ion-select-option>
+                      <ion-select-option value="intensa">Actividad Intensa</ion-select-option>
+                      <ion-select-option value="muy_intensa">Actividad Muy Intensa</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Botones de Accion -->
+        <div class="action-buttons">
+          <ion-button 
+            expand="block" 
+            color="primary" 
+            size="large"
+            type="submit"
+            [disabled]="guardando || pacienteForm.invalid"
+            class="btn-primary">
+            <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+            {{guardando ? 'Guardando...' : 'Registrar Paciente'}}
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            color="medium"
+            type="button"
+            (click)="limpiarFormulario()"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Limpiar Formulario
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            color="medium"
+            type="button"
+            (click)="navegarA('medicoverpacientes')"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver a la Lista
+          </ion-button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</ion-content>

@@ -266,7 +266,7 @@ export class MedicoinformesPage implements OnInit {
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
       'medicoinformes': '/medicoinformes',
-      'configuracion': '/configuracion'
+      'medico-configuracion': '/medico-configuracion'
     };
     this.router.navigate([rutas[ruta] || `/${ruta}`]);
     this.submenuAbierto = null;

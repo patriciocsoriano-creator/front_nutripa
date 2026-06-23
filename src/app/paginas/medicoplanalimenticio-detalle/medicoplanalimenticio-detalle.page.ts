@@ -229,8 +229,8 @@ export class MedicoplanalimenticioDetallePage implements OnInit {
       'buscar-paciente': '/buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'reportes': '/reportes-medico',
-      'configuracion': '/configuracion-medico'
+      'medicoinformes': '/medicoinformes',
+      'medico-configuracion': '/medico-configuracion'
     };
 
     const rutaDestino = rutas[ruta] || `/${ruta}`;

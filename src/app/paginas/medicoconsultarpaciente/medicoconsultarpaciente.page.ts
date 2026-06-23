@@ -160,9 +160,8 @@ async ngOnInit() {
       'buscar-paciente': '/buscar-paciente',
       'planes-nutricionales': '/planes-nutricionales',
       'crear-plan': '/crear-plan',
-      'reportes': '/reportes-medico',
-      'educacion': '/educacion-pacientes',
-      'configuracion': '/configuracion-medico'
+      'medico-informes': '/medico-informes',
+      'medico-configuracion': '/medico-configuracion'
     };
     const rutaDestino = rutas[ruta] || `/${ruta}`;
     this.router.navigate([rutaDestino]);

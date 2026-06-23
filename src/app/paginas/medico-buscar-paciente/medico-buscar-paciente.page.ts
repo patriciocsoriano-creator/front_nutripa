@@ -1,17 +1,16 @@
-// src/app/paginas/medicoverpacientes/medicoverpacientes.page.ts
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-medicoverpacientes',
-  templateUrl: './medicoverpacientes.page.html',
-  styleUrls: ['./medicoverpacientes.page.scss'],
+  selector: 'app-medico-buscar-paciente',
+  templateUrl: './medico-buscar-paciente.page.html',
+  styleUrls: ['./medico-buscar-paciente.page.scss'],
   standalone: false,
 })
-export class MedicoverpacientesPage implements OnInit {
+export class MedicoBuscarPacientePage implements OnInit {
 
   // UI State
   sidebarOpen = false;
@@ -19,9 +18,13 @@ export class MedicoverpacientesPage implements OnInit {
   nombreDoctor: string = 'Dr. Usuario';
   especialidad: string = 'Especialista';
   
-  // Data
-  pacientes: any[] = [];
+  // Busqueda
+  terminoBusqueda: string = '';
+  filtroTipo: 'todos' | 'cedula' | 'nombre' | 'telefono' = 'todos';
+  resultados: any[] = [];
   cargando = false;
+  
+  private searchTimeout: any;
 
   constructor(
     private router: Router,
@@ -33,7 +36,6 @@ export class MedicoverpacientesPage implements OnInit {
 
   async ngOnInit() {
     this.cargarDatosUsuario();
-    await this.cargarPacientes();
   }
 
   private cargarDatosUsuario() {
@@ -50,52 +52,84 @@ export class MedicoverpacientesPage implements OnInit {
     }
   }
 
-  async cargarPacientes() {
+  buscarPacientes() {
+    // Limpiar timeout anterior
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    // Si no hay termino, limpiar resultados
+    if (!this.terminoBusqueda || this.terminoBusqueda.length < 2) {
+      this.resultados = [];
+      return;
+    }
+
+    // Debounce de 300ms
+    this.searchTimeout = setTimeout(() => {
+      this.ejecutarBusqueda();
+    }, 300);
+  }
+
+  private async ejecutarBusqueda() {
     this.cargando = true;
-    const loading = await this.loadingCtrl.create({ 
-      message: 'Cargando pacientes...', 
-      spinner: 'crescent'
-    });
-    await loading.present();
+    const token = localStorage.getItem('token');
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticacion');
-
-      const headers = new HttpHeaders({ 
+      const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       });
 
+      // Usar endpoint de busqueda existente
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/medico/pacientes`,
-        { headers }
+        `${environment.apiUrl}/nutricionapp-api/medico/pacientes/buscar`,
+        { 
+          headers,
+          params: { 
+            q: this.terminoBusqueda,
+            tipo: this.filtroTipo 
+          }
+        }
       ).toPromise();
 
-      if (response?.error) throw new Error(response.mensaje);
+      if (response?.error) {
+        throw new Error(response.mensaje);
+      }
+
+      this.resultados = response.resultados || response.pacientes || [];
       
-      this.pacientes = response.pacientes || [];
-      console.log('Pacientes cargados:', this.pacientes.length);
+      // Si es busqueda por cedula especifica, filtrar localmente
+      if (this.filtroTipo === 'cedula') {
+        this.resultados = this.resultados.filter(p => 
+          (p.numero_identificacion || p.cedula)?.includes(this.terminoBusqueda)
+        );
+      } else if (this.filtroTipo === 'telefono') {
+        this.resultados = this.resultados.filter(p => 
+          p.telefono?.includes(this.terminoBusqueda)
+        );
+      }
+
+      console.log(`Busqueda: "${this.terminoBusqueda}" - ${this.resultados.length} resultados`);
 
     } catch (error: any) {
-      console.error('Error cargando pacientes:', error);
-      await this.showToast('No se pudieron cargar los pacientes', 'danger');
+      console.error('Error en busqueda:', error);
+      await this.showToast('Error al buscar pacientes', 'danger');
+      this.resultados = [];
     } finally {
-      await loading.dismiss();
       this.cargando = false;
     }
   }
 
-  // Ver detalle de paciente (historial clinico)
-  verDetallePaciente(paciente: any) {
+  // Ver detalle del paciente
+  verDetalle(paciente: any) {
     this.router.navigate(['/medicoconsultarpaciente', paciente.id]);
   }
 
-  // Ver plan alimenticio guardado
+  // Ver plan alimenticio
   async verPlanAlimenticio(paciente: any) {
-    const loading = await this.loadingCtrl.create({ 
-      message: 'Buscando plan alimenticio...', 
-      spinner: 'crescent' 
+    const loading = await this.loadingCtrl.create({
+      message: 'Buscando plan alimenticio...',
+      spinner: 'crescent'
     });
     await loading.present();
 
@@ -111,21 +145,22 @@ export class MedicoverpacientesPage implements OnInit {
       await loading.dismiss();
 
       if (response?.error || !response?.planes?.length) {
-        await this.alertCtrl.create({
+        const alert = await this.alertCtrl.create({
           header: 'Sin Plan Alimenticio',
-          message: `El paciente <strong>${paciente.nombre_completo}</strong> aun no tiene un plan alimenticio guardado.`,
+          message: `El paciente <strong>${paciente.nombres} ${paciente.apellidos}</strong> aun no tiene un plan alimenticio guardado.`,
           buttons: ['Entendido']
-        }).then(alert => alert.present());
+        });
+        await alert.present();
         return;
       }
 
       const planMasReciente = response.planes[0];
 
       this.router.navigate(['/medicoplanalimenticio-detalle'], {
-        state: { 
+        state: {
           planId: planMasReciente.id,
           pacienteId: paciente.id,
-          pacienteNombre: paciente.nombre_completo
+          pacienteNombre: `${paciente.nombres} ${paciente.apellidos}`
         }
       });
 
@@ -137,7 +172,7 @@ export class MedicoverpacientesPage implements OnInit {
   }
 
   // Ver seguimiento clinico
-  verSeguimientoClinico(paciente: any) {
+  verSeguimiento(paciente: any) {
     this.router.navigate(['/medicoseguimientoclinico', paciente.id], {
       state: { pacienteId: paciente.id }
     });
@@ -146,7 +181,7 @@ export class MedicoverpacientesPage implements OnInit {
   // Contactar por WhatsApp
   contactarWhatsApp(paciente: any) {
     if (!paciente.telefono) {
-      this.showToast('El paciente no tiene numero de telefono registrado', 'warning');
+      this.showToast('El paciente no tiene telefono registrado', 'warning');
       return;
     }
 
@@ -158,74 +193,20 @@ export class MedicoverpacientesPage implements OnInit {
       telefonoLimpio = '593' + telefonoLimpio;
     }
 
-    const mensaje = `Hola ${paciente.nombre_completo}, soy el Dr. ${this.nombreDoctor}. Te contacto desde la plataforma NutriPa para dar seguimiento a tu plan nutricional. En que puedo ayudarte?`;
-    
+    const mensaje = `Hola ${paciente.nombres}, soy el Dr. ${this.nombreDoctor}. Te contacto desde NutriPa.`;
     const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
-    
-    this.showToast(`Abriendo WhatsApp con ${paciente.nombre_completo}...`, 'success', 2000);
-  }
-
-  // Eliminar paciente (soft delete)
-  async eliminarPaciente(paciente: any) {
-    const alert = await this.alertCtrl.create({
-      header: 'Confirmar Eliminacion',
-      message: `Estas seguro de que deseas eliminar a <strong>${paciente.nombre_completo}</strong>?<br><br>
-                <small>Esta accion es reversible desde el panel de administracion.</small>`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
-        { 
-          text: 'Si, Eliminar', 
-          cssClass: 'alert-button-confirm',
-          handler: async () => {
-            const loading = await this.loadingCtrl.create({ 
-              message: 'Eliminando paciente...', 
-              spinner: 'crescent' 
-            });
-            await loading.present();
-
-            try {
-              const token = localStorage.getItem('token');
-              const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-              await this.http.delete(
-                `${environment.apiUrl}/nutricionapp-api/medico/pacientes/${paciente.id}`,
-                { headers }
-              ).toPromise();
-
-              await loading.dismiss();
-              
-              this.pacientes = this.pacientes.filter(p => p.id !== paciente.id);
-              
-              await this.showToast(`${paciente.nombre_completo} eliminado correctamente`, 'success');
-
-            } catch (error: any) {
-              await loading.dismiss();
-              console.error('Error eliminando paciente:', error);
-              await this.showToast('Error al eliminar el paciente', 'danger');
-            }
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // Refrescar datos
-  async refrescarDatos() {
-    await this.cargarPacientes();
-    await this.showToast('Datos actualizados', 'success');
   }
 
   // Helpers de UI
-  toggleSidebar() { 
-    this.sidebarOpen = !this.sidebarOpen; 
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
   }
-  
-  toggleSubmenu(item: string) { 
-    this.submenuAbierto = this.submenuAbierto === item ? null : item; 
+
+  toggleSubmenu(item: string) {
+    this.submenuAbierto = this.submenuAbierto === item ? null : item;
   }
-  
+
   navegarA(ruta: string) {
     const rutas: Record<string, string> = {
       'medico': '/medico',
@@ -234,14 +215,14 @@ export class MedicoverpacientesPage implements OnInit {
       'medico-buscar-paciente': '/medico-buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'medicoinformes': '/medicoinformes',
+      'medico-informes': '/medico-informes',
       'medico-configuracion': '/medico-configuracion'
     };
-    
+
     this.router.navigate([rutas[ruta] || `/${ruta}`]);
     this.submenuAbierto = null;
   }
-  
+
   async cerrarSesion() {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar Sesion',
@@ -263,7 +244,7 @@ export class MedicoverpacientesPage implements OnInit {
     });
     await alert.present();
   }
-  
+
   async showToast(message: string, color: 'primary'|'success'|'danger'|'warning' = 'primary', duration: number = 3000) {
     await this.toastCtrl.create({ message, color, duration, position: 'bottom' }).then(t => t.present());
   }

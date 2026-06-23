@@ -178,17 +178,17 @@ export class MedicoPage implements OnInit {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  // 🧭 Navegar a otra página
+  //  Navegar a otra página
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'medico': '/medico',
       'medicoverpacientes': '/medicoverpacientes',
-      'agregar-paciente': '/agregar-paciente',
-      'buscar-paciente': '/buscar-paciente',
+      'medico-agregar-paciente': '/medico-agregar-paciente',
+      'medico-buscar-paciente': '/medico-buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'reportes': '/reportes-medico',
-      'configuracion': '/configuracion-medico'
+      'medico-informes': '/medico-informes',
+      'medico-configuracion': '/medico-configuracion'
     };
 
     const rutaDestino = rutas[ruta] || `/${ruta}`;

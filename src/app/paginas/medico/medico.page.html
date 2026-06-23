@@ -43,8 +43,8 @@
           </div>
           <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
             <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
-            <li (click)="navegarA('agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
-            <li (click)="navegarA('buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
           </ul>
         </li>
         <li (click)="navegarA('medicoplanesnutricionalescreados')">
@@ -56,7 +56,7 @@
         <li (click)="navegarA('medicoinformes')">
           <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
         </li>
-        <li (click)="navegarA('configuracion')">
+        <li (click)="navegarA('medico-configuracion')">
           <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
         </li>
       </ul>

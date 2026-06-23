@@ -1,5 +1,4 @@
-// src/app/paginas/medicoseguimientoclinico/medicoseguimientoclinico.page.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -14,35 +13,35 @@ import { environment } from 'src/environments/environment';
 })
 export class MedicoseguimientoclinicoPage implements OnInit {
 
-  // 👤 Sidebar
+  // Sidebar
   sidebarOpen = false;
   submenuAbierto: string | null = null;
-  nombreDoctor: string = '';
-  especialidad: string = '';
+  nombreDoctor: string = 'Dr. Usuario';
+  especialidad: string = 'Especialista';
 
-  // 📋 Estado general
+  // Estado general
   cargando = true;
   pacienteSeleccionado: any = null;
   planActivo: any = null;
   registroActual: any = null;
 
-  // 🎛️ Tabs
+  // Tabs
   tabActiva: string = 'evolucion';
 
-  // 📝 Formularios
+  // Formularios
   evolucionForm!: FormGroup;
   citaForm!: FormGroup;
   glucosaForm!: FormGroup;
 
-  // 💬 WhatsApp
+  // WhatsApp
   mensajeWhatsApp: string = '';
 
-  // 📊 Datos
+  // Datos
   evoluciones: any[] = [];
   citas: any[] = [];
   historialGlucosa: any[] = [];
 
-  // ⏳ Estados de carga
+  // Estados de carga
   guardando = false;
   guardandoCita = false;
   guardandoGlucosa = false;
@@ -72,7 +71,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     }
   }
 
-  // 👤 CARGAR DATOS DEL USUARIO (MÉTODO QUE FALTABA)
+  // Cargar datos del usuario
   private cargarDatosUsuario(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -82,12 +81,12 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         this.especialidad = user.rol === 'medico' ? 'Médico Especialista' : 
                            user.rol === 'nutricionista' ? 'Nutricionista' : 'Especialista';
       } catch (e) { 
-        console.warn('⚠️ Error parseando usuario'); 
+        console.warn('Error parseando usuario'); 
       }
     }
   }
 
-  // 📋 CARGAR DATOS DEL PACIENTE (ÚNICA VERSIÓN)
+  // Cargar datos del paciente
   private async cargarDatosPaciente(pacienteId: string): Promise<void> {
     this.cargando = true;
     
@@ -123,14 +122,14 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         ]);
       }
     } catch (error: any) {
-      console.error('❌ Error cargando paciente:', error);
+      console.error('Error cargando paciente:', error);
       await this.showToast('Error al cargar datos del paciente', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
-  // 📝 INICIALIZAR FORMULARIOS
+  // Inicializar formularios
   private inicializarFormularios(): void {
     this.evolucionForm = this.fb.group({
       fecha: [new Date().toISOString().split('T')[0], Validators.required],
@@ -154,7 +153,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     });
   }
 
-  // 📋 CARGAR PLAN ACTIVO
+  // Cargar plan activo
   private async cargarPlanActivo(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -169,11 +168,11 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         this.planActivo = resp.planes.find((p: any) => p.estado === 'activo') || resp.planes[0];
       }
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar el plan activo');
+      console.warn('No se pudo cargar el plan activo');
     }
   }
 
-  // 📋 CARGAR REGISTRO ACTUAL
+  // Cargar registro actual
   private async cargarRegistroActual(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -188,11 +187,11 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         this.registroActual = resp.registro;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar el registro actual');
+      console.warn('No se pudo cargar el registro actual');
     }
   }
 
-  // 📋 CARGAR EVOLUCIONES
+  // Cargar evoluciones
   private async cargarEvoluciones(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -205,12 +204,12 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
       this.evoluciones = resp?.evoluciones || [];
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar las evoluciones');
+      console.warn('No se pudieron cargar las evoluciones');
       this.evoluciones = [];
     }
   }
 
-  // 📋 CARGAR CITAS
+  // Cargar citas
   private async cargarCitas(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -223,12 +222,12 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
       this.citas = resp?.citas || [];
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar las citas');
+      console.warn('No se pudieron cargar las citas');
       this.citas = [];
     }
   }
 
-  // 📋 CARGAR HISTORIAL GLUCOSA
+  // Cargar historial glucosa
   private async cargarHistorialGlucosa(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -241,16 +240,16 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
       this.historialGlucosa = resp?.historial || [];
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar el historial de glucosa');
+      console.warn('No se pudo cargar el historial de glucosa');
       this.historialGlucosa = [];
     }
   }
 
   cambiarTab(): void {
-    console.log('📑 Tab activa:', this.tabActiva);
+    console.log('Tab activa:', this.tabActiva);
   }
 
-  // 📝 GUARDAR EVOLUCIÓN
+  // Guardar evolución
   async guardarEvolucion(): Promise<void> {
     if (this.evolucionForm.invalid) return;
 
@@ -273,21 +272,21 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         { headers }
       ).toPromise();
 
-      await this.showToast('✅ Evolución registrada correctamente', 'success');
+      await this.showToast('Evolución registrada correctamente', 'success');
       this.evolucionForm.reset({
         fecha: new Date().toISOString().split('T')[0],
         adherencia: 'buena'
       });
       await this.cargarEvoluciones(this.pacienteSeleccionado.id);
     } catch (error: any) {
-      console.error('❌ Error guardando evolución:', error);
+      console.error('Error guardando evolución:', error);
       await this.showToast(error?.error?.mensaje || 'Error al guardar evolución', 'danger');
     } finally {
       this.guardando = false;
     }
   }
 
-  // 📅 AGENDAR CITA
+  // Agendar cita
   async agendarCita(): Promise<void> {
     if (this.citaForm.invalid) return;
 
@@ -312,18 +311,18 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         { headers }
       ).toPromise();
 
-      await this.showToast('✅ Cita agendada correctamente', 'success');
+      await this.showToast('Cita agendada correctamente', 'success');
       this.citaForm.reset({ tipo: 'control' });
       await this.cargarCitas(this.pacienteSeleccionado.id);
     } catch (error: any) {
-      console.error('❌ Error agendando cita:', error);
+      console.error('Error agendando cita:', error);
       await this.showToast(error?.error?.mensaje || 'Error al agendar cita', 'danger');
     } finally {
       this.guardandoCita = false;
     }
   }
 
-  // 💉 REGISTRAR GLUCOSA
+  // Registrar glucosa
   async registrarGlucosa(): Promise<void> {
     if (this.glucosaForm.invalid) return;
 
@@ -346,20 +345,20 @@ export class MedicoseguimientoclinicoPage implements OnInit {
         { headers }
       ).toPromise();
 
-      await this.showToast('✅ Medición registrada correctamente', 'success');
+      await this.showToast('Medición registrada correctamente', 'success');
       this.glucosaForm.reset({
         fecha: new Date().toISOString().split('T')[0]
       });
       await this.cargarHistorialGlucosa(this.pacienteSeleccionado.id);
     } catch (error: any) {
-      console.error('❌ Error registrando glucosa:', error);
+      console.error('Error registrando glucosa:', error);
       await this.showToast(error?.error?.mensaje || 'Error al registrar medición', 'danger');
     } finally {
       this.guardandoGlucosa = false;
     }
   }
 
-  // 📱 WHATSAPP
+  // WhatsApp
   contactarWhatsApp(): void {
     if (!this.pacienteSeleccionado?.telefono) {
       this.showToast('El paciente no tiene número de teléfono registrado', 'warning');
@@ -384,7 +383,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     this.showToast(`Abriendo WhatsApp con ${nombrePaciente}...`, 'success', 2000);
   }
 
-  // 📱 RECORDAR CITA POR WHATSAPP
+  // Recordar cita por WhatsApp
   recordarCitaWhatsApp(cita: any): void {
     const fecha = new Date(cita.fecha_hora);
     const opciones: Intl.DateTimeFormatOptions = {
@@ -403,7 +402,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     this.contactarWhatsApp();
   }
 
-  // 📱 MENSAJES RÁPIDOS
+  // Mensajes rápidos
   setMensajeRapido(tipo: string): void {
     const nombrePaciente = `${this.pacienteSeleccionado.nombres} ${this.pacienteSeleccionado.apellidos}`;
     
@@ -417,7 +416,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     this.mensajeWhatsApp = mensajes[tipo] || '';
   }
 
-  // 🎨 HELPERS DE UI
+  // Helpers de UI
   getAdherenciaColor(adherencia: string): string {
     const colores: Record<string, string> = {
       'excelente': 'success',
@@ -454,7 +453,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     return new Date(fecha) < new Date();
   }
 
-  // ❌ CANCELAR CITA
+  // Cancelar cita
   async cancelarCita(cita: any): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Cancelar Cita',
@@ -485,7 +484,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     await alert.present();
   }
 
-  // 🎨 COLORES GLUCOSA
+  // Colores glucosa
   getGlucosaColor(valor: number): string {
     if (!valor) return 'normal';
     if (valor < 100) return 'normal';
@@ -521,7 +520,7 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     return 'danger';
   }
 
-  // 👁️ VER PLAN ACTIVO
+  // Ver plan activo
   verPlanActivo(): void {
     if (this.planActivo) {
       this.router.navigate(['/medicoplanesnutricionalescreadosver', this.planActivo.id]);
@@ -530,25 +529,25 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     }
   }
 
-  // ➕ CREAR NUEVO PLAN
+  // Crear nuevo plan
   crearNuevoPlan(): void {
     this.router.navigate(['/medicocrearplan'], {
       state: { pacienteId: this.pacienteSeleccionado.id }
     });
   }
 
-  // 🧭 NAVEGACIÓN
+  // Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
     const rutas: Record<string, string> = {
       'medico': '/medico',
       'medicoverpacientes': '/medicoverpacientes',
-      'agregar-paciente': '/agregar-paciente',
-      'buscar-paciente': '/buscar-paciente',
+      'medico-agregar-paciente': '/medico-agregar-paciente',
+      'medico-buscar-paciente': '/medico-buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'reportes': '/reportes',
-      'configuracion': '/configuracion'
+      'medicoinformes': '/medicoinformes',
+      'medico-configuracion': '/medico-configuracion'
     };
     const destino = rutas[ruta] || '/medico';
     this.router.navigate([destino]);
@@ -562,34 +561,53 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     this.submenuAbierto = this.submenuAbierto === item ? null : item;
   }
 
-  // 🚪 CERRAR SESIÓN
+  // Cerrar sesión
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar Sesión',
       message: '¿Estás seguro de que deseas cerrar sesión?',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
         {
-          text: 'Cerrar',
-          handler: () => {
+          text: 'Salir',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            this.router.navigate(['/lprincipal'], { replaceUrl: true });
+            await this.showToast('Sesión cerrada exitosamente', 'success');
+            this.router.navigate(['/principal'], { replaceUrl: true });
           }
         }
-      ]
+      ],
+      cssClass: 'alert-logout'
     });
     await alert.present();
   }
 
-  // 🔔 TOAST
-  async showToast(message: string, color: 'primary'|'success'|'danger'|'warning' = 'primary', duration: number = 2500): Promise<void> {
+  // Refrescar datos
+  async refrescarDatos(): Promise<void> {
+    if (this.pacienteSeleccionado) {
+      await this.cargarDatosPaciente(this.pacienteSeleccionado.id);
+      await this.showToast('Datos actualizados', 'success');
+    }
+  }
+
+  // Toast
+  async showToast(message: string, color: 'primary' | 'success' | 'danger' | 'warning' = 'primary', duration: number = 2500): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
-      color,
       duration,
+      color,
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.menu-item-with-submenu')) {
+      this.submenuAbierto = null;
+    }
   }
 }

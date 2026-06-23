@@ -1,0 +1,287 @@
+<!-- HEADER PRINCIPAL -->
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Configuración</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/avatar-placeholder.png" alt="Usuario" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('configuracion')" class="active">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando configuración...</p>
+      </div>
+
+      <div *ngIf="!cargando" class="config-container">
+        
+        <!-- Header del perfil -->
+        <div class="profile-header">
+          <div class="profile-avatar-section">
+            <ion-avatar class="profile-avatar">
+              <img src="assets/avatar-placeholder.png" alt="Avatar" />
+            </ion-avatar>
+            <div class="profile-info">
+              <h2>{{perfilForm.get('nombre')?.value}} {{perfilForm.get('apellido')?.value}}</h2>
+              <p class="profile-role">{{especialidad}}</p>
+              <p class="profile-email">{{perfilForm.get('correo')?.value}}</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <ion-button color="primary" (click)="guardarTodo()" [disabled]="!perfilForm.dirty && !cuentaForm.dirty">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              Guardar Cambios
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Tabs de configuración -->
+        <ion-segment [(ngModel)]="tabActiva" (ionChange)="cambiarTab()">
+          <ion-segment-button value="perfil">
+            <ion-icon name="person-outline"></ion-icon>
+            <ion-label>Perfil</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="ubicacion">
+            <ion-icon name="location-outline"></ion-icon>
+            <ion-label>Ubicación</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="cuenta">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-label>Cuenta</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="seguridad">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <ion-label>Seguridad</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- TAB: PERFIL -->
+        <div *ngIf="tabActiva === 'perfil'" class="tab-content">
+          <ion-card class="config-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="person-outline" color="primary"></ion-icon>
+                Información Personal
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="perfilForm">
+                <div class="form-grid">
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Nombre</ion-label>
+                    <ion-input formControlName="nombre" placeholder="Tu nombre"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Apellido</ion-label>
+                    <ion-input formControlName="apellido" placeholder="Tu apellido"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Cédula</ion-label>
+                    <ion-input formControlName="cedula" placeholder="Número de identificación"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Género</ion-label>
+                    <ion-select formControlName="genero" placeholder="Selecciona">
+                      <ion-select-option value="M">Masculino</ion-select-option>
+                      <ion-select-option value="F">Femenino</ion-select-option>
+                      <ion-select-option value="O">Otro</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Teléfono</ion-label>
+                    <ion-input formControlName="telefono" type="tel" placeholder="09XXXXXXXX"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Fecha de Nacimiento</ion-label>
+                    <ion-input formControlName="fecha_nacimiento" type="date"></ion-input>
+                  </ion-item>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- TAB: UBICACIÓN -->
+        <div *ngIf="tabActiva === 'ubicacion'" class="tab-content">
+          <ion-card class="config-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="location-outline" color="primary"></ion-icon>
+                Información de Ubicación
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="ubicacionForm">
+                <div class="form-grid">
+                  <ion-item lines="none" class="full-width">
+                    <ion-label position="stacked">Dirección Residencial</ion-label>
+                    <ion-input formControlName="direccionresidencial" placeholder="Calle principal, número"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Ciudad</ion-label>
+                    <ion-input formControlName="ciudad" placeholder="Tu ciudad"></ion-input>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Provincia</ion-label>
+                    <ion-select formControlName="provincia" placeholder="Selecciona provincia" (ionChange)="onProvinciaChange()">
+                      <ion-select-option *ngFor="let prov of provincias" [value]="prov.nombre">
+                        {{prov.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Cantón</ion-label>
+                    <ion-select formControlName="canton" placeholder="Selecciona cantón" (ionChange)="onCantonChange()">
+                      <ion-select-option *ngFor="let cant of cantones" [value]="cant.nombre">
+                        {{cant.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+
+                  <ion-item lines="none">
+                    <ion-label position="stacked">Parroquia</ion-label>
+                    <ion-select formControlName="parroquia" placeholder="Selecciona parroquia">
+                      <ion-select-option *ngFor="let parr of parroquias" [value]="parr.nombre">
+                        {{parr.nombre}}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- TAB: CUENTA -->
+        <div *ngIf="tabActiva === 'cuenta'" class="tab-content">
+          <ion-card class="config-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="mail-outline" color="primary"></ion-icon>
+                Correo Electrónico
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="cuentaForm">
+                <ion-item lines="none">
+                  <ion-label position="stacked">Correo Electrónico</ion-label>
+                  <ion-input formControlName="correo" type="email" placeholder="tucorreo@ejemplo.com"></ion-input>
+                </ion-item>
+                <p class="field-hint" *ngIf="cuentaForm.get('correo')?.invalid && cuentaForm.get('correo')?.touched">
+                  Ingresa un correo electrónico válido
+                </p>
+              </form>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- TAB: SEGURIDAD -->
+        <div *ngIf="tabActiva === 'seguridad'" class="tab-content">
+          <ion-card class="config-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+                Cambiar Contraseña
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <form [formGroup]="passwordForm">
+                <ion-item lines="none">
+                  <ion-label position="stacked">Contraseña Actual</ion-label>
+                  <ion-input formControlName="password_actual" type="password" placeholder="Ingresa tu contraseña actual"></ion-input>
+                </ion-item>
+
+                <ion-item lines="none">
+                  <ion-label position="stacked">Nueva Contraseña</ion-label>
+                  <ion-input formControlName="password_nueva" type="password" placeholder="Mínimo 8 caracteres"></ion-input>
+                </ion-item>
+
+                <ion-item lines="none">
+                  <ion-label position="stacked">Confirmar Nueva Contraseña</ion-label>
+                  <ion-input formControlName="password_confirmar" type="password" placeholder="Repite la nueva contraseña"></ion-input>
+                </ion-item>
+
+                <p class="field-hint" *ngIf="passwordForm.get('password_nueva')?.value !== passwordForm.get('password_confirmar')?.value && passwordForm.get('password_confirmar')?.touched">
+                  Las contraseñas no coinciden
+                </p>
+
+                <div class="form-actions">
+                  <ion-button color="primary" (click)="cambiarPassword()" [disabled]="passwordForm.invalid || guardandoPassword">
+                    <ion-spinner *ngIf="guardandoPassword" name="crescent" slot="start"></ion-spinner>
+                    <ion-icon *ngIf="!guardandoPassword" name="key-outline" slot="start"></ion-icon>
+                    {{guardandoPassword ? 'Cambiando...' : 'Cambiar Contraseña'}}
+                  </ion-button>
+                </div>
+              </form>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -641,3 +641,19 @@ ion-badge {
 .patients-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
 .patients-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
 .patients-table tbody tr:nth-child(n+6) { animation-delay: 0.3s; }
+
+/* ============================================
+   AVATAR PLACEHOLDER
+   ============================================ */
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a4d68, #4fc3f7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-radius: 50%;
+}

@@ -237,7 +237,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
       'buscar-paciente': '/buscar-paciente',
       'planes-nutricionales': '/medicoplanesnutricionalescreados',
       'seguimiento-clinico': '/seguimiento-clinico',
-      'reportes': '/reportes',
+      'medicoinformes': '/medicoinformes',
       'configuracion': '/configuracion'
     };
     
