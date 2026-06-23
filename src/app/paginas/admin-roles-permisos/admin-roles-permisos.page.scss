@@ -290,36 +290,6 @@
 }
 
 /* ============================================
-   TARJETA DE FILTROS
-   ============================================ */
-.filtros-card {
-  background: white;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
-  border: 1px solid #e0f0e8;
-
-  ion-card-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #0d6b4e;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .search-item {
-    --background: #f4faf7;
-    border: 1px solid #e0f0e8;
-    border-radius: 8px;
-
-    &:focus-within {
-      border-color: #0d6b4e;
-    }
-  }
-}
-
-/* ============================================
    LOADING
    ============================================ */
 .loading-container {
@@ -337,163 +307,307 @@
 }
 
 /* ============================================
-   PACIENTES CONTAINER
+   ROLES CONTAINER (LAYOUT 2 COLUMNAS)
    ============================================ */
-.pacientes-container {
-  .pacientes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-
-    h2 {
-      color: #0d6b4e;
-      font-size: 1.2rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0;
-
-      ion-icon {
-        font-size: 1.4rem;
-      }
-
-      ion-badge {
-        margin-left: 8px;
-        font-size: 0.8rem;
-      }
-    }
-  }
+.roles-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
 /* ============================================
-   GRID DE PACIENTES
+   LISTA DE ROLES
    ============================================ */
-.pacientes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 1.2rem;
-}
-
-.paciente-card {
+.roles-card, .permisos-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
   border: 1px solid #e0f0e8;
-  transition: all 0.3s ease;
   margin: 0;
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(13, 107, 78, 0.15);
-  }
-
-  ion-card-content {
-    padding: 1.2rem;
-  }
-
-  .paciente-top {
+  ion-card-title {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e0f0e8;
+    gap: 10px;
+    color: #0d6b4e;
+    font-size: 1.15rem;
+    font-weight: 600;
 
-    .avatar-circle {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    ion-icon {
+      font-size: 1.4rem;
+    }
+  }
+
+  ion-card-subtitle {
+    color: #6b7c75;
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+}
+
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.rol-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f4faf7;
+  border: 1px solid #e0f0e8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background: #e0f5ed;
+    transform: translateX(4px);
+  }
+
+  &.selected {
+    background: linear-gradient(135deg, #e0f5ed, #c8e6d5);
+    border-color: #0d6b4e;
+    box-shadow: 0 2px 8px rgba(13, 107, 78, 0.15);
+
+    .rol-info h3 {
+      color: #0d6b4e;
+    }
+  }
+
+  .rol-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: white;
+    flex-shrink: 0;
+
+    &.admin {
+      background: linear-gradient(135deg, #0d6b4e, #0a5a41);
+    }
+    &.doctor {
+      background: linear-gradient(135deg, #2196f3, #1976d2);
+    }
+    &.nutricionista {
+      background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    }
+    &.enfermera {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+    }
+    &.paciente {
+      background: linear-gradient(135deg, #00bcd4, #0097a7);
+    }
+  }
+
+  .rol-info {
+    flex: 1;
+    min-width: 0;
+
+    h3 {
+      margin: 0 0 2px 0;
+      color: #1a1f36;
+      font-size: 0.95rem;
       font-weight: 600;
-      font-size: 1.1rem;
-      color: white;
-      flex-shrink: 0;
-
-      &.patient {
-        background: linear-gradient(135deg, #00bcd4, #0097a7);
-      }
     }
 
-    .paciente-info {
-      flex: 1;
-      min-width: 0;
+    p {
+      margin: 0 0 6px 0;
+      color: #6b7c75;
+      font-size: 0.8rem;
+    }
 
-      h3 {
-        margin: 0 0 4px 0;
-        color: #1a1f36;
-        font-size: 1rem;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+    .rol-stats {
+      display: flex;
+      gap: 12px;
 
-      .paciente-cedula {
-        margin: 0;
-        color: #6b7c75;
-        font-size: 0.85rem;
+      .stat {
         display: flex;
         align-items: center;
         gap: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.75rem;
+        color: #6b7c75;
 
         ion-icon {
-          font-size: 0.9rem;
-          flex-shrink: 0;
+          font-size: 0.85rem;
         }
       }
     }
+  }
 
-    .paciente-badges {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-end;
+  .selected-indicator {
+    color: #0d6b4e;
+    font-size: 1.2rem;
+  }
+}
 
-      ion-badge {
-        font-size: 0.7rem;
-        padding: 4px 8px;
-      }
+.btn-nuevo-rol {
+  margin-top: 8px;
+}
+
+/* ============================================
+   SECCION PERMISOS
+   ============================================ */
+.permisos-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .resumen-item {
+    text-align: center;
+    padding: 16px;
+    background: #f4faf7;
+    border-radius: 10px;
+    border: 1px solid #e0f0e8;
+
+    .resumen-numero {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0d6b4e;
+      margin-bottom: 4px;
+    }
+
+    .resumen-label {
+      font-size: 0.8rem;
+      color: #6b7c75;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &.activo .resumen-numero {
+      color: #10b981;
+    }
+
+    &.inactivo .resumen-numero {
+      color: #ef4444;
+    }
+  }
+}
+
+.permisos-acciones {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  ion-button {
+    font-size: 0.85rem;
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+}
+
+/* ============================================
+   CATEGORIAS DE PERMISOS
+   ============================================ */
+.categorias-permisos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoria-item {
+  background: #f4faf7;
+  border: 1px solid #e0f0e8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.categoria-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e0f5ed;
+  }
+
+  .categoria-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+
+    ion-icon {
+      font-size: 1.3rem;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a1f36;
+      flex: 1;
+    }
+
+    ion-badge {
+      font-size: 0.75rem;
     }
   }
 
-  .paciente-details {
+  .categoria-arrow {
+    transition: transform 0.3s ease;
+    color: #6b7c75;
+
+    &.rotate {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.permisos-lista {
+  padding: 8px 16px 16px;
+  border-top: 1px solid #e0f0e8;
+  background: white;
+}
+
+.permiso-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f4faf7;
+  }
+
+  ion-checkbox {
+    --size: 20px;
+    --checkbox-background-checked: #0d6b4e;
+    --border-color-checked: #0d6b4e;
+    --border-color: #c8e6d5;
+    margin: 0;
+  }
+
+  .permiso-info {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 1rem;
+    gap: 2px;
 
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #6b7c75;
-      font-size: 0.85rem;
-
-      ion-icon {
-        font-size: 1rem;
-        color: #0d6b4e;
-      }
+    strong {
+      font-size: 0.9rem;
+      color: #1a1f36;
+      font-weight: 500;
     }
-  }
 
-  .paciente-actions {
-    display: flex;
-    gap: 8px;
-    padding-top: 1rem;
-    border-top: 1px solid #e0f0e8;
-
-    ion-button {
-      flex: 1;
-      font-size: 0.85rem;
-      --padding-start: 8px;
-      --padding-end: 8px;
+    small {
+      font-size: 0.78rem;
+      color: #6b7c75;
     }
   }
 }
@@ -502,8 +616,9 @@
    EMPTY STATE
    ============================================ */
 .empty-state {
+  grid-column: 2;
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 4rem 2rem;
   background: white;
   border-radius: 12px;
   border: 2px dashed #e0f0e8;
@@ -529,7 +644,7 @@
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .admin-sidebar {
     position: fixed;
     height: calc(100vh - 60px);
@@ -542,32 +657,33 @@
     }
   }
 
+  .roles-container {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 768px) {
   .main-content {
     padding: 1rem;
   }
 
-  .pacientes-grid {
+  .welcome-section h1 {
+    font-size: 1.4rem;
+  }
+
+  .permisos-resumen {
     grid-template-columns: 1fr;
   }
 
-  .pacientes-header {
+  .permisos-acciones {
     flex-direction: column;
-    gap: 1rem;
-    align-items: stretch !important;
 
-    h2 {
-      justify-content: center;
-    }
-  }
-
-  .paciente-card .paciente-top {
-    flex-wrap: wrap;
-
-    .paciente-badges {
+    ion-button {
       width: 100%;
-      flex-direction: row;
-      justify-content: flex-start;
-      gap: 8px;
     }
   }
 }

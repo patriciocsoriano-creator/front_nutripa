@@ -319,12 +319,13 @@
     margin-bottom: 12px;
 
     ion-label {
-      color: #333;
+      color: #333 !important;
+      --color: #333 !important;
       font-weight: 500;
       font-size: 0.9rem;
     }
 
-    ion-input, ion-select {
+    ion-input {
       --padding-start: 12px;
       --padding-end: 12px;
       --padding-top: 10px;
@@ -344,6 +345,51 @@
       }
     }
 
+    /* ============================================
+       ESTILOS ESPECÍFICOS PARA ION-SELECT
+       ============================================ */
+    ion-select {
+      --padding-start: 12px;
+      --padding-end: 12px;
+      --padding-top: 10px;
+      --padding-bottom: 10px;
+      --color: #1a1f36 !important;
+      --placeholder-color: #9499b7 !important;
+      --placeholder-opacity: 0.8;
+      font-size: 0.95rem;
+      background: #f4faf7;
+      border: 1px solid #e0f0e8;
+      border-radius: 8px;
+      margin-top: 6px;
+      width: 100%;
+      transition: all 0.3s ease;
+
+      &:focus, &:focus-within {
+        border-color: #0d6b4e;
+        background: white;
+      }
+    }
+
+    /* Texto seleccionado del ion-select */
+    ion-select::part(text) {
+      color: #1a1f36 !important;
+      font-weight: 500;
+      padding: 4px 0;
+    }
+
+    /* Placeholder del ion-select */
+    ion-select::part(placeholder) {
+      color: #9499b7 !important;
+      opacity: 0.8;
+    }
+
+    /* Icono de la flecha del ion-select */
+    ion-select::part(icon) {
+      color: #0d6b4e !important;
+      opacity: 0.8;
+    }
+
+    /* Estados de validación */
     &.invalid ion-input,
     &.invalid ion-select {
       border-color: #ef4444;
@@ -488,5 +534,63 @@
 
   .action-buttons {
     margin-top: 1.5rem;
+  }
+}
+
+/* ============================================
+   POPOVER DEL ION-SELECT
+   ============================================ */
+ion-popover {
+  --background: #ffffff;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  
+  &::part(content) {
+    border-radius: 12px;
+  }
+}
+
+ion-select-popover {
+  ion-list {
+    background: white;
+  }
+  
+  ion-item {
+    --background: white;
+    --color: #1a1f36;
+    --background-hover: #f4faf7;
+    --background-focused: #e0f5ed;
+    font-size: 0.95rem;
+    
+    ion-label {
+      color: #1a1f36 !important;
+    }
+    
+    &:hover {
+      --background: #f4faf7;
+    }
+    
+    &.ion-focused {
+      --background: #e0f5ed;
+    }
+  }
+}
+
+/* Alert interface del ion-select */
+.alert-radio-group {
+  .alert-radio {
+    .alert-radio-label {
+      color: #1a1f36 !important;
+    }
+    
+    &.alert-radio-checked {
+      .alert-radio-label {
+        color: #0d6b4e !important;
+        font-weight: 600;
+      }
+      
+      .alert-radio-inner {
+        border-color: #0d6b4e !important;
+      }
+    }
   }
 }

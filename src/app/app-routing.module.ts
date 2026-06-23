@@ -179,6 +179,26 @@ const routes: Routes = [
     path: 'admin-config-backup',
     loadChildren: () => import('./paginas/admin-config-backup/admin-config-backup.module').then( m => m.AdminConfigBackupPageModule)
   },
+  {
+    path: 'admin-agregar-usuario',
+    loadChildren: () => import('./paginas/admin-agregar-usuario/admin-agregar-usuario.module').then( m => m.AdminAgregarUsuarioPageModule)
+  },
+  {
+    path: 'admin-roles-permisos',
+    loadChildren: () => import('./paginas/admin-roles-permisos/admin-roles-permisos.module').then( m => m.AdminRolesPermisosPageModule)
+  },
+  {
+    path: 'admin-estadisticas-pacientes',
+    loadChildren: () => import('./paginas/admin-estadisticas-pacientes/admin-estadisticas-pacientes.module').then( m => m.AdminEstadisticasPacientesPageModule)
+  },
+  {
+    path: 'admin-reportes-globales',
+    loadChildren: () => import('./paginas/admin-reportes-globales/admin-reportes-globales.module').then( m => m.AdminReportesGlobalesPageModule)
+  },
+  {
+    path: 'admin-actividad-usuarios',
+    loadChildren: () => import('./paginas/admin-actividad-usuarios/admin-actividad-usuarios.module').then( m => m.AdminActividadUsuariosPageModule)
+  },
   
 ];
 

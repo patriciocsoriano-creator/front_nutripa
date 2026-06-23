@@ -1,98 +1,355 @@
-<ion-header>
-  <ion-toolbar color="success">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Respaldos de BD</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarInfoBackup()" title="Actualizar">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Respaldos de BD</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="cargando" class="ion-text-center ion-padding">
-    <ion-spinner></ion-spinner>
-    <p>Cargando información...</p>
-  </div>
-
-  <div *ngIf="!cargando">
-    <!-- Resumen -->
-    <ion-card class="resumen-card">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="server-outline" color="primary"></ion-icon>
-          Resumen de Base de Datos
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="resumen-grid">
-          <div class="resumen-item">
-            <div class="resumen-valor">{{totalTablas}}</div>
-            <div class="resumen-label">Tablas</div>
-          </div>
-          <div class="resumen-item">
-            <div class="resumen-valor">{{tamanioTotal.toFixed(2)}} MB</div>
-            <div class="resumen-label">Tamaño Total</div>
-          </div>
-          <div class="resumen-item">
-            <div class="resumen-valor">{{fechaBackup | date:'dd/MM/yyyy'}}</div>
-            <div class="resumen-label">Última Actualización</div>
-          </div>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+      
+      <ul>
+        <li (click)="navegarA('admin-inicio')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
 
-    <!-- Tablas -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="list-outline" color="primary"></ion-icon>
-          Tablas del Sistema
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item *ngFor="let tabla of tablas">
-            <ion-icon name="table-portrait-outline" slot="start" color="primary"></ion-icon>
-            <ion-label>
-              <h2>{{tabla.tabla}}</h2>
-              <p>
-                ~{{tabla.filas_aprox}} filas |
-                Creada: {{tabla.creado_en | date:'dd/MM/yyyy'}}
-              </p>
-            </ion-label>
-            <ion-badge [color]="getTamanioColor(tabla.tamanio_mb)" slot="end">
-              {{tabla.tamanio_mb}} MB
-            </ion-badge>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
 
-    <!-- Acciones -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="construct-outline" color="primary"></ion-icon>
-          Acciones de Respaldo
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="action-buttons">
-          <ion-button expand="block" (click)="confirmarExportar()">
-            <ion-icon slot="start" name="download-outline"></ion-icon>
-            Exportar Base de Datos (.sql)
-          </ion-button>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Medicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver medicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar medico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
 
-          <ion-button expand="block" fill="outline" color="warning" (click)="confirmarImportar()">
-            <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-            Importar Base de Datos
-          </ion-button>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadisticas</span>
+            </li>
+          </ul>
+        </li>
 
-          <ion-button expand="block" fill="clear" (click)="cargarInfoBackup()">
-            <ion-icon slot="start" name="refresh-outline"></ion-icon>
-            Actualizar Información
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoria / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuracion</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parametros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')" class="active">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>
+          <ion-icon name="save-outline"></ion-icon>
+          Respaldos de Base de Datos
+        </h1>
+        <p class="subtitle">Gestiona los respaldos y exporta la informacion del sistema</p>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando informacion de la base de datos...</p>
+      </div>
+
+      <div *ngIf="!cargando" class="backup-container">
+
+        <!-- Seccion 1: Resumen -->
+        <ion-card class="backup-card resumen-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="server-outline" color="primary"></ion-icon>
+              Resumen de Base de Datos
+            </ion-card-title>
+            <ion-card-subtitle>
+              Informacion general sobre la base de datos del sistema
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="resumen-grid">
+              <div class="resumen-item">
+                <div class="resumen-icono tablas">
+                  <ion-icon name="grid-outline"></ion-icon>
+                </div>
+                <div class="resumen-info">
+                  <div class="resumen-valor">{{totalTablas}}</div>
+                  <div class="resumen-label">Tablas</div>
+                </div>
+              </div>
+              <div class="resumen-item">
+                <div class="resumen-icono size">
+                  <ion-icon name="hardware-chip-outline"></ion-icon>
+                </div>
+                <div class="resumen-info">
+                  <div class="resumen-valor">{{tamanioTotal.toFixed(2)}} MB</div>
+                  <div class="resumen-label">Tamano Total</div>
+                </div>
+              </div>
+              <div class="resumen-item">
+                <div class="resumen-icono fecha">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                </div>
+                <div class="resumen-info">
+                  <div class="resumen-valor">{{fechaBackup | date:'dd/MM/yyyy'}}</div>
+                  <div class="resumen-label">Ultima Actualizacion</div>
+                </div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Seccion 2: Tablas -->
+        <ion-card class="backup-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="list-outline" color="primary"></ion-icon>
+              Tablas del Sistema
+              <ion-badge color="primary" class="count-badge">{{tablas.length}}</ion-badge>
+            </ion-card-title>
+            <ion-card-subtitle>
+              Lista detallada de todas las tablas de la base de datos
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="tablas-list" *ngIf="tablas.length > 0">
+              <div class="tabla-item" *ngFor="let tabla of tablas">
+                <div class="tabla-icon">
+                  <ion-icon name="table-portrait-outline"></ion-icon>
+                </div>
+                <div class="tabla-info">
+                  <h3>{{tabla.tabla}}</h3>
+                  <div class="tabla-meta">
+                    <span class="meta-item">
+                      <ion-icon name="rows-outline"></ion-icon>
+                      ~{{tabla.filas_aprox}} filas
+                    </span>
+                    <span class="meta-item">
+                      <ion-icon name="calendar-outline"></ion-icon>
+                      Creada: {{tabla.creado_en | date:'dd/MM/yyyy'}}
+                    </span>
+                    <span class="meta-item" *ngIf="tabla.actualizado_en">
+                      <ion-icon name="time-outline"></ion-icon>
+                      Actualizada: {{tabla.actualizado_en | date:'dd/MM/yyyy'}}
+                    </span>
+                  </div>
+                </div>
+                <div class="tabla-size">
+                  <ion-badge [color]="getTamanioColor(tabla.tamanio_mb)">
+                    {{tabla.tamanio_mb}} MB
+                  </ion-badge>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="tablas.length === 0" class="empty-state">
+              <ion-icon name="server-outline"></ion-icon>
+              <h3>No hay tablas disponibles</h3>
+              <p>No se pudo obtener la informacion de las tablas</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Seccion 3: Acciones -->
+        <ion-card class="backup-card acciones-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="construct-outline" color="primary"></ion-icon>
+              Acciones de Respaldo
+            </ion-card-title>
+            <ion-card-subtitle>
+              Herramientas para exportar e importar la base de datos
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="acciones-grid">
+              <div class="accion-item exportar">
+                <div class="accion-icon">
+                  <ion-icon name="download-outline"></ion-icon>
+                </div>
+                <div class="accion-info">
+                  <h4>Exportar Base de Datos</h4>
+                  <p>Descarga un archivo .sql con toda la estructura y datos</p>
+                </div>
+                <ion-button fill="solid" color="primary" (click)="confirmarExportar()">
+                  <ion-icon slot="start" name="download-outline"></ion-icon>
+                  Exportar
+                </ion-button>
+              </div>
+
+              <div class="accion-item importar">
+                <div class="accion-icon">
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                </div>
+                <div class="accion-info">
+                  <h4>Importar Base de Datos</h4>
+                  <p>Restaura la base de datos desde un archivo de respaldo</p>
+                </div>
+                <ion-button fill="outline" color="warning" (click)="confirmarImportar()">
+                  <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                  Importar
+                </ion-button>
+              </div>
+
+              <div class="accion-item actualizar">
+                <div class="accion-icon">
+                  <ion-icon name="refresh-outline"></ion-icon>
+                </div>
+                <div class="accion-info">
+                  <h4>Actualizar Informacion</h4>
+                  <p>Recarga los datos de las tablas y su tamano actual</p>
+                </div>
+                <ion-button fill="outline" color="medium" (click)="cargarInfoBackup()">
+                  <ion-icon slot="start" name="refresh-outline"></ion-icon>
+                  Actualizar
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Boton volver -->
+        <div class="action-footer">
+          <ion-button fill="clear" color="medium" (click)="navegarA('admin-inicio')">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver al Panel
           </ion-button>
         </div>
-      </ion-card-content>
-    </ion-card>
+
+      </div>
+    </div>
   </div>
 </ion-content>

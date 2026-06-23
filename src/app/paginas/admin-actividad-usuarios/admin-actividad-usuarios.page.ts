@@ -5,25 +5,31 @@ import { AlertController, ToastController, LoadingController, Platform } from '@
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-admin-ver-usuarios',
-  templateUrl: './admin-ver-usuarios.page.html',
-  styleUrls: ['./admin-ver-usuarios.page.scss'],
+  selector: 'app-admin-actividad-usuarios',
+  templateUrl: './admin-actividad-usuarios.page.html',
+  styleUrls: ['./admin-actividad-usuarios.page.scss'],
   standalone: false,
 })
-export class AdminVerUsuariosPage implements OnInit {
-  // 🎯 Sidebar
+export class AdminActividadUsuariosPage implements OnInit {
+  // Sidebar
   sidebarOpen = false;
-  submenuAbierto: string | null = null;
+  submenuAbierto: string | null = 'reportes';
   nombreAdmin: string = '';
   rol: string = 'Administrador';
   private isMobile = false;
 
-  // 👥 Usuarios
+  // Datos
   usuarios: any[] = [];
-  usuariosFiltrados: any[] = [];
   cargando = false;
   terminoBusqueda = '';
   filtroRol = 'todos';
+  filtroEstado = 'todos';
+  ordenPor: 'actividad' | 'registros' | 'nombre' | 'fecha' = 'actividad';
+
+  // KPIs
+  totalActivos = 0;
+  totalInactivos = 0;
+  totalRegistros = 0;
 
   constructor(
     private router: Router,
@@ -43,10 +49,9 @@ export class AdminVerUsuariosPage implements OnInit {
 
   ngOnInit() {
     this.cargarDatosAdmin();
-    this.cargarUsuarios();
+    this.cargarActividad();
   }
 
-  // 👤 Cargar datos del admin
   private cargarDatosAdmin() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -55,108 +60,108 @@ export class AdminVerUsuariosPage implements OnInit {
         this.nombreAdmin = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Administrador';
         this.rol = user.rol === 'admin' ? 'Administrador General' : 'Administrador';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
 
-  // 📋 Cargar usuarios desde backend
-  async cargarUsuarios() {
+  async cargarActividad() {
     this.cargando = true;
     const token = localStorage.getItem('token');
-    
+
     try {
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/admin/usuarios`,
+        `${environment.apiUrl}/nutricionapp-api/admin/actividad`,
         { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
       ).toPromise();
 
       if (response?.error === false) {
-        this.usuarios = response.usuarios || [];
-        this.aplicarFiltros();
-        console.log('✅ Usuarios cargados:', this.usuarios.length);
+        this.usuarios = response.actividad || [];
+        this.calcularKpis();
+        console.log('Actividad cargada:', this.usuarios.length, 'usuarios');
       } else {
-        await this.showToast('Error al cargar usuarios', 'danger');
+        await this.showToast('Error al cargar actividad', 'danger');
       }
     } catch (error) {
-      console.error('Error cargando usuarios:', error);
-      await this.showToast('Error al cargar usuarios', 'danger');
+      console.error('Error cargando actividad:', error);
+      await this.showToast('Error al cargar actividad de usuarios', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
-  // 🔍 Aplicar filtros
-  aplicarFiltros() {
-    let filtrados = [...this.usuarios];
-    
+  private calcularKpis() {
+    this.totalActivos = this.usuarios.filter(u => u.activo === 1).length;
+    this.totalInactivos = this.usuarios.length - this.totalActivos;
+    this.totalRegistros = this.usuarios.reduce((sum, u) => sum + (u.registros_realizados || 0), 0);
+  }
+
+  get usuariosFiltrados() {
+    let result = [...this.usuarios];
+
+    // Filtro por busqueda
     if (this.terminoBusqueda) {
       const t = this.terminoBusqueda.toLowerCase();
-      filtrados = filtrados.filter(u => 
-        u.nombre?.toLowerCase().includes(t) ||
-        u.apellido?.toLowerCase().includes(t) ||
-        u.correo?.toLowerCase().includes(t) ||
-        u.cedula?.includes(t)
+      result = result.filter(u => 
+        u.nombre?.toLowerCase().includes(t)
       );
     }
 
+    // Filtro por rol
     if (this.filtroRol !== 'todos') {
-      filtrados = filtrados.filter(u => u.rol === this.filtroRol);
+      result = result.filter(u => u.rol === this.filtroRol);
     }
 
-    this.usuariosFiltrados = filtrados;
+    // Filtro por estado
+    if (this.filtroEstado === 'activos') {
+      result = result.filter(u => u.activo === 1);
+    } else if (this.filtroEstado === 'inactivos') {
+      result = result.filter(u => u.activo !== 1);
+    }
+
+    // Ordenamiento
+    result = this.ordenarUsuarios(result);
+
+    return result;
   }
 
-  // 🗑️ Eliminar usuario
-  async eliminarUsuario(usuario: any) {
-    const alert = await this.alertCtrl.create({
-      header: '⚠️ Eliminar Usuario',
-      message: `¿Eliminar a <strong>${usuario.nombre} ${usuario.apellido}</strong>?<br><br>Esta acción no se puede deshacer.`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Eliminar',
-          cssClass: 'alert-button-danger',
-          handler: async () => {
-            const token = localStorage.getItem('token');
-            try {
-              await this.http.delete(
-                `${environment.apiUrl}/nutricionapp-api/admin/usuarios/${usuario.id}`,
-                { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
-              ).toPromise();
-              await this.showToast('✅ Usuario eliminado', 'success');
-              this.cargarUsuarios();
-            } catch (error) {
-              await this.showToast('❌ Error al eliminar', 'danger');
-            }
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // 🔄 Toggle activo/inactivo
-  async toggleActivo(usuario: any) {
-    const token = localStorage.getItem('token');
-    try {
-      await this.http.patch(
-        `${environment.apiUrl}/nutricionapp-api/admin/usuarios/${usuario.id}/toggle-activo`,
-        {},
-        { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
-      ).toPromise();
-      await this.showToast(`Usuario ${usuario.activo ? 'desactivado' : 'activado'}`, 'success');
-      this.cargarUsuarios();
-    } catch (error) {
-      await this.showToast('Error al cambiar estado', 'danger');
+  private ordenarUsuarios(lista: any[]): any[] {
+    switch (this.ordenPor) {
+      case 'actividad':
+        return lista.sort((a, b) => {
+          const fechaA = a.ultima_actividad ? new Date(a.ultima_actividad).getTime() : 0;
+          const fechaB = b.ultima_actividad ? new Date(b.ultima_actividad).getTime() : 0;
+          return fechaB - fechaA;
+        });
+      case 'registros':
+        return lista.sort((a, b) => 
+          (b.registros_realizados || 0) - (a.registros_realizados || 0)
+        );
+      case 'nombre':
+        return lista.sort((a, b) => 
+          (a.nombre || '').localeCompare(b.nombre || '')
+        );
+      case 'fecha':
+        return lista.sort((a, b) => {
+          const fechaA = a.fecha_registro ? new Date(a.fecha_registro).getTime() : 0;
+          const fechaB = b.fecha_registro ? new Date(b.fecha_registro).getTime() : 0;
+          return fechaB - fechaA;
+        });
+      default:
+        return lista;
     }
   }
 
-  // 🎨 Helpers visuales
+  limpiarFiltros() {
+    this.terminoBusqueda = '';
+    this.filtroRol = 'todos';
+    this.filtroEstado = 'todos';
+  }
+
   getRolLabel(rol: string): string {
     const labels: Record<string, string> = {
       'admin': 'Administrador',
-      'doctor': 'Médico',
+      'doctor': 'Medico',
       'nutricionista': 'Nutricionista',
       'enfermera': 'Enfermera',
       'paciente': 'Paciente'
@@ -175,13 +180,36 @@ export class AdminVerUsuariosPage implements OnInit {
     return colores[rol] || 'default';
   }
 
-  // 🧭 Navegación
+  getPorcentajeActividad(registros: number): number {
+    if (!registros || registros === 0) return 0;
+    // Maximo de referencia: 20 registros
+    const maximo = 20;
+    return Math.min(Math.round((registros / maximo) * 100), 100);
+  }
+
+  getNivelActividad(registros: number): string {
+    if (!registros || registros === 0) return 'Sin actividad';
+    if (registros <= 3) return 'Baja';
+    if (registros <= 10) return 'Media';
+    if (registros <= 20) return 'Alta';
+    return 'Muy alta';
+  }
+
+  getClaseActividad(registros: number): string {
+    if (!registros || registros === 0) return 'nivel-nulo';
+    if (registros <= 3) return 'nivel-bajo';
+    if (registros <= 10) return 'nivel-medio';
+    if (registros <= 20) return 'nivel-alto';
+    return 'nivel-muy-alto';
+  }
+
+  // Navegacion
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'admin-inicio': '/administrador',
       'admin-ver-usuarios': '/admin-ver-usuarios',
-      'admin-agregar-usuario': '/admin-ver-usuarios',
-      'admin-roles-permisos': '/admin-ver-usuarios',
+      'admin-agregar-usuario': '/admin-agregar-usuario',
+      'admin-roles-permisos': '/admin-roles-permisos',
       'admin-ver-medicos': '/admin-ver-medicos',
       'admin-agregar-medico': '/admin-agregar-medico',
       'admin-asignaciones': '/admin-asignaciones',
@@ -189,7 +217,7 @@ export class AdminVerUsuariosPage implements OnInit {
       'admin-estadisticas-pacientes': '/admin-estadisticas-pacientes',
       'admin-reportes-globales': '/admin-reportes-globales',
       'admin-auditoria': '/admin-auditoria',
-      'admin-actividad-usuarios': '/admin-auditoria',
+      'admin-actividad-usuarios': '/admin-actividad-usuarios',
       'admin-config-general': '/admin-config-general',
       'admin-config-parametros': '/admin-config-parametros',
       'admin-config-backup': '/admin-config-backup'
@@ -214,12 +242,12 @@ export class AdminVerUsuariosPage implements OnInit {
 
   async cerrarSesion() {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar sesión',
-      message: '¿Estás seguro que deseas cerrar sesión?',
+      header: 'Cerrar sesion',
+      message: 'Esta seguro que desea cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
-          text: 'Sí, cerrar',
+          text: 'Si, cerrar',
           cssClass: 'alert-button-danger',
           handler: () => {
             localStorage.removeItem('token');

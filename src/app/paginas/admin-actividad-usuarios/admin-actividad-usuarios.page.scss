@@ -114,9 +114,6 @@
         font-size: 0.75rem;
         color: #b8dcc9;
         margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
     }
   }
@@ -155,12 +152,10 @@
       
       &:hover {
         background: rgba(255,255,255,0.15);
-        color: white;
       }
       
       &.active {
         background: rgba(255,255,255,0.2);
-        color: white;
         border-left: 3px solid #4fd1a5;
       }
     }
@@ -216,7 +211,6 @@
         
         &:hover {
           background: rgba(255,255,255,0.15);
-          color: white;
         }
         
         &.active {
@@ -263,14 +257,11 @@
 
   .welcome-section {
     margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
 
     h1 {
       font-size: 1.8rem;
       color: #0d6b4e;
-      margin: 0;
+      margin: 0 0 0.3rem 0;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -290,7 +281,93 @@
 }
 
 /* ============================================
-   TARJETA DE FILTROS
+   LOADING
+   ============================================ */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #6b7c75;
+
+  p {
+    margin-top: 1rem;
+  }
+}
+
+/* ============================================
+   KPIs
+   ============================================ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+
+  .kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
+    border: 1px solid #e0f0e8;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(13, 107, 78, 0.12);
+    }
+
+    .kpi-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      flex-shrink: 0;
+
+      &.total {
+        background: linear-gradient(135deg, #0d6b4e, #0a5a41);
+      }
+
+      &.activos {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      &.inactivos {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+
+      &.registros {
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+      }
+    }
+
+    .kpi-info {
+      h3 {
+        font-size: 1.8rem;
+        color: #0d6b4e;
+        margin: 0;
+        font-weight: 700;
+      }
+
+      p {
+        color: #6b7c75;
+        font-size: 0.85rem;
+        margin: 4px 0 0 0;
+      }
+    }
+  }
+}
+
+/* ============================================
+   FILTROS CARD
    ============================================ */
 .filtros-card {
   background: white;
@@ -308,39 +385,86 @@
     font-weight: 600;
   }
 
-  .search-item {
+  .search-item, .filter-item {
     --background: #f4faf7;
     border: 1px solid #e0f0e8;
     border-radius: 8px;
+    margin-bottom: 8px;
 
     &:focus-within {
       border-color: #0d6b4e;
+    }
+
+    ion-select {
+      --color: #1a1f36 !important;
+      --placeholder-color: #9499b7 !important;
+    }
+
+    ion-select::part(text) {
+      color: #1a1f36 !important;
+    }
+  }
+
+  .sort-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+
+    .sort-label {
+      color: #6b7c75;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .sort-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #f4faf7;
+        border: 1px solid #e0f0e8;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.82rem;
+        color: #6b7c75;
+
+        ion-icon {
+          font-size: 0.95rem;
+        }
+
+        &:hover {
+          background: #e0f5ed;
+          border-color: #0d6b4e;
+          color: #0d6b4e;
+        }
+
+        &.active {
+          background: #0d6b4e;
+          color: white;
+          border-color: #0d6b4e;
+
+          ion-icon {
+            color: white;
+          }
+        }
+      }
     }
   }
 }
 
 /* ============================================
-   LOADING
+   ACTIVIDAD CONTAINER
    ============================================ */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  color: #6b7c75;
-
-  p {
-    margin-top: 1rem;
-    font-size: 0.95rem;
-  }
-}
-
-/* ============================================
-   PACIENTES CONTAINER
-   ============================================ */
-.pacientes-container {
-  .pacientes-header {
+.actividad-container {
+  .actividad-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -368,15 +492,15 @@
 }
 
 /* ============================================
-   GRID DE PACIENTES
+   USUARIOS LIST
    ============================================ */
-.pacientes-grid {
+.usuarios-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   gap: 1.2rem;
 }
 
-.paciente-card {
+.usuario-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
@@ -389,11 +513,16 @@
     box-shadow: 0 6px 16px rgba(13, 107, 78, 0.15);
   }
 
+  &.inactivo {
+    opacity: 0.75;
+    border-color: #ffcdd2;
+  }
+
   ion-card-content {
     padding: 1.2rem;
   }
 
-  .paciente-top {
+  .usuario-top {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -413,17 +542,32 @@
       color: white;
       flex-shrink: 0;
 
-      &.patient {
+      &.admin {
+        background: linear-gradient(135deg, #0d6b4e, #0a5a41);
+      }
+      &.doctor {
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+      }
+      &.nutri {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+      }
+      &.enfermera {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+      }
+      &.paciente {
         background: linear-gradient(135deg, #00bcd4, #0097a7);
+      }
+      &.default {
+        background: linear-gradient(135deg, #607d8b, #455a64);
       }
     }
 
-    .paciente-info {
+    .usuario-info {
       flex: 1;
       min-width: 0;
 
       h3 {
-        margin: 0 0 4px 0;
+        margin: 0 0 6px 0;
         color: #1a1f36;
         font-size: 1rem;
         font-weight: 600;
@@ -432,68 +576,149 @@
         text-overflow: ellipsis;
       }
 
-      .paciente-cedula {
-        margin: 0;
-        color: #6b7c75;
-        font-size: 0.85rem;
+      .usuario-meta {
         display: flex;
-        align-items: center;
-        gap: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        gap: 6px;
+        flex-wrap: wrap;
 
-        ion-icon {
-          font-size: 0.9rem;
-          flex-shrink: 0;
+        .rol-badge, .estado-badge {
+          font-size: 0.7rem;
+          padding: 3px 8px;
         }
       }
     }
 
-    .paciente-badges {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-end;
+    .usuario-stats {
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #f4faf7;
+        border-radius: 10px;
+        border: 1px solid #e0f0e8;
 
-      ion-badge {
-        font-size: 0.7rem;
-        padding: 4px 8px;
+        ion-icon {
+          font-size: 1.3rem;
+          color: #0d6b4e;
+        }
+
+        .stat-info {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+
+          strong {
+            font-size: 1.1rem;
+            color: #0d6b4e;
+            font-weight: 700;
+            line-height: 1;
+          }
+
+          small {
+            font-size: 0.7rem;
+            color: #6b7c75;
+          }
+        }
       }
     }
   }
 
-  .paciente-details {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  .usuario-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-bottom: 1rem;
 
     .detail-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #6b7c75;
-      font-size: 0.85rem;
+      padding: 8px 10px;
+      background: #f4faf7;
+      border-radius: 8px;
 
       ion-icon {
         font-size: 1rem;
         color: #0d6b4e;
+        flex-shrink: 0;
+      }
+
+      .detail-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+
+        .detail-label {
+          font-size: 0.7rem;
+          color: #6b7c75;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .detail-value {
+          font-size: 0.85rem;
+          color: #1a1f36;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          &.sin-actividad {
+            color: #9499b7;
+            font-style: italic;
+            font-weight: 400;
+          }
+        }
       }
     }
   }
 
-  .paciente-actions {
-    display: flex;
-    gap: 8px;
-    padding-top: 1rem;
-    border-top: 1px solid #e0f0e8;
+  .actividad-bar-container {
+    .actividad-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
 
-    ion-button {
-      flex: 1;
-      font-size: 0.85rem;
-      --padding-start: 8px;
-      --padding-end: 8px;
+      span:first-child {
+        color: #6b7c75;
+        font-weight: 500;
+      }
+
+      span:last-child {
+        color: #0d6b4e;
+        font-weight: 600;
+      }
+    }
+
+    .actividad-bar {
+      height: 8px;
+      background: #e0f0e8;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .actividad-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s ease;
+
+        &.nivel-nulo {
+          background: linear-gradient(90deg, #e0e0e0, #bdbdbd);
+        }
+        &.nivel-bajo {
+          background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        &.nivel-medio {
+          background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        &.nivel-alto {
+          background: linear-gradient(90deg, #10b981, #059669);
+        }
+        &.nivel-muy-alto {
+          background: linear-gradient(90deg, #0d6b4e, #0a5a41);
+        }
+      }
     }
   }
 }
@@ -522,7 +747,7 @@
 
   p {
     color: #6b7c75;
-    margin: 0;
+    margin: 0 0 1.5rem 0;
   }
 }
 
@@ -546,28 +771,33 @@
     padding: 1rem;
   }
 
-  .pacientes-grid {
+  .welcome-section h1 {
+    font-size: 1.4rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .usuarios-list {
     grid-template-columns: 1fr;
   }
 
-  .pacientes-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch !important;
+  .usuario-card .usuario-top {
+    flex-wrap: wrap;
 
-    h2 {
-      justify-content: center;
+    .usuario-stats {
+      width: 100%;
     }
   }
 
-  .paciente-card .paciente-top {
-    flex-wrap: wrap;
+  .usuario-card .usuario-details {
+    grid-template-columns: 1fr;
+  }
+}
 
-    .paciente-badges {
-      width: 100%;
-      flex-direction: row;
-      justify-content: flex-start;
-      gap: 8px;
-    }
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
   }
 }

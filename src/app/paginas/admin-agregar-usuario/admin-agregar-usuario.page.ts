@@ -444,9 +444,9 @@ export class AdminAgregarUsuarioPage implements OnInit {
       'admin-asignaciones': '/admin-asignaciones',
       'admin-ver-pacientes': '/admin-ver-pacientes',
       'admin-estadisticas-pacientes': '/admin-ver-pacientes',
-      'admin-reportes-globales': '/admin-auditoria',
+      'admin-reportes-globales': '/admin-reportes-globales',
       'admin-auditoria': '/admin-auditoria',
-      'admin-actividad-usuarios': '/admin-auditoria',
+      'admin-actividad-usuarios': '/admin-actividad-usuarios',
       'admin-config-general': '/admin-config-general',
       'admin-config-parametros': '/admin-config-parametros',
       'admin-config-backup': '/admin-config-backup'

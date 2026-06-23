@@ -1,68 +1,282 @@
-<ion-header>
-  <ion-toolbar color="success">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
-    </ion-buttons>
-    <ion-title>Pacientes Registrados</ion-title>
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Pacientes Registrados</ion-title>
+    </div>
+
     <ion-buttons slot="end">
-      <ion-button (click)="cargarPacientes()">
+      <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarPacientes()" title="Actualizar">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="accessibility-outline" color="primary"></ion-icon>
-        Pacientes ({{pacientesFiltrados.length}})
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <!-- Búsqueda -->
-      <ion-item>
-        <ion-icon name="search-outline" slot="start"></ion-icon>
-        <ion-input 
-          [(ngModel)]="terminoBusqueda" 
-          (ionInput)="aplicarFiltros()"
-          placeholder="Buscar por nombre, cédula o teléfono...">
-        </ion-input>
-      </ion-item>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
+        </div>
+      </div>
+      
+      <ul>
+        <li (click)="navegarA('admin-inicio')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Medicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver medicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar medico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')" class="active">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadisticas</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoria / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuracion</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parametros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>
+          <ion-icon name="accessibility-outline"></ion-icon>
+          Pacientes Registrados
+        </h1>
+        <p class="subtitle">Administra y consulta la informacion de los pacientes del sistema</p>
+      </div>
+
+      <!-- Tarjeta de busqueda -->
+      <ion-card class="filtros-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="search-outline" color="primary"></ion-icon>
+            Buscar Pacientes
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item lines="none" class="search-item">
+            <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
+            <ion-input 
+              [(ngModel)]="terminoBusqueda" 
+              (ionInput)="aplicarFiltros()"
+              placeholder="Buscar por nombre, cedula o telefono..."
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
 
       <!-- Loading -->
-      <div *ngIf="cargando" class="ion-text-center ion-padding">
-        <ion-spinner></ion-spinner>
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
         <p>Cargando pacientes...</p>
       </div>
 
-      <!-- Lista -->
-      <ion-list *ngIf="!cargando">
-        <ion-item *ngFor="let p of pacientesFiltrados">
-          <ion-avatar slot="start">
-            <div class="avatar-circle patient">{{p.nombres?.charAt(0)}}{{p.apellidos?.charAt(0)}}</div>
-          </ion-avatar>
-          <ion-label>
-            <h2>{{p.nombres}} {{p.apellidos}}</h2>
-            <p>🆔 {{p.numero_identificacion}}</p>
-            <p>📱 {{p.telefono || 'Sin teléfono'}}</p>
-            <p>
-              <ion-badge color="tertiary">
-                {{getSexoLabel(p.sexo)}} - {{calcularEdad(p.fecha_nacimiento)}} años
-              </ion-badge>
-              <ion-badge color="medium" *ngIf="p.total_registros > 0">
-                {{p.total_registros}} registro(s)
-              </ion-badge>
-            </p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
+      <!-- Lista de pacientes -->
+      <div *ngIf="!cargando" class="pacientes-container">
+        <div class="pacientes-header">
+          <h2>
+            <ion-icon name="people-outline"></ion-icon>
+            Pacientes Registrados 
+            <ion-badge color="primary">{{pacientesFiltrados.length}}</ion-badge>
+          </h2>
+        </div>
 
-      <div *ngIf="!cargando && pacientesFiltrados.length === 0" class="ion-text-center ion-padding">
-        <ion-icon name="accessibility-outline" size="large" color="medium"></ion-icon>
-        <p>No se encontraron pacientes registrados</p>
+        <div class="pacientes-grid" *ngIf="pacientesFiltrados.length > 0">
+          <ion-card *ngFor="let p of pacientesFiltrados" class="paciente-card">
+            <ion-card-content>
+              <div class="paciente-top">
+                <div class="avatar-circle patient">
+                  {{p.nombres?.charAt(0)}}{{p.apellidos?.charAt(0)}}
+                </div>
+                <div class="paciente-info">
+                  <h3>{{p.nombres}} {{p.apellidos}}</h3>
+                  <p class="paciente-cedula">
+                    <ion-icon name="card-outline"></ion-icon>
+                    {{p.numero_identificacion}}
+                  </p>
+                </div>
+                <div class="paciente-badges">
+                  <ion-badge color="tertiary">
+                    {{getSexoLabel(p.sexo)}}
+                  </ion-badge>
+                  <ion-badge color="medium">
+                    {{calcularEdad(p.fecha_nacimiento)}} anios
+                  </ion-badge>
+                </div>
+              </div>
+
+              <div class="paciente-details">
+                <div class="detail-item" *ngIf="p.telefono">
+                  <ion-icon name="call-outline"></ion-icon>
+                  <span>{{p.telefono}}</span>
+                </div>
+                <div class="detail-item" *ngIf="p.fecha_nacimiento">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>Nacimiento: {{p.fecha_nacimiento | date:'dd/MM/yyyy'}}</span>
+                </div>
+                <div class="detail-item" *ngIf="p.creado_en">
+                  <ion-icon name="time-outline"></ion-icon>
+                  <span>Registrado: {{p.creado_en | date:'dd/MM/yyyy'}}</span>
+                </div>
+                <div class="detail-item" *ngIf="p.total_registros > 0">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                  <span>{{p.total_registros}} registro(s) clinico(s)</span>
+                </div>
+              </div>
+
+              <div class="paciente-actions">
+                <ion-button size="small" fill="outline" color="primary" (click)="verDetalle(p)">
+                  <ion-icon slot="start" name="eye-outline"></ion-icon>
+                  Ver Detalle
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- Sin resultados -->
+        <div *ngIf="pacientesFiltrados.length === 0" class="empty-state">
+          <ion-icon name="accessibility-outline"></ion-icon>
+          <h3>No se encontraron pacientes</h3>
+          <p>Intenta con otros criterios de busqueda</p>
+        </div>
       </div>
-    </ion-card-content>
-  </ion-card>
+    </div>
+  </div>
 </ion-content>

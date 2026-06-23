@@ -1,130 +1,417 @@
-<ion-header>
-  <ion-toolbar color="success">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Configuracion General</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarConfiguracion()" title="Actualizar">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Configuración General</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="cargando" class="ion-text-center ion-padding">
-    <ion-spinner></ion-spinner>
-    <p>Cargando configuración...</p>
-  </div>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
+        </div>
+      </div>
+      
+      <ul>
+        <li (click)="navegarA('admin-inicio')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
 
-  <div *ngIf="!cargando">
-    <!-- Información del Sistema -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-          Información del Sistema
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Nombre del Sistema</ion-label>
-          <ion-input [(ngModel)]="config.nombre_sistema"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Versión</ion-label>
-          <ion-input [(ngModel)]="config.version"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Medicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver medicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar medico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Descripción</ion-label>
-          <ion-textarea [(ngModel)]="config.descripcion" rows="2"></ion-textarea>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadisticas</span>
+            </li>
+          </ul>
+        </li>
 
-    <!-- Contacto -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="mail-outline" color="primary"></ion-icon>
-          Información de Contacto
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Email de Contacto</ion-label>
-          <ion-input [(ngModel)]="config.email_contacto" type="email"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoria / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Teléfono</ion-label>
-          <ion-input [(ngModel)]="config.telefono_contacto" type="tel"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuracion</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')" class="active">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parametros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 
-        <ion-item>
-          <ion-label position="stacked">Dirección</ion-label>
-          <ion-textarea [(ngModel)]="config.direccion" rows="2"></ion-textarea>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>
+          <ion-icon name="construct-outline"></ion-icon>
+          Configuracion General
+        </h1>
+        <p class="subtitle">Administra los parametros generales del sistema NutriPA</p>
+      </div>
 
-    <!-- Seguridad -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
-          Seguridad y Sesiones
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Máximo de Intentos de Login</ion-label>
-          <ion-input [(ngModel)]="config.max_intentos_login" type="number" min="1" max="20"></ion-input>
-        </ion-item>
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando configuracion...</p>
+      </div>
 
-        <ion-item>
-          <ion-label position="stacked">Tiempo de Sesión (minutos)</ion-label>
-          <ion-input [(ngModel)]="config.tiempo_sesion_minutos" type="number" min="5" max="480"></ion-input>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+      <div *ngIf="!cargando" class="config-container">
+        
+        <!-- Seccion 1: Informacion del Sistema -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+              Informacion del Sistema
+            </ion-card-title>
+            <ion-card-subtitle>
+              Datos basicos de identificacion de la aplicacion
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Nombre del Sistema</ion-label>
+                    <ion-input [(ngModel)]="config.nombre_sistema" placeholder="NutriPA"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Version</ion-label>
+                    <ion-input [(ngModel)]="config.version" placeholder="1.0.0"></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Descripcion</ion-label>
+                    <ion-textarea 
+                      [(ngModel)]="config.descripcion" 
+                      rows="2"
+                      placeholder="Descripcion breve del sistema">
+                    </ion-textarea>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
 
-    <!-- Registro -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="person-add-outline" color="primary"></ion-icon>
-          Configuración de Registro
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label>Permitir Auto-registro</ion-label>
-          <ion-toggle [(ngModel)]="config.permitir_autoregistro" slot="end"></ion-toggle>
-        </ion-item>
+        <!-- Seccion 2: Contacto -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="mail-outline" color="primary"></ion-icon>
+              Informacion de Contacto
+            </ion-card-title>
+            <ion-card-subtitle>
+              Datos de contacto oficiales de la institucion
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Email de Contacto</ion-label>
+                    <ion-input 
+                      [(ngModel)]="config.email_contacto" 
+                      type="email"
+                      placeholder="contacto@nutripa.com">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Telefono</ion-label>
+                    <ion-input 
+                      [(ngModel)]="config.telefono_contacto" 
+                      type="tel"
+                      placeholder="+593 99 123 4567">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Direccion</ion-label>
+                    <ion-textarea 
+                      [(ngModel)]="config.direccion" 
+                      rows="2"
+                      placeholder="Direccion fisica de la institucion">
+                    </ion-textarea>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
 
-        <ion-item>
-          <ion-label>Requerir Aprobación del Admin</ion-label>
-          <ion-toggle [(ngModel)]="config.requerir_aprobacion_admin" slot="end"></ion-toggle>
-        </ion-item>
+        <!-- Seccion 3: Seguridad -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+              Seguridad y Sesiones
+            </ion-card-title>
+            <ion-card-subtitle>
+              Parametros de seguridad y gestion de sesiones de usuario
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Maximo de Intentos de Login</ion-label>
+                    <ion-input 
+                      [(ngModel)]="config.max_intentos_login" 
+                      type="number" 
+                      min="1" 
+                      max="20"
+                      placeholder="5">
+                    </ion-input>
+                  </ion-item>
+                  <p class="config-help">Numero de intentos fallidos antes de bloquear la cuenta</p>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Tiempo de Sesion (minutos)</ion-label>
+                    <ion-input 
+                      [(ngModel)]="config.tiempo_sesion_minutos" 
+                      type="number" 
+                      min="5" 
+                      max="480"
+                      placeholder="30">
+                    </ion-input>
+                  </ion-item>
+                  <p class="config-help">Tiempo de inactividad antes de cerrar sesion automaticamente</p>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
 
-        <ion-item>
-          <ion-label>Modo Mantenimiento</ion-label>
-          <ion-toggle [(ngModel)]="config.modo_mantenimiento" slot="end" color="danger"></ion-toggle>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+        <!-- Seccion 4: Registro -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="person-add-outline" color="primary"></ion-icon>
+              Configuracion de Registro
+            </ion-card-title>
+            <ion-card-subtitle>
+              Controla como los nuevos usuarios pueden registrarse en el sistema
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <h4>Permitir Auto-registro</h4>
+                  <p>Los usuarios pueden crear cuentas por si mismos sin aprobacion</p>
+                </div>
+                <ion-toggle 
+                  [(ngModel)]="config.permitir_autoregistro"
+                  color="primary">
+                </ion-toggle>
+              </div>
 
-    <!-- Botones -->
-    <div class="action-buttons">
-      <ion-button expand="block" (click)="guardarConfiguracion()" [disabled]="guardando">
-        <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-        <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
-        {{guardando ? 'Guardando...' : 'Guardar Configuración'}}
-      </ion-button>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <h4>Requerir Aprobacion del Admin</h4>
+                  <p>Las cuentas nuevas deben ser aprobadas por un administrador</p>
+                </div>
+                <ion-toggle 
+                  [(ngModel)]="config.requerir_aprobacion_admin"
+                  color="primary">
+                </ion-toggle>
+              </div>
 
-      <ion-button expand="block" fill="outline" color="warning" (click)="confirmarReset()">
-        <ion-icon slot="start" name="refresh-outline"></ion-icon>
-        Resetear Valores
-      </ion-button>
+              <div class="toggle-item mantenimiento">
+                <div class="toggle-info">
+                  <h4>Modo Mantenimiento</h4>
+                  <p>Desactiva el acceso publico al sistema temporalmente</p>
+                </div>
+                <ion-toggle 
+                  [(ngModel)]="config.modo_mantenimiento"
+                  color="danger">
+                </ion-toggle>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Botones de Accion -->
+        <div class="action-buttons">
+          <ion-button 
+            expand="block" 
+            color="primary" 
+            size="large"
+            (click)="guardarConfiguracion()" 
+            [disabled]="guardando"
+            class="btn-primary">
+            <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+            {{guardando ? 'Guardando...' : 'Guardar Configuracion'}}
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            color="warning"
+            (click)="confirmarReset()"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Resetear Valores
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            color="medium"
+            (click)="navegarA('admin-inicio')"
+            [disabled]="guardando">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver al Panel
+          </ion-button>
+        </div>
+
+      </div>
     </div>
   </div>
 </ion-content>

@@ -1,176 +1,488 @@
-<ion-header>
-  <ion-toolbar color="success">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/administrador" text=""></ion-back-button>
+<ion-header [translucent]="true" class="main-header admin-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
+      <ion-title>Parametros del Sistema (IA)</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
+        <ion-icon slot="icon-only" name="home-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarParametrosIA()" title="Actualizar">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Parámetros del Sistema (IA)</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="cargando" class="ion-text-center ion-padding">
-    <ion-spinner></ion-spinner>
-    <p>Cargando parámetros...</p>
-  </div>
-
-  <div *ngIf="!cargando">
-    <!-- Métricas del Modelo -->
-    <ion-card class="metricas-card">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="analytics-outline" color="primary"></ion-icon>
-          Métricas del Modelo Actual
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="metricas-grid">
-          <div class="metrica-item">
-            <div class="metrica-valor">{{(metricas.precision * 100).toFixed(1)}}%</div>
-            <div class="metrica-label">Precisión</div>
-          </div>
-          <div class="metrica-item">
-            <div class="metrica-valor">{{(metricas.recall * 100).toFixed(1)}}%</div>
-            <div class="metrica-label">Recall</div>
-          </div>
-          <div class="metrica-item">
-            <div class="metrica-valor">{{(metricas.f1_score * 100).toFixed(1)}}%</div>
-            <div class="metrica-label">F1-Score</div>
-          </div>
-          <div class="metrica-item">
-            <div class="metrica-valor">{{metricas.total_predicciones}}</div>
-            <div class="metrica-label">Predicciones</div>
-          </div>
-          <div class="metrica-item">
-            <div class="metrica-valor">{{(metricas.confianza_promedio * 100).toFixed(1)}}%</div>
-            <div class="metrica-label">Confianza Prom.</div>
-          </div>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar admin-sidebar" 
+         [class.open]="sidebarOpen" 
+         (mouseenter)="sidebarOpen = true" 
+         (mouseleave)="sidebarOpen = false">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAdmin.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAdmin}}</h4>
+          <p>{{rol}}</p>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+      
+      <ul>
+        <li (click)="navegarA('admin-inicio')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
 
-    <!-- Arquitectura del Modelo -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="git-network-outline" color="primary"></ion-icon>
-          Arquitectura del Modelo
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Tipo de Arquitectura</ion-label>
-          <ion-select [(ngModel)]="modeloIA.arquitectura">
-            <ion-select-option value="MLP">MLP (Multicapa)</ion-select-option>
-            <ion-select-option value="CNN">CNN (Convolucional)</ion-select-option>
-            <ion-select-option value="RNN">RNN (Recurrente)</ion-select-option>
-          </ion-select>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('usuarios')">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Usuarios</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'usuarios'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'usuarios'">
+            <li (click)="navegarA('admin-ver-usuarios')">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>Ver todos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-usuario')">
+              <ion-icon name="person-add-outline"></ion-icon>
+              <span>Agregar usuario</span>
+            </li>
+            <li (click)="navegarA('admin-roles-permisos')">
+              <ion-icon name="key-outline"></ion-icon>
+              <span>Roles y permisos</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Capas Ocultas (neuronas por capa)</ion-label>
-          <ion-input [(ngModel)]="modeloIA.capas_ocultas" placeholder="Ej: 64,32"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('medicos')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <span>Medicos</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'medicos'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'medicos'">
+            <li (click)="navegarA('admin-ver-medicos')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver medicos</span>
+            </li>
+            <li (click)="navegarA('admin-agregar-medico')">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Agregar medico</span>
+            </li>
+            <li (click)="navegarA('admin-asignaciones')">
+              <ion-icon name="link-outline"></ion-icon>
+              <span>Asignaciones</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Función de Activación</ion-label>
-          <ion-select [(ngModel)]="modeloIA.activacion">
-            <ion-select-option value="relu">ReLU</ion-select-option>
-            <ion-select-option value="sigmoid">Sigmoid</ion-select-option>
-            <ion-select-option value="tanh">Tanh</ion-select-option>
-            <ion-select-option value="leaky_relu">Leaky ReLU</ion-select-option>
-          </ion-select>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="accessibility-outline"></ion-icon>
+            <span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'pacientes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('admin-ver-pacientes')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver pacientes</span>
+            </li>
+            <li (click)="navegarA('admin-estadisticas-pacientes')">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <span>Estadisticas</span>
+            </li>
+          </ul>
+        </li>
 
-        <ion-item>
-          <ion-label position="stacked">Dropout (regularización)</ion-label>
-          <ion-range [(ngModel)]="modeloIA.dropout" min="0" max="0.9" step="0.05" pin="true">
-            <ion-label slot="start">0</ion-label>
-            <ion-label slot="end">{{modeloIA.dropout}}</ion-label>
-          </ion-range>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('reportes')">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <span>Reportes</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'reportes'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'reportes'">
+            <li (click)="navegarA('admin-reportes-globales')">
+              <ion-icon name="globe-outline"></ion-icon>
+              <span>Reportes globales</span>
+            </li>
+            <li (click)="navegarA('admin-auditoria')">
+              <ion-icon name="clipboard-outline"></ion-icon>
+              <span>Auditoria / Logs</span>
+            </li>
+            <li (click)="navegarA('admin-actividad-usuarios')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Actividad usuarios</span>
+            </li>
+          </ul>
+        </li>
 
-    <!-- Hiperparámetros de Entrenamiento -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="options-outline" color="primary"></ion-icon>
-          Hiperparámetros de Entrenamiento
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Epochs (iteraciones)</ion-label>
-          <ion-input [(ngModel)]="modeloIA.epochs" type="number" min="10" max="1000"></ion-input>
-        </ion-item>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('configuracion')">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuracion</span>
+            <ion-icon name="chevron-down-outline" 
+                      class="submenu-arrow" 
+                      [class.rotate]="submenuAbierto === 'configuracion'">
+            </ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'configuracion'">
+            <li (click)="navegarA('admin-config-general')">
+              <ion-icon name="construct-outline"></ion-icon>
+              <span>General</span>
+            </li>
+            <li (click)="navegarA('admin-config-parametros')" class="active">
+              <ion-icon name="options-outline"></ion-icon>
+              <span>Parametros del sistema</span>
+            </li>
+            <li (click)="navegarA('admin-config-backup')">
+              <ion-icon name="save-outline"></ion-icon>
+              <span>Respaldos</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 
-        <ion-item>
-          <ion-label position="stacked">Batch Size</ion-label>
-          <ion-select [(ngModel)]="modeloIA.batch_size">
-            <ion-select-option [value]="16">16</ion-select-option>
-            <ion-select-option [value]="32">32</ion-select-option>
-            <ion-select-option [value]="64">64</ion-select-option>
-            <ion-select-option [value]="128">128</ion-select-option>
-          </ion-select>
-        </ion-item>
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="welcome-section">
+        <h1>
+          <ion-icon name="brain-outline"></ion-icon>
+          Parametros del Sistema (IA)
+        </h1>
+        <p class="subtitle">Configura y monitorea el modelo de inteligencia artificial del sistema</p>
+      </div>
 
-        <ion-item>
-          <ion-label position="stacked">Learning Rate</ion-label>
-          <ion-input [(ngModel)]="modeloIA.learning_rate" type="number" step="0.0001"></ion-input>
-        </ion-item>
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando parametros...</p>
+      </div>
 
-        <ion-item>
-          <ion-label position="stacked">Optimizador</ion-label>
-          <ion-select [(ngModel)]="modeloIA.optimizer">
-            <ion-select-option value="adam">Adam</ion-select-option>
-            <ion-select-option value="sgd">SGD</ion-select-option>
-            <ion-select-option value="rmsprop">RMSprop</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+      <div *ngIf="!cargando" class="config-container">
 
-    <!-- Estado del Modelo -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="pulse-outline" color="primary"></ion-icon>
-          Estado del Modelo
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label>Estado</ion-label>
-          <ion-badge [color]="modeloIA.estado === 'activo' ? 'success' : 'medium'" slot="end">
-            {{modeloIA.estado | uppercase}}
-          </ion-badge>
-        </ion-item>
-        <ion-item *ngIf="modeloIA.ultima_entrenamiento">
-          <ion-label>Último Entrenamiento</ion-label>
-          <ion-note slot="end">{{modeloIA.ultima_entrenamiento | date:'dd/MM/yyyy HH:mm'}}</ion-note>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+        <!-- Seccion 1: Metricas del Modelo -->
+        <ion-card class="config-card metricas-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="analytics-outline" color="primary"></ion-icon>
+              Metricas del Modelo Actual
+            </ion-card-title>
+            <ion-card-subtitle>
+              Indicadores de rendimiento del modelo de IA entrenado
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="metricas-grid">
+              <div class="metrica-item precision">
+                <div class="metrica-icono">
+                  <ion-icon name="target-outline"></ion-icon>
+                </div>
+                <div class="metrica-valor">{{(metricas.precision * 100).toFixed(1)}}%</div>
+                <div class="metrica-label">Precision</div>
+              </div>
+              <div class="metrica-item recall">
+                <div class="metrica-icono">
+                  <ion-icon name="search-outline"></ion-icon>
+                </div>
+                <div class="metrica-valor">{{(metricas.recall * 100).toFixed(1)}}%</div>
+                <div class="metrica-label">Recall</div>
+              </div>
+              <div class="metrica-item f1">
+                <div class="metrica-icono">
+                  <ion-icon name="trophy-outline"></ion-icon>
+                </div>
+                <div class="metrica-valor">{{(metricas.f1_score * 100).toFixed(1)}}%</div>
+                <div class="metrica-label">F1-Score</div>
+              </div>
+              <div class="metrica-item predicciones">
+                <div class="metrica-icono">
+                  <ion-icon name="calculator-outline"></ion-icon>
+                </div>
+                <div class="metrica-valor">{{metricas.total_predicciones}}</div>
+                <div class="metrica-label">Predicciones</div>
+              </div>
+              <div class="metrica-item confianza">
+                <div class="metrica-icono">
+                  <ion-icon name="shield-checkmark-outline"></ion-icon>
+                </div>
+                <div class="metrica-valor">{{(metricas.confianza_promedio * 100).toFixed(1)}}%</div>
+                <div class="metrica-label">Confianza Prom.</div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
 
-    <!-- Botones -->
-    <div class="action-buttons">
-      <ion-button expand="block" (click)="guardarParametros()" [disabled]="guardando">
-        <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-        <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
-        {{guardando ? 'Guardando...' : 'Guardar Parámetros'}}
-      </ion-button>
+        <!-- Seccion 2: Arquitectura del Modelo -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="git-network-outline" color="primary"></ion-icon>
+              Arquitectura del Modelo
+            </ion-card-title>
+            <ion-card-subtitle>
+              Define la estructura y componentes de la red neuronal
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Tipo de Arquitectura</ion-label>
+                    <ion-select 
+                      [(ngModel)]="modeloIA.arquitectura"
+                      interface="popover"
+                      placeholder="Seleccione">
+                      <ion-select-option value="MLP">MLP (Multicapa)</ion-select-option>
+                      <ion-select-option value="CNN">CNN (Convolucional)</ion-select-option>
+                      <ion-select-option value="RNN">RNN (Recurrente)</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Funcion de Activacion</ion-label>
+                    <ion-select 
+                      [(ngModel)]="modeloIA.activacion"
+                      interface="popover"
+                      placeholder="Seleccione">
+                      <ion-select-option value="relu">ReLU</ion-select-option>
+                      <ion-select-option value="sigmoid">Sigmoid</ion-select-option>
+                      <ion-select-option value="tanh">Tanh</ion-select-option>
+                      <ion-select-option value="leaky_relu">Leaky ReLU</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Capas Ocultas (neuronas por capa)</ion-label>
+                    <ion-input 
+                      [(ngModel)]="modeloIA.capas_ocultas" 
+                      placeholder="Ej: 64,32">
+                    </ion-input>
+                  </ion-item>
+                  <p class="config-help">Separa los valores con coma (ej: 128,64,32)</p>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <div class="range-item">
+                    <div class="range-header">
+                      <span class="range-label">Dropout (regularizacion)</span>
+                      <span class="range-value">{{modeloIA.dropout}}</span>
+                    </div>
+                    <ion-range 
+                      [(ngModel)]="modeloIA.dropout" 
+                      min="0" 
+                      max="0.9" 
+                      step="0.05" 
+                      pin="true"
+                      color="primary">
+                    </ion-range>
+                    <p class="config-help">Previene sobreajuste. Valores altos reducen complejidad.</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-button expand="block" color="warning" (click)="confirmarReentrenamiento()" [disabled]="entrenando">
-        <ion-spinner *ngIf="entrenando" name="crescent"></ion-spinner>
-        <ion-icon *ngIf="!entrenando" slot="start" name="refresh-outline"></ion-icon>
-        {{entrenando ? 'Reentrenando...' : 'Reentrenar Modelo IA'}}
-      </ion-button>
+        <!-- Seccion 3: Hiperparametros de Entrenamiento -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="options-outline" color="primary"></ion-icon>
+              Hiperparametros de Entrenamiento
+            </ion-card-title>
+            <ion-card-subtitle>
+              Configura como se entrena el modelo de IA
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Epochs (iteraciones)</ion-label>
+                    <ion-input 
+                      [(ngModel)]="modeloIA.epochs" 
+                      type="number" 
+                      min="10" 
+                      max="1000"
+                      placeholder="100">
+                    </ion-input>
+                  </ion-item>
+                  <p class="config-help">Numero de veces que el modelo ve los datos completos</p>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Batch Size</ion-label>
+                    <ion-select 
+                      [(ngModel)]="modeloIA.batch_size"
+                      interface="popover"
+                      placeholder="Seleccione">
+                      <ion-select-option [value]="16">16</ion-select-option>
+                      <ion-select-option [value]="32">32</ion-select-option>
+                      <ion-select-option [value]="64">64</ion-select-option>
+                      <ion-select-option [value]="128">128</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                  <p class="config-help">Muestras procesadas antes de actualizar pesos</p>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Learning Rate</ion-label>
+                    <ion-input 
+                      [(ngModel)]="modeloIA.learning_rate" 
+                      type="number" 
+                      step="0.0001"
+                      placeholder="0.001">
+                    </ion-input>
+                  </ion-item>
+                  <p class="config-help">Velocidad de aprendizaje del modelo</p>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item lines="full" class="config-item">
+                    <ion-label position="stacked">Optimizador</ion-label>
+                    <ion-select 
+                      [(ngModel)]="modeloIA.optimizer"
+                      interface="popover"
+                      placeholder="Seleccione">
+                      <ion-select-option value="adam">Adam</ion-select-option>
+                      <ion-select-option value="sgd">SGD</ion-select-option>
+                      <ion-select-option value="rmsprop">RMSprop</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                  <p class="config-help">Algoritmo que ajusta los pesos de la red</p>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
 
-      <ion-button expand="block" fill="outline" color="primary" (click)="descargarModelo()">
-        <ion-icon slot="start" name="download-outline"></ion-icon>
-        Descargar Modelo (.keras)
-      </ion-button>
+        <!-- Seccion 4: Estado del Modelo -->
+        <ion-card class="config-card estado-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="pulse-outline" color="primary"></ion-icon>
+              Estado del Modelo
+            </ion-card-title>
+            <ion-card-subtitle>
+              Informacion sobre el estado actual del modelo entrenado
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="estado-grid">
+              <div class="estado-item">
+                <div class="estado-icon" [ngClass]="modeloIA.estado">
+                  <ion-icon [name]="modeloIA.estado === 'activo' ? 'checkmark-circle-outline' : 'remove-circle-outline'"></ion-icon>
+                </div>
+                <div class="estado-info">
+                  <span class="estado-label">Estado actual</span>
+                  <ion-badge [color]="modeloIA.estado === 'activo' ? 'success' : 'medium'">
+                    {{modeloIA.estado | uppercase}}
+                  </ion-badge>
+                </div>
+              </div>
+              <div class="estado-item" *ngIf="modeloIA.ultima_entrenamiento">
+                <div class="estado-icon entrenamiento">
+                  <ion-icon name="time-outline"></ion-icon>
+                </div>
+                <div class="estado-info">
+                  <span class="estado-label">Ultimo entrenamiento</span>
+                  <span class="estado-valor">{{modeloIA.ultima_entrenamiento | date:'dd/MM/yyyy HH:mm'}}</span>
+                </div>
+              </div>
+              <div class="estado-item">
+                <div class="estado-icon arquitectura">
+                  <ion-icon name="cube-outline"></ion-icon>
+                </div>
+                <div class="estado-info">
+                  <span class="estado-label">Arquitectura</span>
+                  <span class="estado-valor">{{modeloIA.arquitectura}} - {{modeloIA.capas_ocultas}}</span>
+                </div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Botones de Accion -->
+        <div class="action-buttons">
+          <ion-button 
+            expand="block" 
+            color="primary" 
+            size="large"
+            (click)="guardarParametros()" 
+            [disabled]="guardando"
+            class="btn-primary">
+            <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+            {{guardando ? 'Guardando...' : 'Guardar Parametros'}}
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            color="warning" 
+            size="large"
+            (click)="confirmarReentrenamiento()" 
+            [disabled]="entrenando">
+            <ion-spinner *ngIf="entrenando" name="crescent"></ion-spinner>
+            <ion-icon *ngIf="!entrenando" slot="start" name="refresh-outline"></ion-icon>
+            {{entrenando ? 'Reentrenando...' : 'Reentrenar Modelo IA'}}
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            color="primary"
+            (click)="descargarModelo()"
+            [disabled]="guardando || entrenando">
+            <ion-icon slot="start" name="download-outline"></ion-icon>
+            Descargar Modelo (.keras)
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            color="medium"
+            (click)="navegarA('admin-inicio')"
+            [disabled]="guardando || entrenando">
+            <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+            Volver al Panel
+          </ion-button>
+        </div>
+
+      </div>
     </div>
   </div>
 </ion-content>

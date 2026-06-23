@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ToastController, LoadingController, AlertController } from '@ionic/angular';
+import { ToastController, LoadingController, AlertController, Platform } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -11,6 +11,14 @@ import { environment } from 'src/environments/environment';
   standalone: false,
 })
 export class AdminConfigParametrosPage implements OnInit {
+  // Sidebar
+  sidebarOpen = false;
+  submenuAbierto: string | null = 'configuracion';
+  nombreAdmin: string = '';
+  rol: string = 'Administrador';
+  private isMobile = false;
+
+  // Estado
   cargando = false;
   guardando = false;
   entrenando = false;
@@ -42,12 +50,34 @@ export class AdminConfigParametrosPage implements OnInit {
     private http: HttpClient,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController
-  ) {}
+    private alertCtrl: AlertController,
+    private platform: Platform
+  ) {
+    this.platform.ready().then(() => {
+      this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
+      if (!this.isMobile) {
+        this.sidebarOpen = true;
+      }
+    });
+  }
 
   ngOnInit() {
+    this.cargarDatosAdmin();
     this.cargarParametrosIA();
     this.cargarMetricas();
+  }
+
+  private cargarDatosAdmin() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.nombreAdmin = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Administrador';
+        this.rol = user.rol === 'admin' ? 'Administrador General' : 'Administrador';
+      } catch (e) {
+        console.warn('Error parseando usuario');
+      }
+    }
   }
 
   async cargarParametrosIA() {
@@ -74,9 +104,10 @@ export class AdminConfigParametrosPage implements OnInit {
             }
           }
         });
+        console.log('Parametros IA cargados');
       }
     } catch (error) {
-      console.error('Error cargando parámetros IA:', error);
+      console.error('Error cargando parametros IA:', error);
     } finally {
       this.cargando = false;
     }
@@ -99,9 +130,10 @@ export class AdminConfigParametrosPage implements OnInit {
           total_predicciones: response.total_predicciones || 0,
           confianza_promedio: response.confianza_promedio || 0
         };
+        console.log('Metricas cargadas');
       }
     } catch (error) {
-      console.error('Error cargando métricas:', error);
+      console.error('Error cargando metricas:', error);
     }
   }
 
@@ -115,15 +147,15 @@ export class AdminConfigParametrosPage implements OnInit {
       for (const clave of claves) {
         await this.http.put(
           `${environment.apiUrl}/nutricionapp-api/admin/configuracion/parametros/ia_${clave}`,
-          { valor: String(this.modeloIA[clave]), descripcion: `Parámetro IA: ${clave}` },
+          { valor: String(this.modeloIA[clave]), descripcion: `Parametro IA: ${clave}` },
           { headers }
         ).toPromise();
       }
 
-      await this.showToast('✅ Parámetros guardados', 'success');
+      await this.showToast('Parametros guardados correctamente', 'success');
     } catch (error) {
       console.error('Error guardando:', error);
-      await this.showToast('❌ Error al guardar', 'danger');
+      await this.showToast('Error al guardar los parametros', 'danger');
     } finally {
       this.guardando = false;
     }
@@ -131,8 +163,8 @@ export class AdminConfigParametrosPage implements OnInit {
 
   async confirmarReentrenamiento() {
     const alert = await this.alertCtrl.create({
-      header: '🤖 Reentrenar Modelo IA',
-      message: `¿Desea reentrenar el modelo con los nuevos parámetros?<br><br>
+      header: 'Reentrenar Modelo IA',
+      message: `Desea reentrenar el modelo con los nuevos parametros?<br><br>
         <strong>Arquitectura:</strong> ${this.modeloIA.arquitectura}<br>
         <strong>Capas:</strong> ${this.modeloIA.capas_ocultas}<br>
         <strong>Epochs:</strong> ${this.modeloIA.epochs}<br><br>
@@ -160,14 +192,14 @@ export class AdminConfigParametrosPage implements OnInit {
       ).toPromise();
 
       if (response?.error === false) {
-        await this.showToast('✅ Modelo reentrenado exitosamente', 'success');
+        await this.showToast('Modelo reentrenado exitosamente', 'success');
         this.cargarMetricas();
       } else {
-        await this.showToast('❌ ' + (response?.mensaje || 'Error al reentrenar'), 'danger');
+        await this.showToast(response?.mensaje || 'Error al reentrenar', 'danger');
       }
     } catch (error) {
       console.error('Error reentrenando:', error);
-      await this.showToast('❌ Error al reentrenar modelo', 'danger');
+      await this.showToast('Error al reentrenar el modelo', 'danger');
     } finally {
       this.entrenando = false;
     }
@@ -181,8 +213,65 @@ export class AdminConfigParametrosPage implements OnInit {
     );
   }
 
+  // Navegacion
+  navegarA(ruta: string): void {
+    const rutas: Record<string, string> = {
+      'admin-inicio': '/administrador',
+      'admin-ver-usuarios': '/admin-ver-usuarios',
+      'admin-agregar-usuario': '/admin-agregar-usuario',
+      'admin-roles-permisos': '/admin-roles-permisos',
+      'admin-ver-medicos': '/admin-ver-medicos',
+      'admin-agregar-medico': '/admin-agregar-medico',
+      'admin-asignaciones': '/admin-asignaciones',
+      'admin-ver-pacientes': '/admin-ver-pacientes',
+      'admin-estadisticas-pacientes': '/admin-estadisticas-pacientes',
+      'admin-reportes-globales': '/admin-reportes-globales',
+      'admin-auditoria': '/admin-auditoria',
+      'admin-actividad-usuarios': '/admin-actividad-usuarios',
+      'admin-config-general': '/admin-config-general',
+      'admin-config-parametros': '/admin-config-parametros',
+      'admin-config-backup': '/admin-config-backup'
+    };
+
+    const rutaDestino = rutas[ruta] || `/${ruta}`;
+    
+    if (this.isMobile) {
+      this.sidebarOpen = false;
+    }
+    
+    this.router.navigate([rutaDestino]);
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  toggleSubmenu(item: string) {
+    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+  }
+
+  async cerrarSesion() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cerrar sesion',
+      message: 'Esta seguro que desea cerrar sesion?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Si, cerrar',
+          cssClass: 'alert-button-danger',
+          handler: () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            this.router.navigate(['/principal']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
   async showToast(msg: string, color: string) {
-    const toast = await this.toastCtrl.create({ message: msg, color, duration: 3000, position: 'bottom' });
+    const toast = await this.toastCtrl.create({ message: msg, color, duration: 2500, position: 'bottom' });
     await toast.present();
   }
 }

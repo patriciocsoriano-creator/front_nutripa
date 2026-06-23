@@ -114,9 +114,6 @@
         font-size: 0.75rem;
         color: #b8dcc9;
         margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
     }
   }
@@ -155,12 +152,10 @@
       
       &:hover {
         background: rgba(255,255,255,0.15);
-        color: white;
       }
       
       &.active {
         background: rgba(255,255,255,0.2);
-        color: white;
         border-left: 3px solid #4fd1a5;
       }
     }
@@ -216,7 +211,6 @@
         
         &:hover {
           background: rgba(255,255,255,0.15);
-          color: white;
         }
         
         &.active {
@@ -263,14 +257,11 @@
 
   .welcome-section {
     margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
 
     h1 {
       font-size: 1.8rem;
       color: #0d6b4e;
-      margin: 0;
+      margin: 0 0 0.3rem 0;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -290,18 +281,34 @@
 }
 
 /* ============================================
-   STATS RESUMEN
+   LOADING
    ============================================ */
-.stats-resumen {
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #6b7c75;
+
+  p {
+    margin-top: 1rem;
+  }
+}
+
+/* ============================================
+   KPIs
+   ============================================ */
+.kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.2rem;
   margin-bottom: 2rem;
 
-  .stat-item {
+  .kpi-card {
     background: white;
     border-radius: 12px;
-    padding: 1.2rem;
+    padding: 1.3rem;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -314,7 +321,7 @@
       box-shadow: 0 4px 12px rgba(13, 107, 78, 0.12);
     }
 
-    .stat-icon {
+    .kpi-icon {
       width: 50px;
       height: 50px;
       border-radius: 12px;
@@ -325,22 +332,26 @@
       color: white;
       flex-shrink: 0;
 
-      &.medicos {
+      &.pacientes {
+        background: linear-gradient(135deg, #00bcd4, #0097a7);
+      }
+
+      &.registros {
         background: linear-gradient(135deg, #2196f3, #1976d2);
       }
 
-      &.pacientes {
-        background: linear-gradient(135deg, #ff9800, #f57c00);
+      &.planes {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
       }
 
-      &.asignaciones {
+      &.medicos {
         background: linear-gradient(135deg, #0d6b4e, #0a5a41);
       }
     }
 
-    .stat-info {
+    .kpi-info {
       h3 {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         color: #0d6b4e;
         margin: 0;
         font-weight: 700;
@@ -356,33 +367,35 @@
 }
 
 /* ============================================
-   CONTENT GRID (2 COLUMNAS)
+   STATS ROW (2 columnas)
    ============================================ */
-.content-grid {
+.stats-row {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  align-items: start;
+  margin-bottom: 1.5rem;
 }
 
 /* ============================================
-   FORM CARD (Nueva Asignacion)
+   STATS CARD
    ============================================ */
-.form-card {
+.stats-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
   border: 1px solid #e0f0e8;
   margin: 0;
-  position: sticky;
-  top: 1rem;
+
+  &.full-width {
+    margin-bottom: 1.5rem;
+  }
 
   ion-card-title {
     display: flex;
     align-items: center;
     gap: 10px;
     color: #0d6b4e;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 600;
 
     ion-icon {
@@ -395,164 +408,270 @@
     font-size: 0.85rem;
     margin-top: 6px;
   }
+}
 
-  .select-item {
-    --background: transparent;
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    margin-bottom: 12px;
+/* ============================================
+   TIMELINE CHART (Pacientes por mes)
+   ============================================ */
+.timeline-chart {
+  padding: 1rem 0;
 
-    ion-label {
-      color: #333 !important;
-      --color: #333 !important;
-      font-weight: 500;
-      font-size: 0.9rem;
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 250px;
+    padding: 0 10px;
+
+    .chart-bar-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      height: 100%;
+
+      .chart-value {
+        color: #0d6b4e;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .chart-bar-track {
+        flex: 1;
+        width: 100%;
+        background: #f4faf7;
+        border-radius: 6px 6px 0 0;
+        border: 1px solid #e0f0e8;
+        border-bottom: none;
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+        min-height: 5px;
+
+        .chart-bar {
+          width: 100%;
+          background: linear-gradient(180deg, #4fd1a5, #0d6b4e);
+          border-radius: 6px 6px 0 0;
+          transition: height 0.6s ease;
+          min-height: 5px;
+
+          &:hover {
+            background: linear-gradient(180deg, #66e0b8, #0a5a41);
+          }
+        }
+      }
+
+      .chart-label {
+        color: #6b7c75;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: center;
+      }
     }
+  }
+}
 
-    ion-select {
-      --padding-start: 12px;
-      --padding-end: 12px;
-      --padding-top: 10px;
-      --padding-bottom: 10px;
-      --color: #1a1f36 !important;
-      --placeholder-color: #9499b7 !important;
-      --placeholder-opacity: 0.8;
-      font-size: 0.95rem;
-      background: #f4faf7;
-      border: 1px solid #e0f0e8;
-      border-radius: 8px;
-      margin-top: 6px;
-      width: 100%;
-      transition: all 0.3s ease;
+/* ============================================
+   BARS HORIZONTAL (Registros por estado)
+   ============================================ */
+.bars-horizontal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 1rem 0;
 
-      &:focus, &:focus-within {
-        border-color: #0d6b4e;
-        background: white;
+  .bar-item {
+    .bar-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+
+      .estado-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+
+        &.estado-completado { background: #10b981; }
+        &.estado-pendiente { background: #f59e0b; }
+        &.estado-en_proceso { background: #2196f3; }
+        &.estado-cancelado { background: #ef4444; }
+        &.estado-borrador { background: #9499b7; }
+        &.estado-activo { background: #0d6b4e; }
+        &.estado-inactivo { background: #6b7c75; }
+        &.estado-desconocido { background: #c8e6d5; }
+      }
+
+      .estado-nombre {
+        flex: 1;
+        color: #1a1f36;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .bar-count {
+        color: #0d6b4e;
+        font-weight: 600;
+        font-size: 0.9rem;
       }
     }
 
-    ion-select::part(text) {
-      color: #1a1f36 !important;
-      font-weight: 500;
-      padding: 4px 0;
+    .bar-track {
+      height: 24px;
+      background: #f4faf7;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #e0f0e8;
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.6s ease;
+
+        &.estado-completado { background: linear-gradient(90deg, #10b981, #059669); }
+        &.estado-pendiente { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        &.estado-en_proceso { background: linear-gradient(90deg, #2196f3, #1976d2); }
+        &.estado-cancelado { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        &.estado-borrador { background: linear-gradient(90deg, #9499b7, #6b7280); }
+        &.estado-activo { background: linear-gradient(90deg, #0d6b4e, #0a5a41); }
+        &.estado-inactivo { background: linear-gradient(90deg, #6b7c75, #4b5563); }
+        &.estado-desconocido { background: linear-gradient(90deg, #c8e6d5, #a7d9c0); }
+      }
     }
 
-    ion-select::part(placeholder) {
-      color: #9499b7 !important;
-      opacity: 0.8;
-    }
-
-    ion-select::part(icon) {
-      color: #0d6b4e !important;
-      opacity: 0.8;
-    }
-  }
-
-  .warning-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    color: #92400e;
-    font-size: 0.85rem;
-
-    ion-icon {
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-  }
-
-  .btn-crear {
-    margin-top: 8px;
-    --background: #0d6b4e;
-    --background-hover: #0a5a41;
-    font-weight: 600;
-    --border-radius: 8px;
-  }
-}
-
-/* ============================================
-   LIST CARD (Asignaciones Activas)
-   ============================================ */
-.list-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(13, 107, 78, 0.08);
-  border: 1px solid #e0f0e8;
-  margin: 0;
-
-  ion-card-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #0d6b4e;
-    font-size: 1.15rem;
-    font-weight: 600;
-
-    ion-icon {
-      font-size: 1.4rem;
-    }
-
-    ion-badge {
-      margin-left: auto;
+    .bar-percent {
+      text-align: right;
       font-size: 0.8rem;
+      color: #6b7c75;
+      margin-top: 4px;
     }
   }
 }
 
 /* ============================================
-   LOADING
+   DONUT LEGEND (Planes por perfil)
    ============================================ */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  color: #6b7c75;
+.donut-container {
+  padding: 1rem 0;
 
-  p {
-    margin-top: 1rem;
-    font-size: 0.95rem;
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: #f4faf7;
+      border-radius: 8px;
+      border: 1px solid #e0f0e8;
+
+      .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        flex-shrink: 0;
+
+        &.perfil-0 { background: #0d6b4e; }
+        &.perfil-1 { background: #2196f3; }
+        &.perfil-2 { background: #ff9800; }
+        &.perfil-3 { background: #9c27b0; }
+        &.perfil-4 { background: #e91e63; }
+        &.perfil-5 { background: #00bcd4; }
+      }
+
+      .legend-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .legend-label {
+          color: #1a1f36;
+          font-weight: 500;
+          font-size: 0.9rem;
+        }
+
+        .legend-bar-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          .legend-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0f0e8;
+            border-radius: 4px;
+            overflow: hidden;
+
+            .legend-bar-fill {
+              height: 100%;
+              border-radius: 4px;
+              transition: width 0.6s ease;
+
+              &.perfil-0 { background: #0d6b4e; }
+              &.perfil-1 { background: #2196f3; }
+              &.perfil-2 { background: #ff9800; }
+              &.perfil-3 { background: #9c27b0; }
+              &.perfil-4 { background: #e91e63; }
+              &.perfil-5 { background: #00bcd4; }
+            }
+          }
+
+          .legend-value {
+            color: #0d6b4e;
+            font-weight: 600;
+            font-size: 0.85rem;
+            min-width: 80px;
+            text-align: right;
+          }
+        }
+      }
+    }
   }
 }
 
 /* ============================================
-   ASIGNACIONES LIST
+   TOP MEDICOS LIST
    ============================================ */
-.asignaciones-list {
+.top-medicos-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
+  padding: 1rem 0;
 
-.asignacion-card {
-  background: #f4faf7;
-  border: 1px solid #e0f0e8;
-  border-radius: 12px;
-  padding: 1rem;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #e0f5ed;
-    border-color: #0d6b4e;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 107, 78, 0.1);
-  }
-
-  .asignacion-header {
+  .top-medico-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e0f0e8;
+    gap: 14px;
+    padding: 14px;
+    background: #f4faf7;
+    border: 1px solid #e0f0e8;
+    border-radius: 12px;
+    transition: all 0.2s;
 
-    .medico-avatar, .paciente-avatar {
+    &:hover {
+      background: #e0f5ed;
+      transform: translateX(4px);
+    }
+
+    .medico-rank {
+      font-size: 1.3rem;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: center;
+      color: #6b7c75;
+
+      &.rank-1 { color: #ffa000; }
+      &.rank-2 { color: #78909c; }
+      &.rank-3 { color: #8d6e63; }
+    }
+
+    .medico-avatar {
       width: 44px;
       height: 44px;
       border-radius: 50%;
@@ -560,34 +679,22 @@
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 1.1rem;
       color: white;
       flex-shrink: 0;
+      background: linear-gradient(135deg, #607d8b, #455a64);
 
-      &.doctor {
-        background: linear-gradient(135deg, #2196f3, #1976d2);
-      }
-      &.nutri {
-        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-      }
-      &.enfermera {
-        background: linear-gradient(135deg, #ff9800, #f57c00);
-      }
-      &.default {
-        background: linear-gradient(135deg, #607d8b, #455a64);
-      }
+      &.rank-1 { background: linear-gradient(135deg, #ffa000, #ff8f00); }
+      &.rank-2 { background: linear-gradient(135deg, #78909c, #546e7a); }
+      &.rank-3 { background: linear-gradient(135deg, #8d6e63, #6d4c41); }
     }
 
-    .paciente-avatar {
-      background: linear-gradient(135deg, #00bcd4, #0097a7);
-    }
-
-    .asignacion-info {
+    .medico-info {
       flex: 1;
       min-width: 0;
 
-      h3 {
-        margin: 0 0 2px 0;
+      h4 {
+        margin: 0 0 6px 0;
         color: #1a1f36;
         font-size: 0.95rem;
         font-weight: 600;
@@ -596,82 +703,84 @@
         text-overflow: ellipsis;
       }
 
-      .medico-rol, .paciente-cedula {
-        margin: 0;
-        color: #6b7c75;
-        font-size: 0.8rem;
+      .medico-bar-wrapper {
+        .medico-bar {
+          height: 8px;
+          background: #e0f0e8;
+          border-radius: 4px;
+          overflow: hidden;
+
+          .medico-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            background: linear-gradient(90deg, #0d6b4e, #4fd1a5);
+
+            &.rank-1 { background: linear-gradient(90deg, #ffa000, #ffca28); }
+            &.rank-2 { background: linear-gradient(90deg, #78909c, #b0bec5); }
+            &.rank-3 { background: linear-gradient(90deg, #8d6e63, #a1887f); }
+          }
+        }
       }
     }
 
-    .arrow-icon {
-      color: #0d6b4e;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-  }
+    .medico-value {
+      text-align: right;
+      min-width: 80px;
 
-  .asignacion-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .fecha-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #6b7c75;
-      font-size: 0.85rem;
-
-      ion-icon {
-        font-size: 1rem;
+      strong {
+        display: block;
+        font-size: 1.4rem;
         color: #0d6b4e;
+        font-weight: 700;
       }
-    }
 
-    ion-button {
-      font-size: 0.85rem;
-      --padding-start: 10px;
-      --padding-end: 10px;
+      small {
+        color: #6b7c75;
+        font-size: 0.75rem;
+      }
     }
   }
 }
 
 /* ============================================
-   EMPTY STATE
+   EMPTY MINI
    ============================================ */
-.empty-state {
+.empty-mini {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 2rem;
+  color: #999;
 
   ion-icon {
-    font-size: 4rem;
+    font-size: 3rem;
     color: #c8e6d5;
-    margin-bottom: 1rem;
-  }
-
-  h3 {
-    color: #0d6b4e;
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
   }
 
   p {
-    color: #6b7c75;
     margin: 0;
     font-size: 0.9rem;
   }
 }
 
 /* ============================================
+   ACTION FOOTER
+   ============================================ */
+.action-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0f0e8;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 1200px) {
-  .content-grid {
+  .stats-row {
     grid-template-columns: 1fr;
-  }
-
-  .form-card {
-    position: static;
   }
 }
 
@@ -696,33 +805,43 @@
     font-size: 1.4rem;
   }
 
-  .stats-resumen {
-    grid-template-columns: 1fr;
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .asignacion-card .asignacion-header {
+  .timeline-chart .chart-bars {
+    height: 180px;
+    
+    .chart-bar-wrapper {
+      .chart-value {
+        font-size: 0.7rem;
+      }
+
+      .chart-label {
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  .top-medico-item {
     flex-wrap: wrap;
 
-    .arrow-icon {
-      display: none;
-    }
-
-    .asignacion-info {
-      flex: 1 1 calc(50% - 60px);
+    .medico-info {
+      flex: 1 1 calc(100% - 120px);
     }
   }
 
-  .asignacion-card .asignacion-footer {
+  .action-footer {
     flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-
-    .fecha-info {
-      justify-content: center;
-    }
 
     ion-button {
       width: 100%;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
   }
 }

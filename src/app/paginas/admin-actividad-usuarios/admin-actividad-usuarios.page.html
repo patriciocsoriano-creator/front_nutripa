@@ -2,14 +2,14 @@
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
       <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
-      <ion-title>Auditoria del Sistema</ion-title>
+      <ion-title>Actividad de Usuarios</ion-title>
     </div>
 
     <ion-buttons slot="end">
       <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
         <ion-icon slot="icon-only" name="home-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="cargarLogs()" title="Actualizar">
+      <ion-button (click)="cargarActividad()" title="Actualizar">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
       <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
@@ -132,11 +132,11 @@
               <ion-icon name="globe-outline"></ion-icon>
               <span>Reportes globales</span>
             </li>
-            <li (click)="navegarA('admin-auditoria')" class="active">
+            <li (click)="navegarA('admin-auditoria')">
               <ion-icon name="clipboard-outline"></ion-icon>
               <span>Auditoria / Logs</span>
             </li>
-            <li (click)="navegarA('admin-actividad-usuarios')">
+            <li (click)="navegarA('admin-actividad-usuarios')" class="active">
               <ion-icon name="time-outline"></ion-icon>
               <span>Actividad usuarios</span>
             </li>
@@ -174,51 +174,51 @@
     <div class="main-content">
       <div class="welcome-section">
         <h1>
-          <ion-icon name="clipboard-outline"></ion-icon>
-          Auditoria del Sistema
+          <ion-icon name="time-outline"></ion-icon>
+          Actividad de Usuarios
         </h1>
-        <p class="subtitle">Registro detallado de todas las actividades y eventos del sistema</p>
+        <p class="subtitle">Seguimiento detallado de la actividad y registros de cada usuario del sistema</p>
       </div>
 
-      <!-- Resumen de logs -->
-      <div class="stats-resumen">
-        <div class="stat-item">
-          <div class="stat-icon total">
-            <ion-icon name="file-tray-full-outline"></ion-icon>
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon total">
+            <ion-icon name="people-outline"></ion-icon>
           </div>
-          <div class="stat-info">
-            <h3>{{logs.length}}</h3>
-            <p>Total de Logs</p>
-          </div>
-        </div>
-
-        <div class="stat-item">
-          <div class="stat-icon login">
-            <ion-icon name="log-in-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <h3>{{totalLogins}}</h3>
-            <p>Inicios de Sesion</p>
+          <div class="kpi-info">
+            <h3>{{usuarios.length}}</h3>
+            <p>Total Usuarios</p>
           </div>
         </div>
 
-        <div class="stat-item">
-          <div class="stat-icon user">
-            <ion-icon name="person-outline"></ion-icon>
+        <div class="kpi-card">
+          <div class="kpi-icon activos">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
           </div>
-          <div class="stat-info">
-            <h3>{{totalUsuarios}}</h3>
-            <p>Eventos de Usuarios</p>
+          <div class="kpi-info">
+            <h3>{{totalActivos}}</h3>
+            <p>Usuarios Activos</p>
           </div>
         </div>
 
-        <div class="stat-item">
-          <div class="stat-icon error">
-            <ion-icon name="alert-circle-outline"></ion-icon>
+        <div class="kpi-card">
+          <div class="kpi-icon inactivos">
+            <ion-icon name="remove-circle-outline"></ion-icon>
           </div>
-          <div class="stat-info">
-            <h3>{{totalErrores}}</h3>
-            <p>Errores Detectados</p>
+          <div class="kpi-info">
+            <h3>{{totalInactivos}}</h3>
+            <p>Usuarios Inactivos</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon registros">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <div class="kpi-info">
+            <h3>{{totalRegistros}}</h3>
+            <p>Registros Realizados</p>
           </div>
         </div>
       </div>
@@ -234,71 +234,80 @@
         <ion-card-content>
           <ion-grid>
             <ion-row>
-              <ion-col size="12" size-md="8">
+              <ion-col size="12" size-md="6">
                 <ion-item lines="none" class="search-item">
                   <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
                   <ion-input 
                     [(ngModel)]="terminoBusqueda" 
-                    placeholder="Buscar por descripcion o usuario..."
+                    placeholder="Buscar por nombre o correo..."
                     clearInput="true">
                   </ion-input>
                 </ion-item>
               </ion-col>
-              <ion-col size="12" size-md="4">
+              <ion-col size="12" size-md="3">
                 <ion-item lines="none" class="filter-item">
-                  <ion-icon name="filter-outline" slot="start" color="medium"></ion-icon>
+                  <ion-icon name="shield-outline" slot="start" color="medium"></ion-icon>
                   <ion-select 
-                    [(ngModel)]="filtroTipo" 
-                    placeholder="Filtrar por tipo"
+                    [(ngModel)]="filtroRol" 
+                    placeholder="Filtrar por rol"
                     interface="popover">
-                    <ion-select-option value="todos">Todos los tipos</ion-select-option>
-                    <ion-select-option value="login">Inicios de Sesion</ion-select-option>
-                    <ion-select-option value="user">Usuarios</ion-select-option>
-                    <ion-select-option value="registro">Registros</ion-select-option>
-                    <ion-select-option value="error">Errores</ion-select-option>
-                    <ion-select-option value="plan">Planes</ion-select-option>
+                    <ion-select-option value="todos">Todos los roles</ion-select-option>
+                    <ion-select-option value="admin">Administrador</ion-select-option>
+                    <ion-select-option value="doctor">Medico</ion-select-option>
+                    <ion-select-option value="nutricionista">Nutricionista</ion-select-option>
+                    <ion-select-option value="enfermera">Enfermera</ion-select-option>
+                    <ion-select-option value="paciente">Paciente</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-md="3">
+                <ion-item lines="none" class="filter-item">
+                  <ion-icon name="toggle-outline" slot="start" color="medium"></ion-icon>
+                  <ion-select 
+                    [(ngModel)]="filtroEstado" 
+                    placeholder="Estado"
+                    interface="popover">
+                    <ion-select-option value="todos">Todos</ion-select-option>
+                    <ion-select-option value="activos">Solo activos</ion-select-option>
+                    <ion-select-option value="inactivos">Solo inactivos</ion-select-option>
                   </ion-select>
                 </ion-item>
               </ion-col>
             </ion-row>
           </ion-grid>
 
-          <!-- Chips de tipos -->
-          <div class="filter-chips">
-            <div 
-              class="chip" 
-              [class.active]="filtroTipo === 'todos'"
-              (click)="filtroTipo = 'todos'">
-              <ion-icon name="apps-outline"></ion-icon>
-              <span>Todos ({{logs.length}})</span>
-            </div>
-            <div 
-              class="chip login" 
-              [class.active]="filtroTipo === 'login'"
-              (click)="filtroTipo = 'login'">
-              <ion-icon name="log-in-outline"></ion-icon>
-              <span>Login ({{totalLogins}})</span>
-            </div>
-            <div 
-              class="chip user" 
-              [class.active]="filtroTipo === 'user'"
-              (click)="filtroTipo = 'user'">
-              <ion-icon name="person-outline"></ion-icon>
-              <span>Usuarios ({{totalUsuarios}})</span>
-            </div>
-            <div 
-              class="chip registro" 
-              [class.active]="filtroTipo === 'registro'"
-              (click)="filtroTipo = 'registro'">
-              <ion-icon name="document-text-outline"></ion-icon>
-              <span>Registros ({{totalRegistros}})</span>
-            </div>
-            <div 
-              class="chip error" 
-              [class.active]="filtroTipo === 'error'"
-              (click)="filtroTipo = 'error'">
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              <span>Errores ({{totalErrores}})</span>
+          <!-- Ordenamiento -->
+          <div class="sort-options">
+            <span class="sort-label">Ordenar por:</span>
+            <div class="sort-chips">
+              <div 
+                class="chip" 
+                [class.active]="ordenPor === 'actividad'"
+                (click)="ordenPor = 'actividad'">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Ultima actividad</span>
+              </div>
+              <div 
+                class="chip" 
+                [class.active]="ordenPor === 'registros'"
+                (click)="ordenPor = 'registros'">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>Registros</span>
+              </div>
+              <div 
+                class="chip" 
+                [class.active]="ordenPor === 'nombre'"
+                (click)="ordenPor = 'nombre'">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>Nombre</span>
+              </div>
+              <div 
+                class="chip" 
+                [class.active]="ordenPor === 'fecha'"
+                (click)="ordenPor = 'fecha'">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>Fecha registro</span>
+              </div>
             </div>
           </div>
         </ion-card-content>
@@ -307,65 +316,94 @@
       <!-- Loading -->
       <div *ngIf="cargando" class="loading-container">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
-        <p>Cargando registros de auditoria...</p>
+        <p>Cargando actividad de usuarios...</p>
       </div>
 
-      <!-- Lista de logs -->
-      <div *ngIf="!cargando" class="logs-container">
-        <div class="logs-header">
+      <!-- Lista de usuarios -->
+      <div *ngIf="!cargando" class="actividad-container">
+        <div class="actividad-header">
           <h2>
             <ion-icon name="list-outline"></ion-icon>
-            Registros de Auditoria
-            <ion-badge color="primary">{{logsFiltrados.length}}</ion-badge>
+            Usuarios del Sistema
+            <ion-badge color="primary">{{usuariosFiltrados.length}}</ion-badge>
           </h2>
-          <ion-button size="small" fill="outline" (click)="cargarLogs()">
-            <ion-icon slot="start" name="refresh-outline"></ion-icon>
-            Actualizar
-          </ion-button>
         </div>
 
-        <div class="logs-list" *ngIf="logsFiltrados.length > 0">
-          <div 
-            *ngFor="let log of logsFiltrados" 
-            class="log-card" 
-            [ngClass]="'tipo-' + log.tipo">
-            <div class="log-header">
-              <div class="log-icon" [ngClass]="log.tipo">
-                <ion-icon [name]="getIconoTipo(log.tipo)"></ion-icon>
-              </div>
-              <div class="log-info">
-                <div class="log-title-row">
-                  <h3>{{log.descripcion}}</h3>
-                  <ion-badge [color]="getColorTipo(log.tipo)" class="tipo-badge">
-                    {{getNombreTipo(log.tipo)}}
-                  </ion-badge>
+        <div class="usuarios-list" *ngIf="usuariosFiltrados.length > 0">
+          <ion-card *ngFor="let u of usuariosFiltrados" class="usuario-card" 
+                    [class.inactivo]="!u.activo">
+            <ion-card-content>
+              <div class="usuario-top">
+                <div class="avatar-circle" [ngClass]="getRolColor(u.rol)">
+                  {{u.nombre?.charAt(0)}}{{u.nombre?.split(' ')[1]?.charAt(0) || u.apellido?.charAt(0)}}
                 </div>
-                <div class="log-meta">
-                  <span *ngIf="log.usuario_nombre" class="meta-item">
-                    <ion-icon name="person-outline"></ion-icon>
-                    {{log.usuario_nombre}}
-                  </span>
-                  <span *ngIf="log.ip_address" class="meta-item">
-                    <ion-icon name="globe-outline"></ion-icon>
-                    {{log.ip_address}}
-                  </span>
-                  <span class="meta-item fecha">
-                    <ion-icon name="time-outline"></ion-icon>
-                    {{log.fecha | date:'dd/MM/yyyy HH:mm:ss'}}
-                  </span>
+                <div class="usuario-info">
+                  <h3>{{u.nombre}}</h3>
+                  <div class="usuario-meta">
+                    <ion-badge [color]="getRolColor(u.rol)" class="rol-badge">
+                      {{getRolLabel(u.rol)}}
+                    </ion-badge>
+                    <ion-badge [color]="u.activo ? 'success' : 'danger'" class="estado-badge">
+                      {{u.activo ? 'Activo' : 'Inactivo'}}
+                    </ion-badge>
+                  </div>
+                </div>
+                <div class="usuario-stats">
+                  <div class="stat-item">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <div class="stat-info">
+                      <strong>{{u.registros_realizados || 0}}</strong>
+                      <small>registros</small>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              <div class="usuario-details">
+                <div class="detail-item">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <div class="detail-info">
+                    <span class="detail-label">Registrado</span>
+                    <span class="detail-value">{{u.fecha_registro | date:'dd/MM/yyyy'}}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <ion-icon name="time-outline"></ion-icon>
+                  <div class="detail-info">
+                    <span class="detail-label">Ultima actividad</span>
+                    <span class="detail-value" [class.sin-actividad]="!u.ultima_actividad">
+                      {{u.ultima_actividad ? (u.ultima_actividad | date:'dd/MM/yyyy HH:mm') : 'Sin actividad registrada'}}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Barra de progreso de actividad -->
+              <div class="actividad-bar-container">
+                <div class="actividad-bar-label">
+                  <span>Nivel de actividad</span>
+                  <span>{{getNivelActividad(u.registros_realizados)}}</span>
+                </div>
+                <div class="actividad-bar">
+                  <div 
+                    class="actividad-bar-fill" 
+                    [style.width.%]="getPorcentajeActividad(u.registros_realizados)"
+                    [ngClass]="getClaseActividad(u.registros_realizados)">
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
         </div>
 
         <!-- Estado vacio -->
-        <div *ngIf="logsFiltrados.length === 0" class="empty-state">
-          <ion-icon name="file-tray-outline"></ion-icon>
-          <h3>No hay registros de auditoria</h3>
-          <p *ngIf="logs.length > 0">No se encontraron resultados con los filtros aplicados</p>
-          <p *ngIf="logs.length === 0">El sistema aun no tiene registros de actividad</p>
-          <ion-button *ngIf="filtroTipo !== 'todos' || terminoBusqueda" fill="outline" (click)="limpiarFiltros()">
+        <div *ngIf="usuariosFiltrados.length === 0" class="empty-state">
+          <ion-icon name="people-outline"></ion-icon>
+          <h3>No se encontraron usuarios</h3>
+          <p *ngIf="usuarios.length > 0">No se encontraron resultados con los filtros aplicados</p>
+          <p *ngIf="usuarios.length === 0">El sistema aun no tiene usuarios registrados</p>
+          <ion-button *ngIf="filtroRol !== 'todos' || filtroEstado !== 'todos' || terminoBusqueda" 
+                      fill="outline" (click)="limpiarFiltros()">
             <ion-icon slot="start" name="refresh-outline"></ion-icon>
             Limpiar Filtros
           </ion-button>

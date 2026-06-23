@@ -2,14 +2,14 @@
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
       <ion-icon name="shield-checkmark-outline" class="logo-icon"></ion-icon>
-      <ion-title>Asignaciones Medico-Paciente</ion-title>
+      <ion-title>Roles y Permisos</ion-title>
     </div>
 
     <ion-buttons slot="end">
       <ion-button (click)="navegarA('admin-inicio')" title="Volver al inicio">
         <ion-icon slot="icon-only" name="home-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="cargarDatos()" title="Actualizar">
+      <ion-button (click)="cargarRoles()" title="Actualizar">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
       </ion-button>
       <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
@@ -65,7 +65,7 @@
               <ion-icon name="person-add-outline"></ion-icon>
               <span>Agregar usuario</span>
             </li>
-            <li (click)="navegarA('admin-roles-permisos')">
+            <li (click)="navegarA('admin-roles-permisos')" class="active">
               <ion-icon name="key-outline"></ion-icon>
               <span>Roles y permisos</span>
             </li>
@@ -90,7 +90,7 @@
               <ion-icon name="add-circle-outline"></ion-icon>
               <span>Agregar medico</span>
             </li>
-            <li (click)="navegarA('admin-asignaciones')" class="active">
+            <li (click)="navegarA('admin-asignaciones')">
               <ion-icon name="link-outline"></ion-icon>
               <span>Asignaciones</span>
             </li>
@@ -174,165 +174,160 @@
     <div class="main-content">
       <div class="welcome-section">
         <h1>
-          <ion-icon name="link-outline"></ion-icon>
-          Asignaciones Medico-Paciente
+          <ion-icon name="key-outline"></ion-icon>
+          Roles y Permisos del Sistema
         </h1>
-        <p class="subtitle">Gestiona las asignaciones de medicos a pacientes del sistema</p>
+        <p class="subtitle">Administra los roles y define los permisos de acceso para cada uno</p>
       </div>
 
-      <!-- Resumen de estadisticas -->
-      <div class="stats-resumen">
-        <div class="stat-item">
-          <div class="stat-icon medicos">
-            <ion-icon name="medkit-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <h3>{{medicos.length}}</h3>
-            <p>Medicos disponibles</p>
-          </div>
-        </div>
-
-        <div class="stat-item">
-          <div class="stat-icon pacientes">
-            <ion-icon name="accessibility-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <h3>{{pacientes.length}}</h3>
-            <p>Pacientes registrados</p>
-          </div>
-        </div>
-
-        <div class="stat-item">
-          <div class="stat-icon asignaciones">
-            <ion-icon name="link-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <h3>{{asignaciones.length}}</h3>
-            <p>Asignaciones activas</p>
-          </div>
-        </div>
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando roles y permisos...</p>
       </div>
 
-      <div class="content-grid">
-        <!-- Seccion Nueva Asignacion -->
-        <div class="nueva-asignacion-section">
-          <ion-card class="form-card">
+      <div *ngIf="!cargando" class="roles-container">
+        <!-- Seccion Izquierda: Lista de Roles -->
+        <div class="roles-list-section">
+          <ion-card class="roles-card">
             <ion-card-header>
               <ion-card-title>
-                <ion-icon name="add-circle-outline" color="primary"></ion-icon>
-                Nueva Asignacion
+                <ion-icon name="shield-outline" color="primary"></ion-icon>
+                Roles del Sistema
               </ion-card-title>
-              <ion-card-subtitle>
-                Vincule un medico con un paciente para iniciar su seguimiento
-              </ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
-              <ion-item lines="full" class="select-item">
-                <ion-label position="stacked">Medico *</ion-label>
-                <ion-select 
-                  [(ngModel)]="nuevaAsignacion.medico_id" 
-                  placeholder="Seleccione un medico"
-                  interface="popover">
-                  <ion-select-option *ngFor="let m of medicos" [value]="m.id">
-                    {{getTitulo(m.rol)}} {{m.nombre}} {{m.apellido}} - {{getRolLabel(m.rol)}}
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
-
-              <ion-item lines="full" class="select-item">
-                <ion-label position="stacked">Paciente *</ion-label>
-                <ion-select 
-                  [(ngModel)]="nuevaAsignacion.paciente_id" 
-                  placeholder="Seleccione un paciente"
-                  interface="popover">
-                  <ion-select-option *ngFor="let p of pacientes" [value]="p.id">
-                    {{p.nombres}} {{p.apellidos}} - {{p.numero_identificacion}}
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
-
-              <!-- Verificar si ya existe asignacion -->
-              <div class="warning-box" *ngIf="existeAsignacion()">
-                <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
-                <span>Esta asignacion ya existe en el sistema</span>
+              <div class="roles-list">
+                <div 
+                  *ngFor="let rol of roles" 
+                  class="rol-item"
+                  [class.selected]="rolSeleccionado?.id === rol.id"
+                  (click)="seleccionarRol(rol)">
+                  <div class="rol-icon" [ngClass]="rol.nombre">
+                    <ion-icon [name]="getIconoRol(rol.nombre)"></ion-icon>
+                  </div>
+                  <div class="rol-info">
+                    <h3>{{getNombreRol(rol.nombre)}}</h3>
+                    <p>{{rol.descripcion || 'Sin descripcion'}}</p>
+                    <div class="rol-stats">
+                      <span class="stat">
+                        <ion-icon name="people-outline"></ion-icon>
+                        {{rol.total_usuarios || 0}} usuarios
+                      </span>
+                      <span class="stat">
+                        <ion-icon name="key-outline"></ion-icon>
+                        {{rol.total_permisos || 0}} permisos
+                      </span>
+                    </div>
+                  </div>
+                  <ion-icon 
+                    *ngIf="rolSeleccionado?.id === rol.id" 
+                    name="chevron-forward" 
+                    class="selected-indicator">
+                  </ion-icon>
+                </div>
               </div>
 
-              <ion-button 
-                expand="block" 
-                (click)="crearAsignacion()" 
-                [disabled]="guardando || !nuevaAsignacion.medico_id || !nuevaAsignacion.paciente_id || existeAsignacion()"
-                class="btn-crear">
-                <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-                <ion-icon *ngIf="!guardando" slot="start" name="link-outline"></ion-icon>
-                {{guardando ? 'Asignando...' : 'Crear Asignacion'}}
+              <!-- Boton crear nuevo rol -->
+              <ion-button expand="block" fill="outline" color="primary" (click)="mostrarCrearRol()" class="btn-nuevo-rol">
+                <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+                Crear Nuevo Rol
               </ion-button>
             </ion-card-content>
           </ion-card>
         </div>
 
-        <!-- Seccion Asignaciones Actuales -->
-        <div class="asignaciones-section">
-          <ion-card class="list-card">
+        <!-- Seccion Derecha: Permisos del Rol Seleccionado -->
+        <div class="permisos-section" *ngIf="rolSeleccionado">
+          <ion-card class="permisos-card">
             <ion-card-header>
               <ion-card-title>
-                <ion-icon name="list-outline" color="primary"></ion-icon>
-                Asignaciones Activas
-                <ion-badge color="primary">{{asignaciones.length}}</ion-badge>
+                <ion-icon name="lock-open-outline" color="primary"></ion-icon>
+                Permisos de {{getNombreRol(rolSeleccionado.nombre)}}
               </ion-card-title>
+              <ion-card-subtitle>
+                Active o desactive los permisos para este rol. Los cambios se guardan automaticamente.
+              </ion-card-subtitle>
             </ion-card-header>
             <ion-card-content>
-              <!-- Loading -->
-              <div *ngIf="cargando" class="loading-container">
-                <ion-spinner name="crescent" color="primary"></ion-spinner>
-                <p>Cargando asignaciones...</p>
+              
+              <!-- Resumen -->
+              <div class="permisos-resumen">
+                <div class="resumen-item">
+                  <div class="resumen-numero">{{permisosDisponibles.length}}</div>
+                  <div class="resumen-label">Total</div>
+                </div>
+                <div class="resumen-item activo">
+                  <div class="resumen-numero">{{contarPermisosActivos()}}</div>
+                  <div class="resumen-label">Activos</div>
+                </div>
+                <div class="resumen-item inactivo">
+                  <div class="resumen-numero">{{permisosDisponibles.length - contarPermisosActivos()}}</div>
+                  <div class="resumen-label">Inactivos</div>
+                </div>
               </div>
 
-              <!-- Lista -->
-              <div class="asignaciones-list" *ngIf="!cargando && asignaciones.length > 0">
-                <div *ngFor="let a of asignaciones" class="asignacion-card">
-                  <div class="asignacion-header">
-                    <div class="medico-avatar" [ngClass]="getRolColor(getMedicoRol(a.medico_id))">
-                      {{getMedicoInicial(a.medico_id)}}
-                    </div>
-                    <div class="asignacion-info">
-                      <h3>{{getMedicoNombre(a.medico_id)}}</h3>
-                      <p class="medico-rol">{{getRolLabel(getMedicoRol(a.medico_id))}}</p>
-                    </div>
-                    <ion-icon name="arrow-forward-outline" class="arrow-icon"></ion-icon>
-                    <div class="paciente-avatar">
-                      {{getPacienteInicial(a.paciente_id)}}
-                    </div>
-                    <div class="asignacion-info">
-                      <h3>{{getPacienteNombre(a.paciente_id)}}</h3>
-                      <p class="paciente-cedula">{{getPacienteCedula(a.paciente_id)}}</p>
-                    </div>
-                  </div>
+              <!-- Acciones rapidas -->
+              <div class="permisos-acciones">
+                <ion-button size="small" fill="outline" (click)="seleccionarTodos()">
+                  <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+                  Seleccionar todos
+                </ion-button>
+                <ion-button size="small" fill="outline" (click)="deseleccionarTodos()">
+                  <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+                  Quitar todos
+                </ion-button>
+                <ion-button size="small" fill="outline" color="success" (click)="guardarPermisos()" [disabled]="guardando">
+                  <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+                  <ion-icon *ngIf="!guardando" slot="start" name="save-outline"></ion-icon>
+                  Guardar cambios
+                </ion-button>
+              </div>
 
-                  <div class="asignacion-footer">
-                    <div class="fecha-info">
-                      <ion-icon name="calendar-outline"></ion-icon>
-                      <span>Asignado: {{a.fecha_asignacion | date:'dd/MM/yyyy'}}</span>
+              <!-- Lista de permisos agrupados por categoria -->
+              <div class="categorias-permisos">
+                <div *ngFor="let categoria of getCategorias()" class="categoria-item">
+                  <div class="categoria-header" (click)="toggleCategoria(categoria)">
+                    <div class="categoria-info">
+                      <ion-icon [name]="getIconoCategoria(categoria)" color="primary"></ion-icon>
+                      <h3>{{getNombreCategoria(categoria)}}</h3>
+                      <ion-badge color="medium">
+                        {{contarPermisosCategoria(categoria)}}
+                      </ion-badge>
                     </div>
-                    <ion-button 
-                      size="small" 
-                      fill="outline" 
-                      color="danger" 
-                      (click)="eliminarAsignacion(a)">
-                      <ion-icon slot="start" name="trash-outline"></ion-icon>
-                      Eliminar
-                    </ion-button>
+                    <ion-icon 
+                      name="chevron-down-outline" 
+                      class="categoria-arrow"
+                      [class.rotate]="categoriasAbiertas[categoria]">
+                    </ion-icon>
+                  </div>
+                  
+                  <div class="permisos-lista" *ngIf="categoriasAbiertas[categoria]">
+                    <div 
+                      *ngFor="let permiso of getPermisosPorCategoria(categoria)" 
+                      class="permiso-item">
+                      <ion-checkbox 
+                        [checked]="esPermisoActivo(permiso.codigo)"
+                        (ionChange)="togglePermiso(permiso.codigo, $event.detail.checked)">
+                      </ion-checkbox>
+                      <div class="permiso-info">
+                        <strong>{{permiso.nombre}}</strong>
+                        <small>{{permiso.descripcion}}</small>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Estado vacio -->
-              <div *ngIf="!cargando && asignaciones.length === 0" class="empty-state">
-                <ion-icon name="link-outline"></ion-icon>
-                <h3>No hay asignaciones activas</h3>
-                <p>Cree una nueva asignacion vinculando un medico con un paciente</p>
-              </div>
             </ion-card-content>
           </ion-card>
+        </div>
+
+        <!-- Estado vacio -->
+        <div *ngIf="!rolSeleccionado" class="empty-state">
+          <ion-icon name="shield-outline"></ion-icon>
+          <h3>Seleccione un rol</h3>
+          <p>Haga clic en un rol de la lista para ver y editar sus permisos</p>
         </div>
       </div>
     </div>
