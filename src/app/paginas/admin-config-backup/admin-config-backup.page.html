@@ -215,7 +215,7 @@
                   <ion-icon name="hardware-chip-outline"></ion-icon>
                 </div>
                 <div class="resumen-info">
-                  <div class="resumen-valor">{{tamanioTotal.toFixed(2)}} MB</div>
+                  <div class="resumen-valor">{{(tamanioTotal || 0).toFixed(2)}} MB</div>
                   <div class="resumen-label">Tamano Total</div>
                 </div>
               </div>

@@ -59,29 +59,38 @@ export class AdminConfigBackupPage implements OnInit {
   }
 
   async cargarInfoBackup() {
-    this.cargando = true;
-    const token = localStorage.getItem('token');
+  this.cargando = true;
+  const token = localStorage.getItem('token');
 
-    try {
-      const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/admin/configuracion/backup`,
-        { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
-      ).toPromise();
+  try {
+    const response: any = await this.http.get(
+      `${environment.apiUrl}/nutricionapp-api/admin/configuracion/backup`,
+      { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
+    ).toPromise();
 
-      if (response?.error === false) {
-        this.tablas = response.tablas || [];
-        this.totalTablas = response.total_tablas || 0;
-        this.fechaBackup = response.fecha_backup || '';
-        this.tamanioTotal = this.tablas.reduce((sum: number, t: any) => sum + (t.tamanio_mb || 0), 0);
-        console.log('Informacion de backup cargada:', this.totalTablas, 'tablas');
-      }
-    } catch (error) {
-      console.error('Error cargando backup:', error);
-      await this.showToast('Error al cargar informacion', 'danger');
-    } finally {
-      this.cargando = false;
+    if (response?.error === false) {
+      this.tablas = response.tablas || [];
+      this.totalTablas = response.total_tablas || 0;
+      this.fechaBackup = response.fecha_backup || '';
+      
+      // CALCULO PROTEGIDO: convertir a numero y asegurar que sea valido
+      this.tamanioTotal = Number(
+        this.tablas.reduce((sum: number, t: any) => sum + (Number(t.tamanio_mb) || 0), 0)
+      ) || 0;
+      
+      console.log('Informacion de backup cargada:', this.totalTablas, 'tablas, total:', this.tamanioTotal, 'MB');
     }
+  } catch (error) {
+    console.error('Error cargando backup:', error);
+    await this.showToast('Error al cargar informacion', 'danger');
+    // Valores por defecto en caso de error
+    this.tamanioTotal = 0;
+    this.totalTablas = 0;
+    this.tablas = [];
+  } finally {
+    this.cargando = false;
   }
+}
 
   async confirmarExportar() {
     const alert = await this.alertCtrl.create({
