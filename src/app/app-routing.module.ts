@@ -211,6 +211,14 @@ const routes: Routes = [
     path: 'medico-configuracion',
     loadChildren: () => import('./paginas/medico-configuracion/medico-configuracion.module').then( m => m.MedicoConfiguracionPageModule)
   },
+  {
+    path: 'enfermeria-buscar-paciente',
+    loadChildren: () => import('./paginas/enfermeria-buscar-paciente/enfermeria-buscar-paciente.module').then( m => m.EnfermeriaBuscarPacientePageModule)
+  },
+  {
+    path: 'enfermeria-reportes',
+    loadChildren: () => import('./paginas/enfermeria-reportes/enfermeria-reportes.module').then( m => m.EnfermeriaReportesPageModule)
+  },
   
 ];
 

@@ -1,13 +1,16 @@
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
-      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Registro Clínico: Información del Paciente</ion-title>
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clinico: Informacion del Paciente</ion-title>
     </div>
-
     <ion-buttons slot="end">
-      <ion-button (click)="cancelar()">
+      <ion-button (click)="cancelar()" title="Cancelar">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -16,58 +19,57 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR -->
-    <div
-      class="sidebar"
-      [class.open]="sidebarOpen"
-      (mouseenter)="sidebarOpen = true"
-      (mouseleave)="sidebarOpen = false"
-    >
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
       </div>
-
-      <!-- 👤 Info de Usuario -->
       <div class="user-info">
         <ion-avatar>
-          <ion-icon name="person-circle-outline"></ion-icon>
+          <div class="avatar-placeholder">{{nombreAsistente.charAt(0)}}</div>
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombreAsistente || 'Enfermera'}}</h4>
-          <p>{{especialidad || 'Asistente Médico'}}</p>
+          <p>{{especialidad || 'Asistente Medico'}}</p>
         </div>
       </div>
-
-      <!-- 📋 Menú -->
       <ul>
-        <li (click)="irAInicio()">
-          <ion-icon name="home-outline"></ion-icon>
-          <span>Inicio</span>
+        <li (click)="navegarA('enfermeria')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
         </li>
-        
         <li class="menu-item-with-submenu">
-          <div class="menu-link">
-            <ion-icon name="people-outline"></ion-icon>
-            <span>Pacientes</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
           </div>
-          <ul class="submenu">
-            <li><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
-            <li><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
+            </li>
+            <li (click)="iniciarRegistroPaciente()">
+              <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('enfermeria-buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
+            </li>
           </ul>
         </li>
-        
-        <li>
-          <ion-icon name="clipboard-outline"></ion-icon>
-          <span>Registros</span>
+        <li (click)="iniciarRegistroPaciente()">
+          <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
+        </li>
+        <li (click)="navegarA('enfermeria-reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('enfermeria-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL - FORMULARIO -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content form-layout">
       
-      <!-- 🆕 LOADING mientras se cargan datos -->
+      <!-- LOADING -->
       <div *ngIf="cargandoDatos" class="loading-datos">
         <div class="loading-content">
           <ion-spinner name="crescent" color="primary"></ion-spinner>
@@ -76,47 +78,45 @@
         </div>
       </div>
 
-      <!-- FORMULARIO (solo cuando termina de cargar) -->
+      <!-- FORMULARIO -->
       <div class="form-container" *ngIf="!cargandoDatos">
         
-        <!-- Encabezado del Formulario -->
+        <!-- Encabezado -->
         <div class="form-header-section">
-          <!-- 🆕 Título dinámico según el tipo de registro -->
-          <h1 *ngIf="esNuevaCita && esPacienteExistente">🔄 Nueva Cita - Datos del Paciente</h1>
-          <h1 *ngIf="!esNuevaCita && !esPacienteNuevo">📝 Completar Registro Clínico</h1>
-          <h1 *ngIf="esPacienteNuevo">🆕 Nuevo Registro Clínico</h1>
+          <h1 *ngIf="esNuevaCita && esPacienteExistente">Nueva Cita - Datos del Paciente</h1>
+          <h1 *ngIf="!esNuevaCita && !esPacienteNuevo">Completar Registro Clinico</h1>
+          <h1 *ngIf="esPacienteNuevo">Nuevo Registro Clinico</h1>
           
-          <!-- 🆕 Descripción dinámica -->
           <p *ngIf="esNuevaCita && esPacienteExistente">
-            Los datos del paciente han sido cargados de su última visita. 
-            Verifique la información y actualice los campos que hayan cambiado.
+            Los datos del paciente han sido cargados de su ultima visita. 
+            Verifique la informacion y actualice los campos que hayan cambiado.
           </p>
           <p *ngIf="!esNuevaCita && !esPacienteNuevo">
-            Complete la información personal requerida para continuar con el registro clínico.
+            Complete la informacion personal requerida para continuar con el registro clinico.
           </p>
           <p *ngIf="esPacienteNuevo">
-            Complete la información personal requerida para iniciar el registro clínico.
+            Complete la informacion personal requerida para iniciar el registro clinico.
           </p>
           
-          <!-- 🆕 Banner NUEVA CITA (diferente al prefill normal) -->
+          <!-- Banner NUEVA CITA -->
           <div class="nueva-cita-banner" *ngIf="esNuevaCita && esPacienteExistente">
             <ion-icon name="refresh-circle"></ion-icon>
             <div class="banner-content">
               <h4>Nueva Cita Detectada</h4>
               <p>
-                Los datos del paciente han sido cargados automáticamente de su última visita.
+                Los datos del paciente han sido cargados automaticamente de su ultima visita.
                 <br>
-                <strong>Los campos bloqueados</strong> (nombre, cédula) son datos básicos del paciente.
+                <strong>Los campos bloqueados</strong> (nombre, cedula) son datos basicos del paciente.
                 <br>
-                <strong>Los demás campos</strong> pueden actualizarse si la información ha cambiado.
+                <strong>Los demas campos</strong> pueden actualizarse si la informacion ha cambiado.
               </p>
             </div>
           </div>
           
-          <!-- Banner pre-llenado normal (para continuación de registro) -->
+          <!-- Banner pre-llenado normal -->
           <div class="prefill-notice" *ngIf="datosPrellenados && !esNuevaCita">
             <ion-icon name="information-circle-outline"></ion-icon>
-            <span>Los datos del paciente han sido cargados automáticamente desde el sistema.</span>
+            <span>Los datos del paciente han sido cargados automaticamente desde el sistema.</span>
           </div>
         </div>
 
@@ -124,18 +124,18 @@
           
           <div class="form-grid">
             
-            <!-- Columna Izquierda: Identificación -->
+            <!-- Columna Izquierda: Identificacion -->
             <div class="form-column">
               <ion-card class="input-card">
                 <ion-card-header>
                   <ion-card-title>
-                    <ion-icon name="id-card-outline"></ion-icon> Identificación
+                    <ion-icon name="id-card-outline"></ion-icon> Identificacion
                   </ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                   
                   <div class="form-group">
-                    <label>Número de Identificación *</label>
+                    <label>Numero de Identificacion *</label>
                     <ion-input 
                       [(ngModel)]="pacienteForm.numeroIdentificacion" 
                       name="numeroIdentificacion" 
@@ -184,7 +184,7 @@
                       <!-- Badge de edad calculada -->
                       <div class="age-badge" *ngIf="edadCalculada !== null && edadCalculada > 0">
                         <ion-icon name="time-outline"></ion-icon>
-                        <span>{{edadCalculada}} años</span>
+                        <span>{{edadCalculada}} anos</span>
                       </div>
                     </div>
                   </div>
@@ -203,56 +203,84 @@
                 </ion-card-header>
                 <ion-card-content>
                   
-                  <!-- 🆕 Aviso si es nueva cita -->
+                  <!-- Aviso si es nueva cita -->
                   <div class="campo-editable-aviso" *ngIf="esNuevaCita && esPacienteExistente">
                     <ion-icon name="create-outline"></ion-icon>
-                    <small>Estos campos pueden actualizarse si la información ha cambiado</small>
+                    <small>Estos campos pueden actualizarse si la informacion ha cambiado</small>
                   </div>
                   
-                  <div class="form-row">
-                    <div class="form-group half">
-                      <label>Sexo</label>
-                      <ion-select 
-                        [(ngModel)]="pacienteForm.sexo" 
-                        name="sexo" 
-                        placeholder="Seleccione"
-                        interface="action-sheet"
-                        class="custom-select">
-                        <ion-select-option value="M">Masculino</ion-select-option>
-                        <ion-select-option value="F">Femenino</ion-select-option>
-                        <ion-select-option value="O">Otro</ion-select-option>
-                      </ion-select>
-                    </div>
+                  <!-- Sexo -->
+<div class="form-group half">
+  <label class="custom-select-label">Sexo</label>
+  <div class="custom-select-wrapper">
+    <ion-icon name="person-outline" class="custom-select-icon"></ion-icon>
+    <ion-select 
+      [(ngModel)]="pacienteForm.sexo" 
+      name="sexo" 
+      placeholder="Seleccione sexo"
+      interface="action-sheet"
+      class="custom-select"
+      required>
+      <ion-select-option value="M">
+        <ion-icon name="man-outline" slot="start"></ion-icon>
+        Masculino
+      </ion-select-option>
+      <ion-select-option value="F">
+        <ion-icon name="woman-outline" slot="start"></ion-icon>
+        Femenino
+      </ion-select-option>
+      <ion-select-option value="O">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Otro
+      </ion-select-option>
+    </ion-select>
+  </div>
+</div>
 
-                    <div class="form-group half">
-                      <label>Actividad Física</label>
-                      <ion-select 
-                        [(ngModel)]="pacienteForm.actividadFisica" 
-                        name="actividadFisica" 
-                        placeholder="Seleccione"
-                        interface="action-sheet"
-                        class="custom-select">
-                        <ion-select-option value="sedentario">Sedentario</ion-select-option>
-                        <ion-select-option value="ligera">Ligera</ion-select-option>
-                        <ion-select-option value="moderada">Moderada</ion-select-option>
-                        <ion-select-option value="intensa">Intensa</ion-select-option>
-                      </ion-select>
-                    </div>
-                  </div>
+<!-- Actividad Física -->
+<div class="form-group half">
+  <label class="custom-select-label">Actividad Física</label>
+  <div class="custom-select-wrapper">
+    <ion-icon name="fitness-outline" class="custom-select-icon"></ion-icon>
+    <ion-select 
+      [(ngModel)]="pacienteForm.actividadFisica" 
+      name="actividadFisica" 
+      placeholder="Nivel de actividad"
+      interface="action-sheet"
+      class="custom-select">
+      <ion-select-option value="sedentario">
+        <ion-icon name="remove-circle-outline" slot="start"></ion-icon>
+        Sedentario
+      </ion-select-option>
+      <ion-select-option value="ligera">
+        <ion-icon name="walk-outline" slot="start"></ion-icon>
+        Ligera (1-2 días/semana)
+      </ion-select-option>
+      <ion-select-option value="moderada">
+        <ion-icon name="run-outline" slot="start"></ion-icon>
+        Moderada (3-4 días/semana)
+      </ion-select-option>
+      <ion-select-option value="intensa">
+        <ion-icon name="flame-outline" slot="start"></ion-icon>
+        Intensa (5-6 días/semana)
+      </ion-select-option>
+    </ion-select>
+  </div>
+</div>
 
                   <div class="form-group">
-                    <label>Dirección</label>
+                    <label>Direccion</label>
                     <ion-input 
                       [(ngModel)]="pacienteForm.direccion" 
                       name="direccion" 
-                      placeholder="Calle principal, número..."
+                      placeholder="Calle principal, numero..."
                       class="custom-input">
                     </ion-input>
                   </div>
 
                   <div class="form-row">
                     <div class="form-group half">
-                      <label>Teléfono</label>
+                      <label>Telefono</label>
                       <ion-input 
                         type="tel" 
                         [(ngModel)]="pacienteForm.telefono" 
@@ -262,7 +290,7 @@
                       </ion-input>
                     </div>
                     <div class="form-group half">
-                      <label>Ocupación</label>
+                      <label>Ocupacion</label>
                       <ion-input 
                         [(ngModel)]="pacienteForm.ocupacion" 
                         name="ocupacion" 
@@ -278,7 +306,7 @@
 
           </div>
 
-          <!-- Botones de Acción -->
+          <!-- Botones de Accion -->
           <div class="form-actions">
             <ion-button fill="outline" color="medium" (click)="cancelar()" type="button">
               Cancelar

@@ -1,8 +1,7 @@
 /* =========================================
-   🎨 VARIABLES - Tema Hospitalario
+   VARIABLES
    ========================================= */
 $primary-color: #0a4d68;
-$primary-dark: #083d52;
 $secondary-color: #145da0;
 $accent-color: #4fc3f7;
 $bg-color: #f4f7fb;
@@ -20,243 +19,369 @@ $radius-md: 12px;
 $radius-lg: 16px;
 
 /* =========================================
-   🔄 RESET Y BASE
+   HEADER
    ========================================= */
-* {
-  box-sizing: border-box;
-}
-
-ion-content {
-  --background: #{$bg-color};
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-/* =========================================
-   🎯 HEADER
-   ========================================= */
-.main-header {
-  ion-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    border-bottom: 1px solid $border-color;
-    padding: 0 20px;
-    box-shadow: $shadow-sm;
-    --min-height: 64px;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .logo-icon {
-        font-size: 1.8rem;
-        color: $primary-color;
-      }
-
-      ion-title {
-        font-weight: 700;
-        color: $primary-color;
-        font-size: 1.1rem;
-        padding: 0;
-        margin: 0;
-      }
-    }
-
-    ion-button {
-      --color: $text-secondary;
-      --color-hover: $primary-color;
-      
-      ion-icon {
-        font-size: 1.4rem;
-      }
-    }
-  }
-}
-
-/* =========================================
-   📦 DASHBOARD CONTAINER
-   ========================================= */
-.dashboard-container {
+::ng-deep .main-header ion-toolbar {
+  --background: #f7fbff !important;
+  border-bottom: 1px solid #dce5f3 !important;
+  padding: 0 20px;
+  height: 60px;
   display: flex;
-  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+::ng-deep .main-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+::ng-deep .main-header .logo-icon {
+  font-size: 1.6rem;
+  color: $primary-color;
+}
+
+::ng-deep .main-header ion-title {
+  font-weight: 600;
+  color: $primary-color;
+  font-size: 1.2rem;
+  padding: 0 !important;
+}
+
+/* =========================================
+   DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
   background: $bg-color;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* =========================================
-   🧭 SIDEBAR
+   SIDEBAR - ESTRUCTURA SIMPLE Y FUNCIONAL
    ========================================= */
-.sidebar {
+::ng-deep .sidebar {
   width: 70px;
-  background-color: $primary-color;
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: visible !important;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+::ng-deep .sidebar.open {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+::ng-deep .sidebar .menu-icon {
+  margin: 1rem 0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+::ng-deep .sidebar .menu-icon:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+::ng-deep .sidebar .user-info {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+}
+
+::ng-deep .sidebar .user-info ion-avatar {
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  --background: rgba(255,255,255,0.2);
+}
+
+::ng-deep .sidebar .user-info ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+::ng-deep .sidebar .user-details {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+::ng-deep .sidebar.open .user-details {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+::ng-deep .sidebar .user-details h4 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 90;
+  text-overflow: ellipsis;
+}
 
-  &.open {
-    width: 230px;
-  }
-
-  .menu-icon {
-    margin: 1rem 0;
-    font-size: 1.6rem;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .user-info {
-    text-align: center;
-    padding: 1rem 0.5rem;
-    width: 100%;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 0.5rem;
-    
-    ion-avatar {
-      margin: 0 auto 8px;
-      width: 50px;
-      height: 50px;
-      background: rgba(255,255,255,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      ion-icon {
-        font-size: 30px;
-        color: white;
-      }
-    }
-    
-    .user-details {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      
-      h4, p {
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      
-      h4 {
-        font-size: 0.95rem;
-        font-weight: 500;
-      }
-      
-      p {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.7);
-      }
-    }
-  }
-
-  &.open .user-details {
-    opacity: 1;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    margin: 0;
-    
-    li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      cursor: pointer;
-      color: rgba(255,255,255,0.85);
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-      
-      ion-icon {
-        font-size: 1.3rem;
-        min-width: 20px;
-      }
-      
-      span {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        white-space: nowrap;
-      }
-      
-      &:hover {
-        background: rgba(255,255,255,0.12);
-        color: white;
-      }
-      
-      &.active {
-        background: rgba(255,255,255,0.18);
-        color: white;
-        border-left: 3px solid $accent-color;
-      }
-    }
-  }
-
-  &.open ul li span {
-    opacity: 1;
-  }
+::ng-deep .sidebar .user-details p {
+  font-size: 0.75rem;
+  color: #b0c7d9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =========================================
-   📦 CONTENIDO PRINCIPAL
+   LISTA DEL MENU
    ========================================= */
-.main-content {
+::ng-deep .sidebar ul {
+  list-style: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  margin: 0;
+}
+
+::ng-deep .sidebar ul > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+::ng-deep .sidebar ul > li:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+::ng-deep .sidebar ul > li.active {
+  background: rgba(255,255,255,0.2);
+  border-left: 3px solid $accent-color;
+}
+
+::ng-deep .sidebar ul > li ion-icon {
+  font-size: 1.3rem;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+::ng-deep .sidebar ul > li span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::ng-deep .sidebar.open ul > li span {
+  opacity: 1;
+}
+
+/* =========================================
+   ITEM CON SUBMENU (PACIENTES)
+   ========================================= */
+::ng-deep .sidebar .menu-item-with-submenu {
+  position: relative !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+::ng-deep .sidebar .menu-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  color: rgba(255,255,255,0.9) !important;
+  transition: background 0.2s ease !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .sidebar .menu-link:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .menu-link ion-icon:first-child {
+  font-size: 1.3rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .menu-link span {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+
+::ng-deep .sidebar.open .menu-link span {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow {
+  margin-left: auto !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.3s ease !important;
+  font-size: 1rem !important;
+}
+
+::ng-deep .sidebar.open .menu-link .submenu-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow.rotate {
+  transform: rotate(180deg) !important;
+}
+
+/* =========================================
+   SUBMENU DESPLEGABLE
+   ========================================= */
+::ng-deep .sidebar .submenu {
+  position: absolute !important;
+  left: 100% !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #083d52 0%, #062d3d 100%) !important;
+  min-width: 220px !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.3) !important;
+  z-index: 1000 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+::ng-deep .sidebar .submenu.active {
+  max-height: 400px !important;
+}
+
+::ng-deep .sidebar .submenu li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 20px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .sidebar .submenu li:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .submenu li.active {
+  background: rgba(255,255,255,0.2) !important;
+  border-left: 3px solid $accent-color !important;
+}
+
+::ng-deep .sidebar .submenu li:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .sidebar .submenu li ion-icon {
+  font-size: 1.1rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .submenu li span {
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
+}
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
   flex: 1;
   padding: 30px 40px;
   overflow-y: auto;
+  overflow-x: hidden;
+  background: $bg-color;
+}
+
+::ng-deep .main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.2);
+  border-radius: 4px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-thumb:hover {
+  background: rgba($primary-color, 0.4);
 }
 
 /* =========================================
-   🎯 ENCABEZADO DE PÁGINA
+   ENCABEZADO DE PAGINA
    ========================================= */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  
-  .header-info {
-    h1 {
-      margin: 0 0 8px;
-      color: $primary-color;
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
-    
-    p {
-      margin: 0;
-      color: $text-secondary;
-      font-size: 0.95rem;
-      
-      strong {
-        color: $primary-color;
-      }
-    }
-  }
-  
-  ion-button {
-    --border-radius: #{$radius-md};
-    font-weight: 600;
-  }
+}
+
+.page-header .header-info h1 {
+  margin: 0 0 8px;
+  color: $primary-color;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.page-header .header-info p {
+  margin: 0;
+  color: $text-secondary;
+  font-size: 0.95rem;
+}
+
+.page-header .header-info p strong {
+  color: $primary-color;
+}
+
+.page-header ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
 }
 
 /* =========================================
-   🔍 BARRA DE BÚSQUEDA Y FILTROS
+   FILTROS
    ========================================= */
 .filtros-container {
   display: flex;
@@ -266,45 +391,49 @@ ion-content {
   padding: 16px 20px;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
-  
-  .search-box {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: $input-bg;
-    border: 1px solid $border-color;
-    border-radius: $radius-md;
-    padding: 0 16px;
-    
-    ion-icon {
-      color: $text-muted;
-      font-size: 1.2rem;
-    }
-    
-    ion-input {
-      --padding-start: 0;
-      --padding-end: 0;
-      font-size: 0.95rem;
-    }
-  }
-  
-  .filtro-estado {
-    min-width: 200px;
-    
-    ion-select {
-      --background: $input-bg;
-      --border-radius: #{$radius-md};
-      --padding-start: 16px;
-      --padding-end: 16px;
-      border: 1px solid $border-color;
-      font-size: 0.95rem;
-    }
-  }
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: $input-bg;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  padding: 0 16px;
+}
+
+.search-box ion-icon {
+  color: $text-muted;
+  font-size: 1.2rem;
+}
+
+.search-box ion-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  --color: #{$text-primary};
+  --placeholder-color: #{$text-muted};
+  font-size: 0.95rem;
+}
+
+.filtro-estado {
+  min-width: 200px;
+}
+
+.filtro-estado ion-select {
+  --background: $input-bg;
+  --color: #{$text-primary};
+  --placeholder-color: #{$text-muted};
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 1px solid $border-color;
+  font-size: 0.95rem;
 }
 
 /* =========================================
-   🔄 LOADING
+   LOADING
    ========================================= */
 .loading-container {
   display: flex;
@@ -312,22 +441,23 @@ ion-content {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  
-  ion-spinner {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-  }
-  
-  p {
-    color: $text-secondary;
-    font-size: 1rem;
-    margin: 0;
-  }
+}
+
+.loading-container ion-spinner {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  --color: #{$secondary-color};
+}
+
+.loading-container p {
+  color: $text-secondary;
+  font-size: 1rem;
+  margin: 0;
 }
 
 /* =========================================
-   👥 GRID DE PACIENTES
+   GRID DE PACIENTES
    ========================================= */
 .pacientes-grid {
   display: grid;
@@ -341,182 +471,216 @@ ion-content {
   padding: 20px;
   box-shadow: $shadow-md;
   transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: $shadow-lg;
-    transform: translateY(-2px);
-  }
+}
+
+.paciente-card:hover {
+  box-shadow: $shadow-lg;
+  transform: translateY(-2px);
 }
 
 /* =========================================
-   👤 HEADER DE PACIENTE
+   HEADER DE PACIENTE
    ========================================= */
 .paciente-header {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
-  
-  .avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    
-    span {
-      color: white;
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-  }
-  
-  .paciente-info {
-    flex: 1;
-    min-width: 0;
-    
-    h3 {
-      margin: 0 0 4px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: $text-primary;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    p {
-      margin: 2px 0;
-      font-size: 0.85rem;
-      color: $text-secondary;
-      
-      &.cedula, &.telefono {
-        font-family: 'Courier New', monospace;
-      }
-    }
-  }
-  
-  .estado-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    white-space: nowrap;
-    height: fit-content;
-    
-    &.badge-success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    
-    &.badge-warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    
-    &.badge-primary {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-    
-    &.badge-danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-  }
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar span {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.paciente-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.paciente-info h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paciente-info p {
+  margin: 2px 0;
+  font-size: 0.85rem;
+  color: $text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.paciente-info p ion-icon {
+  font-size: 0.9rem;
+  color: $secondary-color;
+}
+
+.paciente-info .cedula,
+.paciente-info .telefono {
+  font-family: 'Courier New', monospace;
+}
+
+.estado-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.estado-badge ion-icon {
+  font-size: 0.85rem;
+}
+
+.estado-badge.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.estado-badge.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado-badge.badge-primary {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.estado-badge.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 /* =========================================
-   📊 PROGRESO
+   PROGRESO
    ========================================= */
 .progreso-container {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
-  
-  .progreso-bar {
-    flex: 1;
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 10px;
-    overflow: hidden;
-    
-    .progreso-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981, #059669);
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-  }
-  
-  .progreso-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: $text-primary;
-    min-width: 40px;
-    text-align: right;
-  }
+}
+
+.progreso-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progreso-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.progreso-fill.progress-complete {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.progreso-fill.progress-warning {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.progreso-fill.progress-normal {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+.progreso-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-primary;
+  min-width: 40px;
+  text-align: right;
 }
 
 /* =========================================
-   ⚠️ ALERTAS
+   ALERTAS
    ========================================= */
 .alertas-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
-  
-  .alerta-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    background: #fef3c7;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    
-    ion-icon {
-      font-size: 0.9rem;
-      
-      &.alert-critico {
-        color: #dc2626;
-      }
-      
-      &.alert-alto {
-        color: #f59e0b;
-      }
-    }
-  }
+}
+
+.alerta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.alerta-item ion-icon {
+  font-size: 0.9rem;
+}
+
+.alerta-item.critico {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.alerta-item.alto {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.alerta-item.medio {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 /* =========================================
-   🔘 ACCIONES
+   ACCIONES
    ========================================= */
 .acciones-container {
   display: flex;
   gap: 8px;
   padding-top: 16px;
   border-top: 1px solid $border-color;
-  
-  ion-button {
-    flex: 1;
-    --border-radius: #{$radius-sm};
-    font-size: 0.85rem;
-    font-weight: 600;
-    --padding-top: 10px;
-    --padding-bottom: 10px;
-    
-    ion-icon {
-      font-size: 1rem;
-    }
-  }
+}
+
+.acciones-container ion-button {
+  flex: 1;
+  --border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+.acciones-container ion-button ion-icon {
+  font-size: 1rem;
 }
 
 /* =========================================
-   🔍 SIN RESULTADOS
+   SIN RESULTADOS
    ========================================= */
 .sin-resultados {
   display: flex;
@@ -525,28 +689,28 @@ ion-content {
   justify-content: center;
   padding: 80px 20px;
   text-align: center;
-  
-  ion-icon {
-    font-size: 4rem;
-    color: $text-muted;
-    margin-bottom: 16px;
-  }
-  
-  h3 {
-    margin: 0 0 8px;
-    color: $text-primary;
-    font-size: 1.3rem;
-  }
-  
-  p {
-    margin: 0;
-    color: $text-secondary;
-    font-size: 0.95rem;
-  }
+}
+
+.sin-resultados ion-icon {
+  font-size: 4rem;
+  color: $text-muted;
+  margin-bottom: 16px;
+}
+
+.sin-resultados h3 {
+  margin: 0 0 8px;
+  color: $text-primary;
+  font-size: 1.3rem;
+}
+
+.sin-resultados p {
+  margin: 0;
+  color: $text-secondary;
+  font-size: 0.95rem;
 }
 
 /* =========================================
-   📄 PAGINACIÓN
+   PAGINACION
    ========================================= */
 .paginacion-container {
   display: flex;
@@ -555,73 +719,403 @@ ion-content {
   gap: 16px;
   margin-top: 32px;
   padding: 20px;
-  
-  ion-button {
-    --border-radius: #{$radius-sm};
-  }
-  
-  .pagina-info {
-    font-size: 0.95rem;
-    color: $text-secondary;
-    font-weight: 500;
-  }
+}
+
+.paginacion-container ion-button {
+  --border-radius: 8px;
+}
+
+.pagina-info {
+  font-size: 0.95rem;
+  color: $text-secondary;
+  font-weight: 500;
 }
 
 /* =========================================
-   📱 RESPONSIVE
+   RESPONSIVE
    ========================================= */
 @media (max-width: 1024px) {
   .pacientes-grid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
-  
+
   .filtros-container {
     flex-direction: column;
-    
-    .filtro-estado {
-      min-width: auto;
-    }
   }
-  
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    box-shadow: $shadow-lg;
-    
-    &.open {
-      transform: translateX(0);
-    }
+
+  .filtro-estado {
+    min-width: auto;
   }
 }
 
 @media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  ::ng-deep .sidebar.open {
+    width: 100% !important;
+  }
+
+  ::ng-deep .sidebar .menu-icon {
+    display: none;
+  }
+
+  ::ng-deep .sidebar .user-info {
+    display: none;
+  }
+
+  ::ng-deep .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: auto;
+  }
+
+  ::ng-deep .sidebar ul li {
+    padding: 5px;
+  }
+
+  ::ng-deep .sidebar ul li span {
+    display: none;
+  }
+
+  ::ng-deep .sidebar .menu-item-with-submenu {
+    position: static !important;
+  }
+
+  ::ng-deep .sidebar .submenu {
+    position: static !important;
+    min-width: 100% !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    margin-top: 8px !important;
+  }
+
   .main-content {
     padding: 20px 16px;
   }
-  
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    
-    .header-info h1 {
-      font-size: 1.5rem;
-    }
   }
-  
+
+  .page-header .header-info h1 {
+    font-size: 1.5rem;
+  }
+
   .pacientes-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .acciones-container {
     flex-direction: column;
-    
-    ion-button {
-      width: 100%;
+  }
+
+  .acciones-container ion-button {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================
+   ALERT DE REGISTRO CLINICO - PROFESIONAL
+   ========================================= */
+::ng-deep .alert-registro {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 480px;
+    animation: alertSlideIn 0.3s ease-out;
+  }
+
+  /* HEADER DEL ALERT */
+  .alert-head {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%);
+    padding: 24px 24px 20px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+    letter-spacing: 0.3px;
+  }
+
+  .alert-sub-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+    font-weight: 400;
+  }
+
+  /* MENSAJE */
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 8px !important;
+    margin: 0 !important;
+  }
+
+  /* GRUPO DE INPUTS */
+  .alert-input-group {
+    padding: 8px 24px 16px;
+    background: #ffffff;
+  }
+
+  /* CADA INPUT INDIVIDUAL */
+  .alert-input-wrapper {
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .alert-input {
+    width: 100%;
+    padding: 12px 16px !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    color: #1a1f36 !important;
+    background: #f8fafc !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+
+    &:focus {
+      border-color: #4fc3f7 !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.15) !important;
     }
+
+    &::placeholder {
+      color: #9499b7;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* BOTONES */
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease !important;
+    min-width: 120px;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* BOTON CANCELAR */
+  .alert-button-cancel {
+    background: #f1f5f9 !important;
+    color: #6c7293 !important;
+    border: 1px solid #e2e8f0 !important;
+
+    &:hover {
+      background: #e2e8f0 !important;
+      color: #1a1f36 !important;
+    }
+
+    &:active {
+      background: #cbd5e1 !important;
+    }
+  }
+
+  /* BOTON CONFIRMAR */
+  .alert-button-confirm {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(10, 77, 104, 0.25) !important;
+
+    &:hover {
+      background: linear-gradient(135deg, #083d52 0%, #0f4a7a 100%) !important;
+      box-shadow: 0 6px 16px rgba(10, 77, 104, 0.35) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(10, 77, 104, 0.25) !important;
+    }
+  }
+}
+
+/* =========================================
+   ALERT DE ERROR DE CEDULA
+   ========================================= */
+::ng-deep .alert-error-cedula {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    border-top: 4px solid #ef4444;
+  }
+
+  .alert-head {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    padding: 20px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #991b1b !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alert-message {
+    color: #7f1d1d !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 20px !important;
+    background: #ffffff;
+    line-height: 1.5;
+  }
+
+  .alert-button-group {
+    padding: 0 24px 20px;
+    background: #ffffff;
+    justify-content: flex-end;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      background: #dc2626 !important;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+    }
+  }
+}
+
+/* =========================================
+   ALERT DE CONFIRMACION (ELIMINAR, CERRAR SESION)
+   ========================================= */
+::ng-deep ion-alert {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .alert-head {
+    padding: 24px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #1a1f36 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    padding: 0 24px 20px !important;
+  }
+
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.2s ease !important;
+    min-width: 100px;
+  }
+}
+
+/* =========================================
+   ANIMACION DE ENTRADA DEL ALERT
+   ========================================= */
+@keyframes alertSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   RESPONSIVE PARA ALERTS
+   ========================================= */
+@media (max-width: 480px) {
+  ::ng-deep .alert-registro .alert-wrapper,
+  ::ng-deep .alert-error-cedula .alert-wrapper {
+    max-width: 95vw;
+    margin: 10px;
+  }
+
+  ::ng-deep .alert-registro .alert-button-group {
+    flex-direction: column-reverse;
+  }
+
+  ::ng-deep .alert-registro .alert-button {
+    width: 100%;
   }
 }

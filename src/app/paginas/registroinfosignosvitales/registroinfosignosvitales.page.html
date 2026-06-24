@@ -1,13 +1,16 @@
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
-      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Registro Clínico: Signos Vitales</ion-title>
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clinico: Signos Vitales</ion-title>
     </div>
-
     <ion-buttons slot="end">
-      <ion-button (click)="volver()">
+      <ion-button (click)="volver()" title="Volver">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -16,65 +19,64 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR (Mismo menú de enfermería) -->
-    <div
-      class="sidebar"
-      [class.open]="sidebarOpen"
-      (mouseenter)="sidebarOpen = true"
-      (mouseleave)="sidebarOpen = false"
-    >
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
       </div>
-
-      <!-- 👤 Info de Usuario -->
       <div class="user-info">
         <ion-avatar>
-          <ion-icon name="person-circle-outline"></ion-icon>
+          <div class="avatar-placeholder">{{nombreAsistente.charAt(0)}}</div>
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombreAsistente || 'Enfermera'}}</h4>
-          <p>{{especialidad || 'Asistente Médico'}}</p>
+          <p>{{especialidad || 'Asistente Medico'}}</p>
         </div>
       </div>
-
-      <!-- 📋 Menú -->
       <ul>
-        <li (click)="irAInicio()">
-          <ion-icon name="home-outline"></ion-icon>
-          <span>Inicio</span>
+        <li (click)="navegarA('enfermeria')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
         </li>
-        
         <li class="menu-item-with-submenu">
-          <div class="menu-link">
-            <ion-icon name="people-outline"></ion-icon>
-            <span>Pacientes</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
           </div>
-          <ul class="submenu">
-            <li><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
-            <li><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
+            </li>
+            <li (click)="iniciarRegistroPaciente()">
+              <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('enfermeria-buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
+            </li>
           </ul>
         </li>
-        
-        <li>
-          <ion-icon name="clipboard-outline"></ion-icon>
-          <span>Registros</span>
+        <li (click)="iniciarRegistroPaciente()">
+          <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
+        </li>
+        <li (click)="navegarA('enfermeria-reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('enfermeria-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL - FORMULARIO -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content form-layout">
       <div class="form-container">
         
-        <!-- Encabezado del Formulario -->
+        <!-- Encabezado -->
         <div class="form-header-section">
           <h1>Signos Vitales</h1>
-          <p>Registre las constantes vitales del paciente para continuar con la evaluación clínica.</p>
+          <p>Registre las constantes vitales del paciente para continuar con la evaluacion clinica.</p>
         </div>
 
-        <!-- 👥 Selector de Perfil de Paciente -->
+        <!-- Selector de Perfil de Paciente -->
         <ion-card class="profile-selector-card">
           <ion-card-header>
             <ion-card-title>
@@ -98,7 +100,7 @@
             <div class="profile-info" *ngIf="getPerfilActual()">
               <small>
                 <ion-icon name="information-circle-outline"></ion-icon>
-                Rangos clínicos aplicados: <strong>{{getPerfilActual().label}}</strong>
+                Rangos clinicos aplicados: <strong>{{getPerfilActual().label}}</strong>
               </small>
             </div>
           </ion-card-content>
@@ -108,20 +110,20 @@
           
           <div class="form-grid">
             
-            <!-- Columna Izquierda: Signos Vitales Básicos -->
+            <!-- Columna Izquierda: Signos Vitales Basicos -->
             <div class="form-column">
               <ion-card class="input-card">
                 <ion-card-header>
                   <ion-card-title>
-                    <ion-icon name="pulse-outline"></ion-icon> Signos Vitales Básicos
+                    <ion-icon name="pulse-outline"></ion-icon> Signos Vitales Basicos
                   </ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                   
-                  <!-- Frecuencia Cardíaca -->
+                  <!-- Frecuencia Cardiaca -->
                   <div class="form-group">
                     <label>
-                      Frecuencia Cardíaca (Pulso) *
+                      Frecuencia Cardiaca (Pulso) *
                       <span class="clinical-badge" 
                             [class.clinical-normal]="getEstadoClase('frecuenciaCardiaca')==='normal'"
                             [class.clinical-warning]="getEstadoClase('frecuenciaCardiaca')==='warning'"
@@ -129,7 +131,7 @@
                             *ngIf="validaciones['frecuenciaCardiaca']?.estado">
                         <ion-icon [name]="getEstadoIcono('frecuenciaCardiaca')"></ion-icon>
                         {{validaciones['frecuenciaCardiaca']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['frecuenciaCardiaca']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['frecuenciaCardiaca']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -153,10 +155,10 @@
                     </small>
                   </div>
 
-                  <!-- Presión Arterial -->
+                  <!-- Presion Arterial -->
                   <div class="form-group">
                     <label>
-                      Presión Arterial *
+                      Presion Arterial *
                       <span class="clinical-badge" 
                             [class.clinical-normal]="getEstadoClase('presionArterial')==='normal'"
                             [class.clinical-warning]="getEstadoClase('presionArterial')==='warning'"
@@ -164,7 +166,7 @@
                             *ngIf="validaciones['presionArterial']?.estado">
                         <ion-icon [name]="getEstadoIcono('presionArterial')"></ion-icon>
                         {{validaciones['presionArterial']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['presionArterial']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['presionArterial']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -198,7 +200,7 @@
                             *ngIf="validaciones['frecuenciaRespiratoria']?.estado">
                         <ion-icon [name]="getEstadoIcono('frecuenciaRespiratoria')"></ion-icon>
                         {{validaciones['frecuenciaRespiratoria']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['frecuenciaRespiratoria']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['frecuenciaRespiratoria']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -232,7 +234,7 @@
                             *ngIf="validaciones['temperatura']?.estado">
                         <ion-icon [name]="getEstadoIcono('temperatura')"></ion-icon>
                         {{validaciones['temperatura']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['temperatura']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['temperatura']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -247,7 +249,7 @@
                         [class.warning-only]="getEstadoClase('temperatura')==='warning'"
                         (ionChange)="validarSignoVital('temperatura', signosVitalesForm.temperatura)">
                       </ion-input>
-                      <span class="unit-label">°C</span>
+                      <span class="unit-label">C</span>
                     </div>
                     <small class="alert-text" 
                            *ngIf="validaciones['temperatura']?.mensaje && getEstadoClase('temperatura')!=='normal'">
@@ -260,20 +262,20 @@
               </ion-card>
             </div>
 
-            <!-- Columna Derecha: Oxigenación y Metabolismo -->
+            <!-- Columna Derecha: Oxigenacion y Metabolismo -->
             <div class="form-column">
               <ion-card class="input-card">
                 <ion-card-header>
                   <ion-card-title>
-                    <ion-icon name="leaf-outline"></ion-icon> Oxigenación y Metabolismo
+                    <ion-icon name="leaf-outline"></ion-icon> Oxigenacion y Metabolismo
                   </ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                   
-                  <!-- SpO₂ -->
+                  <!-- SpO2 -->
                   <div class="form-group">
                     <label>
-                      Saturación de Oxígeno (SpO₂)
+                      Saturacion de Oxigeno (SpO2)
                       <span class="clinical-badge" 
                             [class.clinical-normal]="getEstadoClase('spo2')==='normal'"
                             [class.clinical-warning]="getEstadoClase('spo2')==='warning'"
@@ -281,7 +283,7 @@
                             *ngIf="validaciones['spo2']?.estado">
                         <ion-icon [name]="getEstadoIcono('spo2')"></ion-icon>
                         {{validaciones['spo2']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['spo2']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['spo2']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -315,7 +317,7 @@
                             *ngIf="validaciones['glucosaAyunas']?.estado">
                         <ion-icon [name]="getEstadoIcono('glucosaAyunas')"></ion-icon>
                         {{validaciones['glucosaAyunas']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['glucosaAyunas']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['glucosaAyunas']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -349,7 +351,7 @@
                             *ngIf="validaciones['glucosaPostprandial']?.estado">
                         <ion-icon [name]="getEstadoIcono('glucosaPostprandial')"></ion-icon>
                         {{validaciones['glucosaPostprandial']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['glucosaPostprandial']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['glucosaPostprandial']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -383,7 +385,7 @@
                             *ngIf="validaciones['hemoglobinaGlicosilada']?.estado">
                         <ion-icon [name]="getEstadoIcono('hemoglobinaGlicosilada')"></ion-icon>
                         {{validaciones['hemoglobinaGlicosilada']?.estado === 'normal' ? 'Normal' : 
-                          validaciones['hemoglobinaGlicosilada']?.estado === 'warning' ? 'Alerta' : 'Crítico'}}
+                          validaciones['hemoglobinaGlicosilada']?.estado === 'warning' ? 'Alerta' : 'Critico'}}
                       </span>
                     </label>
                     <div class="input-with-unit">
@@ -413,7 +415,7 @@
 
           </div>
 
-          <!-- Botones de Acción -->
+          <!-- Botones de Accion -->
           <div class="form-actions">
             <ion-button fill="outline" color="medium" (click)="volver()" type="button">
               <ion-icon slot="start" name="arrow-back-outline"></ion-icon>

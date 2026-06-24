@@ -6,38 +6,36 @@ import { environment } from 'src/environments/environment';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'app-enfermeriaverpacientes',
-  templateUrl: './enfermeriaverpacientes.page.html',
-  styleUrls: ['./enfermeriaverpacientes.page.scss'],
+  selector: 'app-enfermeria-buscar-paciente',
+  templateUrl: './enfermeria-buscar-paciente.page.html',
+  styleUrls: ['./enfermeria-buscar-paciente.page.scss'],
   standalone: false,
 })
-export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
+export class EnfermeriaBuscarPacientePage implements OnInit, OnDestroy {
 
-  // Info de usuario para sidebar
+  // Info de usuario
   nombreAsistente: string = 'Enfermera';
   especialidad: string = 'Asistente Medico';
   usuario: any = null;
   
-  // Sidebar - ABIERTO POR DEFECTO en desktop
+  // Sidebar
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   private isMobile = false;
   
-  // Pacientes
-  pacientes: any[] = [];
-  pacientesFiltrados: any[] = [];
-  cargandoPacientes = false;
-  
   // Busqueda
   terminoBusqueda: string = '';
-  
-  // Filtros
+  tipoBusqueda: string = 'todos';
   filtroEstado: string = 'todos';
+  ordenPor: string = 'recientes';
   
-  // Paginacion
-  paginaActual: number = 1;
-  pacientesPorPagina: number = 10;
-  totalPacientes: number = 0;
+  // Resultados
+  resultados: any[] = [];
+  buscando: boolean = false;
+  haBuscado: boolean = false;
+  
+  // Busquedas recientes
+  busquedasRecientes: string[] = [];
   
   // Estados
   private destroy$ = new Subject<void>();
@@ -46,9 +44,9 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   private readonly rutas: Record<string, string> = {
     'enfermeria': '/enfermeria',
     'enfermeriaverpacientes': '/enfermeriaverpacientes',
+    'enfermeria-buscar-paciente': '/enfermeria-buscar-paciente',
     'agregar-paciente': '/enfermeria/registro',
-    'enfermeria-buscar-paciente': 'enfermeria-buscar-paciente',
-    'enfermeria-reportes': 'enfermeria-reportes',
+    'reportes': '/enfermeria/reportes',
     'enfermeria-configuracion': '/enfermeria-configuracion'
   };
 
@@ -62,24 +60,18 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   ) {
     this.platform.ready().then(() => {
       this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
-      // Sidebar ABIERTO por defecto en desktop
       this.sidebarOpen = !this.isMobile;
     });
   }
 
   ngOnInit() {
     this.cargarDatosSesion();
-    this.cargarPacientes();
+    this.cargarBusquedasRecientes();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ionViewWillEnter() {
-    console.log('[VER PACIENTES] Recargando lista...');
-    this.cargarPacientes();
   }
 
   private cargarDatosSesion(): void {
@@ -96,72 +88,93 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
     }
   }
 
-  private async cargarPacientes(): Promise<void> {
-    this.cargandoPacientes = true;
+  private cargarBusquedasRecientes(): void {
+    const busquedas = localStorage.getItem('busquedas_recientes_enfermeria');
+    if (busquedas) {
+      try {
+        this.busquedasRecientes = JSON.parse(busquedas);
+      } catch (e) {
+        this.busquedasRecientes = [];
+      }
+    }
+  }
+
+  private guardarBusquedaReciente(termino: string): void {
+    if (!termino.trim()) return;
     
+    // Eliminar duplicados
+    this.busquedasRecientes = this.busquedasRecientes.filter(b => b !== termino);
+    
+    // Agregar al inicio
+    this.busquedasRecientes.unshift(termino);
+    
+    // Limitar a 5 busquedas
+    if (this.busquedasRecientes.length > 5) {
+      this.busquedasRecientes = this.busquedasRecientes.slice(0, 5);
+    }
+    
+    localStorage.setItem('busquedas_recientes_enfermeria', JSON.stringify(this.busquedasRecientes));
+  }
+
+  async buscarPacientes(): Promise<void> {
+    if (!this.terminoBusqueda.trim()) {
+      await this.showToast('Ingrese un termino de busqueda', 'warning');
+      return;
+    }
+
+    this.buscando = true;
+    this.haBuscado = true;
+    this.guardarBusquedaReciente(this.terminoBusqueda.trim());
+
     try {
       const token = localStorage.getItem('token');
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`
       });
 
+      const params = new URLSearchParams();
+      params.append('q', this.terminoBusqueda.trim());
+      params.append('tipo', this.tipoBusqueda);
+      params.append('estado', this.filtroEstado);
+      params.append('orden', this.ordenPor);
+
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/todos`,
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/buscar?${params.toString()}`,
         { headers }
       ).toPromise();
 
-      if (response?.error === false && response?.pacientes) {
-        this.pacientes = response.pacientes;
-        this.totalPacientes = response.pacientes.length;
-        this.aplicarFiltros();
+      if (response?.error === false) {
+        this.resultados = response.pacientes || [];
+        
+        if (this.resultados.length === 0) {
+          await this.showToast('No se encontraron pacientes', 'primary');
+        } else {
+          await this.showToast(`${this.resultados.length} paciente(s) encontrado(s)`, 'success');
+        }
       } else {
-        this.pacientes = [];
-        this.pacientesFiltrados = [];
+        this.resultados = [];
+        await this.showToast('Error en la busqueda', 'danger');
       }
     } catch (error) {
-      console.error('Error cargando pacientes:', error);
-      await this.showToast('Error al cargar pacientes', 'danger');
-      this.pacientes = [];
-      this.pacientesFiltrados = [];
+      console.error('Error buscando pacientes:', error);
+      this.resultados = [];
+      await this.showToast('Error al buscar pacientes', 'danger');
     } finally {
-      this.cargandoPacientes = false;
+      this.buscando = false;
     }
   }
 
-  aplicarFiltros(): void {
-    let filtrados = [...this.pacientes];
-
-    if (this.terminoBusqueda.trim()) {
-      const termino = this.terminoBusqueda.toLowerCase();
-      filtrados = filtrados.filter(p => 
-        p.nombre_completo?.toLowerCase().includes(termino) ||
-        p.cedula?.includes(termino) ||
-        p.telefono?.includes(termino)
-      );
-    }
-
-    if (this.filtroEstado !== 'todos') {
-      filtrados = filtrados.filter(p => p.estado_real === this.filtroEstado);
-    }
-
-    this.pacientesFiltrados = filtrados;
-    this.paginaActual = 1;
+  ejecutarBusquedaRapida(termino: string): void {
+    this.terminoBusqueda = termino;
+    this.buscarPacientes();
   }
 
-  get pacientesPaginados(): any[] {
-    const inicio = (this.paginaActual - 1) * this.pacientesPorPagina;
-    const fin = inicio + this.pacientesPorPagina;
-    return this.pacientesFiltrados.slice(inicio, fin);
-  }
-
-  get totalPaginas(): number {
-    return Math.ceil(this.pacientesFiltrados.length / this.pacientesPorPagina);
-  }
-
-  cambiarPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaActual = pagina;
-    }
+  limpiarBusqueda(): void {
+    this.terminoBusqueda = '';
+    this.resultados = [];
+    this.haBuscado = false;
+    this.tipoBusqueda = 'todos';
+    this.filtroEstado = 'todos';
   }
 
   async verInformacion(paciente: any): Promise<void> {
@@ -180,53 +193,6 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
       this.router.navigate(['/enfermeriaverpacientesinfo'], {
         queryParams: { registro_id: paciente.registro_id }
       });
-    }
-  }
-
-  async eliminarPaciente(paciente: any): Promise<void> {
-    const confirm = await this.alertCtrl.create({
-      header: 'Eliminar Paciente',
-      message: `¿Estas seguro de eliminar a <strong>${paciente.nombre_completo}</strong>?<br><br>
-                <small style="color: #dc2626;">Esta accion no se puede deshacer.</small>`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
-        {
-          text: 'Si, eliminar',
-          cssClass: 'alert-button-danger',
-          handler: async () => { await this.confirmarEliminacion(paciente); }
-        }
-      ]
-    });
-    await confirm.present();
-  }
-
-  private async confirmarEliminacion(paciente: any): Promise<void> {
-    const loading = await this.loadingCtrl.create({
-      message: 'Eliminando paciente...',
-      spinner: 'crescent'
-    });
-    await loading.present();
-
-    try {
-      const token = localStorage.getItem('token');
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-      const response: any = await this.http.delete(
-        `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/${paciente.id}`,
-        { headers }
-      ).toPromise();
-
-      await loading.dismiss();
-
-      if (response?.error === false) {
-        await this.showToast('Paciente eliminado correctamente', 'success');
-        await this.cargarPacientes();
-      } else {
-        throw new Error(response?.mensaje || 'Error desconocido');
-      }
-    } catch (error: any) {
-      await loading.dismiss();
-      await this.showToast('Error al eliminar paciente', 'danger');
     }
   }
 
@@ -251,13 +217,70 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
     window.open(`https://wa.me/${telefono}?text=${mensaje}`, '_blank');
   }
 
+  async nuevoRegistroParaPaciente(paciente: any): Promise<void> {
+    const confirm = await this.alertCtrl.create({
+      header: 'Nuevo Registro',
+      message: `Desea iniciar un nuevo registro para <strong>${paciente.nombre_completo}</strong>?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Iniciar',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            try {
+              const token = localStorage.getItem('token');
+              const headers = new HttpHeaders({
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              });
+
+              const partes = paciente.nombre_completo.split(' ');
+              const response: any = await this.http.post(
+                `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
+                {
+                  cedula: paciente.cedula,
+                  nombres: partes[0] || '',
+                  apellidos: partes.slice(1).join(' ') || ''
+                },
+                { headers }
+              ).toPromise();
+
+              if (response?.registro_id) {
+                localStorage.setItem('registro_clinico_id', response.registro_id);
+                await this.showToast('Registro iniciado correctamente', 'success');
+                this.router.navigate(['/registroinfopaciente'], {
+                  queryParams: {
+                    registro_id: response.registro_id,
+                    nombres: partes[0] || '',
+                    apellidos: partes.slice(1).join(' ') || '',
+                    numeroIdentificacion: paciente.cedula
+                  }
+                });
+              }
+            } catch (error: any) {
+              if (error?.status === 409 && error?.error?.registro_id) {
+                localStorage.setItem('registro_clinico_id', error.error.registro_id);
+                this.router.navigate(['/registroinfopaciente'], {
+                  queryParams: { registro_id: error.error.registro_id }
+                });
+              } else {
+                await this.showToast('Error al iniciar registro', 'danger');
+              }
+            }
+          }
+        }
+      ]
+    });
+    await confirm.present();
+  }
+
   async iniciarRegistroPaciente(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Nuevo Registro Clinico',
       message: 'Ingrese cedula, nombres y apellidos del paciente:',
       cssClass: 'alert-registro',
       inputs: [
-        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)', 
+        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)',
           attributes: { maxlength: 10, inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off' } },
         { name: 'nombres', type: 'text', placeholder: 'Nombres *' },
         { name: 'apellidos', type: 'text', placeholder: 'Apellidos *' }
@@ -398,19 +421,17 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
     if (this.isMobile) this.sidebarOpen = false;
   }
 
-  irAInicio(): void {
-    this.router.navigate(['/enfermeria']);
-  }
-
   async refrescarDatos(): Promise<void> {
-    await this.cargarPacientes();
+    if (this.haBuscado && this.terminoBusqueda) {
+      await this.buscarPacientes();
+    }
     await this.showToast('Datos actualizados', 'success');
   }
 
   async cerrarSesion(): Promise<void> {
     const confirm = await this.alertCtrl.create({
       header: 'Cerrar sesion',
-      message: '¿Esta seguro que desea cerrar sesion?',
+      message: 'Esta seguro que desea cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
         {
@@ -435,7 +456,7 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.has-submenu')) {
+    if (!target.closest('.menu-item-with-submenu')) {
       this.submenuAbierto = null;
     }
   }

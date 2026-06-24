@@ -1,8 +1,7 @@
 /* =========================================
-   🎨 VARIABLES - Tema Hospitalario
+   VARIABLES
    ========================================= */
 $primary-color: #0a4d68;
-$primary-dark: #083d52;
 $secondary-color: #145da0;
 $accent-color: #4fc3f7;
 $bg-color: #f4f7fb;
@@ -12,12 +11,6 @@ $text-secondary: #6c7293;
 $text-muted: #9499b7;
 $border-color: #e2e8f0;
 $input-bg: #f8fafc;
-
-// 🚨 Colores clínicos
-$clinical-normal: #06d6a0;
-$clinical-warning: #ffc107;
-$clinical-critical: #ff3b5c;
-
 $shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
 $shadow-md: 0 4px 20px rgba(0,0,0,0.08);
 $shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
@@ -26,718 +19,952 @@ $radius-md: 12px;
 $radius-lg: 16px;
 
 /* =========================================
-   🔄 RESET Y BASE
+   HEADER
    ========================================= */
-* {
-  box-sizing: border-box;
-}
-
-ion-content {
-  --background: #{$bg-color};
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-/* =========================================
-   🎯 HEADER (Idéntico al Dashboard)
-   ========================================= */
-.main-header {
-  ion-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    border-bottom: 1px solid $border-color;
-    padding: 0 20px;
-    box-shadow: $shadow-sm;
-    --min-height: 64px;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .logo-icon {
-        font-size: 1.8rem;
-        color: $primary-color;
-      }
-
-      ion-title {
-        font-weight: 700;
-        color: $primary-color;
-        font-size: 1.1rem;
-        padding: 0;
-        margin: 0;
-      }
-    }
-
-    ion-button {
-      --color: $text-secondary;
-      --color-hover: $primary-color;
-      
-      ion-icon {
-        font-size: 1.4rem;
-      }
-      
-      &:hover {
-        --background: rgba(0,0,0,0.04);
-      }
-    }
-  }
-}
-
-/* =========================================
-   📦 DASHBOARD CONTAINER
-   ========================================= */
-.dashboard-container {
+::ng-deep .main-header ion-toolbar {
+  --background: #f7fbff !important;
+  border-bottom: 1px solid #dce5f3 !important;
+  padding: 0 20px;
+  height: 60px;
   display: flex;
-  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+::ng-deep .main-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+::ng-deep .main-header .logo-icon {
+  font-size: 1.6rem;
+  color: $primary-color;
+}
+
+::ng-deep .main-header ion-title {
+  font-weight: 600;
+  color: $primary-color;
+  font-size: 1.2rem;
+  padding: 0 !important;
+}
+
+/* =========================================
+   DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
   background: $bg-color;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* =========================================
-   🧭 SIDEBAR (Mismo estilo que enfermería)
+   SIDEBAR
    ========================================= */
-.sidebar {
+::ng-deep .sidebar {
   width: 70px;
-  background-color: $primary-color;
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: visible !important;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+::ng-deep .sidebar.open {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+::ng-deep .sidebar .menu-icon {
+  margin: 1rem 0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+::ng-deep .sidebar .menu-icon:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+::ng-deep .sidebar .user-info {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+}
+
+::ng-deep .sidebar .user-info ion-avatar {
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  --background: rgba(255,255,255,0.2);
+}
+
+::ng-deep .sidebar .user-info ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+::ng-deep .sidebar .user-details {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+::ng-deep .sidebar.open .user-details {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+::ng-deep .sidebar .user-details h4 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 90;
+  text-overflow: ellipsis;
+}
 
-  &.open {
-    width: 230px;
-  }
+::ng-deep .sidebar .user-details p {
+  font-size: 0.75rem;
+  color: #b0c7d9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .menu-icon {
-    margin: 1rem 0;
-    font-size: 1.6rem;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    
-    ion-icon {
-      transition: transform 0.2s ease;
-    }
-    
-    &:hover ion-icon {
-      transform: scale(1.1);
-    }
-  }
+::ng-deep .sidebar ul {
+  list-style: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  margin: 0;
+}
 
-  .user-info {
-    text-align: center;
-    padding: 1rem 0.5rem;
-    width: 100%;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 0.5rem;
-    
-    ion-avatar {
-      margin: 0 auto 8px;
-      width: 50px;
-      height: 50px;
-      min-width: 50px;
-      background: rgba(255,255,255,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      ion-icon {
-        font-size: 30px;
-        color: white;
-      }
-    }
-    
-    .user-details {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-      
-      h4 {
-        font-size: 0.95rem;
-        margin: 0;
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      
-      p {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.7);
-        margin: 2px 0 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-  }
+::ng-deep .sidebar ul > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
 
-  &.open .user-details {
-    opacity: 1;
-    pointer-events: auto;
-  }
+::ng-deep .sidebar ul > li:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
 
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    margin: 0;
-    
-    li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      cursor: pointer;
-      color: rgba(255,255,255,0.85);
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-      
-      ion-icon {
-        font-size: 1.3rem;
-        min-width: 20px;
-      }
-      
-      span {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        white-space: nowrap;
-      }
-      
-      &:hover {
-        background: rgba(255,255,255,0.12);
-        color: white;
-      }
-      
-      &.active {
-        background: rgba(255,255,255,0.18);
-        color: white;
-        border-left: 3px solid $accent-color;
-      }
-    }
-  }
+::ng-deep .sidebar ul > li.active {
+  background: rgba(255,255,255,0.2);
+  border-left: 3px solid $accent-color;
+}
 
-  &.open ul li span {
-    opacity: 1;
-  }
-  
-  .menu-item-with-submenu {
-    .menu-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-    
-    .submenu-arrow {
-      font-size: 1rem;
-      transition: transform 0.3s ease;
-      margin-left: auto;
-      
-      &.rotate {
-        transform: rotate(180deg);
-      }
-    }
-    
-    .submenu {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-      background: rgba(0,0,0,0.1);
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      
-      &.active {
-        max-height: 200px;
-      }
-      
-      li {
-        padding: 10px 20px 10px 52px;
-        font-size: 0.85rem;
-        
-        ion-icon {
-          font-size: 1.1rem;
-        }
-      }
-    }
-  }
-  
-  &.open .menu-item-with-submenu .submenu li span {
-    opacity: 1;
-  }
+::ng-deep .sidebar ul > li ion-icon {
+  font-size: 1.3rem;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+::ng-deep .sidebar ul > li span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::ng-deep .sidebar.open ul > li span {
+  opacity: 1;
+}
+
+::ng-deep .sidebar .menu-item-with-submenu {
+  position: relative !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+::ng-deep .sidebar .menu-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  color: rgba(255,255,255,0.9) !important;
+  transition: background 0.2s ease !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .sidebar .menu-link:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .menu-link span {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+
+::ng-deep .sidebar.open .menu-link span {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow {
+  margin-left: auto !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.3s ease !important;
+  font-size: 1rem !important;
+}
+
+::ng-deep .sidebar.open .menu-link .submenu-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow.rotate {
+  transform: rotate(180deg) !important;
+}
+
+::ng-deep .sidebar .submenu {
+  position: absolute !important;
+  left: 100% !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #083d52 0%, #062d3d 100%) !important;
+  min-width: 220px !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.3) !important;
+  z-index: 1000 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+::ng-deep .sidebar .submenu.active {
+  max-height: 400px !important;
+}
+
+::ng-deep .sidebar .submenu li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 20px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .sidebar .submenu li:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .submenu li.active {
+  background: rgba(255,255,255,0.2) !important;
+  border-left: 3px solid $accent-color !important;
+}
+
+::ng-deep .sidebar .submenu li:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .sidebar .submenu li ion-icon {
+  font-size: 1.1rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .submenu li span {
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
 }
 
 /* =========================================
-   📦 CONTENIDO PRINCIPAL - FORMULARIO
+   MAIN CONTENT
    ========================================= */
-.main-content.form-layout {
+::ng-deep .main-content {
   flex: 1;
   padding: 30px 40px;
   overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  overflow-x: hidden;
+  background: $bg-color;
 }
 
-.form-container {
-  width: 100%;
-  max-width: 800px;
+::ng-deep .main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Encabezado del Formulario */
+::ng-deep .main-content::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.2);
+  border-radius: 4px;
+}
+
+.form-layout {
+  display: flex;
+  justify-content: center;
+}
+
+.form-container {
+  max-width: 900px;
+  width: 100%;
+}
+
+/* =========================================
+   FORM HEADER
+   ========================================= */
 .form-header-section {
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  
+  margin-bottom: 24px;
+
   h1 {
     color: $primary-color;
-    font-size: 1.9rem;
-    margin: 0 0 8px;
+    font-size: 1.8rem;
     font-weight: 700;
-    line-height: 1.3;
+    margin: 0 0 8px;
   }
-  
+
   p {
     color: $text-secondary;
+    font-size: 0.95rem;
     margin: 0;
-    font-size: 1rem;
-    line-height: 1.5;
   }
 }
 
 /* =========================================
-   👥 TARJETA DE RESUMEN DEL PACIENTE
+   PATIENT SUMMARY CARD
    ========================================= */
 .patient-summary-card {
-  --background: #{$card-bg};
+  --background: white;
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
-  margin: 0 0 24px;
-  border: 1px solid rgba(0,0,0,0.03);
+  margin-bottom: 24px;
   border-left: 4px solid $accent-color;
-  
-  ion-card-header {
-    padding: 16px 24px 8px;
-    border-bottom: 1px solid #f0f0f0;
-    
-    ion-card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: $primary-color;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0;
-      
-      ion-icon {
-        font-size: 1.2rem;
-        color: $secondary-color;
-      }
-    }
-  }
-  
-  ion-card-content {
-    padding: 16px 24px;
-    
-    p {
-      margin: 8px 0;
-      font-size: 0.95rem;
-      color: $text-primary;
-      
-      strong {
-        color: $text-secondary;
-        font-weight: 500;
-        min-width: 140px;
-        display: inline-block;
-      }
-    }
-  }
-}
 
-/* =========================================
-   📋 LISTA DE CONDICIONES METABÓLICAS
-   ========================================= */
-.conditions-list-card {
-  --background: #{$card-bg};
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
-  margin: 0 0 24px;
-  border: 1px solid rgba(0,0,0,0.03);
-  
   ion-card-header {
-    padding: 18px 24px 10px;
-    border-bottom: 1px solid #f0f0f0;
-    
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+
     ion-card-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: $primary-color;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: $text-primary;
+      font-size: 1.1rem;
+      font-weight: 600;
       margin: 0;
-      
+
       ion-icon {
         font-size: 1.3rem;
         color: $secondary-color;
       }
     }
   }
-  
+
   ion-card-content {
-    padding: 8px 0;
+    padding: 20px 24px;
   }
 }
 
-/* Items de la lista con toggles */
-.condition-item {
-  --background: transparent;
-  --inner-padding-start: 24px;
-  --inner-padding-end: 24px;
-  --padding-top: 14px;
-  --padding-bottom: 14px;
-  --border-width: 0 0 1px 0;
-  --border-color: #f0f0f0;
-  --min-height: auto;
-  
-  &:last-child {
-    --border-width: 0;
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.8rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
   }
-  
-  &:hover {
-    --background: rgba(10, 77, 104, 0.03);
-  }
-  
-  ion-label {
+
+  span {
     font-size: 0.95rem;
-    font-weight: 500;
-    color: #b9c5d9; 
-    margin: 0;
+    color: $text-primary;
+    font-weight: 600;
   }
-  
-  /* Toggle personalizado */
-  ion-toggle {
-    --background: #{$border-color};
-    --background-checked: #{$secondary-color};
-    --handle-background: #ffffff;
-    --handle-width: 20px;
-    --handle-height: 20px;
-    --handle-border-radius: 50%;
-    --handle-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    
-    &.toggle-checked {
-      --handle-background: #ffffff;
+
+  &.imc-item span {
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-block;
+    width: fit-content;
+
+    &.imc-normal {
+      background: #d1fae5;
+      color: #065f46;
     }
-    
-    &::part(track) {
-      border-radius: 20px;
-      height: 28px;
-      width: 48px;
+
+    &.imc-sobrepeso {
+      background: #fef3c7;
+      color: #92400e;
     }
-    
-    &::part(handle) {
-      transition: transform 0.2s ease;
+
+    &.imc-obesidad {
+      background: #fee2e2;
+      color: #991b1b;
     }
   }
 }
 
 /* =========================================
-   ⚠️ TARJETA DE INFORMACIÓN / ALERTA
+   CONDITIONS LIST CARD
    ========================================= */
-.info-card {
-  --background: rgba(255, 193, 7, 0.1);
-  border-radius: $radius-md;
-  border-left: 4px solid $clinical-warning;
-  margin: 0 0 32px;
-  
-  ion-card-content {
-    padding: 16px 20px;
-    
-    small {
+.conditions-list-card {
+  --background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 24px;
+
+  ion-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+
+    ion-card-title {
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: darken($clinical-warning, 20%);
-      font-size: 0.9rem;
-      line-height: 1.4;
-      
+      gap: 10px;
+      color: $text-primary;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+
       ion-icon {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
+        color: $secondary-color;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 16px 24px;
+  }
+}
+
+.conditions-list {
+  background: transparent;
+}
+
+.condition-item {
+  --background: transparent;
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+  border-bottom: 1px solid $border-color;
+  --min-height: 80px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .condition-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    padding: 12px 0;
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: $secondary-color;
+      flex-shrink: 0;
+    }
+
+    div {
+      flex: 1;
+      min-width: 0;
+
+      h3 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  ion-toggle {
+    --handle-width: 22px;
+    --handle-height: 22px;
+    --handle-spacing: 2px;
+    --background: #e5e7eb;
+    --background-checked: #{$primary-color};
+    --handle-background: white;
+    --handle-background-checked: white;
+  }
+}
+
+/* =========================================
+   INFO CARD
+   ========================================= */
+.info-card {
+  --background: rgba($accent-color, 0.1);
+  border-radius: $radius-lg;
+  margin-bottom: 24px;
+  border: 1px solid rgba($accent-color, 0.3);
+
+  ion-card-content {
+    padding: 16px 20px;
+
+    .info-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      ion-icon {
+        font-size: 1.3rem;
+        color: $secondary-color;
         flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      small {
+        color: $text-secondary;
+        font-size: 0.9rem;
+        line-height: 1.5;
       }
     }
   }
 }
 
 /* =========================================
-   🔘 BOTONES DE ACCIÓN (FINALIZAR)
+   FORM ACTIONS
    ========================================= */
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 24px 0;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
   border-top: 1px solid $border-color;
-  margin-top: 8px;
-  
+
   ion-button {
-    --border-radius: #{$radius-md};
-    text-transform: none;
+    --border-radius: 10px;
     font-weight: 600;
-    font-size: 0.95rem;
-    min-width: 150px;
-    --padding-top: 14px;
-    --padding-bottom: 14px;
-    box-shadow: $shadow-sm;
-    transition: all 0.2s ease;
-    
-    &.btn-finalize {
-      --background: #{$clinical-normal};
-      --box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
-      
-      &:hover:not([disabled]) {
-        --background: #{darken($clinical-normal, 8%)};
-        --box-shadow: 0 6px 20px rgba(6, 214, 160, 0.4);
-        transform: translateY(-2px);
-      }
-      
-      &:active:not([disabled]) {
-        transform: translateY(0);
-        --box-shadow: 0 2px 8px rgba(6, 214, 160, 0.2);
-      }
-    }
-    
-    &[fill="outline"] {
-      --border-width: 2px;
-      --border-color: #{$text-muted};
-      --color: #{$text-secondary};
-      
-      &:hover:not([disabled]) {
-        --border-color: #{$primary-color};
-        --color: #{$primary-color};
-        --background: rgba(10, 77, 104, 0.04);
-      }
-    }
+    font-size: 0.9rem;
+  }
+
+  .btn-finalize {
+    --background: linear-gradient(135deg, #10b981, #059669);
+    --background-hover: linear-gradient(135deg, #059669, #047857);
+    --color: white;
+    --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    padding: 0 24px;
   }
 }
 
 /* =========================================
-   🎨 TOAST Y LOADING PERSONALIZADOS
+   RESPONSIVE
    ========================================= */
-.toast-custom {
-  --border-radius: 12px;
-  --box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  
-  &.toast-success {
-    --background: #{$clinical-normal};
-  }
-  
-  &.toast-warning {
-    --background: #{$clinical-warning};
-    --color: #1a1f36;
-  }
-  
-  &.toast-danger {
-    --background: #{$clinical-critical};
-  }
-}
-
-.loading-custom {
-  --background: rgba(26, 31, 54, 0.9);
-  --spinner-color: #4fc3f7;
-  --color: white;
-  border-radius: 16px;
-  padding: 20px 30px;
-}
-
-/* =========================================
-   📱 RESPONSIVE
-   ========================================= */
-
-/* Tablet (≤ 1024px) */
 @media (max-width: 1024px) {
-  .main-content.form-layout {
-    padding: 24px;
-  }
-  
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    box-shadow: $shadow-lg;
-    
-    &.open {
-      transform: translateX(0);
-    }
-    
-    .menu-icon {
-      position: absolute;
-      top: 12px;
-      right: -40px;
-      width: 40px;
-      height: 40px;
-      background: $primary-color;
-      border-radius: 0 8px 8px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-    }
-  }
-  
-  .form-container {
-    max-width: 100%;
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Móvil (≤ 768px) */
 @media (max-width: 768px) {
-  .main-header ion-toolbar {
-    --padding-start: 12px;
-    --padding-end: 12px;
-    
-    ion-title {
-      font-size: 1rem;
-    }
-  }
-  
-  .main-content.form-layout {
-    padding: 16px;
-  }
-  
-  .form-header-section {
-    h1 { font-size: 1.5rem; }
-    p { font-size: 0.9rem; }
-  }
-  
-  .patient-summary-card,
-  .conditions-list-card {
-    ion-card-header {
-      padding: 14px 20px 8px;
-      ion-card-title { font-size: 1rem; }
-    }
-    ion-card-content { padding: 14px 20px; }
-  }
-  
-  .condition-item {
-    --inner-padding-start: 20px;
-    --inner-padding-end: 20px;
-  }
-  
-  .form-actions {
+  ::ng-deep .dashboard-container {
     flex-direction: column;
-    gap: 12px;
-    
+  }
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  ::ng-deep .sidebar.open {
+    width: 100% !important;
+  }
+
+  ::ng-deep .sidebar .menu-icon,
+  ::ng-deep .sidebar .user-info {
+    display: none;
+  }
+
+  ::ng-deep .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: auto;
+  }
+
+  ::ng-deep .sidebar ul li {
+    padding: 5px;
+  }
+
+  ::ng-deep .sidebar ul li span {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .form-header-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .condition-item .condition-info {
+    gap: 10px;
+
+    ion-icon {
+      font-size: 1.2rem;
+    }
+
+    div h3 {
+      font-size: 0.9rem;
+    }
+
+    div p {
+      font-size: 0.75rem;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
     ion-button {
       width: 100%;
-      min-width: auto;
     }
-  }
-  
-  .sidebar {
-    width: 240px;
-    &.open { width: 240px; }
-    .user-info { padding: 12px; }
-  }
-}
-
-/* Móvil muy pequeño (≤ 480px) */
-@media (max-width: 480px) {
-  .form-header-section h1 { font-size: 1.4rem; }
-  
-  .patient-summary-card ion-card-content p {
-    font-size: 0.9rem;
-    
-    strong {
-      display: block;
-      min-width: auto;
-      margin-bottom: 2px;
-    }
-  }
-  
-  .condition-item ion-label {
-    font-size: 0.9rem;
-  }
-  
-  .info-card ion-card-content small {
-    font-size: 0.85rem;
-  }
-  
-  .form-actions ion-button {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-    font-size: 0.9rem;
   }
 }
 
 /* =========================================
-   ♿ ACCESIBILIDAD
+   ACCESIBILIDAD
    ========================================= */
 :focus-visible {
   outline: 2px solid $accent-color;
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
-/* 🆕 Estilos para IMC en el resumen */
-.patient-summary-card {
-  ion-card-content {
-    .imc-obesidad {
-      color: #ff3b5c;
-      font-weight: 700;
+/* =========================================
+   ALERT DE REGISTRO CLINICO - PROFESIONAL
+   ========================================= */
+::ng-deep .alert-registro {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 480px;
+    animation: alertSlideIn 0.3s ease-out;
+  }
+
+  /* HEADER DEL ALERT */
+  .alert-head {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%);
+    padding: 24px 24px 20px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+    letter-spacing: 0.3px;
+  }
+
+  .alert-sub-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+    font-weight: 400;
+  }
+
+  /* MENSAJE */
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 8px !important;
+    margin: 0 !important;
+  }
+
+  /* GRUPO DE INPUTS */
+  .alert-input-group {
+    padding: 8px 24px 16px;
+    background: #ffffff;
+  }
+
+  /* CADA INPUT INDIVIDUAL */
+  .alert-input-wrapper {
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .alert-input {
+    width: 100%;
+    padding: 12px 16px !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    color: #1a1f36 !important;
+    background: #f8fafc !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+
+    &:focus {
+      border-color: #4fc3f7 !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.15) !important;
     }
-    
-    .imc-sobrepeso {
-      color: #ffc107;
-      font-weight: 600;
+
+    &::placeholder {
+      color: #9499b7;
+      font-size: 0.9rem;
     }
-    
-    .imc-normal {
-      color: #06d6a0;
-      font-weight: 600;
+  }
+
+  /* BOTONES */
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease !important;
+    min-width: 120px;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* BOTON CANCELAR */
+  .alert-button-cancel {
+    background: #f1f5f9 !important;
+    color: #6c7293 !important;
+    border: 1px solid #e2e8f0 !important;
+
+    &:hover {
+      background: #e2e8f0 !important;
+      color: #1a1f36 !important;
+    }
+
+    &:active {
+      background: #cbd5e1 !important;
+    }
+  }
+
+  /* BOTON CONFIRMAR */
+  .alert-button-confirm {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(10, 77, 104, 0.25) !important;
+
+    &:hover {
+      background: linear-gradient(135deg, #083d52 0%, #0f4a7a 100%) !important;
+      box-shadow: 0 6px 16px rgba(10, 77, 104, 0.35) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(10, 77, 104, 0.25) !important;
     }
   }
 }
 
 /* =========================================
-   🎨 DARK MODE (Opcional)
+   ALERT DE ERROR DE CEDULA
    ========================================= */
-/*
-@media (prefers-color-scheme: dark) {
-  $bg-color: #1a1d26;
-  $card-bg: #232733;
-  $text-primary: #e0e5ec;
-  $text-secondary: #9499b7;
-  $input-bg: #2a2d3a;
-  $border-color: rgba(255,255,255,0.1);
+::ng-deep .alert-error-cedula {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    border-top: 4px solid #ef4444;
+  }
+
+  .alert-head {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    padding: 20px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #991b1b !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alert-message {
+    color: #7f1d1d !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 20px !important;
+    background: #ffffff;
+    line-height: 1.5;
+  }
+
+  .alert-button-group {
+    padding: 0 24px 20px;
+    background: #ffffff;
+    justify-content: flex-end;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      background: #dc2626 !important;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+    }
+  }
 }
-*/
+
+/* =========================================
+   ALERT DE CONFIRMACION (ELIMINAR, CERRAR SESION)
+   ========================================= */
+::ng-deep ion-alert {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .alert-head {
+    padding: 24px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #1a1f36 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    padding: 0 24px 20px !important;
+  }
+
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.2s ease !important;
+    min-width: 100px;
+  }
+}
+
+/* =========================================
+   ANIMACION DE ENTRADA DEL ALERT
+   ========================================= */
+@keyframes alertSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   RESPONSIVE PARA ALERTS
+   ========================================= */
+@media (max-width: 480px) {
+  ::ng-deep .alert-registro .alert-wrapper,
+  ::ng-deep .alert-error-cedula .alert-wrapper {
+    max-width: 95vw;
+    margin: 10px;
+  }
+
+  ::ng-deep .alert-registro .alert-button-group {
+    flex-direction: column-reverse;
+  }
+
+  ::ng-deep .alert-registro .alert-button {
+    width: 100%;
+  }
+}

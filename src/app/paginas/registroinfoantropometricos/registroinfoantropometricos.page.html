@@ -1,13 +1,16 @@
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
-      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Registro Clínico: Indicadores Antropométricos</ion-title>
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Registro Clinico: Indicadores Antropometricos</ion-title>
     </div>
-
     <ion-buttons slot="end">
-      <ion-button (click)="volver()">
+      <ion-button (click)="volver()" title="Volver">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -16,65 +19,64 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR -->
-    <div
-      class="sidebar"
-      [class.open]="sidebarOpen"
-      (mouseenter)="sidebarOpen = true"
-      (mouseleave)="sidebarOpen = false"
-    >
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
       </div>
-
-      <!-- 👤 Info de Usuario -->
       <div class="user-info">
         <ion-avatar>
-          <ion-icon name="person-circle-outline"></ion-icon>
+          <div class="avatar-placeholder">{{nombreAsistente.charAt(0)}}</div>
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombreAsistente || 'Enfermera'}}</h4>
-          <p>{{especialidad || 'Asistente Médico'}}</p>
+          <p>{{especialidad || 'Asistente Medico'}}</p>
         </div>
       </div>
-
-      <!-- 📋 Menú -->
       <ul>
-        <li (click)="irAInicio()">
-          <ion-icon name="home-outline"></ion-icon>
-          <span>Inicio</span>
+        <li (click)="navegarA('enfermeria')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
         </li>
-        
         <li class="menu-item-with-submenu">
           <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
-            <ion-icon name="people-outline"></ion-icon>
-            <span>Pacientes</span>
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
             <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
           </div>
           <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
-            <li (click)="irAInicio(); $event.stopPropagation()"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
-            <li (click)="irAInicio(); $event.stopPropagation()"><ion-icon name="person-add-outline"></ion-icon><span>Registrar</span></li>
+            <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
+            </li>
+            <li (click)="iniciarRegistroPaciente()">
+              <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('enfermeria-buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
+            </li>
           </ul>
         </li>
-        
-        <li (click)="irAInicio()">
-          <ion-icon name="clipboard-outline"></ion-icon>
-          <span>Registros</span>
+        <li (click)="iniciarRegistroPaciente()">
+          <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
+        </li>
+        <li (click)="navegarA('enfermeria-reportes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('enfermeria-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content form-layout">
       <div class="form-container">
         
         <!-- Encabezado -->
         <div class="form-header-section">
-          <h1>Indicadores Antropométricos</h1>
+          <h1>Indicadores Antropometricos</h1>
           <p>Registre las medidas corporales para calcular el IMC y evaluar el estado nutricional.</p>
         </div>
 
-        <!-- 📏 Tarjeta de Medidas Corporales -->
+        <!-- Tarjeta de Medidas Corporales -->
         <ion-card class="anthro-list-card">
           <ion-card-header>
             <ion-card-title>
@@ -128,7 +130,7 @@
                 </div>
               </div>
 
-              <!-- IMC Calculado (Chip Premium) -->
+              <!-- IMC Calculado -->
               <div class="anthro-item full-width imc-result-item">
                 <div class="imc-display">
                   <div class="imc-value">
@@ -173,11 +175,11 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 📚 Tarjeta de Referencia IMC -->
+        <!-- Tarjeta de Referencia IMC -->
         <ion-card class="imc-reference-card">
           <ion-card-header>
             <ion-card-title>
-              <ion-icon name="information-circle-outline"></ion-icon> Clasificación IMC
+              <ion-icon name="information-circle-outline"></ion-icon> Clasificacion IMC
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
@@ -223,7 +225,7 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 🔘 Botones de Acción -->
+        <!-- Botones de Accion -->
         <div class="form-actions">
           <ion-button fill="outline" color="medium" (click)="volver()" type="button">
             <ion-icon slot="start" name="arrow-back-outline"></ion-icon>

@@ -1,0 +1,292 @@
+<!-- HEADER PRINCIPAL -->
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Informes de Enfermeria</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="exportarInforme()" title="Exportar informe">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesion">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreAsistente.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreAsistente}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('enfermeria')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes'); $event.stopPropagation()">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
+              <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
+            </li>
+            <li (click)="iniciarRegistroPaciente()">
+              <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
+            </li>
+            <li (click)="navegarA('enfermeria-buscar-paciente'); $event.stopPropagation()">
+              <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
+            </li>
+          </ul>
+        </li>
+        <li (click)="iniciarRegistroPaciente()">
+          <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
+        </li>
+        <li (click)="navegarA('enfermeria-reportes')" class="active">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('enfermeria-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuracion</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- ENCABEZADO -->
+      <div class="page-header">
+        <div class="header-info">
+          <h1>Informes de Enfermeria</h1>
+          <p>Estadisticas y analisis de registros clinicos</p>
+        </div>
+        <div class="header-actions">
+          <ion-button fill="outline" color="primary" (click)="cambiarPeriodo('hoy')">
+            Hoy
+          </ion-button>
+          <ion-button fill="outline" color="primary" (click)="cambiarPeriodo('semana')">
+            Esta semana
+          </ion-button>
+          <ion-button fill="outline" color="primary" (click)="cambiarPeriodo('mes')">
+            Este mes
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- FILTROS DE FECHA -->
+      <div class="filtros-container">
+        <div class="filtro-item">
+          <ion-label>Fecha inicio:</ion-label>
+          <ion-datetime 
+            [(ngModel)]="fechaInicio"
+            (ionChange)="aplicarFiltros()"
+            displayFormat="DD/MM/YYYY"
+            placeholder="Seleccionar fecha">
+          </ion-datetime>
+        </div>
+        <div class="filtro-item">
+          <ion-label>Fecha fin:</ion-label>
+          <ion-datetime 
+            [(ngModel)]="fechaFin"
+            (ionChange)="aplicarFiltros()"
+            displayFormat="DD/MM/YYYY"
+            placeholder="Seleccionar fecha">
+          </ion-datetime>
+        </div>
+        <div class="filtro-item">
+          <ion-label>Tipo de registro:</ion-label>
+          <ion-select 
+            [(ngModel)]="tipoRegistro"
+            (ionChange)="aplicarFiltros()"
+            interface="popover"
+            placeholder="Todos">
+            <ion-select-option value="todos">Todos</ion-select-option>
+            <ion-select-option value="finalizado">Completados</ion-select-option>
+            <ion-select-option value="en_proceso">En proceso</ion-select-option>
+            <ion-select-option value="iniciado">Iniciados</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="cargando" class="loading-container">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando informes...</p>
+      </div>
+
+      <!-- CONTENIDO DE INFORMES -->
+      <div *ngIf="!cargando" class="informes-content">
+        
+        <!-- TARJETAS DE ESTADISTICAS -->
+        <div class="stats-grid">
+          <ion-card class="stat-card total">
+            <div class="stat-icon">
+              <ion-icon name="clipboard-outline"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{estadisticas.totalRegistros || 0}}</h3>
+              <p>Total de registros</p>
+            </div>
+          </ion-card>
+
+          <ion-card class="stat-card completados">
+            <div class="stat-icon">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{estadisticas.registrosCompletados || 0}}</h3>
+              <p>Registros completados</p>
+            </div>
+          </ion-card>
+
+          <ion-card class="stat-card proceso">
+            <div class="stat-icon">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{estadisticas.registrosEnProceso || 0}}</h3>
+              <p>En proceso</p>
+            </div>
+          </ion-card>
+
+          <ion-card class="stat-card iniciados">
+            <div class="stat-icon">
+              <ion-icon name="play-circle-outline"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{estadisticas.registrosIniciados || 0}}</h3>
+              <p>Registros iniciados</p>
+            </div>
+          </ion-card>
+        </div>
+
+        <!-- GRAFICO DE DISTRIBUCION -->
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="pie-chart-outline"></ion-icon>
+              Distribucion de registros
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="chart-container">
+              <div class="chart-legend">
+                <div class="legend-item completados">
+                  <div class="legend-color"></div>
+                  <span>Completados ({{estadisticas.porcentajeCompletados || 0}}%)</span>
+                </div>
+                <div class="legend-item proceso">
+                  <div class="legend-color"></div>
+                  <span>En proceso ({{estadisticas.porcentajeEnProceso || 0}}%)</span>
+                </div>
+                <div class="legend-item iniciados">
+                  <div class="legend-color"></div>
+                  <span>Iniciados ({{estadisticas.porcentajeIniciados || 0}}%)</span>
+                </div>
+              </div>
+              <div class="chart-bar">
+                <div class="bar-segment completados" [style.width.%]="estadisticas.porcentajeCompletados || 0"></div>
+                <div class="bar-segment proceso" [style.width.%]="estadisticas.porcentajeEnProceso || 0"></div>
+                <div class="bar-segment iniciados" [style.width.%]="estadisticas.porcentajeIniciados || 0"></div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- LISTA DE REGISTROS RECIENTES -->
+        <ion-card class="recent-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="list-outline"></ion-icon>
+              Registros recientes
+            </ion-card-title>
+            <ion-badge color="primary" class="total-badge">
+              {{registrosRecientes.length}} registros
+            </ion-badge>
+          </ion-card-header>
+          <ion-card-content>
+            
+            <div *ngIf="registrosRecientes.length === 0" class="empty-state">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <h3>Sin registros en este periodo</h3>
+              <p>Ajusta los filtros para ver mas registros</p>
+            </div>
+
+            <div class="registro-list" *ngIf="registrosRecientes.length > 0">
+              <div class="registro-item" *ngFor="let registro of registrosRecientes">
+                <div class="registro-header">
+                  <div class="paciente-info">
+                    <div class="avatar-small" [style.background]="getAvatarColor(registro.nombre_paciente)">
+                      <span>{{getIniciales(registro.nombre_paciente)}}</span>
+                    </div>
+                    <div class="info-text">
+                      <h4>{{registro.nombre_paciente}}</h4>
+                      <p class="cedula">
+                        <ion-icon name="card-outline"></ion-icon>
+                        {{registro.cedula_paciente}}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="estado-badge" [class]="'badge-' + getEstadoColor(registro.estado)">
+                    <ion-icon [name]="getEstadoIcono(registro.estado)"></ion-icon>
+                    {{formatearEstado(registro.estado)}}
+                  </div>
+                </div>
+                
+                <div class="registro-body">
+                  <div class="registro-meta">
+                    <span class="meta-item">
+                      <ion-icon name="calendar-outline"></ion-icon>
+                      {{registro.fecha_registro | date:'dd/MM/yyyy HH:mm'}}
+                    </span>
+                    <span class="meta-item" *ngIf="registro.progreso">
+                      <ion-icon name="analytics-outline"></ion-icon>
+                      Progreso: {{registro.progreso}}%
+                    </span>
+                  </div>
+                  
+                  <div class="progreso-bar" *ngIf="registro.progreso">
+                    <div class="progreso-fill" 
+                         [style.width.%]="registro.progreso"
+                         [class.progress-complete]="registro.progreso === 100"
+                         [class.progress-warning]="registro.progreso < 50"
+                         [class.progress-normal]="registro.progreso >= 50 && registro.progreso < 100">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="registro-actions">
+                  <ion-button size="small" fill="outline" color="primary" (click)="verRegistro(registro)">
+                    <ion-icon slot="start" name="eye-outline"></ion-icon>
+                    Ver detalle
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

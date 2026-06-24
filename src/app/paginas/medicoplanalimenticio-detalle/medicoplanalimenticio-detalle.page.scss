@@ -1,5 +1,5 @@
 /* =========================================
-   🎨 VARIABLES - Tema Hospitalario
+   VARIABLES - Tema Hospitalario
    ========================================= */
 $primary-color: #0a4d68;
 $secondary-color: #145da0;
@@ -11,7 +11,7 @@ $text-secondary: #6c7293;
 $text-muted: #9499b7;
 $border-color: #e2e8f0;
 
-// 🥗 Colores para macros
+// Colores para macros
 $macro-protein: #10b981;
 $macro-carbs: #3b82f6;
 $macro-fat: #f59e0b;
@@ -22,58 +22,81 @@ $radius-lg: 16px;
 $radius-xl: 20px;
 
 /* =========================================
-   🔄 BASE
+   BASE
    ========================================= */
 ion-content {
   --background: #{$bg-color};
 }
 
 /* =========================================
-   🧭 DASHBOARD CONTAINER - CON SCROLL
+   HEADER PRINCIPAL
+   ========================================= */
+::ng-deep .main-header {
+  ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 1.6rem;
+        color: $primary-color;
+      }
+
+      ion-title {
+        font-weight: 600;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
+      }
+    }
+  }
+}
+
+/* =========================================
+   DASHBOARD CONTAINER
    ========================================= */
 ::ng-deep .dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
-  background: #{$bg-color};
+  background: $bg-color;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
-  /* ✅ Sin overflow: hidden para permitir scroll */
 }
 
 /* =========================================
-   🧭 SIDEBAR - CON ::ng-deep (ViewEncapsulation)
-   ========================================= */
-/* =========================================
-   🧭 SIDEBAR - CON ::ng-deep (ViewEncapsulation)
+   SIDEBAR
    ========================================= */
 ::ng-deep .sidebar {
   width: 70px;
-  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: visible !important; /* 👈 CRÍTICO para submenú */
+  overflow: visible !important;
   position: relative;
   z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 
   &.open {
     width: 240px !important;
     min-width: 240px;
-    
-    .user-details {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
-    ul li span {
-      opacity: 1;
-    }
-    
-    .submenu-arrow {
-      opacity: 1;
-    }
+
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
   }
 
   .menu-icon {
@@ -82,9 +105,8 @@ ion-content {
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
-    &:hover {
-      background: rgba(255,255,255,0.15);
-    }
+    transition: background 0.2s;
+    &:hover { background: rgba(255,255,255,0.15); }
   }
 
   .user-info {
@@ -92,37 +114,41 @@ ion-content {
     padding: 1rem 0.5rem;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     width: 100%;
-    
+
     ion-avatar {
       margin: 0 auto 8px;
       width: 56px;
       height: 56px;
       --background: rgba(255,255,255,0.2);
       flex-shrink: 0;
-      
-      ion-icon {
-        font-size: 2.5rem;
-        color: rgba(255,255,255,0.8);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
       }
     }
-    
+
     .user-details {
       opacity: 0;
-      transition: opacity 0.2s ease-in-out;
+      transition: opacity 0.3s ease;
       pointer-events: none;
-      
+
       h4 {
         font-size: 0.95rem;
         margin: 0 0 4px;
         font-weight: 500;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       p {
         font-size: 0.75rem;
         color: #b0c7d9;
         margin: 0;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
@@ -134,64 +160,63 @@ ion-content {
     padding: 0.5rem 0;
     width: 100%;
     margin: 0;
-    
+
     li {
       display: flex;
       align-items: center;
-      padding: 12px 0 12px 20px;
+      gap: 14px;
+      padding: 12px 20px;
       cursor: pointer;
       color: rgba(255,255,255,0.9);
       transition: all 0.2s ease;
       font-size: 0.9rem;
-      
-      ion-icon { 
-        font-size: 1.3rem; 
-        min-width: 30px;
+
+      ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
         text-align: center;
         flex-shrink: 0;
       }
-      
-      span { 
+
+      span {
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        margin-left: 10px;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
         overflow: hidden;
       }
-      
-      &:hover { 
-        background: rgba(255,255,255,0.15); 
+
+      &:hover {
+        background: rgba(255,255,255,0.15);
+        color: white;
+      }
+
+      &.active {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-left: 3px solid $accent-color;
       }
     }
   }
 
-  /* 👇 SUBMENÚ - ESTILO ABSOLUTO */
+  /* Submenú */
   .menu-item-with-submenu {
     position: relative;
 
     .menu-link {
       display: flex;
       align-items: center;
+      gap: 14px;
       width: 100%;
-      padding: 12px 0 12px 20px;
-      cursor: pointer;
-      color: rgba(255,255,255,0.9);
-      
+
       .submenu-arrow {
         margin-left: auto;
-        padding-right: 20px;
         opacity: 0;
         transition: opacity 0.2s, transform 0.3s ease;
-        
-        &.rotate {
-          transform: rotate(180deg);
-        }
-      }
-      
-      &:hover { 
-        background: rgba(255,255,255,0.15); 
+
+        &.rotate { transform: rotate(180deg); }
       }
     }
-    
+
     .submenu {
       position: absolute;
       left: 100%;
@@ -206,92 +231,52 @@ ion-content {
       transition: max-height 0.3s ease;
       padding: 0;
       margin: 0;
-      
+
       &.active {
         max-height: 300px;
       }
-      
+
       li {
         padding: 12px 20px;
         font-size: 0.85rem;
         color: rgba(255,255,255,0.9);
         border-bottom: 1px solid rgba(255,255,255,0.05);
-        
+
         &:hover {
           background: rgba(255,255,255,0.15);
           color: white;
         }
-         
+
         ion-icon {
           font-size: 1.1rem;
           margin-right: 10px;
         }
-        
+
         span {
           opacity: 1;
         }
       }
     }
   }
-}
 
-/* =========================================
-   📦 HEADER - CON ::ng-deep
-   ========================================= */
-::ng-deep .main-header {
-  ion-toolbar {
-    --background: #0a4d68 !important;
-    border-bottom: 1px solid #f7fafe !important;
-    
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      
-      .logo-icon {
-        font-size: 1.6rem;
-        color: #f4fcff;
-      }
-      
-      ion-title {
-        font-weight: 600;
-        color: #f4f8f9;
-        font-size: 1.2rem;
-        padding: 0 !important;
-      }
-    }
-  }
-
-  on-buttons[slot="end"] ion-button {
-    --color: #0a4d68 !important;              /* Color del ícono */
-    --color-hover: #145da0 !important;        /* Color al pasar el mouse */
-    --color-activated: #0b2630 !important;    /* Color al presionar */
-    
-    /* Opcional: fondo circular al hover */
-    &::part(native) {
-      border-radius: 50%;
-      transition: background 0.2s ease;
-    }
-    
-    &:hover::part(native) {
-      background: rgba(10, 77, 104, 0.1) !important;
-    }
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow {
+    opacity: 1;
   }
 }
 
 /* =========================================
-   📦 MAIN CONTENT - CON SCROLL VERTICAL
+   MAIN CONTENT
    ========================================= */
 ::ng-deep .main-content {
   flex: 1;
-  padding: 24px;
-  overflow-y: auto; /* ✅ PERMITE SCROLL */
+  padding: 24px 30px;
+  overflow-y: auto;
   overflow-x: hidden;
-  background: #{$bg-color};
+  background: $bg-color;
 }
 
 /* =========================================
-   📋 PLAN LAYOUT
+   PLAN LAYOUT
    ========================================= */
 .plan-layout {
   .loading-state {
@@ -302,40 +287,40 @@ ion-content {
     min-height: 60vh;
     text-align: center;
     color: $text-secondary;
-    
+
     ion-spinner {
       --color: #{$secondary-color};
       margin-bottom: 16px;
     }
-    
+
     p {
       font-size: 1.1rem;
       font-weight: 500;
       margin: 0 0 4px;
     }
-    
+
     small {
       font-size: 0.9rem;
       opacity: 0.8;
     }
   }
-  
+
   .error-state {
     text-align: center;
     padding: 60px 20px;
-    
+
     .error-icon {
       font-size: 4rem;
       color: #ef4444;
       margin-bottom: 16px;
     }
-    
+
     h3 {
       font-size: 1.25rem;
       color: $text-primary;
       margin: 0 0 8px;
     }
-    
+
     p {
       color: $text-secondary;
       margin: 0 0 24px;
@@ -344,7 +329,7 @@ ion-content {
 }
 
 /* =========================================
-   📋 PLAN HEADER CARD
+   PLAN HEADER CARD
    ========================================= */
 .plan-header-card {
   --background: #{$card-bg};
@@ -352,10 +337,10 @@ ion-content {
   box-shadow: $shadow-lg;
   margin-bottom: 24px;
   border-left: 4px solid $accent-color;
-  
+
   ion-card-header {
     padding: 20px 24px 12px;
-    
+
     ion-card-title {
       font-size: 1.2rem;
       font-weight: 700;
@@ -363,40 +348,49 @@ ion-content {
       display: flex;
       align-items: center;
       gap: 10px;
-      
+      margin: 0;
+
       ion-icon {
         font-size: 1.4rem;
         color: $secondary-color;
       }
     }
-    
+
     ion-card-subtitle {
       font-size: 0.95rem;
       color: $text-secondary;
       margin-top: 8px;
-      
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+
       strong {
         color: $primary-color;
         font-weight: 600;
       }
-      
+
       ion-badge {
         margin-left: 4px;
         font-weight: 600;
       }
+
+      .separator {
+        color: $border-color;
+      }
     }
   }
-  
+
   ion-card-content {
     padding: 12px 24px 20px;
-    
+
     .macro-bars {
       display: flex;
       height: 24px;
       border-radius: 12px;
       overflow: hidden;
       margin-top: 8px;
-      
+
       .macro-bar {
         display: flex;
         align-items: center;
@@ -405,11 +399,11 @@ ion-content {
         font-weight: 600;
         color: white;
         transition: width 0.3s ease;
-        
+
         &.protein { background: $macro-protein; }
         &.carbs { background: $macro-carbs; }
         &.fat { background: $macro-fat; }
-        
+
         small {
           white-space: nowrap;
           text-shadow: 0 1px 2px rgba(0,0,0,0.2);
@@ -420,19 +414,19 @@ ion-content {
 }
 
 /* =========================================
-   🗓️ SELECTOR DE VISTA
+   SELECTOR DE VISTA
    ========================================= */
 ion-segment {
   --background: #e2e8f0;
   --indicator-color: #{$secondary-color};
   --indicator-border-radius: 8px;
   margin: 20px 0 24px;
-  
+
   ion-segment-button {
     --color: #{$text-secondary};
     --color-checked: #{$primary-color};
     font-weight: 500;
-    
+
     ion-icon {
       margin-bottom: 4px;
     }
@@ -440,7 +434,7 @@ ion-segment {
 }
 
 /* =========================================
-   🗓️ VISTA SEMANAL - MOSTRAR TODOS LOS DÍAS
+   VISTA SEMANAL
    ========================================= */
 .week-view {
   display: flex;
@@ -457,15 +451,15 @@ ion-segment {
   border: 1px solid rgba(0,0,0,0.04);
   transition: box-shadow 0.3s ease;
   width: 100%;
-  
+
   &:hover {
     box-shadow: $shadow-lg;
   }
-  
+
   ion-card-header {
     padding: 16px 20px 10px;
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    
+
     ion-card-title {
       font-size: 1.1rem;
       font-weight: 600;
@@ -473,20 +467,29 @@ ion-segment {
       display: flex;
       align-items: center;
       gap: 8px;
-      
+      margin: 0;
+
       ion-icon {
         font-size: 1.2rem;
         color: $secondary-color;
       }
     }
-    
+
     ion-card-subtitle {
       font-size: 0.9rem;
       color: $text-muted;
       margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      .separator {
+        color: $border-color;
+      }
     }
   }
-  
+
   ion-card-content {
     padding: 16px 20px;
   }
@@ -504,79 +507,79 @@ ion-segment {
   padding-left: 16px;
   padding-bottom: 16px;
   transition: border-color 0.2s ease;
-  
+
   &:last-child {
     border-left-color: transparent;
     padding-bottom: 0;
   }
-  
+
   &:hover {
     border-left-color: $secondary-color;
   }
-  
+
   .meal-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
-    
+
     .meal-icon {
       font-size: 1.4rem;
       color: $secondary-color;
       min-width: 24px;
     }
-    
+
     div {
       flex: 1;
-      
+
       strong {
         display: block;
         font-size: 1rem;
         color: $text-primary;
         font-weight: 600;
       }
-      
+
       small {
         font-size: 0.8rem;
         color: $text-muted;
       }
     }
-    
+
     ion-chip {
       font-size: 0.8rem;
       font-weight: 600;
       --padding-start: 10px;
       --padding-end: 10px;
-      
+
       &.danger { --background: rgba(239, 68, 68, 0.15); --color: #ef4444; }
       &.warning { --background: rgba(245, 158, 11, 0.15); --color: #b45309; }
       &.success { --background: rgba(16, 185, 129, 0.15); --color: #059669; }
     }
   }
-  
+
   .meal-foods {
     margin-bottom: 10px;
-    
+
     .food-item {
       --background: #f8fafc;
       --min-height: 60px;
       border-radius: 8px;
       margin: 0 0 8px;
-      
+
       ion-avatar {
         width: 40px;
         height: 40px;
         min-width: 40px;
         border-radius: 8px;
         overflow: hidden;
-        
+
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
       }
-      
+
       ion-label {
         h3 {
           font-size: 0.95rem;
@@ -584,14 +587,21 @@ ion-segment {
           color: $text-primary;
           margin: 0 0 2px;
         }
-        
+
         p {
           font-size: 0.8rem;
           color: $text-muted;
           margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          .separator {
+            color: $border-color;
+          }
         }
       }
-      
+
       ion-badge {
         --background: #e2e8f0;
         --color: #1e293b;
@@ -600,7 +610,7 @@ ion-segment {
       }
     }
   }
-  
+
   .meal-notes {
     display: flex;
     align-items: flex-start;
@@ -611,11 +621,12 @@ ion-segment {
     padding: 8px 12px;
     background: rgba($accent-color, 0.08);
     border-radius: 8px;
-    
+
     ion-icon {
       font-size: 1rem;
       color: $secondary-color;
       margin-top: 2px;
+      flex-shrink: 0;
     }
   }
 }
@@ -625,29 +636,29 @@ ion-segment {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px dashed $border-color;
-  
+
   ion-item {
     --background: transparent;
     --min-height: auto;
     --padding-top: 0;
     --padding-bottom: 0;
-    
+
     ion-icon {
       font-size: 1.2rem;
       margin-right: 8px;
     }
-    
+
     ion-label {
       font-size: 0.9rem;
       color: $text-secondary;
-      
+
       strong {
         color: $primary-color;
         font-weight: 600;
       }
     }
   }
-  
+
   .day-notes {
     display: flex;
     align-items: flex-start;
@@ -655,23 +666,24 @@ ion-segment {
     font-size: 0.85rem;
     color: $text-secondary;
     margin-top: 8px;
-    
+
     ion-icon {
       font-size: 1rem;
       color: #f59e0b;
       margin-top: 2px;
+      flex-shrink: 0;
     }
   }
 }
 
 /* =========================================
-   📅 VISTA DÍA
+   VISTA DÍA
    ========================================= */
 .day-view {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
+
   .datetime-picker {
     --background: #{$card-bg};
     --border-radius: 12px;
@@ -682,30 +694,51 @@ ion-segment {
 }
 
 /* =========================================
-   📊 VISTA MES
+   VISTA MES
    ========================================= */
 .month-view {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
+
   .summary-card {
     --background: #{$card-bg};
     border-radius: $radius-lg;
     box-shadow: $shadow-md;
     margin: 0;
   }
-  
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0;
+
+    ion-icon {
+      font-size: 1.3rem;
+    }
+  }
+
   ion-list-header {
     color: $text-primary;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 1.2rem;
+    }
   }
-  
+
   ion-item {
     --background: transparent;
     --min-height: auto;
     padding: 8px 0;
-    
+
     ion-icon {
       margin-right: 8px;
     }
@@ -713,7 +746,7 @@ ion-segment {
 }
 
 /* =========================================
-   🔘 ACCIONES FINALES
+   ACCIONES FINALES
    ========================================= */
 .plan-actions {
   display: flex;
@@ -722,7 +755,8 @@ ion-segment {
   padding: 24px 0 12px;
   border-top: 1px solid $border-color;
   margin-top: 24px;
-  
+  flex-wrap: wrap;
+
   ion-button {
     --border-radius: 12px;
     text-transform: none;
@@ -732,38 +766,63 @@ ion-segment {
 }
 
 /* =========================================
-   📱 RESPONSIVE
+   RESPONSIVE
    ========================================= */
 @media (max-width: 768px) {
   ::ng-deep .dashboard-container {
     flex-direction: column;
   }
-  
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+
+    &.open { width: 100% !important; }
+
+    .menu-icon { display: none; }
+    .user-info { display: none; }
+
+    ul {
+      display: flex;
+      flex-direction: row;
+      gap: 15px;
+      width: auto;
+    }
+
+    ul li {
+      padding: 5px;
+      span { display: none; }
+    }
+  }
+
   .plan-layout {
     padding: 16px;
   }
-  
+
   .plan-header-card ion-card-content ion-grid ion-row {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .week-view .day-card {
     margin: 0;
     border-radius: $radius-lg;
     border-left: none;
     border-right: none;
   }
-  
+
   .meal-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .plan-actions {
     flex-direction: column;
-    
+
     ion-button {
       width: 100%;
     }
@@ -771,7 +830,7 @@ ion-segment {
 }
 
 /* =========================================
-   ♿ ACCESIBILIDAD
+   ACCESIBILIDAD
    ========================================= */
 :focus-visible {
   outline: 2px solid $accent-color;
@@ -789,7 +848,7 @@ ion-segment {
 }
 
 /* =========================================
-   🖨️ PRINT STYLES
+   PRINT STYLES
    ========================================= */
 @media print {
   ::ng-deep .sidebar,
@@ -797,12 +856,12 @@ ion-segment {
   .plan-actions {
     display: none !important;
   }
-  
+
   .main-content {
     padding: 0;
     background: white;
   }
-  
+
   .day-card {
     break-inside: avoid;
     page-break-inside: avoid;
@@ -810,7 +869,7 @@ ion-segment {
     border: 1px solid #ccc;
     margin-bottom: 20px;
   }
-  
+
   .plan-header-card {
     box-shadow: none;
     border: 1px solid #ccc;

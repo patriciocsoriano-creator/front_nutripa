@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoadingController, ToastController, AlertController, Platform } from '@ionic/angular';
@@ -14,40 +14,41 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class EnfermeriaPage implements OnInit, OnDestroy {
 
-  // 👤 INFO DE USUARIO
+  // INFO DE USUARIO
   nombreAsistente: string = 'Enfermera';
   especialidad: string = 'Asistente Médico';
   usuario: { id: string; nombre: string; rol: string } | null = null;
   
-  // 🧭 SIDEBAR
+  // SIDEBAR
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   private isMobile = false;
   
-  // 📊 ESTADÍSTICAS
+  // ESTADÍSTICAS
   totalPacientes: number = 0;
   registrosMes: number = 0;
   alertasActivas: number = 0;
   citasHoy: number = 0;
   detalleAlertas: any[] = [];
   
-  // 👥 PACIENTES
+  // PACIENTES
   pacientesRecientes: any[] = [];
   cargandoPacientes = false;
   
-  // 🔐 ESTADOS
+  // ESTADOS
   cargando = false;
   private destroy$ = new Subject<void>();
   
-  // 🗺️ RUTAS
+  // RUTAS
   private readonly rutas: Record<string, string> = {
     'enfermeria': '/enfermeria',
     'medicoverpacientes': '/enfermeria/pacientes',
     'enfermeriaverpacientes': '/enfermeriaverpacientes', 
     'agregar-paciente': '/enfermeria/registro',
-    'buscar-paciente': '/enfermeria/buscar',
-    'reportes': '/enfermeria/reportes',
-    'signos-vitales': '/enfermeria/signos-vitales'
+    'enfermeria-buscar-paciente': 'enfermeria-buscar-paciente',
+    'enfermeria-reportes': 'enfermeria-reportes',
+    'signos-vitales': '/enfermeria/signos-vitales',
+    'enfermeria-configuracion': '/enfermeria-configuracion'
   };
 
   constructor(
@@ -80,7 +81,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    console.log('🔄 [ENFERMERIA] Recargando panel...');
+    console.log('[ENFERMERIA] Recargando panel...');
     this.cargarTodoElPanel();
   }
   
@@ -89,7 +90,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // 🔐 Verificar sesión
+  // Verificar sesión
   private async verificarSesion(): Promise<boolean> {
     const token = localStorage.getItem('token');
     const usuarioStr = localStorage.getItem('user');
@@ -121,7 +122,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     }
   }
 
-  // 📊 Cargar panel completo
+  // Cargar panel completo
   private async cargarTodoElPanel(): Promise<void> {
     this.cargando = true;
     
@@ -131,54 +132,42 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
         this.cargarPacientesRecientes()
       ]);
     } catch (error) {
-      console.error('❌ Error cargando panel:', error);
+      console.error('Error cargando panel:', error);
     } finally {
       this.cargando = false;
     }
   }
 
-  // 📈 Estadísticas
+  // Estadísticas
   private async cargarEstadisticas(): Promise<void> {
-  const token = localStorage.getItem('token');
-  
-  // Solo verificar token, NO requerir this.usuario
-  if (!token) {
-    console.warn('[ESTADISTICAS] No hay token, reintentando en 500ms...');
-    setTimeout(() => this.cargarEstadisticas(), 500);
-    return;
-  }
-
-  try {
-    console.log('[ESTADISTICAS] Llamando al endpoint...');
+    const token = localStorage.getItem('token');
     
-    const response: any = await this.http.get(
-      `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
-      { headers: this.getAuthHeaders() }
-    ).toPromise();
-
-    console.log('[ESTADISTICAS] Respuesta recibida:', response);
-
-    if (response?.error === false) {
-      const datos = response.datos || response;
-      
-      this.totalPacientes = datos.total_pacientes || 0;
-      this.citasHoy = datos.registros_hoy || 0;
-      this.registrosMes = datos.registros_mes || 0;
-      this.alertasActivas = datos.alertas_activas || 0;
-      
-      console.log('[ESTADISTICAS] Datos asignados:', {
-        totalPacientes: this.totalPacientes,
-        citasHoy: this.citasHoy,
-        registrosMes: this.registrosMes,
-        alertasActivas: this.alertasActivas
-      });
+    if (!token) {
+      console.warn('[ESTADISTICAS] No hay token, reintentando en 500ms...');
+      setTimeout(() => this.cargarEstadisticas(), 500);
+      return;
     }
-  } catch (error) {
-    console.error('[ESTADISTICAS] Error:', error);
+
+    try {
+      const response: any = await this.http.get(
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/estadisticas`,
+        { headers: this.getAuthHeaders() }
+      ).toPromise();
+
+      if (response?.error === false) {
+        const datos = response.datos || response;
+        
+        this.totalPacientes = datos.total_pacientes || 0;
+        this.citasHoy = datos.registros_hoy || 0;
+        this.registrosMes = datos.registros_mes || 0;
+        this.alertasActivas = datos.alertas_activas || 0;
+      }
+    } catch (error) {
+      console.error('[ESTADISTICAS] Error:', error);
+    }
   }
-}
   
-  // 👥 Pacientes recientes
+  // Pacientes recientes
   private async cargarPacientesRecientes(): Promise<void> {
     this.cargandoPacientes = true;
     
@@ -203,14 +192,14 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
         }));
       }
     } catch (error) {
-      console.error('❌ Error cargando pacientes:', error);
+      console.error('Error cargando pacientes:', error);
       this.pacientesRecientes = [];
     } finally {
       this.cargandoPacientes = false;
     }
   }
 
-  // 🆕 Continuar registro existente
+  // Continuar registro existente
   async continuarRegistro(paciente: any): Promise<void> {
     if (!paciente.registro_id) {
       this.showToast('No se encontró el ID del registro', 'danger');
@@ -238,7 +227,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
       localStorage.setItem('registro_clinico_id', paciente.registro_id);
 
       const siguientePaso = response.siguientePaso;
-      console.log(`🧭 [SMART NAV] Redirigiendo a: ${siguientePaso}`);
+      console.log(`[SMART NAV] Redirigiendo a: ${siguientePaso}`);
 
       const queryParams: any = { registro_id: paciente.registro_id };
       
@@ -258,12 +247,12 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
 
     } catch (error: any) {
       await loading.dismiss();
-      console.error('❌ Error en navegación inteligente:', error);
+      console.error('Error en navegación inteligente:', error);
       this.showToast('Error cargando el registro', 'danger');
     }
   }
 
-  // 👁️ Ver detalle de paciente
+  // Ver detalle de paciente
   async verDetallePaciente(paciente: any): Promise<void> {
     if (!paciente.registro_id) {
       this.showToast('No se encontró el registro', 'danger');
@@ -285,7 +274,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     await this.continuarRegistro(paciente);
   }
 
-  // 🆕 Obtener iniciales del nombre
+  // Obtener iniciales del nombre
   getIniciales(nombre: string): string {
     if (!nombre) return '?';
     const partes = nombre.trim().split(' ');
@@ -295,7 +284,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     return nombre.substring(0, 2).toUpperCase();
   }
 
-  // 🆕 Color del avatar basado en el nombre
+  // Color del avatar basado en el nombre
   getAvatarColor(nombre: string): string {
     const colores = [
       'linear-gradient(135deg, #667eea, #764ba2)',
@@ -318,7 +307,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     return colores[Math.abs(hash) % colores.length];
   }
 
-  // 🆕 Color del badge según estado real
+  // Color del badge según estado real
   getEstadoColor(estado: string): string {
     const colores: Record<string, string> = {
       'finalizado': 'success',
@@ -329,7 +318,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     return colores[estado] || 'medium';
   }
 
-  // 🆕 Icono según estado real
+  // Icono según estado real
   getEstadoIcono(estado: string): string {
     const iconos: Record<string, string> = {
       'finalizado': 'checkmark-circle',
@@ -340,7 +329,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     return iconos[estado] || 'help-circle';
   }
 
-  // 🆕 Formatear estado real para mostrar
+  // Formatear estado real para mostrar
   formatearEstadoReal(estado: string): string {
     const estados: Record<string, string> = {
       'finalizado': 'Completado',
@@ -359,7 +348,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     });
   }
 
-  // 🧭 Navegación y UI
+  // Navegación y UI
   toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
   
   toggleSubmenu(menu: string): void {
@@ -395,14 +384,12 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
               if (response?.registro_id) {
                 localStorage.setItem('registro_clinico_id', response.registro_id);
                 
-                // 🆕 NUEVA CITA: Pasar flag y datos del paciente
                 const queryParams: any = { 
                   registro_id: response.registro_id,
                   nueva_cita: 'true',
                   paciente_existente: 'true'
                 };
                 
-                // Pre-llenar con datos del paciente existente
                 if (paciente.nombre_completo) {
                   const partes = paciente.nombre_completo.split(' ');
                   queryParams.nombres = partes[0] || '';
@@ -422,12 +409,10 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     await confirm.present();
   }
 
-  // 🚀 Iniciar nuevo registro clínico
+  // Iniciar nuevo registro clínico
   async iniciarRegistroPaciente(): Promise<void> {
-    console.log('🔍 [DEBUG] Abriendo alert de registro...');
-    
     const alert = await this.alertCtrl.create({
-      header: '📋 Nuevo Registro Clínico',
+      header: 'Nuevo Registro Clínico',
       message: 'Ingrese cédula, nombres y apellidos del paciente:',
       cssClass: 'alert-registro',
       
@@ -451,31 +436,22 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
         { 
           text: 'Cancelar', 
           role: 'cancel', 
-          cssClass: 'alert-button-cancel',
-          handler: () => console.log('❌ [DEBUG] Usuario canceló')
+          cssClass: 'alert-button-cancel'
         },
         {
           text: 'Iniciar Registro',
           cssClass: 'alert-button-confirm',
           handler: async (data: any) => {
-            console.log('📥 [DEBUG] Datos recibidos:', data);
-            
             if (!data.cedula || !data.nombres || !data.apellidos) {
-              console.log('⚠️ [DEBUG] Campos incompletos');
               await this.showToast('Complete cédula, nombres y apellidos', 'danger');
               return false;
             }
             
             const cedulaLimpia = data.cedula.replace(/\D/g, '');
-            console.log('🔢 [DEBUG] Cédula limpia:', cedulaLimpia);
-            
             const validacion = this.validarCedulaEcuador(cedulaLimpia);
-            console.log('✅ [DEBUG] Resultado validación:', validacion);
             
             if (!validacion.valido) {
-              console.log('❌ [DEBUG] Cédula inválida:', validacion.mensaje);
               await this.mostrarErrorCedula(validacion.mensaje);
-              console.log('🔄 [DEBUG] Retornando false para mantener alert abierto');
               return false;
             }
             
@@ -489,7 +465,6 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
               return false;
             }
             
-            console.log('✅ [DEBUG] Todo válido, procesando registro...');
             await this.procesarInicioRegistro({
               cedula: cedulaLimpia,
               nombres: data.nombres.trim(),
@@ -503,18 +478,16 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     });
     
     await alert.present();
-    console.log('✅ [DEBUG] Alert principal presentado');
     
     setTimeout(() => {
       const inputCedula = document.querySelector('ion-alert input[name="cedula"]') as HTMLInputElement;
       if (inputCedula) {
         inputCedula.focus();
-        console.log('🎯 [DEBUG] Focus en input cédula');
       }
     }, 300);
   }
   
-  // ✅ CORREGIDO: procesarInicioRegistro con detección de paciente existente
+  // Procesar inicio de registro
   private async procesarInicioRegistro(datos: any): Promise<void> {
     const loading = await this.loadingCtrl.create({ 
       message: 'Buscando paciente...', 
@@ -523,7 +496,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      // 🆕 PASO 1: Buscar si el paciente ya existe en el sistema
+      // PASO 1: Buscar si el paciente ya existe
       let pacienteExistente = null;
       try {
         const busquedaResponse: any = await this.http.get(
@@ -533,13 +506,13 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
         
         if (busquedaResponse?.paciente) {
           pacienteExistente = busquedaResponse.paciente;
-          console.log('✅ [NUEVA CITA] Paciente existente encontrado:', pacienteExistente.nombre_completo);
+          console.log('[NUEVA CITA] Paciente existente encontrado:', pacienteExistente.nombre_completo);
         }
       } catch (error) {
-        console.log('ℹ️ [NUEVA CITA] Paciente no encontrado en registros previos');
+        console.log('[NUEVA CITA] Paciente no encontrado en registros previos');
       }
 
-      // 🆕 PASO 2: Iniciar nuevo registro clínico
+      // PASO 2: Iniciar nuevo registro clínico
       const response: any = await this.http.post(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
         datos,
@@ -549,9 +522,6 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
       if (response?.registro_id) {
         localStorage.setItem('registro_clinico_id', response.registro_id);
         
-        console.log('🚀 [DEBUG] Navegando a registroinfopaciente con ID:', response.registro_id);
-        
-        // 🆕 PASO 3: Construir queryParams con información de nueva cita
         const queryParams: any = { 
           registro_id: response.registro_id
         };
@@ -561,7 +531,6 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
           queryParams.nueva_cita = 'true';
           queryParams.paciente_existente = 'true';
           
-          // Pre-llenar con datos del paciente existente
           if (pacienteExistente.nombre_completo) {
             const partes = pacienteExistente.nombre_completo.split(' ');
             queryParams.nombres = partes[0] || datos.nombres;
@@ -572,14 +541,13 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
           }
           queryParams.numeroIdentificacion = pacienteExistente.cedula || datos.cedula;
           
-          await this.showToast('✅ Paciente encontrado. Iniciando nueva cita...', 'success');
+          await this.showToast('Paciente encontrado. Iniciando nueva cita...', 'success');
         } else {
-          // Paciente nuevo
           queryParams.nombres = datos.nombres;
           queryParams.apellidos = datos.apellidos;
           queryParams.numeroIdentificacion = datos.cedula;
           
-          await this.showToast('✅ Registro iniciado correctamente', 'success');
+          await this.showToast('Registro iniciado correctamente', 'success');
         }
         
         await this.router.navigate(['/registroinfopaciente'], { queryParams });
@@ -587,7 +555,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
         await this.showToast('Error: No se recibió ID de registro', 'danger');
       }
     } catch (error: any) {
-      console.error('❌ [ERROR] En procesarInicioRegistro:', error);
+      console.error('Error en procesarInicioRegistro:', error);
       
       if (error?.status === 409 && error?.error?.registro_id) {
         await loading.dismiss();
@@ -617,17 +585,19 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     }
   }
 
-  // 🔐 Cerrar sesión
+  // Cerrar sesión
   async cerrarSesion(): Promise<void> {
     const confirm = await this.alertCtrl.create({
       header: 'Cerrar sesión',
       message: '¿Está seguro que desea cerrar sesión?',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
         {
           text: 'Sí, cerrar',
-          handler: () => {
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
             localStorage.clear();
+            await this.showToast('Sesión cerrada exitosamente', 'success');
             this.router.navigate(['/principal'], { replaceUrl: true, queryParams: { loggedOut: 'true' } });
           }
         }
@@ -636,13 +606,19 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     await confirm.present();
   }
 
-  // 🔔 Toast notifications
+  // Refrescar panel
+  async refrescarPanel(): Promise<void> {
+    await this.cargarTodoElPanel();
+    await this.showToast('Datos actualizados', 'success');
+  }
+
+  // Toast notifications
   async showToast(message: string, color: 'success'|'danger'|'warning'|'primary' = 'primary', duration = 3000): Promise<void> {
     const toast = await this.toastCtrl.create({ message, duration, color, position: 'bottom' });
     await toast.present();
   }
 
-  // 🎨 Ver detalle de alertas
+  // Ver detalle de alertas
   async verDetalleAlertas(): Promise<void> {
     if (this.detalleAlertas.length === 0) {
       await this.showToast('No hay alertas activas', 'primary');
@@ -650,7 +626,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     }
 
     const alert = await this.alertCtrl.create({
-      header: '🚨 Alertas Activas',
+      header: 'Alertas Activas',
       cssClass: 'alert-alertas',
       message: `
         <div style="max-height: 400px; overflow-y: auto;">
@@ -658,8 +634,8 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
             <div style="padding: 10px; margin-bottom: 8px; background: ${a.nivel === 'critico' ? '#fee2e2' : a.nivel === 'alto' ? '#fef3c7' : '#dbeafe'}; border-radius: 8px; border-left: 4px solid ${a.nivel === 'critico' ? '#dc2626' : a.nivel === 'alto' ? '#f59e0b' : '#3b82f6'};">
               <strong>${a.nombre_completo}</strong><br>
               <small>Cédula: ${a.cedula}</small><br>
-              <small style="color: #6c7293;">⚠️ ${a.tipo_alerta}</small><br>
-              <small style="color: #9499b7;">📅 ${new Date(a.fecha).toLocaleDateString('es-EC')}</small>
+              <small style="color: #6c7293;">${a.tipo_alerta}</small><br>
+              <small style="color: #9499b7;">${new Date(a.fecha).toLocaleDateString('es-EC')}</small>
             </div>
           `).join('')}
         </div>
@@ -669,7 +645,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  // 🎨 Helpers para badges
+  // Helpers para badges
   getBadgeColor(estado: string): string {
     const colores: Record<string, string> = {
       'iniciado': 'primary',
@@ -685,18 +661,18 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
 
   formatearEstado(estado: string): string {
     const estados: Record<string, string> = {
-      'iniciado': '📝 Iniciado',
-      'datos_personales': '👤 Datos',
-      'signos_vitales': '❤️ Signos',
-      'antropometricos': '📏 Antropo',
-      'metabolicas': '🧬 Metabólicas',
-      'finalizado': '✅ Finalizado',
-      'cancelado': '❌ Cancelado'
+      'iniciado': 'Iniciado',
+      'datos_personales': 'Datos',
+      'signos_vitales': 'Signos',
+      'antropometricos': 'Antropo',
+      'metabolicas': 'Metabólicas',
+      'finalizado': 'Finalizado',
+      'cancelado': 'Cancelado'
     };
     return estados[estado] || estado;
   }
 
-  // 🆔 VALIDACIÓN DE CÉDULA ECUATORIANA
+  // VALIDACIÓN DE CÉDULA ECUATORIANA
   private validarCedulaEcuador(cedula: string): { valido: boolean; mensaje: string } {
     if (!/^\d{10}$/.test(cedula)) {
       return { 
@@ -751,7 +727,7 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
 
   private async mostrarErrorCedula(mensaje: string): Promise<void> {
     const errorAlert = await this.alertCtrl.create({
-      header: '⚠️ Cédula Inválida',
+      header: 'Cédula Inválida',
       message: mensaje,
       cssClass: 'alert-error-cedula',
       buttons: [{ 
@@ -762,5 +738,13 @@ export class EnfermeriaPage implements OnInit, OnDestroy {
     
     await errorAlert.present();
     await errorAlert.onDidDismiss();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.menu-item-with-submenu')) {
+      this.submenuAbierto = null;
+    }
   }
 }

@@ -6,38 +6,33 @@ import { environment } from 'src/environments/environment';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'app-enfermeriaverpacientes',
-  templateUrl: './enfermeriaverpacientes.page.html',
-  styleUrls: ['./enfermeriaverpacientes.page.scss'],
+  selector: 'app-enfermeria-reportes',
+  templateUrl: './enfermeria-reportes.page.html',
+  styleUrls: ['./enfermeria-reportes.page.scss'],
   standalone: false,
 })
-export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
+export class EnfermeriaReportesPage implements OnInit, OnDestroy {
 
-  // Info de usuario para sidebar
+  // Info de usuario
   nombreAsistente: string = 'Enfermera';
   especialidad: string = 'Asistente Medico';
   usuario: any = null;
   
-  // Sidebar - ABIERTO POR DEFECTO en desktop
+  // Sidebar
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   private isMobile = false;
   
-  // Pacientes
-  pacientes: any[] = [];
-  pacientesFiltrados: any[] = [];
-  cargandoPacientes = false;
-  
-  // Busqueda
-  terminoBusqueda: string = '';
-  
   // Filtros
-  filtroEstado: string = 'todos';
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  tipoRegistro: string = 'todos';
+  periodoActivo: string = 'mes';
   
-  // Paginacion
-  paginaActual: number = 1;
-  pacientesPorPagina: number = 10;
-  totalPacientes: number = 0;
+  // Datos
+  estadisticas: any = {};
+  registrosRecientes: any[] = [];
+  cargando: boolean = false;
   
   // Estados
   private destroy$ = new Subject<void>();
@@ -46,9 +41,9 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   private readonly rutas: Record<string, string> = {
     'enfermeria': '/enfermeria',
     'enfermeriaverpacientes': '/enfermeriaverpacientes',
+    'enfermeria-buscar-paciente': '/enfermeria-buscar-paciente',
     'agregar-paciente': '/enfermeria/registro',
-    'enfermeria-buscar-paciente': 'enfermeria-buscar-paciente',
-    'enfermeria-reportes': 'enfermeria-reportes',
+    'enfermeria-reportes': '/enfermeria-reportes',
     'enfermeria-configuracion': '/enfermeria-configuracion'
   };
 
@@ -62,24 +57,19 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   ) {
     this.platform.ready().then(() => {
       this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
-      // Sidebar ABIERTO por defecto en desktop
       this.sidebarOpen = !this.isMobile;
     });
   }
 
   ngOnInit() {
     this.cargarDatosSesion();
-    this.cargarPacientes();
+    this.inicializarFechas();
+    this.cargarInformes();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ionViewWillEnter() {
-    console.log('[VER PACIENTES] Recargando lista...');
-    this.cargarPacientes();
   }
 
   private cargarDatosSesion(): void {
@@ -96,159 +86,150 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
     }
   }
 
-  private async cargarPacientes(): Promise<void> {
-    this.cargandoPacientes = true;
-    
+  private inicializarFechas(): void {
+    const hoy = new Date();
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hoy.getDate() - 30);
+
+    this.fechaFin = hoy.toISOString().split('T')[0];
+    this.fechaInicio = hace30Dias.toISOString().split('T')[0];
+  }
+
+  async cargarInformes(): Promise<void> {
+    this.cargando = true;
+
     try {
       const token = localStorage.getItem('token');
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`
       });
 
+      const params = new URLSearchParams();
+      if (this.fechaInicio) params.append('fecha_inicio', this.fechaInicio);
+      if (this.fechaFin) params.append('fecha_fin', this.fechaFin);
+      if (this.tipoRegistro !== 'todos') params.append('estado', this.tipoRegistro);
+
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/todos`,
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/reportes/estadisticas?${params.toString()}`,
         { headers }
       ).toPromise();
 
-      if (response?.error === false && response?.pacientes) {
-        this.pacientes = response.pacientes;
-        this.totalPacientes = response.pacientes.length;
-        this.aplicarFiltros();
+      if (response?.error === false) {
+        this.estadisticas = response.estadisticas || {};
+        this.registrosRecientes = response.registros || [];
       } else {
-        this.pacientes = [];
-        this.pacientesFiltrados = [];
+        await this.showToast('Error al cargar informes', 'danger');
       }
     } catch (error) {
-      console.error('Error cargando pacientes:', error);
-      await this.showToast('Error al cargar pacientes', 'danger');
-      this.pacientes = [];
-      this.pacientesFiltrados = [];
+      console.error('Error cargando informes:', error);
+      await this.showToast('Error de conexion', 'danger');
     } finally {
-      this.cargandoPacientes = false;
+      this.cargando = false;
     }
   }
 
-  aplicarFiltros(): void {
-    let filtrados = [...this.pacientes];
+  cambiarPeriodo(periodo: string): void {
+    this.periodoActivo = periodo;
+    const hoy = new Date();
+    let fechaInicio = new Date();
 
-    if (this.terminoBusqueda.trim()) {
-      const termino = this.terminoBusqueda.toLowerCase();
-      filtrados = filtrados.filter(p => 
-        p.nombre_completo?.toLowerCase().includes(termino) ||
-        p.cedula?.includes(termino) ||
-        p.telefono?.includes(termino)
-      );
+    if (periodo === 'hoy') {
+      fechaInicio = hoy;
+    } else if (periodo === 'semana') {
+      fechaInicio.setDate(hoy.getDate() - 7);
+    } else if (periodo === 'mes') {
+      fechaInicio.setDate(hoy.getDate() - 30);
     }
 
-    if (this.filtroEstado !== 'todos') {
-      filtrados = filtrados.filter(p => p.estado_real === this.filtroEstado);
-    }
-
-    this.pacientesFiltrados = filtrados;
-    this.paginaActual = 1;
+    this.fechaInicio = fechaInicio.toISOString().split('T')[0];
+    this.fechaFin = hoy.toISOString().split('T')[0];
+    this.aplicarFiltros();
   }
 
-  get pacientesPaginados(): any[] {
-    const inicio = (this.paginaActual - 1) * this.pacientesPorPagina;
-    const fin = inicio + this.pacientesPorPagina;
-    return this.pacientesFiltrados.slice(inicio, fin);
+  async aplicarFiltros(): Promise<void> {
+    await this.cargarInformes();
   }
 
-  get totalPaginas(): number {
-    return Math.ceil(this.pacientesFiltrados.length / this.pacientesPorPagina);
-  }
-
-  cambiarPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaActual = pagina;
-    }
-  }
-
-  async verInformacion(paciente: any): Promise<void> {
-    if (!paciente.registro_id) {
-      await this.showToast('No se encontro registro del paciente', 'warning');
-      return;
-    }
-
-    localStorage.setItem('registro_clinico_id', paciente.registro_id);
-
-    if (paciente.estado_real === 'finalizado') {
-      this.router.navigate(['/registrofinalizado'], {
-        queryParams: { registro_id: paciente.registro_id, modo: 'lectura' }
-      });
-    } else {
-      this.router.navigate(['/enfermeriaverpacientesinfo'], {
-        queryParams: { registro_id: paciente.registro_id }
-      });
-    }
-  }
-
-  async eliminarPaciente(paciente: any): Promise<void> {
-    const confirm = await this.alertCtrl.create({
-      header: 'Eliminar Paciente',
-      message: `¿Estas seguro de eliminar a <strong>${paciente.nombre_completo}</strong>?<br><br>
-                <small style="color: #dc2626;">Esta accion no se puede deshacer.</small>`,
+  async exportarInforme(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Exportar informe',
+      message: 'Selecciona el formato de exportacion:',
       buttons: [
-        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
         {
-          text: 'Si, eliminar',
-          cssClass: 'alert-button-danger',
-          handler: async () => { await this.confirmarEliminacion(paciente); }
+          text: 'PDF',
+          handler: () => this.exportarEnFormato('pdf')
+        },
+        {
+          text: 'Excel',
+          handler: () => this.exportarEnFormato('excel')
+        },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
         }
       ]
     });
-    await confirm.present();
+    await alert.present();
   }
 
-  private async confirmarEliminacion(paciente: any): Promise<void> {
+  private async exportarEnFormato(formato: string): Promise<void> {
     const loading = await this.loadingCtrl.create({
-      message: 'Eliminando paciente...',
+      message: 'Generando informe...',
       spinner: 'crescent'
     });
     await loading.present();
 
     try {
       const token = localStorage.getItem('token');
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
 
-      const response: any = await this.http.delete(
-        `${environment.apiUrl}/nutricionapp-api/enfermeria/pacientes/${paciente.id}`,
-        { headers }
+      const params = new URLSearchParams();
+      if (this.fechaInicio) params.append('fecha_inicio', this.fechaInicio);
+      if (this.fechaFin) params.append('fecha_fin', this.fechaFin);
+      params.append('formato', formato);
+
+      const response: any = await this.http.get(
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/reportes/exportar?${params.toString()}`,
+        { headers, responseType: 'blob' as any }
       ).toPromise();
 
       await loading.dismiss();
 
-      if (response?.error === false) {
-        await this.showToast('Paciente eliminado correctamente', 'success');
-        await this.cargarPacientes();
-      } else {
-        throw new Error(response?.mensaje || 'Error desconocido');
-      }
-    } catch (error: any) {
+      const blob = new Blob([response], { type: formato === 'pdf' ? 'application/pdf' : 'application/vnd.ms-excel' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `informe_enfermeria_${Date.now()}.${formato === 'excel' ? 'csv' : 'txt'}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      await this.showToast('Informe exportado correctamente', 'success');
+    } catch (error) {
       await loading.dismiss();
-      await this.showToast('Error al eliminar paciente', 'danger');
+      console.error('Error exportando informe:', error);
+      await this.showToast('Error al exportar informe', 'danger');
     }
   }
 
-  async contactarWhatsApp(paciente: any): Promise<void> {
-    if (!paciente.telefono) {
-      await this.showToast('El paciente no tiene telefono registrado', 'warning');
+  async verRegistro(registro: any): Promise<void> {
+    if (!registro.id) {
+      await this.showToast('No se encontro el registro', 'warning');
       return;
     }
 
-    let telefono = paciente.telefono.replace(/\D/g, '');
-    
-    if (telefono.length === 10 && telefono.startsWith('0')) {
-      telefono = '593' + telefono.substring(1);
-    } else if (telefono.length === 10 && !telefono.startsWith('593')) {
-      telefono = '593' + telefono;
+    localStorage.setItem('registro_clinico_id', registro.id);
+
+    if (registro.estado === 'finalizado') {
+      this.router.navigate(['/registrofinalizado'], {
+        queryParams: { registro_id: registro.id, modo: 'lectura' }
+      });
+    } else {
+      this.router.navigate(['/enfermeriaverpacientesinfo'], {
+        queryParams: { registro_id: registro.id }
+      });
     }
-
-    const mensaje = encodeURIComponent(
-      `Hola ${paciente.nombre_completo.split(' ')[0]}, soy ${this.nombreAsistente} del equipo medico de NutriPA.`
-    );
-
-    window.open(`https://wa.me/${telefono}?text=${mensaje}`, '_blank');
   }
 
   async iniciarRegistroPaciente(): Promise<void> {
@@ -257,7 +238,7 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
       message: 'Ingrese cedula, nombres y apellidos del paciente:',
       cssClass: 'alert-registro',
       inputs: [
-        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)', 
+        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)',
           attributes: { maxlength: 10, inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off' } },
         { name: 'nombres', type: 'text', placeholder: 'Nombres *' },
         { name: 'apellidos', type: 'text', placeholder: 'Apellidos *' }
@@ -398,19 +379,15 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
     if (this.isMobile) this.sidebarOpen = false;
   }
 
-  irAInicio(): void {
-    this.router.navigate(['/enfermeria']);
-  }
-
   async refrescarDatos(): Promise<void> {
-    await this.cargarPacientes();
+    await this.cargarInformes();
     await this.showToast('Datos actualizados', 'success');
   }
 
   async cerrarSesion(): Promise<void> {
     const confirm = await this.alertCtrl.create({
       header: 'Cerrar sesion',
-      message: '¿Esta seguro que desea cerrar sesion?',
+      message: 'Esta seguro que desea cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
         {
@@ -435,7 +412,7 @@ export class EnfermeriaverpacientesPage implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.has-submenu')) {
+    if (!target.closest('.menu-item-with-submenu')) {
       this.submenuAbierto = null;
     }
   }

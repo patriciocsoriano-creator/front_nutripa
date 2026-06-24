@@ -1,8 +1,7 @@
 /* =========================================
-   VARIABLES - Tema Hospitalario
+   VARIABLES
    ========================================= */
 $primary-color: #0a4d68;
-$primary-dark: #083d52;
 $secondary-color: #145da0;
 $accent-color: #4fc3f7;
 $bg-color: #f4f7fb;
@@ -20,70 +19,42 @@ $radius-md: 12px;
 $radius-lg: 16px;
 
 /* =========================================
-   RESET Y BASE
-   ========================================= */
-* {
-  box-sizing: border-box;
-}
-
-ion-content {
-  --background: #{$bg-color};
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-/* =========================================
    HEADER
    ========================================= */
-.main-header {
-  ion-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    border-bottom: 1px solid $border-color;
-    padding: 0 20px;
-    box-shadow: $shadow-sm;
-    --min-height: 64px;
+::ng-deep .main-header ion-toolbar {
+  --background: #f7fbff !important;
+  border-bottom: 1px solid #dce5f3 !important;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+::ng-deep .main-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-      .logo-icon {
-        font-size: 1.8rem;
-        color: $primary-color;
-      }
+::ng-deep .main-header .logo-icon {
+  font-size: 1.6rem;
+  color: $primary-color;
+}
 
-      ion-title {
-        font-weight: 700;
-        color: $primary-color;
-        font-size: 1.1rem;
-        padding: 0;
-        margin: 0;
-      }
-    }
-
-    ion-button {
-      --color: $text-secondary;
-      --color-hover: $primary-color;
-      
-      ion-icon {
-        font-size: 1.4rem;
-      }
-    }
-  }
+::ng-deep .main-header ion-title {
+  font-weight: 600;
+  color: $primary-color;
+  font-size: 1.2rem;
+  padding: 0 !important;
 }
 
 /* =========================================
    DASHBOARD CONTAINER
    ========================================= */
-.dashboard-container {
+::ng-deep .dashboard-container {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 60px);
   background: $bg-color;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -91,134 +62,270 @@ ion-content {
 /* =========================================
    SIDEBAR
    ========================================= */
-.sidebar {
+::ng-deep .sidebar {
   width: 70px;
-  background-color: $primary-color;
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: visible !important;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+::ng-deep .sidebar.open {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+::ng-deep .sidebar .menu-icon {
+  margin: 1rem 0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+::ng-deep .sidebar .menu-icon:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+::ng-deep .sidebar .user-info {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+}
+
+::ng-deep .sidebar .user-info ion-avatar {
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  --background: rgba(255,255,255,0.2);
+}
+
+::ng-deep .sidebar .user-info ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+::ng-deep .sidebar .user-details {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+::ng-deep .sidebar.open .user-details {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+::ng-deep .sidebar .user-details h4 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 90;
+  text-overflow: ellipsis;
+}
 
-  &.open {
-    width: 230px;
-  }
+::ng-deep .sidebar .user-details p {
+  font-size: 0.75rem;
+  color: #b0c7d9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .menu-icon {
-    margin: 1rem 0;
-    font-size: 1.6rem;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
+::ng-deep .sidebar ul {
+  list-style: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  margin: 0;
+}
 
-  .user-info {
-    text-align: center;
-    padding: 1rem 0.5rem;
-    width: 100%;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 0.5rem;
-    
-    ion-avatar {
-      margin: 0 auto 8px;
-      width: 50px;
-      height: 50px;
-      background: rgba(255,255,255,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      ion-icon {
-        font-size: 30px;
-        color: white;
-      }
-    }
-    
-    .user-details {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      
-      h4, p {
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      
-      h4 {
-        font-size: 0.95rem;
-        font-weight: 500;
-      }
-      
-      p {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.7);
-      }
-    }
-  }
+::ng-deep .sidebar ul > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
 
-  &.open .user-details {
-    opacity: 1;
-  }
+::ng-deep .sidebar ul > li:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
 
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    margin: 0;
-    
-    li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      cursor: pointer;
-      color: rgba(255,255,255,0.85);
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-      
-      ion-icon {
-        font-size: 1.3rem;
-        min-width: 20px;
-      }
-      
-      span {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        white-space: nowrap;
-      }
-      
-      &:hover {
-        background: rgba(255,255,255,0.12);
-        color: white;
-      }
-      
-      &.active {
-        background: rgba(255,255,255,0.18);
-        color: white;
-        border-left: 3px solid $accent-color;
-      }
-    }
-  }
+::ng-deep .sidebar ul > li.active {
+  background: rgba(255,255,255,0.2);
+  border-left: 3px solid $accent-color;
+}
 
-  &.open ul li span {
-    opacity: 1;
-  }
+::ng-deep .sidebar ul > li ion-icon {
+  font-size: 1.3rem;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+::ng-deep .sidebar ul > li span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::ng-deep .sidebar.open ul > li span {
+  opacity: 1;
+}
+
+::ng-deep .sidebar .menu-item-with-submenu {
+  position: relative !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+::ng-deep .sidebar .menu-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  color: rgba(255,255,255,0.9) !important;
+  transition: background 0.2s ease !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .sidebar .menu-link:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .menu-link span {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+
+::ng-deep .sidebar.open .menu-link span {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow {
+  margin-left: auto !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.3s ease !important;
+  font-size: 1rem !important;
+}
+
+::ng-deep .sidebar.open .menu-link .submenu-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow.rotate {
+  transform: rotate(180deg) !important;
+}
+
+::ng-deep .sidebar .submenu {
+  position: absolute !important;
+  left: 100% !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #083d52 0%, #062d3d 100%) !important;
+  min-width: 220px !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.3) !important;
+  z-index: 1000 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+::ng-deep .sidebar .submenu.active {
+  max-height: 400px !important;
+}
+
+::ng-deep .sidebar .submenu li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 20px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .sidebar .submenu li:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .submenu li.active {
+  background: rgba(255,255,255,0.2) !important;
+  border-left: 3px solid $accent-color !important;
+}
+
+::ng-deep .sidebar .submenu li:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .sidebar .submenu li ion-icon {
+  font-size: 1.1rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .submenu li span {
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
 }
 
 /* =========================================
-   CONTENIDO PRINCIPAL
+   MAIN CONTENT
    ========================================= */
-.main-content {
+::ng-deep .main-content {
   flex: 1;
   padding: 30px 40px;
   overflow-y: auto;
+  overflow-x: hidden;
+  background: $bg-color;
+}
+
+::ng-deep .main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.2);
+  border-radius: 4px;
 }
 
 /* =========================================
@@ -228,186 +335,170 @@ ion-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  min-height: 500px;
-  
-  .loading-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 40px;
-    background: white;
-    border-radius: $radius-lg;
-    box-shadow: $shadow-md;
-    
-    ion-spinner {
-      --color: #{$secondary-color};
-      width: 56px;
-      height: 56px;
+  min-height: 400px;
+}
+
+.loading-content {
+  text-align: center;
+
+  ion-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    --color: #{$primary-color};
+  }
+
+  h3 {
+    color: $text-primary;
+    font-size: 1.3rem;
+    margin: 0 0 8px;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+}
+
+/* =========================================
+   BANNER FINALIZADO
+   ========================================= */
+.banner-finalizado {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 24px 32px;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  box-shadow: $shadow-md;
+
+  ion-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+  }
+
+  .banner-text {
+    flex: 1;
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 1.4rem;
+      font-weight: 700;
     }
-    
-    h3 {
-      margin: 0;
-      color: $text-primary;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-    
+
     p {
       margin: 0;
-      color: $text-secondary;
       font-size: 0.95rem;
+      opacity: 0.95;
     }
   }
 }
 
 /* =========================================
-   ENCABEZADO DEL PACIENTE
+   PACIENTE HEADER CARD
    ========================================= */
 .paciente-header-card {
+  background: white;
+  border-radius: $radius-lg;
+  padding: 24px;
+  box-shadow: $shadow-md;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 24px;
-  background: white;
-  padding: 24px;
-  border-radius: $radius-lg;
+  flex-wrap: wrap;
+}
+
+.avatar-grande {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   box-shadow: $shadow-md;
-  margin-bottom: 24px;
-  
-  .avatar-grande {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+
+  span {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+}
+
+.paciente-info-principal {
+  flex: 1;
+  min-width: 250px;
+
+  h1 {
+    margin: 0 0 12px;
+    color: $text-primary;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .info-badges {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .badge-cedula,
+  .badge-edad,
+  .badge-fecha {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    
-    span {
-      color: white;
-      font-size: 2.5rem;
-      font-weight: 700;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    ion-icon {
+      font-size: 0.9rem;
     }
   }
-  
-  .paciente-info-principal {
-    flex: 1;
-    
-    h1 {
-      margin: 0 0 12px;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: $text-primary;
-    }
-    
-    .info-badges {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      
-      .badge-cedula,
-      .badge-estado,
-      .badge-edad {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        
-        ion-icon {
-          font-size: 1rem;
-        }
-      }
-      
-      .badge-cedula {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      
-      .badge-edad {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      
-      .badge-estado {
-        &.badge-success {
-          background: #d1fae5;
-          color: #065f46;
-        }
-        
-        &.badge-warning {
-          background: #fef3c7;
-          color: #92400e;
-        }
-        
-        &.badge-primary {
-          background: #dbeafe;
-          color: #1e40af;
-        }
-      }
-    }
+
+  .badge-cedula {
+    background: $input-bg;
+    color: $text-secondary;
+    border: 1px solid $border-color;
   }
-  
-  .acciones-rapidas {
-    display: flex;
-    gap: 12px;
+
+  .badge-edad {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .badge-fecha {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+.acciones-rapidas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  ion-button {
+    --border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
   }
 }
 
 /* =========================================
-   BARRA DE PROGRESO
-   ========================================= */
-.progreso-general {
-  background: white;
-  padding: 20px 24px;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  margin-bottom: 24px;
-  
-  .progreso-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    
-    span {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: $text-primary;
-    }
-    
-    .progreso-porcentaje {
-      color: $secondary-color;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-  }
-  
-  .progreso-barra {
-    height: 12px;
-    background: #e5e7eb;
-    border-radius: 10px;
-    overflow: hidden;
-    
-    .progreso-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981, #059669);
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-  }
-}
-
-/* =========================================
-   GRID DE INFORMACIÓN
+   INFO GRID
    ========================================= */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .info-card {
@@ -416,60 +507,60 @@ ion-content {
   box-shadow: $shadow-md;
   overflow: hidden;
   transition: all 0.3s ease;
-  
+
   &:hover {
     box-shadow: $shadow-lg;
     transform: translateY(-2px);
   }
-  
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 18px 24px;
-    background: linear-gradient(135deg, $primary-color, $secondary-color);
-    color: white;
-    
-    ion-icon {
-      font-size: 1.5rem;
-    }
-    
-    h2 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba($primary-color, 0.05), rgba($secondary-color, 0.05));
+  border-bottom: 1px solid $border-color;
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: $primary-color;
   }
-  
-  .card-content {
-    padding: 24px;
+
+  h2 {
+    margin: 0;
+    color: $text-primary;
+    font-size: 1.05rem;
+    font-weight: 600;
   }
 }
 
-/* =========================================
-   DATOS PERSONALES
-   ========================================= */
+.card-content {
+  padding: 20px;
+}
+
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid $border-color;
-  
+  padding: 10px 0;
+  border-bottom: 1px solid rgba($border-color, 0.5);
+
   &:last-child {
     border-bottom: none;
   }
-  
+
   label {
+    color: $text-secondary;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  span {
+    color: $text-primary;
     font-size: 0.9rem;
     font-weight: 600;
-    color: $text-secondary;
-  }
-  
-  span {
-    font-size: 0.95rem;
-    color: $text-primary;
-    font-weight: 500;
+    text-align: right;
   }
 }
 
@@ -479,128 +570,141 @@ ion-content {
 .signos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .signo-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   background: $input-bg;
   border-radius: $radius-md;
-  border: 1px solid $border-color;
-  
+  border-left: 3px solid $accent-color;
+
   ion-icon {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     color: $secondary-color;
+    flex-shrink: 0;
   }
-  
+
   .signo-info {
     flex: 1;
-    
+    min-width: 0;
+
     label {
       display: block;
-      font-size: 0.8rem;
-      color: $text-secondary;
-      margin-bottom: 4px;
+      font-size: 0.75rem;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
     }
-    
+
     span {
       display: block;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 0.95rem;
       color: $text-primary;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
 
 /* =========================================
-   ANTROPOMÉTRICOS
+   DATOS ANTROPOMETRICOS
    ========================================= */
 .antropometricos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .antropo-item {
-  padding: 16px;
+  padding: 12px;
   background: $input-bg;
   border-radius: $radius-md;
-  border: 1px solid $border-color;
-  
+  text-align: center;
+
   label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: $text-secondary;
-    margin-bottom: 6px;
-    font-weight: 600;
+    margin-bottom: 4px;
   }
-  
+
   span {
     display: block;
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.1rem;
     color: $text-primary;
+    font-weight: 700;
   }
-  
+
   small {
     display: block;
-    font-size: 0.8rem;
-    color: $text-muted;
+    font-size: 0.75rem;
+    color: $secondary-color;
     margin-top: 4px;
+    font-weight: 600;
   }
-  
+
   &.imc-destacado {
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    border-color: #3b82f6;
-    
+    background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($accent-color, 0.1));
+    border: 2px solid $accent-color;
+    grid-column: span 2;
+
+    label {
+      color: $primary-color;
+      font-weight: 600;
+    }
+
     span {
-      color: #1e40af;
+      font-size: 1.5rem;
+      color: $primary-color;
     }
   }
 }
 
 /* =========================================
-   CONDICIONES METABÓLICAS
+   CONDICIONES METABOLICAS
    ========================================= */
 .condiciones-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .condicion-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: $input-bg;
   border-radius: $radius-md;
-  border: 1px solid $border-color;
-  
+  transition: all 0.2s ease;
+
   ion-icon {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: $text-muted;
   }
-  
+
   span {
-    font-size: 0.95rem;
     color: $text-secondary;
-    font-weight: 500;
+    font-size: 0.9rem;
   }
-  
+
   &.activa {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    
+    background: #d1fae5;
+    border-left: 3px solid #10b981;
+
     ion-icon {
-      color: #d97706;
+      color: #10b981;
     }
-    
+
     span {
-      color: #92400e;
+      color: #065f46;
       font-weight: 600;
     }
   }
@@ -614,19 +718,20 @@ ion-content {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 30px 20px;
   text-align: center;
-  
+
   ion-icon {
     font-size: 3rem;
     color: $text-muted;
     margin-bottom: 12px;
+    opacity: 0.5;
   }
-  
+
   p {
-    margin: 0;
     color: $text-secondary;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    margin: 0;
   }
 }
 
@@ -640,17 +745,26 @@ ion-content {
   justify-content: center;
   padding: 80px 20px;
   text-align: center;
-  
+  background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+
   ion-icon {
-    font-size: 4rem;
+    font-size: 5rem;
     color: $text-muted;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    opacity: 0.5;
   }
-  
+
   h3 {
-    margin: 0 0 16px;
+    margin: 0 0 20px;
     color: $text-primary;
     font-size: 1.3rem;
+  }
+
+  ion-button {
+    --border-radius: 10px;
+    font-weight: 600;
   }
 }
 
@@ -659,88 +773,104 @@ ion-content {
    ========================================= */
 @media (max-width: 1024px) {
   .info-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .paciente-header-card {
-    flex-direction: column;
-    text-align: center;
-    
-    .paciente-info-principal .info-badges {
-      justify-content: center;
-    }
-    
-    .acciones-rapidas {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    box-shadow: $shadow-lg;
-    
-    &.open {
-      transform: translateX(0);
-    }
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  ::ng-deep .sidebar.open {
+    width: 100% !important;
+  }
+
+  ::ng-deep .sidebar .menu-icon,
+  ::ng-deep .sidebar .user-info {
+    display: none;
+  }
+
+  ::ng-deep .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: auto;
+  }
+
+  ::ng-deep .sidebar ul li {
+    padding: 5px;
+  }
+
+  ::ng-deep .sidebar ul li span {
+    display: none;
+  }
+
   .main-content {
     padding: 20px 16px;
   }
-  
-  .signos-grid,
+
+  .banner-finalizado {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+
+    ion-icon {
+      font-size: 2.5rem;
+    }
+
+    .banner-text h2 {
+      font-size: 1.2rem;
+    }
+  }
+
+  .paciente-header-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .info-badges {
+    justify-content: center;
+  }
+
+  .acciones-rapidas {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .signos-grid {
+    grid-template-columns: 1fr;
+  }
+
   .antropometricos-grid {
     grid-template-columns: 1fr;
   }
-  
-  .paciente-header-card h1 {
-    font-size: 1.5rem;
+
+  .antropo-item.imc-destacado {
+    grid-column: span 1;
   }
 }
 
 /* =========================================
-   BANNER FINALIZADO
+   ACCESIBILIDAD
    ========================================= */
-.banner-finalizado {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  padding: 24px 32px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
-  
-  ion-icon {
-    font-size: 3rem;
-    flex-shrink: 0;
-  }
-  
-  .banner-text {
-    h2 {
-      margin: 0 0 4px;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-    
-    p {
-      margin: 0;
-      font-size: 0.95rem;
-      opacity: 0.9;
-    }
-  }
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.badge-fecha {
-  background: #e0e7ff;
-  color: #3730a3;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

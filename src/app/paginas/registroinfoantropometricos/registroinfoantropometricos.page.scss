@@ -1,8 +1,7 @@
 /* =========================================
-   🎨 VARIABLES - Tema Hospitalario Premium
+   VARIABLES
    ========================================= */
 $primary-color: #0a4d68;
-$primary-dark: #083d52;
 $secondary-color: #145da0;
 $accent-color: #4fc3f7;
 $bg-color: #f4f7fb;
@@ -12,1149 +11,993 @@ $text-secondary: #6c7293;
 $text-muted: #9499b7;
 $border-color: #e2e8f0;
 $input-bg: #f8fafc;
-
-// 🚨 Colores clínicos premium para IMC
-$imc-bajo: #6366f1;           // Índigo premium
-$imc-normal: #10b981;         // Verde esmeralda
-$imc-sobrepeso: #f59e0b;      // Ámbar profesional
-$imc-obesidad: #ef4444;       // Rojo clínico
-
-// ✨ Sombras y radios premium
-$shadow-xs: 0 1px 2px rgba(0,0,0,0.03);
 $shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-$shadow-xl: 0 12px 40px rgba(0,0,0,0.15);
+$shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
 $radius-sm: 8px;
 $radius-md: 12px;
 $radius-lg: 16px;
-$radius-xl: 20px;
 
 /* =========================================
-   🔄 RESET Y BASE PREMIUM
+   HEADER
    ========================================= */
-* {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-ion-content {
-  --background: #{$bg-color};
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-/* =========================================
-   🎯 HEADER (Consistente con dashboard)
-   ========================================= */
-.main-header {
-  ion-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    border-bottom: 1px solid $border-color;
-    padding: 0 20px;
-    box-shadow: $shadow-xs;
-    --min-height: 64px;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .logo-icon {
-        font-size: 1.8rem;
-        color: $primary-color;
-        filter: drop-shadow(0 2px 4px rgba(10, 77, 104, 0.1));
-      }
-
-      ion-title {
-        font-weight: 700;
-        color: $primary-color;
-        font-size: 1.1rem;
-        padding: 0;
-        margin: 0;
-        letter-spacing: -0.01em;
-      }
-    }
-
-    ion-button {
-      --color: $text-secondary;
-      --color-hover: $primary-color;
-      
-      ion-icon {
-        font-size: 1.4rem;
-      }
-      
-      &:hover {
-        --background: rgba(0,0,0,0.04);
-      }
-    }
-  }
-}
-
-/* =========================================
-   📦 DASHBOARD CONTAINER
-   ========================================= */
-.dashboard-container {
+::ng-deep .main-header ion-toolbar {
+  --background: #f7fbff !important;
+  border-bottom: 1px solid #dce5f3 !important;
+  padding: 0 20px;
+  height: 60px;
   display: flex;
-  height: 100%;
-  background: $bg-color;
-  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  align-items: center;
+  justify-content: space-between;
+}
+
+::ng-deep .main-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+::ng-deep .main-header .logo-icon {
+  font-size: 1.6rem;
+  color: $primary-color;
+}
+
+::ng-deep .main-header ion-title {
+  font-weight: 600;
+  color: $primary-color;
+  font-size: 1.2rem;
+  padding: 0 !important;
 }
 
 /* =========================================
-   🧭 SIDEBAR (Estilo profesional)
+   DASHBOARD CONTAINER
    ========================================= */
-.sidebar {
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* =========================================
+   SIDEBAR
+   ========================================= */
+::ng-deep .sidebar {
   width: 70px;
-  background: linear-gradient(180deg, $primary-color 0%, $primary-dark 100%);
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  overflow: visible !important;
+  position: relative;
   z-index: 100;
-  box-shadow: $shadow-md;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
 
-  &.open {
-    width: 240px;
-  }
+::ng-deep .sidebar.open {
+  width: 240px !important;
+  min-width: 240px !important;
+}
 
-  .menu-icon {
-    margin: 1.25rem 0;
-    font-size: 1.6rem;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 8px;
-    border-radius: $radius-md;
-    transition: background 0.2s ease;
-    
-    ion-icon {
-      transition: transform 0.25s ease;
-    }
-    
-    &:hover {
-      background: rgba(255,255,255,0.1);
-      ion-icon { transform: scale(1.1); }
-    }
-  }
+::ng-deep .sidebar .menu-icon {
+  margin: 1rem 0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
 
-  .user-info {
-    text-align: center;
-    padding: 1.25rem 0.75rem;
-    width: 100%;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-    margin-bottom: 0.75rem;
-    
-    ion-avatar {
-      margin: 0 auto 10px;
-      width: 52px;
-      height: 52px;
-      min-width: 52px;
-      background: rgba(255,255,255,0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid rgba(255,255,255,0.3);
-      
-      ion-icon {
-        font-size: 32px;
-        color: white;
-      }
-    }
-    
-    .user-details {
-      opacity: 0;
-      transform: translateX(-8px);
-      transition: all 0.3s ease;
-      pointer-events: none;
-      
-      h4 {
-        font-size: 0.95rem;
-        margin: 0;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: white;
-      }
-      
-      p {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.75);
-        margin: 3px 0 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-  }
+::ng-deep .sidebar .menu-icon:hover {
+  background: rgba(255,255,255,0.15);
+}
 
-  &.open .user-details {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
-  }
+::ng-deep .sidebar .user-info {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+}
 
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    margin: 0;
-    
-    li {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 13px 22px;
-      cursor: pointer;
-      color: rgba(255,255,255,0.9);
-      transition: all 0.25s ease;
-      font-size: 0.9rem;
-      font-weight: 500;
-      
-      ion-icon {
-        font-size: 1.3rem;
-        min-width: 20px;
-        opacity: 0.95;
-      }
-      
-      span {
-        opacity: 0;
-        transform: translateX(-6px);
-        transition: all 0.3s ease;
-        white-space: nowrap;
-      }
-      
-      &:hover {
-        background: rgba(255,255,255,0.14);
-        color: white;
-        ion-icon { opacity: 1; }
-      }
-      
-      &.active {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        border-left: 3px solid $accent-color;
-        ion-icon { opacity: 1; }
-      }
-    }
-  }
+::ng-deep .sidebar .user-info ion-avatar {
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  --background: rgba(255,255,255,0.2);
+}
 
-  &.open ul li span {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
-  .menu-item-with-submenu {
-    .menu-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 13px 22px;
-    }
-    
-    .submenu-arrow {
-      font-size: 1rem;
-      transition: transform 0.35s ease;
-      margin-left: auto;
-      opacity: 0.8;
-      
-      &.rotate {
-        transform: rotate(180deg);
-      }
-    }
-    
-    .submenu {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease, opacity 0.3s ease;
-      background: rgba(0,0,0,0.12);
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      opacity: 0;
-      
-      &.active {
-        max-height: 220px;
-        opacity: 1;
-      }
-      
-      li {
-        padding: 11px 22px 11px 56px;
-        font-size: 0.87rem;
-        color: rgba(255,255,255,0.85);
-        
-        ion-icon {
-          font-size: 1.1rem;
-          opacity: 0.9;
-        }
-        
-        &:hover {
-          background: rgba(255,255,255,0.18);
-          color: white;
-        }
-      }
-    }
-  }
-  
-  &.open .menu-item-with-submenu .submenu li span {
-    opacity: 1;
-  }
+::ng-deep .sidebar .user-info ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+::ng-deep .sidebar .user-details {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+::ng-deep .sidebar.open .user-details {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+::ng-deep .sidebar .user-details h4 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .sidebar .user-details p {
+  font-size: 0.75rem;
+  color: #b0c7d9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .sidebar ul {
+  list-style: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  margin: 0;
+}
+
+::ng-deep .sidebar ul > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+::ng-deep .sidebar ul > li:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+::ng-deep .sidebar ul > li.active {
+  background: rgba(255,255,255,0.2);
+  border-left: 3px solid $accent-color;
+}
+
+::ng-deep .sidebar ul > li ion-icon {
+  font-size: 1.3rem;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+::ng-deep .sidebar ul > li span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::ng-deep .sidebar.open ul > li span {
+  opacity: 1;
+}
+
+::ng-deep .sidebar .menu-item-with-submenu {
+  position: relative !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+::ng-deep .sidebar .menu-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  color: rgba(255,255,255,0.9) !important;
+  transition: background 0.2s ease !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .sidebar .menu-link:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .menu-link span {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+
+::ng-deep .sidebar.open .menu-link span {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow {
+  margin-left: auto !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.3s ease !important;
+  font-size: 1rem !important;
+}
+
+::ng-deep .sidebar.open .menu-link .submenu-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow.rotate {
+  transform: rotate(180deg) !important;
+}
+
+::ng-deep .sidebar .submenu {
+  position: absolute !important;
+  left: 100% !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #083d52 0%, #062d3d 100%) !important;
+  min-width: 220px !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.3) !important;
+  z-index: 1000 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+::ng-deep .sidebar .submenu.active {
+  max-height: 400px !important;
+}
+
+::ng-deep .sidebar .submenu li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 20px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .sidebar .submenu li:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .submenu li.active {
+  background: rgba(255,255,255,0.2) !important;
+  border-left: 3px solid $accent-color !important;
+}
+
+::ng-deep .sidebar .submenu li:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .sidebar .submenu li ion-icon {
+  font-size: 1.1rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .submenu li span {
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
 }
 
 /* =========================================
-   📦 CONTENIDO PRINCIPAL - FORMULARIO PREMIUM
+   MAIN CONTENT - FORM LAYOUT
    ========================================= */
-.main-content.form-layout {
+::ng-deep .main-content {
   flex: 1;
-  padding: 36px 48px;
+  padding: 30px 40px;
   overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  background: linear-gradient(180deg, $bg-color 0%, lighten($bg-color, 2%) 100%);
+  overflow-x: hidden;
+  background: $bg-color;
 }
 
-.form-container {
-  width: 100%;
-  max-width: 720px;
+::ng-deep .main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Encabezado del Formulario */
+::ng-deep .main-content::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.2);
+  border-radius: 4px;
+}
+
+.form-layout {
+  display: flex;
+  justify-content: center;
+}
+
+.form-container {
+  max-width: 900px;
+  width: 100%;
+}
+
+/* =========================================
+   FORM HEADER
+   ========================================= */
 .form-header-section {
-  margin-bottom: 40px;
-  padding-bottom: 28px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  
+  margin-bottom: 24px;
+
   h1 {
     color: $primary-color;
-    font-size: 2rem;
-    margin: 0 0 10px;
+    font-size: 1.8rem;
     font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
+    margin: 0 0 8px;
   }
-  
+
   p {
     color: $text-secondary;
+    font-size: 0.95rem;
     margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.6;
-    max-width: 520px;
   }
 }
 
 /* =========================================
-   📋 TARJETA DE MEDIDAS CORPORALES - DISEÑO PREMIUM
+   ANTHRO CARD
    ========================================= */
-.anthro-list-card {
-  --background: #{$card-bg};
-  border-radius: $radius-xl;
-  box-shadow: $shadow-lg;
-  margin: 0 0 32px;
-  border: 1px solid rgba(0,0,0,0.04);
-  overflow: hidden;
-  transition: box-shadow 0.35s ease, transform 0.35s ease;
-  
-  &:hover {
-    box-shadow: $shadow-xl;
-    transform: translateY(-2px);
-  }
-  
+.anthro-list-card,
+.imc-reference-card {
+  --background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 24px;
+
   ion-card-header {
-    padding: 22px 28px 14px;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    background: linear-gradient(135deg, rgba($primary-color, 0.03), transparent);
-    
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+
     ion-card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: $primary-color;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      color: $text-primary;
+      font-size: 1.1rem;
+      font-weight: 600;
       margin: 0;
-      letter-spacing: -0.01em;
-      
+
       ion-icon {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         color: $secondary-color;
-        filter: drop-shadow(0 2px 4px rgba(20, 93, 160, 0.15));
       }
     }
   }
-  
+
   ion-card-content {
-    padding: 4px 0 8px;
+    padding: 24px;
   }
 }
 
-/* Grid de inputs premium */
+/* =========================================
+   ANTHRO GRID
+   ========================================= */
 .anthro-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 24px;
-  padding: 24px 28px 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-/* Item de input premium */
 .anthro-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  
+  gap: 8px;
+
   &.full-width {
-    grid-column: 1 / -1;
+    grid-column: span 2;
   }
-  
-  .input-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: $text-secondary;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    
-    ion-icon {
-      font-size: 1.1rem;
-      color: $accent-color;
-      opacity: 0.9;
-    }
-    
-    .required {
-      color: $imc-obesidad;
-      font-weight: 700;
-      margin-left: 2px;
-    }
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $text-primary;
+
+  ion-icon {
+    font-size: 1.1rem;
+    color: $secondary-color;
   }
-  
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    
-    ion-input.custom-input {
-      --background: #{$input-bg};
-      --border-radius: #{$radius-md};
-      --padding-start: 48px;
-      --padding-end: 52px;
-      --padding-top: 12px;
-      --padding-bottom: 12px;
-      --color: #{$text-primary};
-      --placeholder-color: #{$text-muted};
-      font-size: 1rem;
-      font-weight: 500;
-      border: 1.5px solid $border-color;
-      transition: all 0.28s ease;
-      min-height: 52px;
-      
-      &:focus-within,
-      &.ion-focused {
-        --background: #ffffff;
-        border-color: $secondary-color;
-        box-shadow: 0 0 0 4px rgba(20, 93, 160, 0.12);
-      }
-      
-      &.ion-invalid {
-        --background: rgba($imc-obesidad, 0.06);
-        border-color: $imc-obesidad;
-      }
-    }
-    
-    /* Icono decorativo dentro del input */
-    .input-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.2rem;
-      color: $text-muted;
-      pointer-events: none;
-      transition: color 0.2s ease;
-      
-      .custom-input.ion-focused + & {
-        color: $secondary-color;
-      }
-    }
-    
-    /* Unidad dentro del input */
-    .unit-badge {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: $text-muted;
-      background: rgba(0,0,0,0.04);
-      padding: 4px 10px;
-      border-radius: 6px;
-      pointer-events: none;
-      transition: all 0.2s ease;
-      
-      .custom-input.ion-focused + & {
-        background: rgba($secondary-color, 0.1);
-        color: $secondary-color;
-      }
-    }
+
+  .required {
+    color: #ef4444;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: $input-bg;
+  border: 2px solid $border-color;
+  border-radius: $radius-md;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: $accent-color;
+    box-shadow: 0 0 0 3px rgba($accent-color, 0.15);
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 1.2rem;
+    color: $text-muted;
+    pointer-events: none;
+  }
+
+  .custom-input {
+    flex: 1;
+    --padding-start: 44px;
+    --padding-end: 50px;
+    --color: #{$text-primary};
+    --placeholder-color: #{$text-muted};
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .unit-badge {
+    position: absolute;
+    right: 14px;
+    background: rgba($primary-color, 0.1);
+    color: $primary-color;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
   }
 }
 
 /* =========================================
-   📊 BADGE DE IMC - DISEÑO CHIP PREMIUM
+   IMC RESULT
    ========================================= */
+.imc-result-item {
+  background: linear-gradient(135deg, rgba($primary-color, 0.05), rgba($accent-color, 0.05));
+  border: 2px solid $accent-color;
+  border-radius: $radius-lg;
+  padding: 20px;
+}
+
+.imc-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.imc-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  .value-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $primary-color;
+    line-height: 1;
+  }
+
+  .value-unit {
+    font-size: 1rem;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+}
+
 .imc-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  border-radius: 24px;
-  font-size: 0.87rem;
-  font-weight: 700;
-  white-space: nowrap;
-  box-shadow: $shadow-sm;
-  transition: all 0.3s ease;
-  animation: chipEnter 0.4s ease forwards;
-  
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+
   ion-icon {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
-  
-  /* Estados premium por rango de IMC */
+
   &.imc-bajo {
-    background: linear-gradient(135deg, $imc-bajo, lighten($imc-bajo, 8%));
-    color: white;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
-    }
+    background: #dbeafe;
+    color: #1e40af;
   }
-  
+
   &.imc-normal {
-    background: linear-gradient(135deg, $imc-normal, lighten($imc-normal, 8%));
-    color: white;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-    }
+    background: #d1fae5;
+    color: #065f46;
   }
-  
+
   &.imc-sobrepeso {
-    background: linear-gradient(135deg, $imc-sobrepeso, lighten($imc-sobrepeso, 8%));
-    color: #1a1f36;
-    animation: chipPulse 2.5s infinite;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-    }
+    background: #fef3c7;
+    color: #92400e;
   }
-  
+
   &.imc-obesidad {
-    background: linear-gradient(135deg, $imc-obesidad, lighten($imc-obesidad, 8%));
-    color: white;
-    animation: chipAlert 1.8s infinite;
-    font-weight: 800;
-    
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
-    }
-  }
-}
-
-@keyframes chipEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes chipPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.92; }
-}
-
-@keyframes chipAlert {
-  0%, 100% { 
-    opacity: 1; 
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-  }
-  50% { 
-    opacity: 0.95; 
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-  }
-}
-
-/* Item de resultado IMC premium */
-.imc-result-item {
-  grid-column: 1 / -1;
-  margin-top: 8px;
-  padding-top: 20px;
-  border-top: 1px dashed rgba(0,0,0,0.08);
-  
-  .imc-display {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, rgba($primary-color, 0.04), rgba($accent-color, 0.04));
-    border-radius: $radius-md;
-    border: 1px solid rgba(0,0,0,0.06);
-    
-    .imc-value {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      
-      .value-number {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: $primary-color;
-        line-height: 1;
-        letter-spacing: -0.03em;
-      }
-      
-      .value-unit {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: $text-muted;
-      }
-    }
+    background: #fee2e2;
+    color: #991b1b;
   }
 }
 
 /* =========================================
-   📚 TARJETA DE REFERENCIA IMC - VISUAL PREMIUM
+   IMC REFERENCE
    ========================================= */
-.imc-reference-card {
-  --background: #{$card-bg};
-  border-radius: $radius-xl;
-  box-shadow: $shadow-lg;
-  margin: 0 0 40px;
-  border: 1px solid rgba(0,0,0,0.04);
-  overflow: hidden;
-  
-  ion-card-header {
-    padding: 20px 28px 12px;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    background: linear-gradient(135deg, rgba($accent-color, 0.06), transparent);
-    
-    ion-card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: $primary-color;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: -0.01em;
-      
-      ion-icon {
-        font-size: 1.2rem;
-        color: $secondary-color;
-      }
-    }
-  }
-  
-  ion-card-content {
-    padding: 20px 28px 24px;
-  }
-}
-
-/* Barras de referencia IMC visuales */
 .imc-scale {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .imc-range {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 12px;
+  background: $input-bg;
   border-radius: $radius-md;
-  transition: background 0.2s ease;
-  
+  transition: all 0.2s ease;
+
   &:hover {
-    background: rgba(0,0,0,0.03);
+    transform: translateX(4px);
   }
-  
-  /* Barra de color visual */
+
   .range-bar {
-    width: 48px;
-    height: 28px;
-    border-radius: 6px;
+    width: 6px;
+    height: 40px;
+    border-radius: 3px;
     flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-    }
-    
-    &.bar-bajo { background: linear-gradient(135deg, $imc-bajo, lighten($imc-bajo, 12%)); }
-    &.bar-normal { background: linear-gradient(135deg, $imc-normal, lighten($imc-normal, 12%)); }
-    &.bar-sobrepeso { background: linear-gradient(135deg, $imc-sobrepeso, lighten($imc-sobrepeso, 12%)); }
-    &.bar-obesidad { background: linear-gradient(135deg, $imc-obesidad, lighten($imc-obesidad, 12%)); }
+
+    &.bar-bajo { background: #3b82f6; }
+    &.bar-normal { background: #10b981; }
+    &.bar-sobrepeso { background: #f59e0b; }
+    &.bar-obesidad { background: #ef4444; }
   }
-  
-  /* Texto de la referencia */
+
   .range-text {
     flex: 1;
-    
+    min-width: 0;
+
     .range-label {
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      color: $text-primary;
       margin-bottom: 2px;
-      
-      &.label-bajo { color: $imc-bajo; }
-      &.label-normal { color: $imc-normal; }
-      &.label-sobrepeso { color: darken($imc-sobrepeso, 12%); }
-      &.label-obesidad { color: $imc-obesidad; font-weight: 700; }
+
+      &.label-bajo { color: #1e40af; }
+      &.label-normal { color: #065f46; }
+      &.label-sobrepeso { color: #92400e; }
+      &.label-obesidad { color: #991b1b; }
     }
-    
+
     .range-value {
-      font-size: 0.82rem;
-      color: $text-muted;
+      font-size: 0.8rem;
+      color: $text-secondary;
       font-weight: 500;
     }
   }
-  
-  /* Icono de estado */
+
   .range-icon {
-    font-size: 1.2rem;
-    opacity: 0.8;
-    
-    .imc-bajo &, .imc-normal & { color: $imc-normal; }
-    .imc-sobrepeso & { color: $imc-sobrepeso; }
-    .imc-obesidad & { color: $imc-obesidad; }
+    font-size: 1.3rem;
+    flex-shrink: 0;
   }
 }
 
 /* =========================================
-   🔘 BOTONES DE ACCIÓN PREMIUM
+   FORM ACTIONS
    ========================================= */
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 18px;
-  padding: 28px 0 12px;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  margin-top: 16px;
-  
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid $border-color;
+
   ion-button {
-    --border-radius: #{$radius-md};
-    text-transform: none;
+    --border-radius: 10px;
     font-weight: 600;
-    font-size: 0.97rem;
-    min-width: 160px;
-    --padding-top: 15px;
-    --padding-bottom: 15px;
-    box-shadow: $shadow-sm;
-    transition: all 0.28s ease;
-    letter-spacing: -0.01em;
-    
-    &.btn-submit {
-      --background: linear-gradient(135deg, $secondary-color, lighten($secondary-color, 4%));
-      --box-shadow: 0 6px 20px rgba(20, 93, 160, 0.35);
-      
-      ion-icon {
-        margin-right: 4px;
-      }
-      
-      &:hover:not([disabled]) {
-        --background: linear-gradient(135deg, darken($secondary-color, 6%), $secondary-color);
-        --box-shadow: 0 8px 28px rgba(20, 93, 160, 0.45);
-        transform: translateY(-2px);
-      }
-      
-      &:active:not([disabled]) {
-        transform: translateY(0);
-        --box-shadow: 0 3px 10px rgba(20, 93, 160, 0.25);
-      }
-    }
-    
-    &[fill="outline"] {
-      --border-width: 2px;
-      --border-color: #{$text-muted};
-      --color: #{$text-secondary};
-      background: transparent;
-      
-      &:hover:not([disabled]) {
-        --border-color: #{$primary-color};
-        --color: #{$primary-color};
-        --background: rgba(10, 77, 104, 0.05);
-        transform: translateY(-1px);
-      }
-    }
+    font-size: 0.9rem;
+  }
+
+  .btn-submit {
+    --background: linear-gradient(135deg, #{$primary-color}, #{$secondary-color});
+    --background-hover: linear-gradient(135deg, #083d52, #0f4a7a);
+    --color: white;
+    --box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+    padding: 0 24px;
   }
 }
 
 /* =========================================
-   🎨 TOAST Y LOADING PREMIUM
+   RESPONSIVE
    ========================================= */
-.toast-custom {
-  --border-radius: 14px;
-  --box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-  --padding-top: 14px;
-  --padding-bottom: 14px;
-  font-weight: 500;
-  
-  &.toast-success {
-    --background: linear-gradient(135deg, $imc-normal, lighten($imc-normal, 6%));
-  }
-  
-  &.toast-warning {
-    --background: linear-gradient(135deg, $imc-sobrepeso, lighten($imc-sobrepeso, 6%));
-    --color: #1a1f36;
-  }
-  
-  &.toast-danger {
-    --background: linear-gradient(135deg, $imc-obesidad, lighten($imc-obesidad, 6%));
-  }
-}
-
-.loading-custom {
-  --background: rgba(26, 31, 54, 0.95);
-  --spinner-color: #4fc3f7;
-  --color: white;
-  border-radius: 18px;
-  padding: 24px 36px;
-  box-shadow: $shadow-xl;
-  
-  .loading-content {
-    font-weight: 500;
-    font-size: 1rem;
-  }
-}
-
-/* =========================================
-   📱 RESPONSIVE PREMIUM
-   ========================================= */
-
-/* Tablet (≤ 1024px) */
 @media (max-width: 1024px) {
-  .main-content.form-layout {
-    padding: 28px 32px;
-  }
-  
   .anthro-grid {
     grid-template-columns: 1fr;
-    gap: 22px;
   }
-  
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1100;
-    transform: translateX(-100%);
-    box-shadow: $shadow-xl;
-    
-    &.open {
-      transform: translateX(0);
-    }
-    
-    .menu-icon {
-      position: absolute;
-      top: 14px;
-      right: -44px;
-      width: 44px;
-      height: 44px;
-      background: $primary-color;
-      border-radius: 0 10px 10px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      box-shadow: $shadow-md;
-      
-      &:hover {
-        background: $primary-dark;
-      }
-    }
+
+  .anthro-item.full-width {
+    grid-column: span 1;
   }
-  
-  .form-container {
-    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
   }
-  
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  ::ng-deep .sidebar.open {
+    width: 100% !important;
+  }
+
+  ::ng-deep .sidebar .menu-icon,
+  ::ng-deep .sidebar .user-info {
+    display: none;
+  }
+
+  ::ng-deep .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: auto;
+  }
+
+  ::ng-deep .sidebar ul li {
+    padding: 5px;
+  }
+
+  ::ng-deep .sidebar ul li span {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .form-header-section h1 {
+    font-size: 1.5rem;
+  }
+
   .imc-display {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    
-    .imc-chip {
-      margin-top: 4px;
-    }
   }
-}
 
-/* Móvil (≤ 768px) */
-@media (max-width: 768px) {
-  .main-header ion-toolbar {
-    --padding-start: 14px;
-    --padding-end: 14px;
-    
-    ion-title {
-      font-size: 1.05rem;
-    }
+  .imc-scale {
+    grid-template-columns: 1fr;
   }
-  
-  .main-content.form-layout {
-    padding: 20px 24px;
-  }
-  
-  .form-header-section {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    
-    h1 { font-size: 1.7rem; }
-    p { font-size: 1rem; }
-  }
-  
-  .anthro-list-card,
-  .imc-reference-card {
-    ion-card-header {
-      padding: 18px 22px 10px;
-      ion-card-title { font-size: 1.05rem; }
-    }
-    ion-card-content { padding: 8px 0 4px; }
-  }
-  
-  .anthro-grid {
-    padding: 20px 22px 4px;
-    gap: 20px 18px;
-  }
-  
-  .anthro-item .input-wrapper {
-    ion-input.custom-input {
-      --padding-start: 44px;
-      --padding-end: 48px;
-      font-size: 0.98rem;
-      min-height: 50px;
-    }
-    
-    .input-icon {
-      left: 14px;
-      font-size: 1.1rem;
-    }
-    
-    .unit-badge {
-      right: 14px;
-      font-size: 0.78rem;
-      padding: 3px 9px;
-    }
-  }
-  
-  .imc-result-item .imc-display {
-    padding: 14px 18px;
-    
-    .imc-value .value-number {
-      font-size: 1.6rem;
-    }
-  }
-  
-  .imc-range {
-    padding: 9px 12px;
-    gap: 12px;
-    
-    .range-bar {
-      width: 42px;
-      height: 26px;
-    }
-    
-    .range-text .range-label {
-      font-size: 0.9rem;
-    }
-  }
-  
+
   .form-actions {
-    flex-direction: column;
-    gap: 14px;
-    padding: 24px 0 8px;
-    
+    flex-direction: column-reverse;
+
     ion-button {
       width: 100%;
-      min-width: auto;
-      --padding-top: 14px;
-      --padding-bottom: 14px;
     }
-  }
-  
-  .sidebar {
-    width: 248px;
-    
-    &.open { width: 248px; }
-    
-    .user-info {
-      padding: 14px 10px;
-      
-      ion-avatar {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-      }
-    }
-  }
-}
-
-/* Móvil muy pequeño (≤ 480px) */
-@media (max-width: 480px) {
-  .form-header-section h1 { font-size: 1.55rem; }
-  
-  .anthro-list-card ion-card-content {
-    padding: 4px 0 0;
-  }
-  
-  .anthro-grid {
-    padding: 18px 18px 0;
-    gap: 18px;
-  }
-  
-  .anthro-item .input-wrapper {
-    ion-input.custom-input {
-      --padding-start: 42px;
-      --padding-end: 46px;
-      font-size: 0.96rem;
-      min-height: 48px;
-    }
-  }
-  
-  .imc-result-item .imc-display {
-    padding: 12px 16px;
-    
-    .imc-value .value-number {
-      font-size: 1.5rem;
-    }
-    
-    .imc-chip {
-      font-size: 0.84rem;
-      padding: 7px 14px;
-    }
-  }
-  
-  .imc-reference-card ion-card-content {
-    padding: 16px 18px 20px;
-  }
-  
-  .imc-range {
-    padding: 8px 10px;
-    gap: 10px;
-    
-    .range-bar {
-      width: 38px;
-      height: 24px;
-    }
-    
-    .range-text .range-label {
-      font-size: 0.88rem;
-    }
-    
-    .range-text .range-value {
-      font-size: 0.78rem;
-    }
-  }
-  
-  .form-actions ion-button {
-    --padding-top: 13px;
-    --padding-bottom: 13px;
-    font-size: 0.95rem;
   }
 }
 
 /* =========================================
-   ♿ ACCESIBILIDAD PREMIUM
+   ACCESIBILIDAD
    ========================================= */
 :focus-visible {
-  outline: 2.5px solid $accent-color;
-  outline-offset: 3px;
-  border-radius: 8px;
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  * {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  
-  .imc-chip,
-  .anthro-list-card,
-  ion-button {
-    transform: none !important;
   }
 }
 
 /* =========================================
-   🎨 DARK MODE PREMIUM (Opcional)
+   ALERT DE REGISTRO CLINICO - PROFESIONAL
    ========================================= */
-/*
-@media (prefers-color-scheme: dark) {
-  $bg-color: #1a1d26;
-  $card-bg: #232733;
-  $text-primary: #e0e5ec;
-  $text-secondary: #a0a7c4;
-  $text-muted: #6c7293;
-  $input-bg: #2a2d3a;
-  $border-color: rgba(255,255,255,0.12);
-  
-  .anthro-list-card,
-  .imc-reference-card {
-    --background: #{$card-bg};
-    border-color: rgba(255,255,255,0.08);
+::ng-deep .alert-registro {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 480px;
+    animation: alertSlideIn 0.3s ease-out;
   }
-  
-  .anthro-item .input-wrapper ion-input.custom-input {
-    --background: #{$input-bg};
-    border-color: $border-color;
-    
-    &:focus-within {
-      --background: lighten($input-bg, 4%);
+
+  /* HEADER DEL ALERT */
+  .alert-head {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%);
+    padding: 24px 24px 20px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+    letter-spacing: 0.3px;
+  }
+
+  .alert-sub-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+    font-weight: 400;
+  }
+
+  /* MENSAJE */
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 8px !important;
+    margin: 0 !important;
+  }
+
+  /* GRUPO DE INPUTS */
+  .alert-input-group {
+    padding: 8px 24px 16px;
+    background: #ffffff;
+  }
+
+  /* CADA INPUT INDIVIDUAL */
+  .alert-input-wrapper {
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .alert-input {
+    width: 100%;
+    padding: 12px 16px !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    color: #1a1f36 !important;
+    background: #f8fafc !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+
+    &:focus {
+      border-color: #4fc3f7 !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.15) !important;
+    }
+
+    &::placeholder {
+      color: #9499b7;
+      font-size: 0.9rem;
     }
   }
-  
-  .imc-result-item .imc-display {
-    background: linear-gradient(135deg, rgba($primary-color, 0.08), rgba($accent-color, 0.08));
-    border-color: rgba(255,255,255,0.1);
+
+  /* BOTONES */
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease !important;
+    min-width: 120px;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* BOTON CANCELAR */
+  .alert-button-cancel {
+    background: #f1f5f9 !important;
+    color: #6c7293 !important;
+    border: 1px solid #e2e8f0 !important;
+
+    &:hover {
+      background: #e2e8f0 !important;
+      color: #1a1f36 !important;
+    }
+
+    &:active {
+      background: #cbd5e1 !important;
+    }
+  }
+
+  /* BOTON CONFIRMAR */
+  .alert-button-confirm {
+    background: linear-gradient(135deg, #0a4d68 0%, #145da0 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(10, 77, 104, 0.25) !important;
+
+    &:hover {
+      background: linear-gradient(135deg, #083d52 0%, #0f4a7a 100%) !important;
+      box-shadow: 0 6px 16px rgba(10, 77, 104, 0.35) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(10, 77, 104, 0.25) !important;
+    }
   }
 }
-*/
+
+/* =========================================
+   ALERT DE ERROR DE CEDULA
+   ========================================= */
+::ng-deep .alert-error-cedula {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    border-top: 4px solid #ef4444;
+  }
+
+  .alert-head {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    padding: 20px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #991b1b !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alert-message {
+    color: #7f1d1d !important;
+    font-size: 0.9rem !important;
+    padding: 16px 24px 20px !important;
+    background: #ffffff;
+    line-height: 1.5;
+  }
+
+  .alert-button-group {
+    padding: 0 24px 20px;
+    background: #ffffff;
+    justify-content: flex-end;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      background: #dc2626 !important;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+    }
+  }
+}
+
+/* =========================================
+   ALERT DE CONFIRMACION (ELIMINAR, CERRAR SESION)
+   ========================================= */
+::ng-deep ion-alert {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .alert-head {
+    padding: 24px 24px 16px;
+    text-align: left;
+  }
+
+  .alert-title {
+    color: #1a1f36 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .alert-message {
+    color: #6c7293 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    padding: 0 24px 20px !important;
+  }
+
+  .alert-button-group {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .alert-button {
+    padding: 10px 24px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.2s ease !important;
+    min-width: 100px;
+  }
+}
+
+/* =========================================
+   ANIMACION DE ENTRADA DEL ALERT
+   ========================================= */
+@keyframes alertSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   RESPONSIVE PARA ALERTS
+   ========================================= */
+@media (max-width: 480px) {
+  ::ng-deep .alert-registro .alert-wrapper,
+  ::ng-deep .alert-error-cedula .alert-wrapper {
+    max-width: 95vw;
+    margin: 10px;
+  }
+
+  ::ng-deep .alert-registro .alert-button-group {
+    flex-direction: column-reverse;
+  }
+
+  ::ng-deep .alert-registro .alert-button {
+    width: 100%;
+  }
+}

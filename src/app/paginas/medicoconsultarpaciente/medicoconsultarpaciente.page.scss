@@ -1,82 +1,79 @@
-/* =====================================================
-   medicoconsultarpaciente.page.scss
-   ESTILOS COMPLETOS - Autocontenidos (sin global.scss)
-   ===================================================== */
+/* =========================================
+   VARIABLES - Tema Hospitalario
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
 
-/* ==== HEADER ==== */
-.main-header {
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-lg: 16px;
+
+/* =========================================
+   HEADER PRINCIPAL
+   ========================================= */
+::ng-deep .main-header {
   ion-toolbar {
+    --background: #f7fbff !important;
+    border-bottom: 1px solid #dce5f3 !important;
+    padding: 0 20px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    --background: #f7fbff;
-    --border-color: #dce5f3;
-    --min-height: 60px;
-    border-bottom: 1px solid #dce5f3;
-    padding: 0 20px;
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
 
       .logo-icon {
-        font-size: 1.8rem;
-        color: #0a4d68;
+        font-size: 1.6rem;
+        color: $primary-color;
       }
 
       ion-title {
         font-weight: 600;
-        color: #0a4d68;
-        font-size: 1.3rem;
-      }
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-
-      .header-icon {
-        font-size: 1.4rem;
-        color: #0a4d68;
-        cursor: pointer;
-      }
-
-      .user-avatar {
-        width: 36px;
-        height: 36px;
-        border: 2px solid #0a4d68;
+        color: $primary-color;
+        font-size: 1.2rem;
+        padding: 0 !important;
       }
     }
   }
 }
 
-/* ==== DASHBOARD CONTAINER ==== */
-.dashboard-container {
-  display: flex;
-  height: calc(100vh - var(--ion-toolbar-height, 56px));
-  background: #f4f7fb;
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
-  overflow: hidden;
-}
-
-/* ==== SIDEBAR ==== */
-.sidebar {
+/* =========================================
+   SIDEBAR
+   ========================================= */
+::ng-deep .sidebar {
   width: 70px;
-  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
   color: white;
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: visible; //  NECESARIO 
+  overflow: visible;
   position: relative;
   z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 
   &.open {
-    width: 240px;
+    width: 240px !important;
+    min-width: 240px;
+
+    .user-details { opacity: 1; pointer-events: auto; }
+    ul li span { opacity: 1; }
+    .submenu-arrow { opacity: 1; }
   }
 
   .menu-icon {
@@ -86,31 +83,38 @@
     padding: 8px;
     border-radius: 8px;
     transition: background 0.2s;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
+    &:hover { background: rgba(255,255,255,0.15); }
   }
 
   .user-info {
     text-align: center;
     padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     width: 100%;
 
     ion-avatar {
-      margin: 0 auto 10px;
+      margin: 0 auto 8px;
       width: 56px;
       height: 56px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      --background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
     }
 
     .user-details {
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
 
       h4 {
         font-size: 0.95rem;
-        margin: 0;
+        margin: 0 0 4px;
         font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
@@ -118,22 +122,21 @@
       }
 
       p {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.7);
-        margin: 2px 0 0;
+        font-size: 0.75rem;
+        color: #b0c7d9;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
 
-  &.open .user-details {
-    opacity: 1;
-  }
-
   ul {
     list-style: none;
-    padding: 0;
-    margin: 0;
+    padding: 0.5rem 0;
     width: 100%;
+    margin: 0;
 
     li {
       display: flex;
@@ -141,163 +144,165 @@
       gap: 14px;
       padding: 12px 20px;
       cursor: pointer;
-      color: rgba(255, 255, 255, 0.9);
-      transition: background 0.2s, color 0.2s;
-      user-select: none;
+      color: rgba(255,255,255,0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
 
       ion-icon {
-        font-size: 1.4rem;
-        min-width: 24px;
+        font-size: 1.3rem;
+        min-width: 20px;
+        text-align: center;
+        flex-shrink: 0;
       }
 
       span {
         opacity: 0;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.3s ease;
         white-space: nowrap;
-        font-size: 0.95rem;
+        overflow: hidden;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255,255,255,0.15);
         color: white;
       }
+
+      &.active {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-left: 3px solid $accent-color;
+      }
     }
   }
 
-  &.open ul li span {
-    opacity: 1;
-  }
-}
+  /* Submenú */
+  .menu-item-with-submenu {
+    position: relative;
 
-/* ==== SUBMENU EN SIDEBAR ==== */
-.menu-item-with-submenu {
-  position: relative;
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
 
-  .menu-link {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 20px;
-    cursor: pointer;
-    color: rgba(255, 255, 255, 0.9);
-    transition: background 0.2s;
-    justify-content: space-between;
-    width: 100%;
-
-    ion-icon {
-      font-size: 1.4rem;
-
-      &.submenu-arrow {
-        font-size: 1rem;
-        transition: transform 0.3s ease;
+      .submenu-arrow {
         margin-left: auto;
         opacity: 0;
+        transition: opacity 0.2s, transform 0.3s ease;
 
-        .sidebar.open & {
-          opacity: 1;
-        }
-
-        &.rotate {
-          transform: rotate(180deg);
-        }
+        &.rotate { transform: rotate(180deg); }
       }
     }
 
-    span {
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      font-size: 0.95rem;
-    }
-  }
-
-  .sidebar.open & .menu-link span {
-    opacity: 1;
-  }
-
-  &:hover > .menu-link {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-  }
-
-  .submenu {
-      position: absolute; // 👈 CAMBIO: absolute para que se superponga
-      left: 100%; // 👈 CAMBIO: a la derecha del sidebar
+    .submenu {
+      position: absolute;
+      left: 100%;
       top: 0;
       background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
-      min-width: 220px; // 👈 CAMBIO: ancho fijo
+      min-width: 220px;
       border-radius: 0 8px 8px 0;
       box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-      z-index: 1000; // 👈 CAMBIO: z-index alto
+      z-index: 1000;
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease;
       padding: 0;
       margin: 0;
-      
+
       &.active {
-        max-height: 300px; // 👈 CAMBIO: altura suficiente para mostrar items
+        max-height: 300px;
       }
-      
+
       li {
         padding: 12px 20px;
         font-size: 0.85rem;
         color: rgba(255,255,255,0.9);
         border-bottom: 1px solid rgba(255,255,255,0.05);
-        
+
         &:hover {
           background: rgba(255,255,255,0.15);
           color: white;
         }
-         
+
         ion-icon {
           font-size: 1.1rem;
           margin-right: 10px;
         }
-        
+
         span {
-          opacity: 1; // 👈 Siempre visible en submenú
+          opacity: 1;
         }
       }
     }
+  }
 
-  .sidebar.open .submenu li span {
+  &.open .menu-item-with-submenu .menu-link .submenu-arrow {
     opacity: 1;
   }
 }
 
-/* ==== MAIN CONTENT ==== */
-.main-content {
-  flex: 1;
-  padding: 20px 30px;
-  overflow-y: auto;
-  overflow-x: hidden;
+/* =========================================
+   LAYOUT PRINCIPAL
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
-/* ==== ESTADOS DE CARGA Y ERROR ==== */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 24px 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: $bg-color;
+}
+
+/* =========================================
+   ESTADOS: LOADING / ERROR
+   ========================================= */
 .loading-state,
 .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 40vh;
+  min-height: 50vh;
   padding: 30px 20px;
   text-align: center;
 
   ion-spinner {
-    margin-bottom: 20px;
-    --color: #0a4d68;
+    --color: #{$secondary-color};
+    margin-bottom: 16px;
   }
 
   p {
-    color: #555;
-    margin-bottom: 20px;
+    color: $text-secondary;
+    margin: 0 0 20px;
     font-size: 1rem;
+  }
+}
+
+.error-card,
+.warning-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  max-width: 500px;
+  margin: 0 auto;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
   }
 
   .error-message {
-    color: #721c24;
-    background: #f8d7da;
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 16px;
@@ -310,40 +315,34 @@
     justify-content: center;
     flex-wrap: wrap;
   }
-
-  ion-button {
-    margin: 4px;
-    --border-radius: 8px;
-  }
 }
 
-.error-state ion-card {
-  width: 100%;
-  max-width: 450px;
-  margin: 0 auto;
-}
-
-/* ==== HEADER DEL PACIENTE ==== */
+/* =========================================
+   HEADER DEL PACIENTE
+   ========================================= */
 .patient-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  border-radius: $radius-lg;
   margin-bottom: 24px;
   color: white;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-  position: relative;
+  box-shadow: $shadow-lg;
+  flex-wrap: wrap;
 
   .patient-avatar {
     width: 80px;
     height: 80px;
-    --size: 80px;
+    --background: rgba(255, 255, 255, 0.2);
     border: 3px solid rgba(255, 255, 255, 0.4);
 
     img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      border-radius: 50%;
     }
   }
 
@@ -358,19 +357,35 @@
       line-height: 1.3;
     }
 
-    p {
-      margin: 5px 0;
+    .patient-meta {
+      margin: 6px 0;
       opacity: 0.95;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      ion-icon {
+        font-size: 1rem;
+        color: $accent-color;
+      }
+
+      strong {
+        color: white;
+      }
+
+      .separator {
+        color: rgba(255, 255, 255, 0.5);
+        margin: 0 4px;
+      }
     }
   }
 
-  /* 👇 NUEVO: Contenedor de botones de acción */
   .patient-actions {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 8px;
     min-width: 220px;
 
@@ -378,9 +393,7 @@
       width: 100%;
       max-width: 220px;
       --border-radius: 10px;
-      --box-shadow: none;
       font-weight: 500;
-      text-transform: none;
 
       &.btn-volver {
         --background: rgba(255, 255, 255, 0.2);
@@ -393,68 +406,63 @@
       }
 
       &.btn-crear-plan {
-        --background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        --background-hover: linear-gradient(135deg, #27ae60 0%, #219653 100%);
+        --background: #10b981;
+        --background-hover: #059669;
         --color: white;
-        --border-color: transparent;
-
-        &:hover {
-          --background: linear-gradient(135deg, #27ae60 0%, #219653 100%);
-        }
 
         &:disabled {
-          --background: #95a5a6;
+          --background: #94a3b8;
           opacity: 0.7;
           cursor: not-allowed;
         }
       }
     }
-
-    .plan-disabled-note {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.85);
-      margin-top: 2px;
-      text-align: right;
-      max-width: 220px;
-      line-height: 1.3;
-
-      ion-icon {
-        font-size: 1rem;
-        flex-shrink: 0;
-      }
-    }
   }
 }
 
-/* ==== TARJETA DE RESUMEN CLÍNICO ==== */
+/* =========================================
+   TARJETA DE RESUMEN CLÍNICO
+   ========================================= */
 .clinical-summary {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
   margin-bottom: 20px;
   overflow: hidden;
 
   ion-card-header {
-    padding-bottom: 12px;
-    border-bottom: 1px solid #eee;
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
 
     ion-card-title {
-      color: #0a4d68;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-primary;
       font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
     }
 
     ion-card-subtitle {
-      color: #6c757d;
+      color: $text-secondary;
       font-size: 0.9rem;
+      margin-top: 4px;
     }
+  }
+
+  ion-card-content {
+    padding: 16px 24px 24px;
   }
 
   .metric-card {
     text-align: center;
     padding: 16px 12px;
-    background: #f8f9fa;
+    background: #f8fafc;
     border-radius: 12px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     height: 100%;
@@ -462,10 +470,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border: 1px solid $border-color;
 
     &:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      box-shadow: $shadow-md;
     }
 
     ion-icon {
@@ -476,7 +485,7 @@
     h4 {
       margin: 0 0 6px 0;
       font-size: 0.85rem;
-      color: #495057;
+      color: $text-secondary;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -486,7 +495,7 @@
       margin: 0;
       font-size: 1.2rem;
       font-weight: 700;
-      color: #2c3e50;
+      color: $text-primary;
       line-height: 1.3;
     }
 
@@ -494,34 +503,59 @@
       display: block;
       margin-top: 4px;
       font-size: 0.75rem;
-      color: #6c757d;
+      color: $text-secondary;
       font-weight: 400;
       text-transform: none;
     }
   }
 }
 
-/* ==== TARJETA DE CONDICIONES METABÓLICAS ==== */
+/* =========================================
+   TARJETA DE CONDICIONES METABÓLICAS
+   ========================================= */
 .conditions-card {
-  border-radius: 16px;
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
   margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(21, 60, 152, 0.08);
+  box-shadow: $shadow-md;
 
   ion-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+
     ion-card-title {
-      color: #0a4d68;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-primary;
       font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
     }
+  }
+
+  ion-card-content {
+    padding: 16px 24px 24px;
   }
 
   ion-item {
     --background: transparent;
     --padding-start: 0;
     --inner-padding-end: 0;
+    margin-bottom: 8px;
+
+    ion-icon[slot="start"] {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
 
     ion-label {
       font-weight: 500;
-      color: #efeded;
+      color: $text-primary;
       font-size: 0.95rem;
     }
 
@@ -534,65 +568,125 @@
   }
 }
 
-/* ==== HISTORIAL DE REGISTROS ==== */
-ion-card:last-of-type {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+/* =========================================
+   HISTORIAL DE REGISTROS
+   ========================================= */
+.history-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 20px;
+
+  ion-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-primary;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
+    }
+
+    ion-card-subtitle {
+      color: $text-secondary;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  }
+
+  ion-card-content {
+    padding: 16px 24px 24px;
+  }
+
+  ion-list {
+    --background: transparent;
+  }
+
+  ion-item {
+    --background: #ffffff;              /*  Fondo blanco puro */
+    --background-hover: #f8fafc;        /*  Fondo al pasar el mouse */
+    --min-height: 72px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    --border-radius: 10px;
+    --border-color: #{$border-color};
+    margin-bottom: 10px;
+    border: 1px solid $border-color;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+
+    ion-icon[slot="start"] {
+      margin-right: 12px;
+      font-size: 1.3rem;
+      color: $secondary-color;
+    }
+
+    ion-label h3 {
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    ion-label p {
+      color: $text-secondary;
+      margin: 2px 0;
+      font-size: 0.9rem;
+    }
+
+    ion-label small {
+      color: $text-muted;
+      font-size: 0.8rem;
+    }
+
+    &:hover {
+      --background: #f8fafc;
+      border-color: $accent-color;
+      box-shadow: 0 2px 8px rgba($accent-color, 0.15);
+      transform: translateY(-1px);
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
-ion-item {
-  --min-height: 72px;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
 
-  ion-icon[slot="start"] {
-    margin-right: 12px;
-    font-size: 1.3rem;
+/* =========================================
+   NO DATA
+   ========================================= */
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: $text-muted;
+
+  ion-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
   }
 
-  ion-label h3 {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 4px;
-  }
-
-  ion-label p {
-    color: #6c757d;
-    margin: 2px 0;
-    font-size: 0.9rem;
-  }
-
-  ion-label small {
-    color: #999;
-  }
-
-  &:hover {
-    --background: rgba(102, 126, 234, 0.08);
+  p {
+    margin: 0;
+    font-size: 0.95rem;
   }
 }
 
-/* ==== SCROLLBAR PERSONALIZADO ==== */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(10, 77, 104, 0.3);
-  border-radius: 3px;
-
-  &:hover {
-    background: rgba(10, 77, 104, 0.5);
-  }
-}
-
-/* ==== UTILIDADES IONIC ==== */
+/* =========================================
+   UTILIDADES
+   ========================================= */
 ion-card {
-  --border-radius: 16px;
+  --border-radius: #{$radius-lg};
   margin-bottom: 20px;
 }
 
@@ -617,7 +711,30 @@ ion-badge {
   padding: 16px !important;
 }
 
-/* ==== ANIMACIONES SUAVES ==== */
+/* =========================================
+   SCROLLBAR PERSONALIZADO
+   ========================================= */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.3);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba($primary-color, 0.5);
+  }
+}
+
+/* =========================================
+   ANIMACIONES
+   ========================================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -633,7 +750,9 @@ ion-badge {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* ==== RESPONSIVE ==== */
+/* =========================================
+   RESPONSIVE
+   ========================================= */
 @media (max-width: 992px) {
   .patient-header {
     flex-direction: column;
@@ -657,60 +776,36 @@ ion-badge {
       max-width: none;
       margin: 0 4px;
     }
-
-    .plan-disabled-note {
-      position: absolute;
-      bottom: -28px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
+  ::ng-deep .dashboard-container {
     flex-direction: column;
   }
 
-  .sidebar {
+  ::ng-deep .sidebar {
     width: 100% !important;
-    height: auto;
-    max-height: 60px;
+    min-width: unset;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
 
-    &.open {
-      max-height: 100vh;
-      height: auto;
-    }
+    &.open { width: 100% !important; }
+
+    .menu-icon { display: none; }
+    .user-info { display: none; }
 
     ul {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 10px;
-
-      li {
-        padding: 10px;
-
-        span {
-          opacity: 1 !important;
-          font-size: 0.8rem;
-        }
-      }
+      flex-direction: row;
+      gap: 15px;
+      width: auto;
     }
 
-    .submenu {
-      position: static;
-      max-height: none !important;
-      background: transparent;
-
-      li {
-        padding: 8px !important;
-        justify-content: center;
-      }
+    ul li {
+      padding: 5px;
+      span { display: none; }
     }
   }
 
@@ -751,7 +846,6 @@ ion-badge {
     --padding-start: 8px;
   }
 
-  /* Responsive para botones en móvil */
   .patient-header .patient-actions {
     flex-direction: column !important;
     
@@ -759,14 +853,6 @@ ion-badge {
       width: 100%;
       max-width: 200px;
       margin: 2px 0 !important;
-    }
-
-    .plan-disabled-note {
-      position: static;
-      transform: none;
-      margin-top: 8px;
-      text-align: center;
-      justify-content: center;
     }
   }
 }
@@ -785,8 +871,22 @@ ion-badge {
     width: 100%;
     max-width: 250px;
   }
+}
 
-  .patient-header .patient-actions .plan-disabled-note {
-    font-size: 0.7rem;
+/* =========================================
+   ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

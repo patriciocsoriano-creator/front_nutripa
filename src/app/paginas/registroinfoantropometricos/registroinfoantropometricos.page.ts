@@ -1,13 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { LoadingController, ToastController, Platform } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, Platform } from '@ionic/angular';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PatientRegistrationService } from 'src/app/services/registro-paciente';
 
-// Interfaz para tipado seguro
 interface AntropometriaForm {
   peso: number | null;
   talla: number | null;
@@ -23,17 +22,18 @@ interface AntropometriaForm {
 })
 export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
 
-  // 👤 Info de usuario y Sidebar
-  nombreAsistente: string = '';
-  especialidad: string = '';
+  // Info de usuario
+  nombreAsistente: string = 'Enfermera';
+  especialidad: string = 'Asistente Medico';
+  usuario: any = null;
   
-  // 🧭 Variables del Sidebar (Necesarias para el HTML)
+  // Sidebar
   sidebarOpen = false;
-  submenuAbierto: string | null = null; // 
+  submenuAbierto: string | null = null;
   private isMobile = false;
   private destroy$ = new Subject<void>();
 
-  // 📝 Formulario de Antropometría
+  // Formulario
   antropometriaForm: AntropometriaForm = {
     peso: null,
     talla: null,
@@ -41,24 +41,31 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
     circunferenciaCintura: null
   };
 
+  // Rutas
+  private readonly rutas: Record<string, string> = {
+    'enfermeria': '/enfermeria',
+    'enfermeriaverpacientes': '/enfermeriaverpacientes',
+    'enfermeria-buscar-paciente': '/enfermeria-buscar-paciente',
+    'agregar-paciente': '/enfermeria/registro',
+    'enfermeria-reportes': '/enfermeria-reportes',
+    'enfermeria-configuracion': '/enfermeria-configuracion'
+  };
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private http: HttpClient,
     private patientService: PatientRegistrationService,
+    private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private platform: Platform
   ) {
-    // Detectar dispositivo
     this.platform.ready().then(() => {
       this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
-      if (!this.isMobile) {
-        this.sidebarOpen = true; // Sidebar abierto en PC
-      }
+      this.sidebarOpen = !this.isMobile;
     });
 
-    // Cerrar sidebar en móvil al navegar
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd), takeUntil(this.destroy$))
       .subscribe(() => {
@@ -84,22 +91,20 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
   
-  // Cargar sesión
   private cargarDatosSesion(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        this.nombreAsistente = user.nombre || 'Enfermera';
-        this.especialidad = user.rol === 'enfermera' ? 'Asistente Médico' : 
-                           user.rol === 'nutricionista' ? 'Nutricionista' : 'Personal Médico';
+        this.usuario = JSON.parse(userStr);
+        this.nombreAsistente = this.usuario.nombre || 'Enfermera';
+        this.especialidad = this.usuario.rol === 'enfermera' ? 'Asistente Medico' : 
+                           this.usuario.rol === 'nutricionista' ? 'Nutricionista' : 'Personal Medico';
       } catch (e) {
-        console.warn('⚠️ Error parseando sesión:', e);
+        console.warn('Error parseando sesion:', e);
       }
     }
   }
 
-  // Cargar datos previos si los hay
   private cargarDatosGuardados(): void {
     const datos = this.patientService.getAnthropometricData();
     if (datos) {
@@ -107,28 +112,111 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
     }
   }
 
-  // ==========================================
-  // 🧭 MÉTODOS DEL SIDEBAR (NUEVOS)
-  // ==========================================
-
+  // Navegacion
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  // 👈 FALTABA ESTO: Abrir/cerrar submenú
   toggleSubmenu(menu: string): void {
-    // Si ya está abierto, lo cierra. Si no, lo abre.
     this.submenuAbierto = this.submenuAbierto === menu ? null : menu;
+  }
+
+  navegarA(rutaKey: string): void {
+    const ruta = this.rutas[rutaKey] || '/enfermeria';
+    this.router.navigate([ruta]);
+    if (this.isMobile) this.sidebarOpen = false;
   }
 
   irAInicio(): void {
     this.router.navigate(['/enfermeria']);
   }
 
-  // ==========================================
-  // 📏 LÓGICA DE CÁLCULO
-  // ==========================================
+  async iniciarRegistroPaciente(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Nuevo Registro Clinico',
+      message: 'Ingrese cedula, nombres y apellidos del paciente:',
+      cssClass: 'alert-registro',
+      inputs: [
+        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)',
+          attributes: { maxlength: 10, inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off' } },
+        { name: 'nombres', type: 'text', placeholder: 'Nombres *' },
+        { name: 'apellidos', type: 'text', placeholder: 'Apellidos *' }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Iniciar Registro',
+          cssClass: 'alert-button-confirm',
+          handler: async (data: any) => {
+            if (!data.cedula || !data.nombres || !data.apellidos) {
+              await this.showToast('Complete cedula, nombres y apellidos', 'danger');
+              return false;
+            }
+            const cedulaLimpia = data.cedula.replace(/\D/g, '');
+            if (cedulaLimpia.length !== 10) {
+              await this.showToast('La cedula debe tener 10 digitos', 'danger');
+              return false;
+            }
+            if (!/^[a-zA-Z\s]+$/.test(data.nombres.trim()) || !/^[a-zA-Z\s]+$/.test(data.apellidos.trim())) {
+              await this.showToast('Nombre y apellido solo deben contener letras', 'danger');
+              return false;
+            }
+            await this.procesarInicioRegistro({
+              cedula: cedulaLimpia,
+              nombres: data.nombres.trim(),
+              apellidos: data.apellidos.trim()
+            });
+            return true;
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
 
+  private async procesarInicioRegistro(datos: any): Promise<void> {
+    const loading = await this.loadingCtrl.create({ 
+      message: 'Iniciando registro...', 
+      spinner: 'crescent' 
+    });
+    await loading.present();
+
+    try {
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+
+      const response: any = await this.http.post(
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
+        datos,
+        { headers }
+      ).toPromise();
+
+      await loading.dismiss();
+
+      if (response?.registro_id) {
+        localStorage.setItem('registro_clinico_id', response.registro_id);
+        await this.showToast('Registro iniciado correctamente', 'success');
+        await this.router.navigate(['/registroinfopaciente'], { 
+          queryParams: { 
+            registro_id: response.registro_id,
+            nombres: datos.nombres,
+            apellidos: datos.apellidos,
+            numeroIdentificacion: datos.cedula
+          } 
+        });
+      } else {
+        await this.showToast('Error: No se recibio ID de registro', 'danger');
+      }
+    } catch (error: any) {
+      await loading.dismiss();
+      await this.showToast(error?.error?.mensaje || 'Error de conexion', 'danger');
+    }
+  }
+
+  // Logica de calculo
   calcularIMC(): void {
     const { peso, talla } = this.antropometriaForm;
     if (peso !== null && talla !== null && talla > 0) {
@@ -147,17 +235,13 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
     return 'Obesidad';
   }
 
-  // ==========================================
-  // 💾 GUARDAR Y NAVEGAR
-  // ==========================================
-
+  // Guardar y navegar
   async guardarYContinuar() {
     if (!this.antropometriaForm.peso || !this.antropometriaForm.talla) {
       await this.showToast('Peso y talla son obligatorios', 'danger');
       return;
     }
 
-    // Validaciones de rango
     if (this.antropometriaForm.peso < 20 || this.antropometriaForm.peso > 300) {
       await this.showToast('Peso fuera de rango (20-300 kg)', 'warning');
       return;
@@ -180,7 +264,6 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
       const registroId = localStorage.getItem('registro_clinico_id');
       const token = localStorage.getItem('token');
 
-      // Guardar local
       this.patientService.setAnthropometricData(this.antropometriaForm);
 
       if (!registroId || !token) {
@@ -202,13 +285,13 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
       if (response?.error) throw new Error(response.mensaje);
 
       await loading.dismiss();
-      await this.showToast(`✅ Datos guardados. IMC: ${this.antropometriaForm.imc}`, 'success');
+      await this.showToast(`Datos guardados. IMC: ${this.antropometriaForm.imc}`, 'success');
       this.navegarSiguientePaso(registroId);
 
     } catch (error: any) {
       await loading.dismiss();
-      console.error('❌ Error:', error);
-      await this.showToast('⚠️ Guardado localmente.', 'warning');
+      console.error('Error:', error);
+      await this.showToast('Guardado localmente.', 'warning');
       this.navegarSiguientePaso();
     }
   }
@@ -227,8 +310,36 @@ export class RegistroinfoantropometricosPage implements OnInit, OnDestroy {
     return new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` });
   }
 
+  async cerrarSesion(): Promise<void> {
+    const confirm = await this.alertCtrl.create({
+      header: 'Cerrar sesion',
+      message: 'Esta seguro que desea cerrar sesion?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Si, cerrar',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            localStorage.clear();
+            await this.showToast('Sesion cerrada exitosamente', 'success');
+            this.router.navigate(['/principal'], { replaceUrl: true });
+          }
+        }
+      ]
+    });
+    await confirm.present();
+  }
+
   async showToast(message: string, color: string = 'primary', duration: number = 2500): Promise<void> {
     const toast = await this.toastCtrl.create({ message, duration, color, position: 'bottom', cssClass: 'toast-custom' });
     toast.present();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.menu-item-with-submenu')) {
+      this.submenuAbierto = null;
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { LoadingController, ToastController, Platform } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, Platform } from '@ionic/angular';
 import { filter } from 'rxjs/operators';
 import { takeUntil } from 'rxjs';
 import { Subject } from 'rxjs';
@@ -14,18 +14,20 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./registroinfometabolicas.page.scss'],
   standalone: false,
 })
-export class RegistroinfometabolicasPage implements OnInit {
+export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
 
-  // 👤 Info de usuario para sidebar
-  nombreAsistente: string = '';
-  especialidad: string = '';
+  // Info de usuario
+  nombreAsistente: string = 'Enfermera';
+  especialidad: string = 'Asistente Medico';
+  usuario: any = null;
   
-  // 🧭 Sidebar
+  // Sidebar
   sidebarOpen = false;
+  submenuAbierto: string | null = null;
   private isMobile = false;
   private destroy$ = new Subject<void>();
 
-  // 📝 Formulario de condiciones metabólicas
+  // Formulario
   metabolicasForm = {
     hipertension: false,
     obesidad: false,
@@ -34,21 +36,32 @@ export class RegistroinfometabolicasPage implements OnInit {
     resistenciaInsulina: false
   };
 
-  // 🆕 Datos del paso anterior (antropométricos)
+  // Datos del paso anterior
   imcCalculado: number | null = null;
   clasificacionIMC: string = '';
   
-  // 🆕 Datos del paciente (nombre, ID, actividad física)
+  // Datos del paciente
   nombrePaciente: string = '---';
   identificacionPaciente: string = '---';
   actividadFisicaPaciente: string = '---';
 
-  // 🆕 Control de carga
+  // Control de carga
   cargandoDatos: boolean = true;
+
+  // Rutas
+  private readonly rutas: Record<string, string> = {
+    'enfermeria': '/enfermeria',
+    'enfermeriaverpacientes': '/enfermeriaverpacientes',
+    'enfermeria-buscar-paciente': '/enfermeria-buscar-paciente',
+    'agregar-paciente': '/enfermeria/registro',
+    'enfermeria-reportes': '/enfermeria-reportes',
+    'enfermeria-configuracion': '/enfermeria-configuracion'
+  };
 
   constructor(
     private router: Router,
     private patientService: PatientRegistrationService,
+    private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private http: HttpClient,
@@ -56,9 +69,7 @@ export class RegistroinfometabolicasPage implements OnInit {
   ) {
     this.platform.ready().then(() => {
       this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
-      if (!this.isMobile) {
-        this.sidebarOpen = true;
-      }
+      this.sidebarOpen = !this.isMobile;
     });
     
     this.router.events
@@ -72,8 +83,6 @@ export class RegistroinfometabolicasPage implements OnInit {
 
   async ngOnInit() {
     this.cargarDatosSesion();
-    
-    // 🆕 Cargar datos desde el backend usando el registro_id
     await this.cargarDatosDesdeBackend();
   }
   
@@ -82,33 +91,31 @@ export class RegistroinfometabolicasPage implements OnInit {
     this.destroy$.complete();
   }
   
-  // 👤 Cargar datos de sesión para mostrar en sidebar
   private cargarDatosSesion(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        this.nombreAsistente = user.nombre || 'Enfermera';
-        this.especialidad = user.rol === 'enfermera' ? 'Asistente Médico' : 
-                           user.rol === 'nutricionista' ? 'Nutricionista' : 'Personal Médico';
+        this.usuario = JSON.parse(userStr);
+        this.nombreAsistente = this.usuario.nombre || 'Enfermera';
+        this.especialidad = this.usuario.rol === 'enfermera' ? 'Asistente Medico' : 
+                           this.usuario.rol === 'nutricionista' ? 'Nutricionista' : 'Personal Medico';
       } catch (e) {
-        console.warn('⚠️ Error parseando sesión:', e);
+        console.warn('Error parseando sesion:', e);
       }
     }
   }
 
-  // 🆕 CARGAR TODOS LOS DATOS DESDE EL BACKEND
   private async cargarDatosDesdeBackend(): Promise<void> {
     this.cargandoDatos = true;
     
     const registroId = localStorage.getItem('registro_clinico_id');
     const token = localStorage.getItem('token');
     
-    console.log('🔍 [METABÓLICAS] Iniciando carga de datos...', { registroId });
+    console.log('[METABOLICAS] Iniciando carga de datos...', { registroId });
     
     if (!registroId || !token) {
-      console.error('❌ [METABÓLICAS] No hay registro_id o token');
-      await this.showToast('No se encontró el registro clínico', 'danger');
+      console.error('[METABOLICAS] No hay registro_id o token');
+      await this.showToast('No se encontro el registro clinico', 'danger');
       this.cargandoDatos = false;
       return;
     }
@@ -119,43 +126,41 @@ export class RegistroinfometabolicasPage implements OnInit {
         'Authorization': `Bearer ${token}`
       });
 
-      // 🆕 Llamar al endpoint /estado que devuelve TODO
       const response: any = await this.http.get(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/${registroId}/estado`,
         { headers }
       ).toPromise();
 
-      console.log('📦 [METABÓLICAS] Respuesta del backend:', response);
+      console.log('[METABOLICAS] Respuesta del backend:', response);
 
       if (response?.error) {
         throw new Error(response.mensaje || 'Error al obtener datos');
       }
 
-      // ✅ 1️⃣ Cargar datos del paciente
+      // Cargar datos del paciente
       if (response.paciente) {
         const p = response.paciente;
         this.nombrePaciente = `${p.nombres || ''} ${p.apellidos || ''}`.trim() || '---';
         this.identificacionPaciente = p.numero_identificacion || '---';
         
-        // Actividad física con etiqueta
         if (p.actividad_fisica) {
           const etiquetas: Record<string, string> = {
-            'sedentario': '🪑 Sedentario',
-            'ligera': '🚶 Ligera',
-            'moderada': '🏃 Moderada',
-            'intensa': '🔥 Intensa',
-            'atleta': '🏅 Alto rendimiento'
+            'sedentario': 'Sedentario',
+            'ligera': 'Ligera',
+            'moderada': 'Moderada',
+            'intensa': 'Intensa',
+            'atleta': 'Alto rendimiento'
           };
           this.actividadFisicaPaciente = etiquetas[p.actividad_fisica] || p.actividad_fisica;
         }
         
-        console.log('✅ [METABÓLICAS] Paciente cargado:', this.nombrePaciente);
+        console.log('[METABOLICAS] Paciente cargado:', this.nombrePaciente);
       }
 
-      // ✅ 2️⃣ Cargar datos antropométricos y calcular IMC
+      // Cargar datos antropométricos y calcular IMC
       if (response.datos?.datos_antropometricos) {
         const antro = response.datos.datos_antropometricos;
-        console.log('📊 [METABÓLICAS] Datos antropométricos:', antro);
+        console.log('[METABOLICAS] Datos antropometricos:', antro);
         
         if (antro.peso && antro.talla) {
           const peso = Number(antro.peso);
@@ -165,29 +170,28 @@ export class RegistroinfometabolicasPage implements OnInit {
             this.imcCalculado = Number((peso / (talla * talla)).toFixed(2));
             this.clasificacionIMC = this.getClasificacionIMC(this.imcCalculado);
             
-            console.log('📊 [METABÓLICAS] IMC calculado:', this.imcCalculado, '-', this.clasificacionIMC);
+            console.log('[METABOLICAS] IMC calculado:', this.imcCalculado, '-', this.clasificacionIMC);
             
-            // 🎯 AUTO-MARCAR OBESIDAD si IMC >= 30
+            // AUTO-MARCAR OBESIDAD si IMC >= 30
             if (this.imcCalculado >= 30) {
               this.metabolicasForm.obesidad = true;
-              console.log('✅ [METABÓLICAS] Obesidad auto-marcada (IMC >= 30)');
-              await this.showToast(`⚠️ IMC: ${this.imcCalculado} - Obesidad detectada. Toggle activado automáticamente.`, 'warning', 4000);
+              console.log('[METABOLICAS] Obesidad auto-marcada (IMC >= 30)');
+              await this.showToast(`IMC: ${this.imcCalculado} - Obesidad detectada. Toggle activado automaticamente.`, 'warning', 4000);
             }
           }
         }
       }
 
-      // ✅ 3️⃣ Cargar condiciones metabólicas ya guardadas (si existen)
+      // Cargar condiciones metabólicas ya guardadas
       if (response.datos?.condiciones_metabolicas) {
         const cond = response.datos.condiciones_metabolicas;
-        console.log('🧬 [METABÓLICAS] Condiciones metabólicas previas:', cond);
+        console.log('[METABOLICAS] Condiciones metabolicas previas:', cond);
         
         this.metabolicasForm.hipertension = !!cond.hipertension;
         this.metabolicasForm.dislipidemia = !!cond.dislipidemia;
         this.metabolicasForm.higadoGraso = !!cond.higadoGraso;
         this.metabolicasForm.resistenciaInsulina = !!cond.resistenciaInsulina;
         
-        // Solo auto-marcar obesidad si NO venía ya guardada
         if (!cond.obesidad && this.imcCalculado !== null && this.imcCalculado >= 30) {
           this.metabolicasForm.obesidad = true;
         } else {
@@ -195,28 +199,23 @@ export class RegistroinfometabolicasPage implements OnInit {
         }
       }
 
-      // ✅ 4️⃣ Verificar siguiente paso (si ya está finalizado, redirigir)
       if (response.siguientePaso === 'registrofinalizado') {
-        console.log('✅ [METABÓLICAS] Registro ya finalizado');
+        console.log('[METABOLICAS] Registro ya finalizado');
         await this.showToast('Este registro ya fue finalizado', 'warning');
       }
 
     } catch (error: any) {
-      console.error('❌ [METABÓLICAS] Error cargando datos:', error);
+      console.error('[METABOLICAS] Error cargando datos:', error);
       await this.showToast(error.message || 'Error al cargar datos del paciente', 'danger');
-      
-      // 🆕 Fallback: intentar cargar desde localStorage
       this.cargarDatosDesdeLocalStorage();
     } finally {
       this.cargandoDatos = false;
     }
   }
 
-  // 🆕 FALLBACK: Cargar datos desde localStorage si el backend falla
   private cargarDatosDesdeLocalStorage(): void {
-    console.log('🔄 [METABÓLICAS] Intentando cargar desde localStorage...');
+    console.log('[METABOLICAS] Intentando cargar desde localStorage...');
     
-    // Intentar obtener datos del servicio
     try {
       const data = this.patientService.getPatientData();
       if (data?.informacionPersonal) {
@@ -226,17 +225,16 @@ export class RegistroinfometabolicasPage implements OnInit {
         
         if (info.actividadFisica) {
           const etiquetas: Record<string, string> = {
-            'sedentario': '🪑 Sedentario',
-            'ligera': '🚶 Ligera',
-            'moderada': '🏃 Moderada',
-            'intensa': '🔥 Intensa',
-            'atleta': '🏅 Alto rendimiento'
+            'sedentario': 'Sedentario',
+            'ligera': 'Ligera',
+            'moderada': 'Moderada',
+            'intensa': 'Intensa',
+            'atleta': 'Alto rendimiento'
           };
           this.actividadFisicaPaciente = etiquetas[info.actividadFisica] || info.actividadFisica;
         }
       }
       
-      // Datos antropométricos
       const antro = this.patientService.getAnthropometricData();
       if (antro?.peso && antro?.talla) {
         const peso = Number(antro.peso);
@@ -251,13 +249,12 @@ export class RegistroinfometabolicasPage implements OnInit {
         }
       }
       
-      console.log('✅ [METABÓLICAS] Datos cargados desde localStorage');
+      console.log('[METABOLICAS] Datos cargados desde localStorage');
     } catch (e) {
-      console.warn('⚠️ [METABÓLICAS] No se pudieron cargar datos desde localStorage:', e);
+      console.warn('[METABOLICAS] No se pudieron cargar datos desde localStorage:', e);
     }
   }
 
-  // 📊 Clasificación del IMC
   private getClasificacionIMC(imc: number): string {
     if (imc < 18.5) return 'Bajo peso';
     if (imc < 25) return 'Normal';
@@ -265,16 +262,111 @@ export class RegistroinfometabolicasPage implements OnInit {
     return 'Obesidad';
   }
 
-  // 🧭 Métodos del Sidebar
+  // Navegacion
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
-  
+
+  toggleSubmenu(menu: string): void {
+    this.submenuAbierto = this.submenuAbierto === menu ? null : menu;
+  }
+
+  navegarA(rutaKey: string): void {
+    const ruta = this.rutas[rutaKey] || '/enfermeria';
+    this.router.navigate([ruta]);
+    if (this.isMobile) this.sidebarOpen = false;
+  }
+
   irAInicio(): void {
     this.router.navigate(['/enfermeria']);
   }
 
-  // 💾 Finalizar registro clínico
+  async iniciarRegistroPaciente(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Nuevo Registro Clinico',
+      message: 'Ingrese cedula, nombres y apellidos del paciente:',
+      cssClass: 'alert-registro',
+      inputs: [
+        { name: 'cedula', type: 'tel', placeholder: 'Cedula (10 digitos)',
+          attributes: { maxlength: 10, inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off' } },
+        { name: 'nombres', type: 'text', placeholder: 'Nombres *' },
+        { name: 'apellidos', type: 'text', placeholder: 'Apellidos *' }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Iniciar Registro',
+          cssClass: 'alert-button-confirm',
+          handler: async (data: any) => {
+            if (!data.cedula || !data.nombres || !data.apellidos) {
+              await this.showToast('Complete cedula, nombres y apellidos', 'danger');
+              return false;
+            }
+            const cedulaLimpia = data.cedula.replace(/\D/g, '');
+            if (cedulaLimpia.length !== 10) {
+              await this.showToast('La cedula debe tener 10 digitos', 'danger');
+              return false;
+            }
+            if (!/^[a-zA-Z\s]+$/.test(data.nombres.trim()) || !/^[a-zA-Z\s]+$/.test(data.apellidos.trim())) {
+              await this.showToast('Nombre y apellido solo deben contener letras', 'danger');
+              return false;
+            }
+            await this.procesarInicioRegistro({
+              cedula: cedulaLimpia,
+              nombres: data.nombres.trim(),
+              apellidos: data.apellidos.trim()
+            });
+            return true;
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async procesarInicioRegistro(datos: any): Promise<void> {
+    const loading = await this.loadingCtrl.create({ 
+      message: 'Iniciando registro...', 
+      spinner: 'crescent' 
+    });
+    await loading.present();
+
+    try {
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+
+      const response: any = await this.http.post(
+        `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
+        datos,
+        { headers }
+      ).toPromise();
+
+      await loading.dismiss();
+
+      if (response?.registro_id) {
+        localStorage.setItem('registro_clinico_id', response.registro_id);
+        await this.showToast('Registro iniciado correctamente', 'success');
+        await this.router.navigate(['/registroinfopaciente'], { 
+          queryParams: { 
+            registro_id: response.registro_id,
+            nombres: datos.nombres,
+            apellidos: datos.apellidos,
+            numeroIdentificacion: datos.cedula
+          } 
+        });
+      } else {
+        await this.showToast('Error: No se recibio ID de registro', 'danger');
+      }
+    } catch (error: any) {
+      await loading.dismiss();
+      await this.showToast(error?.error?.mensaje || 'Error de conexion', 'danger');
+    }
+  }
+
+  // Finalizar registro
   async finalizarRegistro() {
     const loading = await this.loadingCtrl.create({
       message: 'Finalizando registro...',
@@ -296,7 +388,7 @@ export class RegistroinfometabolicasPage implements OnInit {
       const token = localStorage.getItem('token');
 
       if (!registroId || !token) {
-        throw new Error('No se pudo identificar el registro clínico');
+        throw new Error('No se pudo identificar el registro clinico');
       }
 
       const response: any = await this.http.post(
@@ -310,7 +402,7 @@ export class RegistroinfometabolicasPage implements OnInit {
       }
 
       await loading.dismiss();
-      await this.showToast('✅ Registro clínico finalizado', 'success');
+      await this.showToast('Registro clinico finalizado', 'success');
       
       localStorage.removeItem('registro_clinico_id');
       this.patientService.clearData();
@@ -319,17 +411,15 @@ export class RegistroinfometabolicasPage implements OnInit {
 
     } catch (error: any) {
       await loading.dismiss();
-      console.error('❌ Error finalizando registro:', error);
-      await this.showToast(error.message || 'Error de conexión', 'danger');
+      console.error('Error finalizando registro:', error);
+      await this.showToast(error.message || 'Error de conexion', 'danger');
     }
   }
 
-  // 🔙 Volver al paso anterior
   volver(): void {
     this.router.navigate(['/registroinfoantropometricos']);
   }
 
-  // 🔐 Headers con token
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -338,23 +428,47 @@ export class RegistroinfometabolicasPage implements OnInit {
     });
   }
 
-  // 🔔 Toast notifications
+  async cerrarSesion(): Promise<void> {
+    const confirm = await this.alertCtrl.create({
+      header: 'Cerrar sesion',
+      message: 'Esta seguro que desea cerrar sesion?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Si, cerrar',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            localStorage.clear();
+            await this.showToast('Sesion cerrada exitosamente', 'success');
+            this.router.navigate(['/principal'], { replaceUrl: true });
+          }
+        }
+      ]
+    });
+    await confirm.present();
+  }
+
   async showToast(message: string, color: string = 'primary', duration: number = 2500): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
       duration,
       color,
       position: 'bottom',
-      icon: color === 'success' ? 'checkmark-circle' : 
-            color === 'danger' ? 'alert-circle' : 'information-circle',
       cssClass: 'toast-custom'
     });
     await toast.present();
   }
 
-  // 🆕 Mostrar IMC calculado en el resumen
   getIMCResumen(): string {
     if (this.imcCalculado === null) return '---';
     return `${this.imcCalculado} kg/m² (${this.clasificacionIMC})`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.menu-item-with-submenu')) {
+      this.submenuAbierto = null;
+    }
   }
 }

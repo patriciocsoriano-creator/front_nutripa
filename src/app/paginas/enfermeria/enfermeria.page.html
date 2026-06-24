@@ -1,11 +1,15 @@
+<!-- HEADER PRINCIPAL -->
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
-      <ion-icon name="heart-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Panel Hospitalario</ion-title>
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Panel de Enfermería</ion-title>
     </div>
     <ion-buttons slot="end">
-      <ion-button (click)="cerrarSesion()">
+      <ion-button (click)="refrescarPanel()" title="Actualizar datos">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -22,7 +26,7 @@
       </div>
       <div class="user-info">
         <ion-avatar>
-          <ion-icon name="person-circle-outline"></ion-icon>
+          <div class="avatar-placeholder">{{nombreAsistente.charAt(0)}}</div>
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombreAsistente}}</h4>
@@ -30,7 +34,7 @@
         </div>
       </div>
       <ul>
-        <li (click)="navegarA('enfermeria')" [class.active]="true">
+        <li (click)="navegarA('enfermeria')" class="active">
           <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
         </li>
         <li class="menu-item-with-submenu">
@@ -42,10 +46,10 @@
             <li (click)="navegarA('enfermeriaverpacientes'); $event.stopPropagation()">
               <ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span>
             </li>
-            <li (click)="navegarA('agregar-paciente'); $event.stopPropagation()">
+            <li (click)="iniciarRegistroPaciente()">
               <ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span>
             </li>
-            <li (click)="navegarA('buscar-paciente'); $event.stopPropagation()">
+            <li (click)="navegarA('enfermeria-buscar-paciente'); $event.stopPropagation()">
               <ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span>
             </li>
           </ul>
@@ -53,8 +57,11 @@
         <li (click)="iniciarRegistroPaciente()">
           <ion-icon name="clipboard-outline"></ion-icon><span>Nuevo Registro</span>
         </li>
-        <li (click)="navegarA('reportes')">
+        <li (click)="navegarA('enfermeria-reportes')">
           <ion-icon name="stats-chart-outline"></ion-icon><span>Reportes</span>
+        </li>
+        <li (click)="navegarA('enfermeria-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
         </li>
       </ul>
     </div>
@@ -64,7 +71,7 @@
       
       <!-- ACCIONES RÁPIDAS -->
       <div class="quick-actions">
-        <ion-card class="action-card pacientes" button (click)="navegarA('medicoverpacientes')">
+        <ion-card class="action-card pacientes" button (click)="navegarA('enfermeriaverpacientes')">
           <ion-card-content>
             <ion-icon name="people-outline"></ion-icon>
             <h3>Gestionar Pacientes</h3>
@@ -141,9 +148,7 @@
         </ion-card>
       </div>
 
-      <!-- ============================================ -->
-      <!-- 🆕 PACIENTES RECIENTES - REDISEÑO PROFESIONAL -->
-      <!-- ============================================ -->
+      <!-- PACIENTES RECIENTES -->
       <div class="recent-patients-section">
         <div class="section-header">
           <div class="section-title">
@@ -153,7 +158,7 @@
               <p>Últimos registros clínicos realizados</p>
             </div>
           </div>
-          <ion-button fill="clear" size="small" (click)="navegarA('medicoverpacientes')">
+          <ion-button fill="clear" size="small" (click)="navegarA('enfermeriaverpacientes')">
             Ver todos
             <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
           </ion-button>
@@ -246,7 +251,7 @@
             <!-- Acciones -->
             <div class="patient-card-actions">
               
-              <!-- Para registros iniciados o en proceso (ej: Marjorie con 30%) -->
+              <!-- Para registros iniciados o en proceso -->
               <ion-button 
                 *ngIf="paciente.estado_real === 'en_proceso' || paciente.estado_real === 'iniciado'"
                 fill="solid" 
@@ -257,7 +262,7 @@
                 {{paciente.progreso === 0 ? 'Iniciar' : 'Continuar'}}
               </ion-button>
               
-              <!-- Para registros finalizados (ej: Patricio y Marcia con 100%) -->
+              <!-- Para registros finalizados -->
               <ion-button 
                 *ngIf="paciente.estado_real === 'finalizado'"
                 fill="outline" 
