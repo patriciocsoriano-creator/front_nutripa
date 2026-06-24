@@ -219,6 +219,10 @@ const routes: Routes = [
     path: 'enfermeria-reportes',
     loadChildren: () => import('./paginas/enfermeria-reportes/enfermeria-reportes.module').then( m => m.EnfermeriaReportesPageModule)
   },
+  {
+    path: 'enfermeria-configuracion',
+    loadChildren: () => import('./paginas/enfermeria-configuracion/enfermeria-configuracion.module').then( m => m.EnfermeriaConfiguracionPageModule)
+  },
   
 ];
 

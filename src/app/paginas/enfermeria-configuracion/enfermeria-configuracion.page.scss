@@ -1,0 +1,659 @@
+/* =========================================
+   VARIABLES
+   ========================================= */
+$primary-color: #0a4d68;
+$secondary-color: #145da0;
+$accent-color: #4fc3f7;
+$bg-color: #f4f7fb;
+$card-bg: #ffffff;
+$text-primary: #1a1f36;
+$text-secondary: #6c7293;
+$text-muted: #9499b7;
+$border-color: #e2e8f0;
+$input-bg: #f8fafc;
+$shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+$shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+$shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+
+/* =========================================
+   HEADER
+   ========================================= */
+::ng-deep .main-header ion-toolbar {
+  --background: #f7fbff !important;
+  border-bottom: 1px solid #dce5f3 !important;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+::ng-deep .main-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+::ng-deep .main-header .logo-icon {
+  font-size: 1.6rem;
+  color: $primary-color;
+}
+
+::ng-deep .main-header ion-title {
+  font-weight: 600;
+  color: $primary-color;
+  font-size: 1.2rem;
+  padding: 0 !important;
+}
+
+/* =========================================
+   DASHBOARD CONTAINER
+   ========================================= */
+::ng-deep .dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  background: $bg-color;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* =========================================
+   SIDEBAR
+   ========================================= */
+::ng-deep .sidebar {
+  width: 70px;
+  min-width: 70px;
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%) !important;
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible !important;
+  position: relative;
+  z-index: 100;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+::ng-deep .sidebar.open {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+::ng-deep .sidebar .menu-icon {
+  margin: 1rem 0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+::ng-deep .sidebar .menu-icon:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+::ng-deep .sidebar .user-info {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+}
+
+::ng-deep .sidebar .user-info ion-avatar {
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  --background: rgba(255,255,255,0.2);
+}
+
+::ng-deep .sidebar .user-info ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+::ng-deep .sidebar .user-details {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+::ng-deep .sidebar.open .user-details {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+::ng-deep .sidebar .user-details h4 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .sidebar .user-details p {
+  font-size: 0.75rem;
+  color: #b0c7d9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .sidebar ul {
+  list-style: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  margin: 0;
+}
+
+::ng-deep .sidebar ul > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+::ng-deep .sidebar ul > li:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+::ng-deep .sidebar ul > li.active {
+  background: rgba(255,255,255,0.2);
+  border-left: 3px solid $accent-color;
+}
+
+::ng-deep .sidebar ul > li ion-icon {
+  font-size: 1.3rem;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+::ng-deep .sidebar ul > li span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::ng-deep .sidebar.open ul > li span {
+  opacity: 1;
+}
+
+::ng-deep .sidebar .menu-item-with-submenu {
+  position: relative !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+::ng-deep .sidebar .menu-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  color: rgba(255,255,255,0.9) !important;
+  transition: background 0.2s ease !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .sidebar .menu-link:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .menu-link span {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+
+::ng-deep .sidebar.open .menu-link span {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow {
+  margin-left: auto !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.3s ease !important;
+  font-size: 1rem !important;
+}
+
+::ng-deep .sidebar.open .menu-link .submenu-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep .sidebar .menu-link .submenu-arrow.rotate {
+  transform: rotate(180deg) !important;
+}
+
+::ng-deep .sidebar .submenu {
+  position: absolute !important;
+  left: 100% !important;
+  top: 0 !important;
+  background: linear-gradient(180deg, #083d52 0%, #062d3d 100%) !important;
+  min-width: 220px !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.3) !important;
+  z-index: 1000 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+::ng-deep .sidebar .submenu.active {
+  max-height: 400px !important;
+}
+
+::ng-deep .sidebar .submenu li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 20px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .sidebar .submenu li:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .sidebar .submenu li.active {
+  background: rgba(255,255,255,0.2) !important;
+  border-left: 3px solid $accent-color !important;
+}
+
+::ng-deep .sidebar .submenu li:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .sidebar .submenu li ion-icon {
+  font-size: 1.1rem !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+::ng-deep .sidebar .submenu li span {
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
+}
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
+::ng-deep .main-content {
+  flex: 1;
+  padding: 30px 40px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: $bg-color;
+}
+
+::ng-deep .main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::ng-deep .main-content::-webkit-scrollbar-thumb {
+  background: rgba($primary-color, 0.2);
+  border-radius: 4px;
+}
+
+/* =========================================
+   LOADING
+   ========================================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+
+  ion-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    --color: #{$primary-color};
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+/* =========================================
+   CONFIG CONTAINER
+   ========================================= */
+.config-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* =========================================
+   PROFILE HEADER
+   ========================================= */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 24px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      --background: rgba($accent-color, 0.15);
+      border: 3px solid $accent-color;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+
+    .profile-info {
+      h2 {
+        margin: 0 0 4px;
+        color: $text-primary;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .profile-role {
+        margin: 0 0 4px;
+        color: $secondary-color;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .profile-email {
+        margin: 0;
+        color: $text-secondary;
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .profile-actions {
+    ion-button {
+      --border-radius: 10px;
+      font-weight: 600;
+    }
+  }
+}
+
+/* =========================================
+   SEGMENT (TABS)
+   ========================================= */
+::ng-deep ion-segment {
+  --background: #e2e8f0;
+  --indicator-color: #{$secondary-color};
+  --indicator-border-radius: 8px;
+  margin-bottom: 24px;
+  
+  ion-segment-button {
+    --color: #{$text-secondary};
+    --color-checked: #{$primary-color};
+    font-weight: 500;
+  }
+}
+
+/* =========================================
+   CONFIG CARD
+   ========================================= */
+.config-card {
+  --background: #{$card-bg};
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0 0 20px;
+
+  ion-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid $border-color;
+    
+    ion-card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $text-primary;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 20px 24px 24px;
+  }
+}
+
+/* =========================================
+   FORM GRID
+   ========================================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.85rem;
+    color: $text-secondary;
+    font-weight: 600;
+  }
+
+  ion-input,
+  ion-select {
+    --background: $input-bg;
+    --color: #{$text-primary};
+    --placeholder-color: #{$text-muted};
+    --border-radius: 10px;
+    border: 2px solid $border-color;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: $accent-color;
+      box-shadow: 0 0 0 3px rgba($accent-color, 0.15);
+    }
+  }
+
+  .field-hint {
+    font-size: 0.8rem;
+    color: #ef4444;
+    margin-top: 4px;
+  }
+}
+
+/* =========================================
+   FORM ACTIONS
+   ========================================= */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid $border-color;
+  
+  ion-button {
+    --border-radius: 10px;
+    font-weight: 600;
+  }
+}
+
+/* =========================================
+   CORRECCION ION-SELECT
+   ========================================= */
+::ng-deep ion-select {
+  --color: #{$text-primary} !important;
+  --placeholder-color: #{$text-muted} !important;
+  --placeholder-opacity: 1 !important;
+}
+
+::ng-deep ion-select::part(text) {
+  color: #{$text-primary} !important;
+}
+
+::ng-deep ion-select::part(placeholder) {
+  color: #{$text-muted} !important;
+}
+
+::ng-deep ion-select::part(label) {
+  color: #{$text-primary} !important;
+}
+
+::ng-deep ion-select::part(icon) {
+  color: #{$secondary-color} !important;
+}
+
+::ng-deep ion-popover {
+  --background: #ffffff !important;
+}
+
+::ng-deep ion-popover ion-item {
+  --color: #{$text-primary} !important;
+  --background: #ffffff !important;
+}
+
+::ng-deep ion-popover ion-item:hover,
+::ng-deep ion-popover ion-item.ion-focused {
+  --background: #f0f7ff !important;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .dashboard-container {
+    flex-direction: column;
+  }
+
+  ::ng-deep .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  ::ng-deep .sidebar.open {
+    width: 100% !important;
+  }
+
+  ::ng-deep .sidebar .menu-icon,
+  ::ng-deep .sidebar .user-info {
+    display: none;
+  }
+
+  ::ng-deep .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: auto;
+  }
+
+  ::ng-deep .sidebar ul li {
+    padding: 5px;
+  }
+
+  ::ng-deep .sidebar ul li span {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .profile-avatar-section {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .profile-actions {
+      width: 100%;
+      ion-button { width: 100%; }
+    }
+  }
+}
+
+/* =========================================
+   ACCESIBILIDAD
+   ========================================= */
+:focus-visible {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
