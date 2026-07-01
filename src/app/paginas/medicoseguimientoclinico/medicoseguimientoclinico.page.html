@@ -338,44 +338,45 @@
 </ion-card>
 
           <!-- Próximas citas -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title>
-                <ion-icon name="calendar-outline" color="secondary"></ion-icon>
-                Próximas Citas
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <div *ngIf="citas.length === 0" class="no-data">
-                <ion-icon name="calendar-clear-outline"></ion-icon>
-                <p>No hay citas agendadas.</p>
-              </div>
-              <div class="citas-list">
-                <div *ngFor="let cita of citas" class="cita-item" [class.pasada]="esCitaPasada(cita.fecha_hora)">
-                  <div class="cita-date">
-                    <div class="cita-day">{{cita.fecha_hora | date:'dd'}}</div>
-                    <div class="cita-month">{{cita.fecha_hora | date:'MMM'}}</div>
-                    <div class="cita-time">{{cita.fecha_hora | date:'HH:mm'}}</div>
-                  </div>
-                  <div class="cita-info">
-                    <div class="cita-header">
-                      <ion-badge [color]="getTipoCitaColor(cita.tipo)">{{getTipoCitaLabel(cita.tipo)}}</ion-badge>
-                      <ion-badge *ngIf="esCitaPasada(cita.fecha_hora)" color="medium">Pasada</ion-badge>
-                    </div>
-                    <p class="cita-motivo" *ngIf="cita.motivo">{{cita.motivo}}</p>
-                  </div>
-                  <div class="cita-actions">
-                    <ion-button fill="clear" size="small" color="success" (click)="recordarCitaWhatsApp(cita)" title="Recordar por WhatsApp">
-                      <ion-icon name="logo-whatsapp"></ion-icon>
-                    </ion-button>
-                    <ion-button fill="clear" size="small" color="danger" (click)="cancelarCita(cita)" title="Cancelar cita">
-                      <ion-icon name="trash-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </div>
-              </div>
-            </ion-card-content>
-          </ion-card>
+          <!-- Próximas citas -->
+<ion-card class="info-card">
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="calendar-outline" color="secondary"></ion-icon>
+      Próximas Citas
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <div *ngIf="citas.length === 0" class="no-data">
+      <ion-icon name="calendar-clear-outline"></ion-icon>
+      <p>No hay citas agendadas.</p>
+    </div>
+    <div class="citas-list">
+      <div *ngFor="let cita of citas" class="cita-item" [class.pasada]="esCitaPasada(cita.fecha_hora)">
+        <div class="cita-date">
+          <div class="cita-day">{{cita.fecha_hora | date:'dd':'':'America/Guayaquil'}}</div>
+          <div class="cita-month">{{cita.fecha_hora | date:'MMM':'':'America/Guayaquil'}}</div>
+          <div class="cita-time">{{cita.fecha_hora | date:'HH:mm':'':'America/Guayaquil'}}</div>
+        </div>
+        <div class="cita-info">
+          <div class="cita-header">
+            <ion-badge [color]="getTipoCitaColor(cita.tipo)">{{getTipoCitaLabel(cita.tipo)}}</ion-badge>
+            <ion-badge *ngIf="esCitaPasada(cita.fecha_hora)" color="medium">Pasada</ion-badge>
+          </div>
+          <p class="cita-motivo" *ngIf="cita.motivo">{{cita.motivo}}</p>
+        </div>
+        <div class="cita-actions">
+          <ion-button fill="clear" size="small" color="success" (click)="recordarCitaWhatsApp(cita)" title="Recordar por WhatsApp">
+            <ion-icon name="logo-whatsapp"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="cancelarCita(cita)" title="Cancelar cita">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>
 
         </div>
 
