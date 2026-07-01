@@ -274,68 +274,64 @@
         <div *ngIf="tabActiva === 'citas'" class="tab-content">
           
           <!-- Agendar nueva cita -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title>
-                <ion-icon name="add-circle-outline" color="primary"></ion-icon>
-                Agendar Nueva Cita
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <form [formGroup]="citaForm" (ngSubmit)="agendarCita()">
-                <ion-item lines="none">
-  <ion-label position="stacked">Fecha y hora</ion-label>
+          <!-- Agendar nueva cita -->
+<ion-card class="info-card">
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="add-circle-outline" color="primary"></ion-icon>
+      Agendar Nueva Cita
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <form [formGroup]="citaForm" (ngSubmit)="agendarCita()">
+      
+      <!-- FECHA -->
+      <ion-item lines="none">
+        <ion-label position="stacked">Fecha</ion-label>
+        <ion-input 
+          type="date" 
+          formControlName="fecha"
+          placeholder="Selecciona fecha">
+        </ion-input>
+      </ion-item>
 
- <ion-item lines="none">
-  <ion-label position="stacked">Fecha</ion-label>
+      <!-- HORA -->
+      <ion-item lines="none">
+        <ion-label position="stacked">Hora</ion-label>
+        <ion-input 
+          type="time" 
+          formControlName="hora">
+        </ion-input>
+      </ion-item>
+      
+      <!-- TIPO DE CITA -->
+      <ion-item lines="none">
+        <ion-label position="stacked">Tipo de cita</ion-label>
+        <ion-select formControlName="tipo" placeholder="Selecciona el tipo">
+          <ion-select-option value="control">Control de rutina</ion-select-option>
+          <ion-select-option value="seguimiento">Seguimiento de plan</ion-select-option>
+          <ion-select-option value="evaluacion">Evaluación inicial</ion-select-option>
+          <ion-select-option value="urgencia">Urgencia</ion-select-option>
+          <ion-select-option value="teleconsulta">Teleconsulta</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- MOTIVO -->
+      <ion-item lines="none">
+        <ion-label position="stacked">Motivo</ion-label>
+        <ion-textarea formControlName="motivo" placeholder="Describe el motivo de la cita..." rows="2"></ion-textarea>
+      </ion-item>
 
-  <ion-datetime
-    formControlName="fecha"
-    presentation="date"
-    locale="es-EC"
-    show-default-buttons="true"
-    first-day-of-week="1">
-  </ion-datetime>
-</ion-item>
-
-<ion-item lines="none">
-  <ion-label position="stacked">Hora</ion-label>
-
-  <ion-input
-    type="time"
-    formControlName="hora">
-  </ion-input>
-</ion-item>
-
-
-</ion-item>
-                
-                <ion-item lines="none">
-                  <ion-label position="stacked">Tipo de cita</ion-label>
-                  <ion-select formControlName="tipo" placeholder="Selecciona el tipo">
-                    <ion-select-option value="control">Control de rutina</ion-select-option>
-                    <ion-select-option value="seguimiento">Seguimiento de plan</ion-select-option>
-                    <ion-select-option value="evaluacion">Evaluación inicial</ion-select-option>
-                    <ion-select-option value="urgencia">Urgencia</ion-select-option>
-                    <ion-select-option value="teleconsulta">Teleconsulta</ion-select-option>
-                  </ion-select>
-                </ion-item>
-                
-                <ion-item lines="none">
-                  <ion-label position="stacked">Motivo</ion-label>
-                  <ion-textarea formControlName="motivo" placeholder="Describe el motivo de la cita..." rows="2"></ion-textarea>
-                </ion-item>
-
-                <div class="form-actions">
-                  <ion-button type="submit" [disabled]="citaForm.invalid || guardandoCita">
-                    <ion-spinner *ngIf="guardandoCita" name="crescent" slot="start"></ion-spinner>
-                    <ion-icon *ngIf="!guardandoCita" name="calendar-outline" slot="start"></ion-icon>
-                    {{guardandoCita ? 'Agendando...' : 'Agendar Cita'}}
-                  </ion-button>
-                </div>
-              </form>
-            </ion-card-content>
-          </ion-card>
+      <div class="form-actions">
+        <ion-button type="submit" [disabled]="citaForm.invalid || guardandoCita">
+          <ion-spinner *ngIf="guardandoCita" name="crescent" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!guardandoCita" name="calendar-outline" slot="start"></ion-icon>
+          {{guardandoCita ? 'Agendando...' : 'Agendar Cita'}}
+        </ion-button>
+      </div>
+    </form>
+  </ion-card-content>
+</ion-card>
 
           <!-- Próximas citas -->
           <ion-card class="info-card">
