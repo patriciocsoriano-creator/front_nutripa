@@ -301,7 +301,9 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
       const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-const fechaHora = `${this.citaForm.value.fecha}T${this.citaForm.value.hora}`;
+const fecha = this.citaForm.value.fecha.split('T')[0];
+
+const fechaHora = `${fecha} ${this.citaForm.value.hora}:00`;
 
 const data = {
   paciente_id: this.pacienteSeleccionado.id,
