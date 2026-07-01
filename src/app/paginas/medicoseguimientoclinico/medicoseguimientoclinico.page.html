@@ -354,10 +354,10 @@
     <div class="citas-list">
       <div *ngFor="let cita of citas" class="cita-item" [class.pasada]="esCitaPasada(cita.fecha_hora)">
         <div class="cita-date">
-          <div class="cita-day">{{cita.fecha_hora | date:'dd':'':'America/Guayaquil'}}</div>
-          <div class="cita-month">{{cita.fecha_hora | date:'MMM':'':'America/Guayaquil'}}</div>
-          <div class="cita-time">{{cita.fecha_hora | date:'HH:mm':'':'America/Guayaquil'}}</div>
-        </div>
+  <div class="cita-day">{{formatearFechaCita(cita.fecha_hora, 'day')}}</div>
+  <div class="cita-month">{{formatearFechaCita(cita.fecha_hora, 'month')}}</div>
+  <div class="cita-time">{{formatearFechaCita(cita.fecha_hora, 'time')}}</div>
+</div>
         <div class="cita-info">
           <div class="cita-header">
             <ion-badge [color]="getTipoCitaColor(cita.tipo)">{{getTipoCitaLabel(cita.tipo)}}</ion-badge>

@@ -367,6 +367,29 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     }
   }
 
+  formatearFechaCita(fechaStr: string, tipo: 'day' | 'month' | 'time'): string {
+  if (!fechaStr) return '';
+  
+  const fecha = new Date(fechaStr);
+  
+  // Ajustar a zona horaria de Ecuador (UTC-5)
+  const offset = -5 * 60; // minutos
+  const localTime = new Date(fecha.getTime() + (offset + fecha.getTimezoneOffset()) * 60000);
+  
+  if (tipo === 'day') {
+    return localTime.getDate().toString().padStart(2, '0');
+  } else if (tipo === 'month') {
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return meses[localTime.getMonth()];
+  } else if (tipo === 'time') {
+    const horas = localTime.getHours().toString().padStart(2, '0');
+    const minutos = localTime.getMinutes().toString().padStart(2, '0');
+    return `${horas}:${minutos}`;
+  }
+  
+  return '';
+}
+
   // WhatsApp
   contactarWhatsApp(): void {
     if (!this.pacienteSeleccionado?.telefono) {

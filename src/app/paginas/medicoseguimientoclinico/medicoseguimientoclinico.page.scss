@@ -527,34 +527,84 @@ ion-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 4px solid $secondary-color;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
 
   &.pasada {
     opacity: 0.6;
-    border-left-color: $text-muted;
+    background: #f9fafb;
   }
 
-  .cita-date {
-    text-align: center;
-    min-width: 60px;
-    .cita-day { font-size: 1.5rem; font-weight: 700; color: $primary-color; line-height: 1; }
-    .cita-month { font-size: 0.8rem; color: $text-secondary; text-transform: uppercase; }
-    .cita-time { font-size: 0.85rem; color: $text-primary; margin-top: 4px; }
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    border-color: var(--ion-color-primary);
+  }
+}
+
+.cita-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  color: white;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .cita-day {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
   }
 
-  .cita-info {
-    flex: 1;
-    .cita-header { display: flex; gap: 6px; margin-bottom: 4px; }
-    .cita-motivo { margin: 0; font-size: 0.9rem; color: $text-secondary; }
+  .cita-month {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    opacity: 0.9;
   }
 
-  .cita-actions {
+  .cita-time {
+    font-size: 14px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 500;
+  }
+}
+
+.cita-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .cita-header {
     display: flex;
-    gap: 4px;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
   }
+
+  .cita-motivo {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.cita-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
 
 /* =========================================
