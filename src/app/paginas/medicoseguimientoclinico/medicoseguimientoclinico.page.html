@@ -305,16 +305,20 @@
       </ion-item>
       
       <!-- TIPO DE CITA -->
-      <ion-item lines="none">
-        <ion-label position="stacked">Tipo de cita</ion-label>
-        <ion-select formControlName="tipo" placeholder="Selecciona el tipo">
-          <ion-select-option value="control">Control de rutina</ion-select-option>
-          <ion-select-option value="seguimiento">Seguimiento de plan</ion-select-option>
-          <ion-select-option value="evaluacion">Evaluación inicial</ion-select-option>
-          <ion-select-option value="urgencia">Urgencia</ion-select-option>
-          <ion-select-option value="teleconsulta">Teleconsulta</ion-select-option>
-        </ion-select>
-      </ion-item>
+      <!-- TIPO DE CITA -->
+<ion-item lines="none">
+  <ion-label position="stacked">Tipo de cita</ion-label>
+  <ion-select 
+    formControlName="tipo" 
+    interface="popover"
+    placeholder="Selecciona el tipo">
+    <ion-select-option value="control">Control de rutina</ion-select-option>
+    <ion-select-option value="seguimiento">Seguimiento de plan</ion-select-option>
+    <ion-select-option value="evaluacion">Evaluación inicial</ion-select-option>
+    <ion-select-option value="urgencia">Urgencia</ion-select-option>
+    <ion-select-option value="teleconsulta">Teleconsulta</ion-select-option>
+  </ion-select>
+</ion-item>
       
       <!-- MOTIVO -->
       <ion-item lines="none">
