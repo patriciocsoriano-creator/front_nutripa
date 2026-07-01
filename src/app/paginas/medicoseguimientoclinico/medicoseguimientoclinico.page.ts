@@ -289,48 +289,44 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
   // Agendar cita
   async agendarCita(): Promise<void> {
-    if (this.citaForm.invalid) return;
+  if (this.citaForm.invalid) return;
 
-    this.guardandoCita = true;
-    try {
-      const token = localStorage.getItem('token');
-      const headers = new HttpHeaders({ 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      });
+  this.guardandoCita = true;
+  try {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
 
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-const fecha = this.citaForm.value.fecha.split('T')[0];
+    // Enviar fecha y hora por separado
+    const data = {
+      paciente_id: this.pacienteSeleccionado.id,
+      medico_id: user.id || null,
+      fecha: this.citaForm.value.fecha,  // Solo la fecha
+      hora: this.citaForm.value.hora,    // Solo la hora
+      tipo: this.citaForm.value.tipo,
+      motivo: this.citaForm.value.motivo
+    };
 
-const fechaHora = `${fecha}T${this.citaForm.value.hora}:00`;
+    await this.http.post(
+      `${environment.apiUrl}/nutricionapp-api/medico/seguimiento/cita`,
+      data,
+      { headers }
+    ).toPromise();
 
-const data = {
-  paciente_id: this.pacienteSeleccionado.id,
-  medico_id: user.id || null,
-  fecha_hora: fechaHora,
-  tipo: this.citaForm.value.tipo,
-  motivo: this.citaForm.value.motivo
-};
-
-      await this.http.post(
-        `${environment.apiUrl}/nutricionapp-api/medico/seguimiento/cita`,
-        data,
-        { headers }
-      ).toPromise();
-
-      await this.showToast('Cita agendada correctamente', 'success');
-      this.citaForm.reset({ tipo: 'control' });
-      await this.cargarCitas(this.pacienteSeleccionado.id);
-    } catch (error: any) {
-      console.error('Error agendando cita:', error);
-      await this.showToast(error?.error?.mensaje || 'Error al agendar cita', 'danger');
-    } finally {
-      this.guardandoCita = false;
-    }
-    console.log('FECHA:', this.citaForm.value.fecha);
-console.log('HORA:', this.citaForm.value.hora);
+    await this.showToast('Cita agendada correctamente', 'success');
+    this.citaForm.reset({ tipo: 'control' });
+    await this.cargarCitas(this.pacienteSeleccionado.id);
+  } catch (error: any) {
+    console.error('Error agendando cita:', error);
+    await this.showToast(error?.error?.mensaje || 'Error al agendar cita', 'danger');
+  } finally {
+    this.guardandoCita = false;
   }
+}
 
   // Registrar glucosa
   async registrarGlucosa(): Promise<void> {
