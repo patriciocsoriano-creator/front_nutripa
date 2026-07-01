@@ -370,20 +370,24 @@ export class MedicoseguimientoclinicoPage implements OnInit {
   formatearFechaCita(fechaStr: string, tipo: 'day' | 'month' | 'time'): string {
   if (!fechaStr) return '';
   
-  const fecha = new Date(fechaStr);
+  // Si la fecha viene como string sin zona horaria, forzar interpretación como UTC
+  let fecha: Date;
+  if (fechaStr.includes('T')) {
+    fecha = new Date(fechaStr);
+  } else {
+    // Formato MySQL: '2026-07-16 09:30:00' - agregar T y Z para forzar UTC
+    fecha = new Date(fechaStr.replace(' ', 'T') + 'Z');
+  }
   
-  // Ajustar a zona horaria de Ecuador (UTC-5)
-  const offset = -5 * 60; // minutos
-  const localTime = new Date(fecha.getTime() + (offset + fecha.getTimezoneOffset()) * 60000);
-  
+  // Ahora la fecha está en UTC, mostrarla tal cual (sin conversión)
   if (tipo === 'day') {
-    return localTime.getDate().toString().padStart(2, '0');
+    return fecha.getUTCDate().toString().padStart(2, '0');
   } else if (tipo === 'month') {
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return meses[localTime.getMonth()];
+    return meses[fecha.getUTCMonth()];
   } else if (tipo === 'time') {
-    const horas = localTime.getHours().toString().padStart(2, '0');
-    const minutos = localTime.getMinutes().toString().padStart(2, '0');
+    const horas = fecha.getUTCHours().toString().padStart(2, '0');
+    const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
     return `${horas}:${minutos}`;
   }
   
