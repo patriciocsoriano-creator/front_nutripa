@@ -301,12 +301,15 @@ export class MedicoseguimientoclinicoPage implements OnInit {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    // Enviar fecha y hora por separado
+    // Formato MySQL: 'YYYY-MM-DD HH:MM:SS' (con espacio, sin T)
+    const fecha = this.citaForm.value.fecha; // '2026-07-09'
+    const hora = this.citaForm.value.hora;   // '09:30'
+    const fechaHora = `${fecha} ${hora}:00`;  // '2026-07-09 09:30:00'
+
     const data = {
       paciente_id: this.pacienteSeleccionado.id,
       medico_id: user.id || null,
-      fecha: this.citaForm.value.fecha,  // Solo la fecha
-      hora: this.citaForm.value.hora,    // Solo la hora
+      fecha_hora: fechaHora,  // Solo este campo, no envíes fecha ni hora por separado
       tipo: this.citaForm.value.tipo,
       motivo: this.citaForm.value.motivo
     };
