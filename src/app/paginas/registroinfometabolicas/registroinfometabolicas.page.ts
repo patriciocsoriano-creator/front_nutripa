@@ -1,9 +1,9 @@
 import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AlertController, LoadingController, ToastController, Platform } from '@ionic/angular';
 import { filter } from 'rxjs/operators';
-import { takeUntil } from 'rxjs';
+import { firstValueFrom, takeUntil } from 'rxjs';
 import { Subject } from 'rxjs';
 import { PatientRegistrationService } from 'src/app/services/registro-paciente';
 import { environment } from 'src/environments/environment';
@@ -65,7 +65,9 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private http: HttpClient,
-    private platform: Platform
+    private platform: Platform,
+    private cdr: ChangeDetectorRef
+
   ) {
     this.platform.ready().then(() => {
       this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
@@ -126,10 +128,11 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
         'Authorization': `Bearer ${token}`
       });
 
-      const response: any = await this.http.get(
+      // ← CAMBIO: Usar firstValueFrom en lugar de toPromise()
+      const response: any = await firstValueFrom(this.http.get(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/${registroId}/estado`,
         { headers }
-      ).toPromise();
+      ));
 
       console.log('[METABOLICAS] Respuesta del backend:', response);
 
@@ -172,11 +175,11 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
             
             console.log('[METABOLICAS] IMC calculado:', this.imcCalculado, '-', this.clasificacionIMC);
             
-            // AUTO-MARCAR OBESIDAD si IMC >= 30
-            if (this.imcCalculado >= 30) {
+            // ← CAMBIO: Auto-marcar si IMC >= 25 (Sobrepeso u Obesidad)
+            if (this.imcCalculado >= 25) {
               this.metabolicasForm.obesidad = true;
-              console.log('[METABOLICAS] Obesidad auto-marcada (IMC >= 30)');
-              await this.showToast(`IMC: ${this.imcCalculado} - Obesidad detectada. Toggle activado automaticamente.`, 'warning', 4000);
+              console.log('[METABOLICAS] Sobrepeso/Obesidad auto-marcada (IMC >= 25)');
+              await this.showToast(`IMC: ${this.imcCalculado} - ${this.clasificacionIMC} detectado. Toggle activado automaticamente.`, 'warning', 4000);
             }
           }
         }
@@ -192,7 +195,8 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
         this.metabolicasForm.higadoGraso = !!cond.higadoGraso;
         this.metabolicasForm.resistenciaInsulina = !!cond.resistenciaInsulina;
         
-        if (!cond.obesidad && this.imcCalculado !== null && this.imcCalculado >= 30) {
+        // ← CAMBIO: Auto-marcar si IMC >= 25
+        if (!cond.obesidad && this.imcCalculado !== null && this.imcCalculado >= 25) {
           this.metabolicasForm.obesidad = true;
         } else {
           this.metabolicasForm.obesidad = !!cond.obesidad;
@@ -204,12 +208,17 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
         await this.showToast('Este registro ya fue finalizado', 'warning');
       }
 
+      // ← AGREGAR: Forzar detección de cambios
+      this.cdr.detectChanges();
+
     } catch (error: any) {
       console.error('[METABOLICAS] Error cargando datos:', error);
       await this.showToast(error.message || 'Error al cargar datos del paciente', 'danger');
       this.cargarDatosDesdeLocalStorage();
+      this.cdr.detectChanges();
     } finally {
       this.cargandoDatos = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -243,13 +252,15 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
           this.imcCalculado = Number((peso / (talla * talla)).toFixed(2));
           this.clasificacionIMC = this.getClasificacionIMC(this.imcCalculado);
           
-          if (this.imcCalculado >= 30) {
+          // ← CAMBIO: Auto-marcar si IMC >= 25
+          if (this.imcCalculado >= 25) {
             this.metabolicasForm.obesidad = true;
           }
         }
       }
       
       console.log('[METABOLICAS] Datos cargados desde localStorage');
+      this.cdr.detectChanges();
     } catch (e) {
       console.warn('[METABOLICAS] No se pudieron cargar datos desde localStorage:', e);
     }
@@ -338,11 +349,12 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
         'Content-Type': 'application/json'
       });
 
-      const response: any = await this.http.post(
+      // ← CAMBIO: Usar firstValueFrom
+      const response: any = await firstValueFrom(this.http.post(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/iniciar`,
         datos,
         { headers }
-      ).toPromise();
+      ));
 
       await loading.dismiss();
 
@@ -391,11 +403,12 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
         throw new Error('No se pudo identificar el registro clinico');
       }
 
-      const response: any = await this.http.post(
+      // ← CAMBIO: Usar firstValueFrom
+      const response: any = await firstValueFrom(this.http.post(
         `${environment.apiUrl}/nutricionapp-api/enfermeria/registro/${registroId}/metabolicas`,
         metabolicasData,
         { headers: this.getAuthHeaders() }
-      ).toPromise();
+      ));
 
       if (response?.error) {
         throw new Error(response.mensaje || 'Error al finalizar registro');
@@ -415,6 +428,7 @@ export class RegistroinfometabolicasPage implements OnInit, OnDestroy {
       await this.showToast(error.message || 'Error de conexion', 'danger');
     }
   }
+
 
   volver(): void {
     this.router.navigate(['/registroinfoantropometricos']);

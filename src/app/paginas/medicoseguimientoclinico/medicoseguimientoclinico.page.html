@@ -284,9 +284,31 @@
             <ion-card-content>
               <form [formGroup]="citaForm" (ngSubmit)="agendarCita()">
                 <ion-item lines="none">
-                  <ion-label position="stacked">Fecha y hora</ion-label>
-                  <ion-input type="datetime-local" formControlName="fecha_hora"></ion-input>
-                </ion-item>
+  <ion-label position="stacked">Fecha y hora</ion-label>
+
+ <ion-item lines="none">
+  <ion-label position="stacked">Fecha</ion-label>
+
+  <ion-datetime
+    formControlName="fecha"
+    presentation="date"
+    locale="es-EC"
+    show-default-buttons="true"
+    first-day-of-week="1">
+  </ion-datetime>
+</ion-item>
+
+<ion-item lines="none">
+  <ion-label position="stacked">Hora</ion-label>
+
+  <ion-input
+    type="time"
+    formControlName="hora">
+  </ion-input>
+</ion-item>
+
+
+</ion-item>
                 
                 <ion-item lines="none">
                   <ion-label position="stacked">Tipo de cita</ion-label>

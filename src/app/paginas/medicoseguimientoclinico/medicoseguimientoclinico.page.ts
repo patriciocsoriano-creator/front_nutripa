@@ -139,10 +139,11 @@ export class MedicoseguimientoclinicoPage implements OnInit {
     });
 
     this.citaForm = this.fb.group({
-      fecha_hora: ['', Validators.required],
-      tipo: ['control', Validators.required],
-      motivo: ['']
-    });
+  fecha: ['', Validators.required],
+  hora: ['', Validators.required],
+  tipo: ['control', Validators.required],
+  motivo: ['']
+});
 
     this.glucosaForm = this.fb.group({
       fecha: [new Date().toISOString().split('T')[0], Validators.required],
@@ -299,11 +300,16 @@ export class MedicoseguimientoclinicoPage implements OnInit {
       });
 
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const data = {
-        paciente_id: this.pacienteSeleccionado.id,
-        medico_id: user.id || null,
-        ...this.citaForm.value
-      };
+
+const fechaHora = `${this.citaForm.value.fecha}T${this.citaForm.value.hora}`;
+
+const data = {
+  paciente_id: this.pacienteSeleccionado.id,
+  medico_id: user.id || null,
+  fecha_hora: fechaHora,
+  tipo: this.citaForm.value.tipo,
+  motivo: this.citaForm.value.motivo
+};
 
       await this.http.post(
         `${environment.apiUrl}/nutricionapp-api/medico/seguimiento/cita`,

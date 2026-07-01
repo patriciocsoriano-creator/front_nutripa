@@ -130,15 +130,15 @@
               </ion-item>
 
               <ion-item class="condition-item">
-                <div class="condition-info">
-                  <ion-icon name="body-outline"></ion-icon>
-                  <div>
-                    <h3>Obesidad</h3>
-                    <p>Exceso de grasa corporal (IMC >= 30)</p>
-                  </div>
-                </div>
-                <ion-toggle [(ngModel)]="metabolicasForm.obesidad" name="obesidad" slot="end"></ion-toggle>
-              </ion-item>
+  <div class="condition-info">
+    <ion-icon name="body-outline"></ion-icon>
+    <div>
+      <h3>Sobrepeso / Obesidad</h3>
+      <p>Exceso de grasa corporal (IMC >= 25)</p>
+    </div>
+  </div>
+  <ion-toggle [(ngModel)]="metabolicasForm.obesidad" name="obesidad" slot="end"></ion-toggle>
+</ion-item>
 
               <ion-item class="condition-item">
                 <div class="condition-info">

@@ -733,3 +733,119 @@ ion-item {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===============================
+   Corrección color ion-select
+   =============================== */
+
+ion-select {
+  --color: #1a1f36;
+  color: #1a1f36;
+}
+
+ion-select::part(text) {
+  color: #1a1f36;
+}
+
+ion-select::part(placeholder) {
+  color: #9499b7;
+}
+
+/* ==================================================
+   CALENDARIO - AGENDAR NUEVA CITA
+   ================================================== */
+
+/*=========================================
+  CALENDARIO PREMIUM
+==========================================*/
+
+ion-datetime {
+  width: 100%;
+  margin-top: 12px;
+
+  --background: linear-gradient(180deg,#ffffff,#f8fbff);
+  --background-rgb: 255,255,255;
+
+  --title-color: #0f4c81;
+  --wheel-highlight-background: transparent;
+
+  border-radius: 22px;
+  padding: 14px;
+
+  border: 1px solid #d9e7f5;
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.08),
+    0 8px 18px rgba(21,101,192,.10);
+}
+
+/* Cabecera */
+ion-datetime::part(calendar-header){
+  background: linear-gradient(135deg,#1565c0,#42a5f5);
+  border-radius:18px;
+  margin-bottom:15px;
+  padding:12px;
+}
+
+/* Mes */
+ion-datetime::part(month-year-button){
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+}
+
+/* Flechas */
+ion-datetime::part(previous-month-button),
+ion-datetime::part(next-month-button){
+  color:#fff;
+}
+
+/* Días de la semana */
+ion-datetime::part(weekday) {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+ion-datetime::part(month-year-button) {
+  color: #ffffff !important;
+}
+
+/* Días */
+ion-datetime::part(calendar-day){
+  color:#222;
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  transition:.25s;
+}
+
+/* Hover */
+ion-datetime::part(calendar-day):hover{
+  background:#e3f2fd;
+  transform:scale(1.08);
+}
+
+/* Hoy */
+ion-datetime::part(today){
+  border:2px solid #1976d2;
+  color:#1976d2;
+  font-weight:bold;
+}
+
+/* Seleccionado */
+ion-datetime::part(calendar-day-active){
+  background:linear-gradient(135deg,#1976d2,#42a5f5);
+  color:#fff;
+  box-shadow:0 5px 15px rgba(25,118,210,.35);
+}
+
+/* Días deshabilitados */
+ion-datetime::part(calendar-day-disabled){
+  opacity:.35;
+}
+
+/* Botones */
+ion-datetime::part(button){
+  border-radius:12px;
+  font-weight:600;
+}
