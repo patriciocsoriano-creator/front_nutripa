@@ -142,6 +142,10 @@
               <ion-icon name="clipboard-outline" slot="start"></ion-icon> 
               Crear Plan Nutricional
             </ion-button>
+            <ion-button fill="solid" color="primary" (click)="verMedicionesPaciente()" class="btn-mediciones">
+  <ion-icon name="analytics-outline" slot="start"></ion-icon> 
+  Ver Mediciones (Casa)
+</ion-button>
           </div>
         </div>
 
@@ -322,7 +326,7 @@
               <ion-item 
                 button 
                 *ngFor="let registro of historial" 
-                (click)="verRegistro(registro)" 
+                (click)="verRegistro(registro)"
                 detail
                 detail-icon="chevron-forward-outline">
                 <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>

@@ -1,29 +1,40 @@
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
+      <ion-icon
+        name="menu-outline"
+        class="mobile-menu-toggle"
+        (click)="toggleSidebar()">
+      </ion-icon>
+      
       <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Registro de Glucosa</ion-title>
+      <ion-title>Registrar Glucosa</ion-title>
     </div>
     <ion-buttons slot="end">
-      <ion-button (click)="cerrarSesion()">
+      <ion-button (click)="cerrarSesion()" color="danger">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+<div class="sidebar-overlay" 
+     [class.active]="sidebarOpen && isMobile" 
+     (click)="toggleSidebar()">
+</div>
+
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR DEL PACIENTE -->
     <div class="sidebar" [class.open]="sidebarOpen">
+      
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="close-outline"></ion-icon>
       </div>
       
       <div class="user-info">
         <ion-avatar>
-          <img src="assets/avatar-patient.png" alt="Paciente" />
+          <img src="assets/icon/paciente.png" alt="Paciente" />
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombrePaciente}}</h4>
@@ -37,13 +48,13 @@
           <span>Inicio</span>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'plan'">
           <div class="menu-link" (click)="toggleSubmenu('plan')">
             <ion-icon name="nutrition-outline"></ion-icon>
             <span>Plan Nutricional</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+          <ul class="submenu">
             <li (click)="navegarA('pacienteverplan')">
               <ion-icon name="eye-outline"></ion-icon>
               <span>Ver mi plan</span>
@@ -55,18 +66,18 @@
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'seguimiento'">
           <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
             <ion-icon name="pulse-outline"></ion-icon>
             <span>Seguimiento Salud</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+          <ul class="submenu">
             <li (click)="navegarA('pacientedatosantropometricos')">
               <ion-icon name="body-outline"></ion-icon>
-              <span>Datos antropométricos</span>
+              <span>Datos antropometricos</span>
             </li>
-            <li (click)="navegarA('pacienteregistrarglucosa')">
+            <li (click)="navegarA('pacienteregistrarglucosa')" class="active">
               <ion-icon name="water-outline"></ion-icon>
               <span>Registrar glucosa</span>
             </li>
@@ -76,7 +87,7 @@
             </li>
             <li (click)="navegarA('pacienteregistrarpresion')">
               <ion-icon name="heart-outline"></ion-icon>
-              <span>Registrar presión arterial</span>
+              <span>Registrar presion arterial</span>
             </li>
             <li (click)="navegarA('pacienteverpresion')">
               <ion-icon name="water-outline"></ion-icon>
@@ -84,284 +95,206 @@
             </li>
             <li (click)="navegarA('pacientehistorialmedico')">
               <ion-icon name="analytics-outline"></ion-icon>
-              <span>Historial médico</span>
+              <span>Historial medico</span>
             </li>
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'comunicacion'">
           <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
             <ion-icon name="chatbubbles-outline"></ion-icon>
-            <span>Comunicación</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+            <span>Comunicacion</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+          <ul class="submenu">
             <li (click)="contactarWhatsApp()">
               <ion-icon name="logo-whatsapp"></ion-icon>
-              <span>WhatsApp médico</span>
+              <span>WhatsApp medico</span>
             </li>
             <li (click)="navegarA('pacientemensajes')">
               <ion-icon name="mail-outline"></ion-icon>
-              <span>Mensajes al médico</span>
+              <span>Mensajes al medico</span>
             </li>
           </ul>
         </li>
 
         <li (click)="navegarA('pacienteconfiguracion')">
           <ion-icon name="settings-outline"></ion-icon>
-          <span>Configuración</span>
+          <span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
     <div class="main-content">
       
-      <!-- Header de la página -->
       <div class="page-header">
         <div class="page-title">
-          <ion-icon name="water-outline"></ion-icon>
+          <ion-icon name="water-outline" class="page-icon"></ion-icon>
           <div>
             <h1>Registro de Glucosa</h1>
-            <p>Monitorea tus niveles de glucosa diariamente</p>
+            <p class="subtitle">Monitorea tus niveles de glucosa diariamente</p>
           </div>
         </div>
       </div>
 
-      <!-- 📊 Tarjetas de estadísticas rápidas -->
+      <!-- Estadísticas -->
       <div class="stats-grid" *ngIf="estadisticas">
-        <div class="stat-card">
-          <div class="stat-icon-wrapper ultima">
-            <ion-icon name="water-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <label>Última medición</label>
-            <span class="stat-value" [ngClass]="getClasificacionColor(estadisticas.ultima_medicion)">
-              {{estadisticas.ultima_medicion || '--'}} <small>mg/dL</small>
-            </span>
-            <small *ngIf="estadisticas.ultima_fecha">
-              {{estadisticas.ultima_fecha | date:'dd/MM HH:mm'}}
-            </small>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon-wrapper promedio">
+        <div class="stat-card promedio">
+          <div class="stat-icon">
             <ion-icon name="analytics-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <label>Promedio (7 días)</label>
-            <span class="stat-value" [ngClass]="getClasificacionColor(estadisticas.promedio)">
-              {{estadisticas.promedio || '--'}} <small>mg/dL</small>
-            </span>
-            <small>Últimos 7 días</small>
+            <label>Promedio</label>
+            <span class="stat-value">{{estadisticas.promedio | number:'1.0-0'}} mg/dL</span>
           </div>
         </div>
-
-        <div class="stat-card">
-          <div class="stat-icon-wrapper rango">
-            <ion-icon name="swap-vertical-outline"></ion-icon>
+        <div class="stat-card minimo">
+          <div class="stat-icon">
+            <ion-icon name="trending-down-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <label>Rango</label>
-            <span class="stat-value">
-              {{estadisticas.minimo || '--'}} - {{estadisticas.maximo || '--'}}
-            </span>
-            <small>Mínimo - Máximo</small>
+            <label>Minimo</label>
+            <span class="stat-value">{{estadisticas.minimo}} mg/dL</span>
           </div>
         </div>
-
-        <div class="stat-card">
-          <div class="stat-icon-wrapper total">
-            <ion-icon name="pulse-outline"></ion-icon>
+        <div class="stat-card maximo">
+          <div class="stat-icon">
+            <ion-icon name="trending-up-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <label>Maximo</label>
+            <span class="stat-value">{{estadisticas.maximo}} mg/dL</span>
+          </div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-icon">
+            <ion-icon name="documents-outline"></ion-icon>
           </div>
           <div class="stat-info">
             <label>Total registros</label>
-            <span class="stat-value">{{estadisticas.total || 0}}</span>
-            <small>Últimos 7 días</small>
+            <span class="stat-value">{{estadisticas.total_registros}}</span>
           </div>
         </div>
       </div>
 
-      <!-- 🆕 Formulario de registro -->
-      <ion-card class="registro-card">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="add-circle-outline"></ion-icon>
-            Registrar Nueva Medición
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <form #glucosaForm="ngForm" (ngSubmit)="registrarGlucosa()">
-            <div class="form-grid">
-              
-              <!-- Valor de glucosa -->
-              <div class="form-group">
-                <label>Valor de Glucosa (mg/dL) *</label>
-                <div class="input-with-unit">
-                  <ion-input 
-                    type="number" 
-                    [(ngModel)]="nuevaMedicion.valor_glucosa" 
-                    name="valor_glucosa"
-                    placeholder="Ej: 95"
-                    required
-                    min="20"
-                    max="600"
-                    class="custom-input">
-                  </ion-input>
-                  <span class="unit-label">mg/dL</span>
-                </div>
-              </div>
-
-              <!-- Momento del día -->
-              <div class="form-group">
-                <label>Momento de la medición *</label>
-                <ion-select 
-                  [(ngModel)]="nuevaMedicion.tipo_momento" 
-                  name="tipo_momento"
-                  placeholder="Selecciona el momento"
-                  interface="action-sheet"
-                  required
-                  class="custom-select">
-                  <ion-select-option value="ayunas">🌅 En ayunas (al despertar)</ion-select-option>
-                  <ion-select-option value="antes_comida">🍽️ Antes de comer</ion-select-option>
-                  <ion-select-option value="despues_comida">🍴 2 horas después de comer</ion-select-option>
-                  <ion-select-option value="antes_dormir">🌙 Antes de dormir</ion-select-option>
-                  <ion-select-option value="otro">📝 Otro momento</ion-select-option>
-                </ion-select>
-              </div>
-
-              <!-- Fecha y hora -->
-              <div class="form-group">
-                <label>Fecha y hora</label>
-                <ion-input 
-                  type="datetime-local" 
-                  [(ngModel)]="nuevaMedicion.fecha_hora" 
-                  name="fecha_hora"
-                  class="custom-input">
-                </ion-input>
-              </div>
-
-              <!-- Notas -->
-              <div class="form-group full-width">
-                <label>Notas (opcional)</label>
-                <ion-textarea 
-                  [(ngModel)]="nuevaMedicion.notas" 
-                  name="notas"
-                  placeholder="Ej: Comí pasta, hice ejercicio, me sentía mareado..."
-                  rows="2"
-                  class="custom-input">
-                </ion-textarea>
-              </div>
-
-            </div>
-
-            <!-- Referencia de rangos -->
-            <div class="rangos-referencia">
-              <h4>📊 Rangos de referencia (ayunas):</h4>
-              <div class="rangos-grid">
-                <div class="rango-item normal">
-                  <strong>70-99</strong>
-                  <span>Normal</span>
-                </div>
-                <div class="rango-item pre-diabetes">
-                  <strong>100-125</strong>
-                  <span>Pre-diabetes</span>
-                </div>
-                <div class="rango-item alto">
-                  <strong>≥126</strong>
-                  <span>Diabetes</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Botones -->
-            <div class="form-actions">
-              <ion-button type="button" fill="outline" color="medium" (click)="limpiarFormulario()">
-                <ion-icon name="refresh-outline" slot="start"></ion-icon>
-                Limpiar
-              </ion-button>
-              <ion-button type="submit" color="primary" [disabled]="!glucosaForm.valid">
-                <ion-icon name="save-outline" slot="start"></ion-icon>
-                Guardar Medición
-              </ion-button>
-            </div>
-          </form>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- 📋 Historial de mediciones -->
-      <ion-card class="historial-card">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="time-outline"></ion-icon>
-            Historial de Mediciones
-          </ion-card-title>
-          <div class="filter-buttons">
-            <ion-button 
-              *ngFor="let filtro of filtrosDias" 
-              fill="outline" 
-              size="small"
-              [color]="diasHistorial === filtro.dias ? 'primary' : 'medium'"
-              (click)="cambiarFiltroDias(filtro.dias)">
-              {{filtro.label}}
-            </ion-button>
-          </div>
-        </ion-card-header>
-        <ion-card-content>
-          
-          <!-- Loading -->
-          <div *ngIf="cargandoHistorial" class="loading-inline">
-            <ion-spinner name="crescent" color="primary"></ion-spinner>
-            <span>Cargando historial...</span>
+      <!-- Formulario de registro -->
+      <div class="registro-card">
+        <div class="card-header">
+          <ion-icon name="add-circle-outline"></ion-icon>
+          <h2>Nueva Medicion</h2>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Valor de Glucosa (mg/dL)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="nuevaMedicion.valor_glucosa" 
+              placeholder="Ej: 95"
+              min="0"
+              max="500">
           </div>
 
-          <!-- Sin mediciones -->
-          <div *ngIf="!cargandoHistorial && mediciones.length === 0" class="empty-inline">
-            <ion-icon name="water-outline"></ion-icon>
-            <p>No hay mediciones registradas en este período</p>
+          <div class="form-group">
+            <label>Momento de la Medicion</label>
+            <select [(ngModel)]="nuevaMedicion.tipo_momento">
+              <option value="ayunas">En ayunas</option>
+              <option value="antes_comida">Antes de comer</option>
+              <option value="despues_comida">Despues de comer</option>
+              <option value="postprandial">Postprandial</option>
+              <option value="antes_dormir">Antes de dormir</option>
+              <option value="otro">Otro momento</option>
+            </select>
           </div>
 
-          <!-- Lista de mediciones -->
-          <div *ngIf="!cargandoHistorial && mediciones.length > 0" class="mediciones-list">
-            <div 
-              *ngFor="let med of mediciones; let i = index" 
-              class="medicion-item"
-              [ngClass]="getClasificacionColor(med.valor_glucosa)">
-              
-              <div class="medicion-valor">
-                <span class="valor">{{med.valor_glucosa}}</span>
-                <span class="unidad">mg/dL</span>
+          <div class="form-group full-width">
+            <label>Fecha y Hora</label>
+            <input 
+              type="datetime-local" 
+              [(ngModel)]="nuevaMedicion.fecha_hora">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Notas (opcional)</label>
+            <textarea 
+              [(ngModel)]="nuevaMedicion.notas" 
+              placeholder="Agrega notas sobre tu medicion..."
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <ion-button expand="block" color="primary" (click)="registrarGlucosa()">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Registrar Medicion
+          </ion-button>
+          <ion-button expand="block" color="medium" fill="outline" (click)="limpiarFormulario()">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            Limpiar
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Historial -->
+      <div class="historial-card">
+        <div class="card-header">
+          <ion-icon name="time-outline"></ion-icon>
+          <h2>Historial de Mediciones</h2>
+        </div>
+
+        <div class="filtros-dias">
+          <ion-button 
+            *ngFor="let filtro of filtrosDias" 
+            [fill]="diasHistorial === filtro.dias ? 'solid' : 'outline'"
+            size="small"
+            (click)="cambiarFiltroDias(filtro.dias)">
+            {{filtro.label}}
+          </ion-button>
+        </div>
+
+        <div *ngIf="cargandoHistorial" class="loading-state">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p>Cargando historial...</p>
+        </div>
+
+        <div *ngIf="!cargandoHistorial && mediciones.length === 0" class="empty-state">
+          <ion-icon name="water-outline" class="empty-icon"></ion-icon>
+          <p>No hay mediciones registradas en este periodo</p>
+        </div>
+
+        <div *ngIf="!cargandoHistorial && mediciones.length > 0" class="mediciones-list">
+          <div *ngFor="let medicion of mediciones" class="medicion-item">
+            <div class="medicion-header">
+              <div class="medicion-icon" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
+                <ion-icon [name]="getMomentoIcono(medicion.tipo_momento)"></ion-icon>
               </div>
-              
               <div class="medicion-info">
-                <div class="momento-badge">
-                  <ion-icon [name]="getMomentoIcono(med.tipo_momento)"></ion-icon>
-                  <span>{{getMomentoLabel(med.tipo_momento)}}</span>
+                <div class="medicion-valor" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
+                  {{medicion.valor_glucosa}} mg/dL
                 </div>
-                <div class="fecha">
-                  <ion-icon name="calendar-outline"></ion-icon>
-                  <span>{{med.fecha_hora | date:'dd/MM/yyyy HH:mm'}}</span>
+                <div class="medicion-momento">
+                  {{getMomentoLabel(medicion.tipo_momento)}}
                 </div>
-                <div class="clasificacion" *ngIf="getClasificacion(med.valor_glucosa, med.tipo_momento)">
-                  <span>{{getClasificacion(med.valor_glucosa, med.tipo_momento)}}</span>
-                </div>
-                <div class="notas" *ngIf="med.notas">
-                  <ion-icon name="chatbubble-outline"></ion-icon>
-                  <span>{{med.notas}}</span>
+                <div class="medicion-fecha">
+                  {{medicion.fecha_hora | date:'dd/MM/yyyy HH:mm'}}
                 </div>
               </div>
-
-              <div class="medicion-actions">
-                <ion-button fill="clear" size="small" color="danger" (click)="eliminarMedicion(med)">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
+              <div class="medicion-clasificacion" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
+                {{getClasificacion(medicion.valor_glucosa, medicion.tipo_momento)}}
               </div>
             </div>
+            <div *ngIf="medicion.notas" class="medicion-notas">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>{{medicion.notas}}</span>
+            </div>
+            <div class="medicion-actions">
+              <ion-button size="small" color="danger" fill="clear" (click)="eliminarMedicion(medicion)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
           </div>
-
-        </ion-card-content>
-      </ion-card>
+        </div>
+      </div>
 
     </div>
   </div>

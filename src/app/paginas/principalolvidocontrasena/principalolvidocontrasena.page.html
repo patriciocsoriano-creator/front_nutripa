@@ -1,27 +1,18 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/principal" text=""></ion-back-button>
-    </ion-buttons>
-    <ion-title>Recuperar Contraseña</ion-title>
-  </ion-toolbar>
-</ion-header>
+
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
     
-    <ion-img src="assets/img/logo.jpeg" class="logo" alt="Logo NutriPA"></ion-img>
+    <ion-img src="assets/icon/NutriAI.png" class="logo" alt="Logo NutriPA"></ion-img>
     
     <form [formGroup]="recuperacionForm" (ngSubmit)="onSubmit()" novalidate>
       
-      <!-- ======================== -->
       <!-- PASO 1: Ingresar CORREO -->
-      <!-- ======================== -->
       <div *ngIf="pasoActual === 1" class="step-content">
         <div class="step-header">
           <ion-icon name="mail-outline" class="step-icon"></ion-icon>
-          <h2>¿Olvidaste tu contraseña?</h2>
-          <p>Ingresa tu correo electrónico y te enviaremos un código de verificación</p>
+          <h2>Olvidaste tu contrasena?</h2>
+          <p>Ingresa tu correo electronico y te enviaremos un codigo de verificacion</p>
         </div>
 
         <!-- Correo Input -->
@@ -40,13 +31,13 @@
               (ionBlur)="onBlur('correo')"
               (ionChange)="onInputChange('correo')"
               placeholder=" "
-              aria-label="Correo electrónico"
+              aria-label="Correo electronico"
               autocomplete="email">
             </ion-input>
             
             <span class="neu-label" 
                   [class.floating]="recuperacionForm.get('correo')?.touched || recuperacionForm.get('correo')?.value">
-              Correo Electrónico
+              Correo Electronico
             </span>
           </div>
         </ion-item>
@@ -59,11 +50,11 @@
         <ion-text color="danger" class="error-message" [class.show]="hasError('correo')">
           <small>
             <span *ngIf="recuperacionForm.get('correo')?.errors?.['required']">El correo es requerido</span>
-            <span *ngIf="recuperacionForm.get('correo')?.errors?.['email']">Formato de correo no válido</span>
+            <span *ngIf="recuperacionForm.get('correo')?.errors?.['email']">Formato de correo no valido</span>
           </small>
         </ion-text>
 
-        <!-- Botón enviar código -->
+        <!-- Boton enviar codigo -->
         <ion-button 
           expand="block" 
           type="submit" 
@@ -71,25 +62,23 @@
           class="ion-margin-top">
           
           <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
-          {{ cargando ? 'Enviando...' : 'Enviar Código por Correo' }}
+          {{ cargando ? 'Enviando...' : 'Enviar Codigo por Correo' }}
         </ion-button>
 
         <div class="step-footer">
           <ion-text color="medium" (click)="volverAlLogin()" role="link" tabindex="0">
-            ← Volver al inicio de sesión
+            Volver al inicio de sesion
           </ion-text>
         </div>
       </div>
 
-      <!-- ======================== -->
-      <!-- PASO 2: Verificar Código -->
-      <!-- ======================== -->
+      <!-- PASO 2: Verificar Codigo -->
       <div *ngIf="pasoActual === 2" class="step-content">
         <div class="step-header">
           <ion-icon name="mail-unread-outline" class="step-icon email-icon"></ion-icon>
           <h2>Verifica tu identidad</h2>
-          <p>Ingresa el código de 6 dígitos que enviamos a:</p>
-          <p class="email-highlight">📧 {{ correoEnviado }}</p>
+          <p>Ingresa el codigo de 6 digitos que enviamos a:</p>
+          <p class="email-highlight">{{ correoEnviado }}</p>
         </div>
 
         <!-- Code Input (6 digits) -->
@@ -101,7 +90,7 @@
               maxlength="1"
               pattern="[0-9]"
               inputmode="numeric"
-              [attr.aria-label]="'Dígito ' + (i+1)"
+              [attr.aria-label]="'Digito ' + (i+1)"
               (input)="onCodeInput($event, i)"
               (keydown)="onCodeKeydown($event, i)"
               (paste)="onCodePaste($event)"
@@ -133,7 +122,7 @@
             role="link" 
             tabindex="0"
             [class.disabled]="cargando">
-            {{ cargando ? 'Enviando...' : '¿No recibiste el código? Reenviar correo' }}
+            {{ cargando ? 'Enviando...' : 'No recibiste el codigo? Reenviar correo' }}
           </ion-text>
         </div>
 
@@ -145,7 +134,7 @@
             type="button"
             (click)="volverPaso(1)"
             [disabled]="cargando">
-            ← Atrás
+            Atras
           </ion-button>
           
           <ion-button 
@@ -156,19 +145,17 @@
             class="ion-margin-top">
             
             <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
-            {{ cargando ? 'Verificando...' : 'Verificar Código' }}
+            {{ cargando ? 'Verificando...' : 'Verificar Codigo' }}
           </ion-button>
         </div>
       </div>
 
-      <!-- ======================== -->
-      <!-- PASO 3: Nueva Contraseña -->
-      <!-- ======================== -->
+      <!-- PASO 3: Nueva Contrasena -->
       <div *ngIf="pasoActual === 3" class="step-content">
         <div class="step-header">
           <ion-icon name="lock-closed-outline" class="step-icon"></ion-icon>
-          <h2>Crea tu nueva contraseña</h2>
-          <p>Ingresa una contraseña segura que recuerdes</p>
+          <h2>Crea tu nueva contrasena</h2>
+          <p>Ingresa una contrasena segura que recuerdes</p>
         </div>
 
         <!-- New Password -->
@@ -187,12 +174,12 @@
               (ionBlur)="onBlur('nuevaPassword')"
               (ionChange)="onInputChange('nuevaPassword')"
               placeholder=" "
-              aria-label="Nueva contraseña">
+              aria-label="Nueva contrasena">
             </ion-input>
             
             <span class="neu-label"
                   [class.floating]="recuperacionForm.get('nuevaPassword')?.touched || recuperacionForm.get('nuevaPassword')?.value">
-              Nueva Contraseña
+              Nueva Contrasena
             </span>
             
             <button type="button" class="password-toggle" (click)="togglePassword('nueva')">
@@ -201,30 +188,30 @@
           </div>
         </ion-item>
 
-        <!-- Requisitos de contraseña -->
+        <!-- Requisitos de contrasena -->
         <div class="password-requirements" *ngIf="recuperacionForm.get('nuevaPassword')?.touched">
           <ion-text [color]="validarRequisito('mayuscula') ? 'success' : 'medium'" class="requirement-item">
             <ion-icon [name]="validarRequisito('mayuscula') ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-            <small>Al menos una mayúscula</small>
+            <small>Al menos una mayuscula</small>
           </ion-text>
           <ion-text [color]="validarRequisito('numero') ? 'success' : 'medium'" class="requirement-item">
             <ion-icon [name]="validarRequisito('numero') ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-            <small>Al menos un número</small>
+            <small>Al menos un numero</small>
           </ion-text>
           <ion-text [color]="validarRequisito('longitud') ? 'success' : 'medium'" class="requirement-item">
             <ion-icon [name]="validarRequisito('longitud') ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-            <small>Mínimo 8 caracteres</small>
+            <small>Minimo 8 caracteres</small>
           </ion-text>
           <ion-text [color]="validarRequisito('especial') ? 'success' : 'medium'" class="requirement-item">
             <ion-icon [name]="validarRequisito('especial') ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-            <small>Al menos un carácter especial</small>
+            <small>Al menos un caracter especial</small>
           </ion-text>
         </div>
 
         <ion-text color="danger" class="error-message" [class.show]="hasError('nuevaPassword')">
           <small>
-            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['passwordSegura']">La contraseña no cumple los requisitos</span>
+            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['required']">La contrasena es requerida</span>
+            <span *ngIf="recuperacionForm.get('nuevaPassword')?.errors?.['passwordSegura']">La contrasena no cumple los requisitos</span>
           </small>
         </ion-text>
 
@@ -244,12 +231,12 @@
               (ionBlur)="onBlur('confirmarPassword')"
               (ionChange)="verificarCoincidencia()"
               placeholder=" "
-              aria-label="Confirmar contraseña">
+              aria-label="Confirmar contrasena">
             </ion-input>
             
             <span class="neu-label"
                   [class.floating]="recuperacionForm.get('confirmarPassword')?.touched || recuperacionForm.get('confirmarPassword')?.value">
-              Confirmar Contraseña
+              Confirmar Contrasena
             </span>
             
             <button type="button" class="password-toggle" (click)="togglePassword('confirmar')">
@@ -260,8 +247,8 @@
 
         <ion-text color="danger" class="error-message" [class.show]="hasError('confirmarPassword') || passwordsNoCoinciden">
           <small>
-            <span *ngIf="recuperacionForm.get('confirmarPassword')?.errors?.['required']">Confirma tu contraseña</span>
-            <span *ngIf="passwordsNoCoinciden">Las contraseñas no coinciden</span>
+            <span *ngIf="recuperacionForm.get('confirmarPassword')?.errors?.['required']">Confirma tu contrasena</span>
+            <span *ngIf="passwordsNoCoinciden">Las contrasenas no coinciden</span>
           </small>
         </ion-text>
 
@@ -285,7 +272,7 @@
             type="button"
             (click)="volverPaso(2)"
             [disabled]="cargando">
-            ← Atrás
+            Atras
           </ion-button>
           
           <ion-button 
@@ -294,28 +281,26 @@
             [disabled]="cargando || recuperacionForm.invalid || passwordsNoCoinciden"
             class="ion-margin-top">
             
-            <ion-spinner name="crescent" *If="cargando" slot="start"></ion-spinner>
-            {{ cargando ? 'Guardando...' : 'Actualizar Contraseña' }}
+            <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
+            {{ cargando ? 'Guardando...' : 'Actualizar Contrasena' }}
           </ion-button>
         </div>
       </div>
 
-      <!-- ======================== -->
-      <!-- PASO 4: Éxito -->
-      <!-- ======================== -->
+      <!-- PASO 4: Exito -->
       <div *ngIf="pasoActual === 4" class="step-content success-step">
         <div class="success-icon">
           <ion-icon name="checkmark-circle"></ion-icon>
         </div>
-        <h2>¡Contraseña Actualizada!</h2>
-        <p>Tu contraseña ha sido cambiada exitosamente. También enviamos una confirmación a tu correo.</p>
+        <h2>Contrasena Actualizada!</h2>
+        <p>Tu contrasena ha sido cambiada exitosamente. Tambien enviamos una confirmacion a tu correo.</p>
         
         <ion-button 
           expand="block" 
           type="button"
           (click)="irAlLogin()"
           class="ion-margin-top">
-          Ir a Iniciar Sesión
+          Ir a Iniciar Sesion
         </ion-button>
       </div>
 

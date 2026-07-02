@@ -1,10 +1,9 @@
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
-      <!-- 🆕 Botón hamburguesa para móvil -->
-      <ion-icon 
-        name="menu-outline" 
-        class="mobile-menu-toggle" 
+      <ion-icon
+        name="menu-outline"
+        class="mobile-menu-toggle"
         (click)="toggleSidebar()">
       </ion-icon>
       
@@ -17,27 +16,30 @@
         <ion-icon slot="icon-only" name="notifications-outline" [color]="diasParaCita <= 1 ? 'danger' : diasParaCita <= 3 ? 'warning' : 'primary'"></ion-icon>
         <ion-badge color="danger" *ngIf="diasParaCita <= 3">{{diasParaCita}}</ion-badge>
       </ion-button>
-      <ion-button (click)="cerrarSesion()">
+      <ion-button (click)="cerrarSesion()" color="danger">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+<div class="sidebar-overlay" 
+     [class.active]="sidebarOpen && isMobile" 
+     (click)="toggleSidebar()">
+</div>
+
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR DEL PACIENTE -->
     <div class="sidebar" [class.open]="sidebarOpen">
-      <!-- 🆕 Icono para cerrar en móvil -->
+      
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="close-outline"></ion-icon>
       </div>
       
-      <!-- Info del paciente -->
       <div class="user-info">
         <ion-avatar>
-          <img src="assets/avatar-patient.png" alt="Paciente" />
+          <img src="assets/icon/paciente.png" alt="Paciente" />
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombrePaciente}}</h4>
@@ -46,20 +48,18 @@
       </div>
 
       <ul>
-        <!-- 🏠 Inicio -->
         <li (click)="navegarA('pacienteprincipal')" class="active">
           <ion-icon name="home-outline"></ion-icon>
           <span>Inicio</span>
         </li>
 
-        <!-- 🥗 Módulo Plan Nutricional -->
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'plan'">
           <div class="menu-link" (click)="toggleSubmenu('plan')">
             <ion-icon name="nutrition-outline"></ion-icon>
             <span>Plan Nutricional</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+          <ul class="submenu">
             <li (click)="navegarA('pacienteverplan')">
               <ion-icon name="eye-outline"></ion-icon>
               <span>Ver mi plan</span>
@@ -71,17 +71,16 @@
           </ul>
         </li>
 
-        <!-- 💊 Módulo Seguimiento de Salud -->
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'seguimiento'">
           <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
             <ion-icon name="pulse-outline"></ion-icon>
             <span>Seguimiento Salud</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+          <ul class="submenu">
             <li (click)="navegarA('pacientedatosantropometricos')">
               <ion-icon name="body-outline"></ion-icon>
-              <span>Datos antropométricos</span>
+              <span>Datos antropometricos</span>
             </li>
             <li (click)="navegarA('pacienteregistrarglucosa')">
               <ion-icon name="water-outline"></ion-icon>
@@ -93,7 +92,7 @@
             </li>
             <li (click)="navegarA('pacienteregistrarpresion')">
               <ion-icon name="heart-outline"></ion-icon>
-              <span>Registrar presión arterial</span>
+              <span>Registrar presion arterial</span>
             </li>
             <li (click)="navegarA('pacienteverpresion')">
               <ion-icon name="water-outline"></ion-icon>
@@ -101,53 +100,48 @@
             </li>
             <li (click)="navegarA('pacientehistorialmedico')">
               <ion-icon name="analytics-outline"></ion-icon>
-              <span>Historial médico</span>
+              <span>Historial medico</span>
             </li>
           </ul>
         </li>
 
-        <!-- 💬 Comunicación Médica -->
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'comunicacion'">
           <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
             <ion-icon name="chatbubbles-outline"></ion-icon>
-            <span>Comunicación</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+            <span>Comunicacion</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+          <ul class="submenu">
             <li (click)="contactarWhatsApp()">
               <ion-icon name="logo-whatsapp"></ion-icon>
-              <span>WhatsApp médico</span>
+              <span>WhatsApp medico</span>
             </li>
             <li (click)="navegarA('pacientemensajes')">
               <ion-icon name="mail-outline"></ion-icon>
-              <span>Mensajes al médico</span>
+              <span>Mensajes al medico</span>
             </li>
           </ul>
         </li>
 
-        <!-- ⚙️ Configuración -->
         <li (click)="navegarA('pacienteconfiguracion')">
           <ion-icon name="settings-outline"></ion-icon>
-          <span>Configuración</span>
+          <span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
     <div class="main-content">
       
-      <!-- Loading -->
       <div *ngIf="cargando" class="loading-state">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
-        <p>Cargando tu información...</p>
+        <p>Cargando tu informacion...</p>
       </div>
 
       <div *ngIf="!cargando" class="patient-dashboard">
         
-        <!-- 🎯 Tarjeta de bienvenida -->
         <div class="welcome-card">
           <div class="welcome-content">
-            <h1>¡Hola, {{nombrePaciente.split(' ')[0]}}! 👋</h1>
+            <h1>Hola, {{nombrePaciente.split(' ')[0]}}!</h1>
             <p>Bienvenido a tu portal de salud personalizado</p>
           </div>
           <div class="welcome-icon">
@@ -155,29 +149,104 @@
           </div>
         </div>
 
-        <!-- 🔔 Alerta de próxima cita -->
-        <div *ngIf="proximaCita" class="cita-card" [class.urgente]="diasParaCita <= 1" [class.pronto]="diasParaCita > 1 && diasParaCita <= 3">
-          <div class="cita-icon">
-            <ion-icon name="calendar-outline"></ion-icon>
-          </div>
-          <div class="cita-info">
-            <h3>Próxima Cita</h3>
-            <p class="cita-fecha">{{proximaCita.fecha_hora | date:'EEEE dd/MM/yyyy'}}</p>
-            <p class="cita-hora">{{proximaCita.fecha_hora | date:'HH:mm'}} h</p>
-            <p class="cita-tiempo" *ngIf="diasParaCita >= 0">
-              <ion-icon name="time-outline"></ion-icon>
-              {{diasParaCita === 0 ? '¡HOY!' : diasParaCita === 1 ? 'Mañana' : 'En ' + diasParaCita + ' días'}}
-            </p>
-          </div>
-          <div class="cita-actions">
-            <ion-button size="small" color="success" (click)="contactarWhatsApp()">
-              <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
-              Confirmar
-            </ion-button>
-          </div>
+        <div class="proxima-cita-destacada">
+          
+          <ng-container *ngIf="proximaCita; else sinCita">
+            <div class="cita-header-section">
+              <div class="cita-icono-grande">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="cita-titulo-seccion">
+                <h2>Tu Proxima Cita</h2>
+                <p class="cita-subtitulo">No olvides prepararte para tu consulta</p>
+              </div>
+              <div class="cita-countdown" [class.urgente]="diasParaCita <= 1" [class.pronto]="diasParaCita > 1 && diasParaCita <= 3">
+                <div class="countdown-numero">{{diasParaCita === 0 ? 'HOY!' : diasParaCita}}</div>
+                <div class="countdown-texto" *ngIf="diasParaCita > 0">{{diasParaCita === 1 ? 'dia' : 'dias'}}</div>
+              </div>
+            </div>
+
+            <div class="cita-detalles-completos">
+              <div class="detalle-item">
+                <ion-icon name="person-outline"></ion-icon>
+                <div class="detalle-info">
+                  <span class="detalle-label">Medico</span>
+                  <span class="detalle-valor">{{medicoNombre}}</span>
+                </div>
+              </div>
+
+              <div class="detalle-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <div class="detalle-info">
+                  <span class="detalle-label">Fecha</span>
+                  <span class="detalle-valor">{{proximaCita.fecha_hora | date:'EEEE, dd MMMM yyyy'}}</span>
+                </div>
+              </div>
+
+              <div class="detalle-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <div class="detalle-info">
+                  <span class="detalle-label">Hora</span>
+                  <span class="detalle-valor">{{proximaCita.fecha_hora | date:'HH:mm'}} h</span>
+                </div>
+              </div>
+
+              <div class="detalle-item" *ngIf="proximaCita.tipo">
+                <ion-icon name="medkit-outline"></ion-icon>
+                <div class="detalle-info">
+                  <span class="detalle-label">Tipo de consulta</span>
+                  <span class="detalle-valor">{{getTipoCitaLabel(proximaCita.tipo)}}</span>
+                </div>
+              </div>
+
+              <div class="detalle-item" *ngIf="proximaCita.motivo">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <div class="detalle-info">
+                  <span class="detalle-label">Motivo</span>
+                  <span class="detalle-valor">{{proximaCita.motivo}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cita-acciones-destacadas">
+              <ion-button color="success" size="default" (click)="contactarWhatsApp()">
+                <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+                Confirmar asistencia
+              </ion-button>
+              <ion-button color="primary" size="default" fill="outline" (click)="verProximaCita()">
+                <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+                Ver detalles
+              </ion-button>
+            </div>
+          </ng-container>
+
+          <ng-template #sinCita>
+            <div class="cita-header-section">
+              <div class="cita-icono-grande sin-cita">
+                <ion-icon name="calendar-clear-outline"></ion-icon>
+              </div>
+              <div class="cita-titulo-seccion">
+                <h2>Proxima Cita</h2>
+                <p class="cita-subtitulo">No tienes citas programadas</p>
+              </div>
+            </div>
+
+            <div class="cita-sin-programar">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              <p>Aun no tienes ninguna cita agendada con tu medico.</p>
+              <p class="cita-sugerencia">Contacta a tu medico para programar tu proxima consulta.</p>
+            </div>
+
+            <div class="cita-acciones-destacadas">
+              <ion-button color="success" size="default" (click)="contactarWhatsApp()">
+                <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+                Contactar medico
+              </ion-button>
+            </div>
+          </ng-template>
+
         </div>
 
-        <!-- 📊 Tarjetas de acceso rápido -->
         <div class="quick-access-grid">
           
           <ion-card class="access-card plan" (click)="navegarA('pacienteverplan')">
@@ -212,7 +281,7 @@
               <h3>Glucosa</h3>
               <p>Registra tus niveles diarios</p>
               <span class="last-value" *ngIf="ultimaGlucosa">
-                Último: {{ultimaGlucosa}} mg/dL
+                Ultimo: {{ultimaGlucosa}} mg/dL
               </span>
             </ion-card-content>
           </ion-card>
@@ -222,10 +291,10 @@
               <div class="card-icon">
                 <ion-icon name="heart-outline"></ion-icon>
               </div>
-              <h3>Presión Arterial</h3>
-              <p>Monitorea tu presión</p>
+              <h3>Presion Arterial</h3>
+              <p>Monitorea tu presion</p>
               <span class="last-value" *ngIf="ultimaPresion">
-                Última: {{ultimaPresion}} mmHg
+                Ultima: {{ultimaPresion}} mmHg
               </span>
             </ion-card-content>
           </ion-card>
@@ -235,8 +304,8 @@
               <div class="card-icon">
                 <ion-icon name="logo-whatsapp"></ion-icon>
               </div>
-              <h3>WhatsApp Médico</h3>
-              <p>Contacta a tu médico</p>
+              <h3>WhatsApp Medico</h3>
+              <p>Contacta a tu medico</p>
             </ion-card-content>
           </ion-card>
 
@@ -246,14 +315,13 @@
                 <ion-icon name="mail-outline"></ion-icon>
               </div>
               <h3>Mensajes</h3>
-              <p>Envía mensajes directos</p>
+              <p>Envia mensajes directos</p>
               <ion-badge color="primary" *ngIf="mensajesNoLeidos > 0">{{mensajesNoLeidos}}</ion-badge>
             </ion-card-content>
           </ion-card>
 
         </div>
 
-        <!-- 📈 Resumen de salud -->
         <ion-card class="health-summary-card">
           <ion-card-header>
             <ion-card-title>
@@ -288,7 +356,7 @@
                 <ion-icon name="heart-outline" color="danger"></ion-icon>
                 <div class="metric-data">
                   <span class="metric-value">{{ultimaPresion || '--'}} mmHg</span>
-                  <span class="metric-label">Presión</span>
+                  <span class="metric-label">Presion</span>
                 </div>
               </div>
             </div>

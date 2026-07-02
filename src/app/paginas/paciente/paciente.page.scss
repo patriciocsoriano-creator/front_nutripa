@@ -1,39 +1,27 @@
-/* =========================================
-   🎨 VARIABLES
-   ========================================= */
 $primary-color: #0a4d68;
-$secondary-color: #145da0;
+$secondary-color: #086b8f;
 $accent-color: #4fc3f7;
-$bg-color: #f4f7fb;
-$card-bg: #ffffff;
 $text-primary: #1a1f36;
 $text-secondary: #6c7293;
 $text-muted: #9499b7;
 $border-color: #e2e8f0;
-
-$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-sm: 8px;
+$radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 20px;
+$shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
-// 🆕 Variables para alineación del menú
-$menu-icon-size: 1.3rem;
-$menu-icon-width: 28px;  // Ancho fijo para alinear iconos
-$menu-padding-left: 20px;
-$submenu-padding-left: 48px;  // Padding izquierdo del submenú
-
-/* =========================================
-   📦 HEADER
-   ========================================= */
-::ng-deep .main-header {
+.main-header {
   ion-toolbar {
-    --background: #f7fbff !important;
-    border-bottom: 1px solid #dce5f3 !important;
-    padding: 0 20px;
-    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: #f7fbff;
+    border-bottom: 1px solid #dce5f3;
+    padding: 0 20px;
+    height: 60px;
 
     .header-left {
       display: flex;
@@ -49,88 +37,94 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
         font-weight: 600;
         color: $primary-color;
         font-size: 1.2rem;
-        padding: 0 !important;
       }
     }
   }
 }
 
-.cita-alert-btn {
-  position: relative;
-  
-  ion-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 0.65rem;
-    padding: 2px 5px;
-    border-radius: 10px;
+.mobile-menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  color: $primary-color;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
-/* =========================================
-   🧭 DASHBOARD CONTAINER
-   ========================================= */
-::ng-deep .dashboard-container {
+.dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
-  background: $bg-color;
+  background: #f4f7fb;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
-/* =========================================
-   🧭 SIDEBAR - CORREGIDO
-   ========================================= */
-::ng-deep .sidebar {
+.sidebar {
   width: 70px;
-  min-width: 70px;
-  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
   color: white;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
-  align-items: stretch;  // 🆕 Cambiado de center a stretch
+  align-items: center;
   overflow: visible;
   position: relative;
-  z-index: 100;
-  white-space: nowrap;
+  z-index: 999;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 
   &.open {
-    width: 260px !important;
-    min-width: 260px;
-    
-    .user-details { opacity: 1; pointer-events: auto; }
-    ul li span { opacity: 1; }
-    .submenu-arrow { opacity: 1; }
+    width: 260px;
   }
 
-  /* === ICONO MENÚ === */
   .menu-icon {
-    margin: 1rem auto;  // 🆕 Centrado horizontal
+    display: none;
+    margin: 1rem 0;
     font-size: 1.6rem;
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
-    width: fit-content;
-    align-self: center;  // 🆕 Centrado
-    &:hover { background: rgba(255,255,255,0.15); }
+    transition: background 0.2s;
+    align-self: flex-end;
+    margin-right: 1rem;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
   }
 
-  /* === INFO USUARIO === */
   .user-info {
     text-align: center;
     padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
-    
+
     ion-avatar {
       margin: 0 auto 8px;
       width: 56px;
       height: 56px;
-      --background: rgba(255,255,255,0.2);
+      --background: rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
-      
+
       img {
         width: 100%;
         height: 100%;
@@ -138,175 +132,178 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
         border-radius: 50%;
       }
     }
-    
+
     .user-details {
       opacity: 0;
-      transition: opacity 0.2s ease-in-out;
-      pointer-events: none;
-      
+      transition: opacity 0.3s ease;
+
       h4 {
         font-size: 0.95rem;
         margin: 0 0 4px;
         font-weight: 500;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       p {
         font-size: 0.75rem;
         color: #b0c7d9;
         margin: 0;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
     }
   }
 
-  /* === LISTA DE MENÚ - CORREGIDA === */
+  &.open .user-details {
+    opacity: 1;
+  }
+
   ul {
     list-style: none;
     padding: 0.5rem 0;
     width: 100%;
     margin: 0;
-    
-    li {
+
+    > li {
       display: flex;
       align-items: center;
-      padding: 12px $menu-padding-left;  // 🆕 Padding consistente
+      gap: 14px;
+      padding: 12px 20px;
       cursor: pointer;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255, 255, 255, 0.9);
       transition: all 0.2s ease;
       font-size: 0.9rem;
-      position: relative;  // 🆕 Para submenús
-      
-      ion-icon { 
-        font-size: $menu-icon-size;
-        width: $menu-icon-width;  // 🆕 Ancho fijo para alineación
-        min-width: $menu-icon-width;
+
+      > ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
         text-align: center;
-        flex-shrink: 0;
       }
-      
-      span { 
+
+      > span {
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        margin-left: 10px;
-        overflow: hidden;
+        transition: opacity 0.3s ease;
         white-space: nowrap;
       }
-      
-      &:hover { background: rgba(255,255,255,0.15); }
-      
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
       &.active {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
         border-left: 3px solid $accent-color;
       }
     }
   }
 
-  /* === SUBMENÚ - CORREGIDO === */
+  &.open ul > li > span {
+    opacity: 1;
+  }
+
   .menu-item-with-submenu {
-    position: relative;  // 🆕 Importante para posicionar submenú
-    
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+
     .menu-link {
       display: flex;
       align-items: center;
-      width: 100%;
-      padding: 12px $menu-padding-left;  // 🆕 Mismo padding que los li
+      gap: 14px;
+      padding: 12px 20px;
       cursor: pointer;
-      color: rgba(255,255,255,0.9);
-      
-      ion-icon:first-child {
-        width: $menu-icon-width;  // 🆕 Alineación con otros iconos
-        min-width: $menu-icon-width;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+
+      > ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
         text-align: center;
       }
-      
-      span {
+
+      > span {
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        margin-left: 10px;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
         flex: 1;
       }
-      
+
       .submenu-arrow {
         margin-left: auto;
-        padding-right: 12px;  // 🆕 Espacio a la derecha
+        transition: transform 0.3s ease;
+        font-size: 1rem;
         opacity: 0;
-        transition: opacity 0.2s, transform 0.3s ease;
-        
-        &.rotate { transform: rotate(180deg); }
       }
-      
-      &:hover { background: rgba(255,255,255,0.15); }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
     }
-    
-    /* 🆕 SUBMENÚ POSICIONADO CORRECTAMENTE */
+
     .submenu {
-      position: absolute;
-      left: 100%;  // A la derecha del sidebar
-      top: 0;  // Alineado con el item padre
-      background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
-      min-width: 240px;
-      border-radius: 0 12px 12px 0;
-      box-shadow: 4px 0 16px rgba(0,0,0,0.3);
-      z-index: 1000;
-      max-height: 0;
+      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
       overflow: hidden;
+      max-height: 0;
       transition: max-height 0.3s ease;
+      list-style: none;
       padding: 0;
       margin: 0;
-      list-style: none;
-      
-      &.active { 
-        max-height: 400px;
-        box-shadow: 4px 4px 16px rgba(0,0,0,0.3);  // 🆕 Sombra mejorada
-      }
-      
+
       li {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
+        padding: 10px 20px 10px 54px;
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.9);
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         cursor: pointer;
         transition: all 0.2s ease;
-        
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
         ion-icon {
-          width: $menu-icon-width;  // 🆕 Mismo ancho que el menú principal
-          min-width: $menu-icon-width;
-          text-align: center;
           font-size: 1.1rem;
-          margin-right: 10px;
         }
-        
-        span { 
+
+        span {
           opacity: 1;
           white-space: nowrap;
         }
-        
+
         &:hover {
-          background: rgba(255,255,255,0.15);
+          background: rgba(255, 255, 255, 0.15);
           color: white;
         }
       }
     }
+
+    &.open .submenu {
+      max-height: 600px;
+    }
+
+    &.open .menu-link .submenu-arrow {
+      transform: rotate(180deg);
+    }
   }
-  
+
+  &.open .menu-item-with-submenu .menu-link span,
   &.open .menu-item-with-submenu .menu-link .submenu-arrow {
     opacity: 1;
   }
 }
 
-/* =========================================
-   📦 MAIN CONTENT
-   ========================================= */
-::ng-deep .main-content {
+.main-content {
   flex: 1;
-  padding: 24px;
+  padding: 20px 30px;
   overflow-y: auto;
-  background: $bg-color;
+  background: #f4f7fb;
 }
 
 .loading-state {
@@ -316,15 +313,17 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   justify-content: center;
   min-height: 60vh;
   text-align: center;
-  color: $text-secondary;
-  
-  ion-spinner { margin-bottom: 16px; }
-  p { font-size: 1rem; }
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #6c7293;
+    font-size: 1rem;
+  }
 }
 
-/* =========================================
-   🎯 WELCOME CARD
-   ========================================= */
 .welcome-card {
   background: linear-gradient(135deg, $primary-color, $secondary-color);
   color: white;
@@ -335,21 +334,21 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   justify-content: space-between;
   margin-bottom: 24px;
   box-shadow: $shadow-lg;
-  
+
   .welcome-content {
     h1 {
       font-size: 1.8rem;
       font-weight: 700;
       margin: 0 0 8px;
     }
-    
+
     p {
       font-size: 1rem;
       opacity: 0.9;
       margin: 0;
     }
   }
-  
+
   .welcome-icon {
     ion-icon {
       font-size: 4rem;
@@ -358,86 +357,204 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   }
 }
 
-/* =========================================
-   🔔 CITA CARD
-   ========================================= */
-.cita-card {
+.proxima-cita-destacada {
   background: white;
-  padding: 20px 24px;
-  border-radius: $radius-lg;
-  display: flex;
-  align-items: center;
-  gap: 20px;
+  border-radius: $radius-xl;
+  padding: 28px;
   margin-bottom: 24px;
-  box-shadow: $shadow-md;
-  border-left: 4px solid $secondary-color;
-  
-  &.urgente {
-    border-left-color: #ef4444;
-    background: #fef2f2;
-    
-    .cita-icon {
-      background: #ef4444;
-      animation: pulse 1.5s infinite;
-    }
+  box-shadow: $shadow-lg;
+  border: 2px solid $accent-color;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $primary-color, $accent-color);
   }
-  
-  &.pronto {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
-    
-    .cita-icon {
-      background: #f59e0b;
-    }
-  }
-  
-  .cita-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    background: $secondary-color;
+
+  .cita-header-section {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    
-    ion-icon {
-      font-size: 1.8rem;
-      color: white;
-    }
-  }
-  
-  .cita-info {
-    flex: 1;
-    
-    h3 {
-      margin: 0 0 4px;
-      font-size: 1.1rem;
-      color: $text-primary;
-    }
-    
-    .cita-fecha {
-      margin: 0;
-      font-size: 0.95rem;
-      color: $text-primary;
-      font-weight: 500;
-      text-transform: capitalize;
-    }
-    
-    .cita-hora {
-      margin: 2px 0 0;
-      font-size: 0.9rem;
-      color: $text-secondary;
-    }
-    
-    .cita-tiempo {
-      margin: 6px 0 0;
-      font-size: 0.85rem;
-      color: $secondary-color;
-      font-weight: 600;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid $border-color;
+
+    .cita-icono-grande {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
       display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(10, 77, 104, 0.3);
+
+      ion-icon {
+        font-size: 2.2rem;
+        color: white;
+      }
+
+      &.sin-cita {
+        background: linear-gradient(135deg, #94a3b8, #64748b);
+      }
+    }
+
+    .cita-titulo-seccion {
+      flex: 1;
+
+      h2 {
+        margin: 0 0 4px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $text-primary;
+      }
+
+      .cita-subtitulo {
+        margin: 0;
+        font-size: 0.9rem;
+        color: $text-secondary;
+      }
+    }
+
+    .cita-countdown {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border-radius: 16px;
+      min-width: 100px;
+
+      &.urgente {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+
+        .countdown-numero {
+          color: #dc2626;
+          animation: pulse 1.5s infinite;
+        }
+      }
+
+      &.pronto {
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+
+        .countdown-numero {
+          color: #d97706;
+        }
+      }
+
+      .countdown-numero {
+        font-size: 2rem;
+        font-weight: 800;
+        color: $primary-color;
+        line-height: 1;
+      }
+
+      .countdown-texto {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .cita-detalles-completos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .detalle-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+      }
+
+      ion-icon {
+        font-size: 1.5rem;
+        color: $secondary-color;
+        flex-shrink: 0;
+      }
+
+      .detalle-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+
+        .detalle-label {
+          font-size: 0.75rem;
+          color: $text-muted;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 2px;
+        }
+
+        .detalle-valor {
+          font-size: 0.95rem;
+          color: $text-primary;
+          font-weight: 500;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  .cita-acciones-destacadas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    ion-button {
+      flex: 1;
+      min-width: 180px;
+      --border-radius: 12px;
+      font-weight: 600;
+    }
+  }
+
+  .cita-sin-programar {
+    text-align: center;
+    padding: 32px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 24px;
+
+    ion-icon {
+      font-size: 3rem;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: $text-primary;
+
+      &.cita-sugerencia {
+        font-size: 0.9rem;
+        color: $text-secondary;
+        margin-top: 12px;
+      }
     }
   }
 }
@@ -447,9 +564,6 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   50% { transform: scale(1.05); }
 }
 
-/* =========================================
-   📊 QUICK ACCESS GRID
-   ========================================= */
 .quick-access-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -465,17 +579,17 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: $shadow-lg;
   }
-  
+
   ion-card-content {
     padding: 24px;
     text-align: center;
   }
-  
+
   .card-icon {
     width: 64px;
     height: 64px;
@@ -484,38 +598,38 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
     align-items: center;
     justify-content: center;
     margin: 0 auto 16px;
-    
+
     ion-icon {
       font-size: 2rem;
       color: white;
     }
   }
-  
+
   h3 {
     margin: 0 0 8px;
     font-size: 1.1rem;
     font-weight: 600;
     color: $text-primary;
   }
-  
+
   p {
     margin: 0 0 12px;
     font-size: 0.85rem;
     color: $text-secondary;
   }
-  
+
   .last-update, .last-value {
     font-size: 0.75rem;
     color: $text-muted;
     display: block;
   }
-  
+
   ion-badge {
     position: absolute;
     top: 12px;
     right: 12px;
   }
-  
+
   &.plan .card-icon { background: linear-gradient(135deg, #10b981, #059669); }
   &.datos .card-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
   &.glucosa .card-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
@@ -524,17 +638,14 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   &.mensajes .card-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
 }
 
-/* =========================================
-   📈 HEALTH SUMMARY
-   ========================================= */
 .health-summary-card {
   --background: white;
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
-  
+
   ion-card-header {
     padding: 20px 24px 12px;
-    
+
     ion-card-title {
       display: flex;
       align-items: center;
@@ -543,23 +654,23 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
       font-weight: 600;
       color: $text-primary;
       margin: 0;
-      
+
       ion-icon {
         font-size: 1.4rem;
         color: $secondary-color;
       }
     }
   }
-  
+
   ion-card-content {
     padding: 12px 24px 24px;
   }
-  
+
   .health-metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
-    
+
     .metric {
       display: flex;
       align-items: center;
@@ -567,21 +678,21 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
       padding: 16px;
       background: #f8fafc;
       border-radius: 12px;
-      
+
       ion-icon {
         font-size: 2rem;
       }
-      
+
       .metric-data {
         display: flex;
         flex-direction: column;
-        
+
         .metric-value {
           font-size: 1.3rem;
           font-weight: 700;
           color: $text-primary;
         }
-        
+
         .metric-label {
           font-size: 0.8rem;
           color: $text-secondary;
@@ -591,261 +702,834 @@ $submenu-padding-left: 48px;  // Padding izquierdo del submenú
   }
 }
 
-/* =========================================
-   📱 RESPONSIVE - TABLET (768px - 1024px)
-   ========================================= */
-@media (max-width: 1024px) and (min-width: 769px) {
-  ::ng-deep .sidebar {
-    width: 70px !important;
-    min-width: 70px !important;
-    
-    .user-details { opacity: 0 !important; }
-    ul li span { opacity: 0 !important; }
-    .submenu-arrow { opacity: 0 !important; }
-    
-    /* 🆕 Submenú aparece al hacer hover en tablet */
-    .menu-item-with-submenu:hover .submenu {
-      max-height: 400px;
+::ng-deep .alert-cita-recordatorio {
+  --background: white;
+  --border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+
+  .alert-wrapper {
+    max-width: 450px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .alert-head {
+    padding: 24px 24px 16px;
+    background: linear-gradient(135deg, $primary-color, $secondary-color);
+    text-align: center;
+
+    h2 {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+
+  .alert-message {
+    padding: 24px;
+    color: $text-primary;
+    font-size: 0.95rem;
+    line-height: 1.6;
+
+    strong {
+      color: $primary-color;
+      font-weight: 600;
+    }
+  }
+
+  .alert-button-group {
+    padding: 16px 24px 24px;
+    gap: 12px;
+    flex-direction: column;
+
+    button {
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 14px 20px;
+      font-size: 0.95rem;
+
+      &.alert-button-role-cancel {
+        background: #f1f5f9;
+        color: $text-secondary;
+      }
+
+      &:not(.alert-button-role-cancel) {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+      }
     }
   }
 }
 
 /* =========================================
-   📱 RESPONSIVE - MÓVIL (< 768px)
+   DESKTOP / LAPTOP (> 768px)
    ========================================= */
-@media (max-width: 768px) {
-  ::ng-deep .dashboard-container {
-    flex-direction: column;
-  }
+@media (min-width: 769px) {
   
-  /* 🆕 SIDEBAR COMO DRAWER EN MÓVIL */
-  ::ng-deep .sidebar {
-    position: fixed;
-    left: -280px;  // 🆕 Oculto por defecto
-    top: 60px;
-    width: 280px !important;
-    min-width: 280px !important;
-    height: calc(100vh - 60px);
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+
+  .sidebar .menu-icon {
+    display: none !important;
+  }
+
+  .sidebar:not(.open) {
     
-    &.open {
-      left: 0;  // 🆕 Se desliza desde la izquierda
-      width: 280px !important;
-      min-width: 280px !important;
+    ul > li > span {
+      opacity: 0;
     }
-    
-    .menu-icon {
-      display: block;  // 🆕 Visible en móvil
-      margin: 1rem auto;
-    }
-    
-    .user-info {
-      display: block;  // 🆕 Visible en móvil
+
+    .menu-item-with-submenu:hover {
       
-      .user-details {
-        opacity: 1 !important;
-        pointer-events: auto !important;
+      .menu-link > span {
+        opacity: 1;
       }
-    }
-    
-    ul {
-      li {
-        span {
-          opacity: 1 !important;  // 🆕 Siempre visible en móvil
-        }
+
+      .menu-link .submenu-arrow {
+        opacity: 1;
       }
-    }
-    
-    /* 🆕 Submenú como acordeón en móvil */
-    .menu-item-with-submenu {
-      .menu-link {
-        .submenu-arrow {
-          opacity: 1 !important;
-          padding-right: 20px;
-        }
-      }
-      
+
       .submenu {
-        position: static !important;  // 🆕 No absoluto en móvil
-        left: auto !important;
-        top: auto !important;
-        min-width: 100% !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        background: rgba(0,0,0,0.2) !important;
-        max-height: 0;
-        
-        &.active {
-          max-height: 400px;
-        }
-        
+        position: absolute;
+        left: 100%;
+        top: 0;
+        min-width: 260px;
+        max-height: 600px;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+        z-index: 1000;
+        padding: 8px 0;
+
         li {
-          padding-left: 48px !important;
-          
-          ion-icon {
-            font-size: 1rem;
+          padding: 12px 20px;
+          font-size: 0.9rem;
+
+          span {
+            opacity: 1;
           }
         }
       }
     }
   }
-  
-  /* 🆕 OVERLAY CUANDO EL MENÚ ESTÁ ABIERTO */
-  ::ng-deep .sidebar.open::before {
-    content: '';
-    position: fixed;
-    top: 60px;
-    left: 280px;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: -1;
+
+  .sidebar.open {
+    
+    .menu-item-with-submenu .submenu {
+      position: static;
+      left: auto;
+      top: auto;
+      min-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      background: rgba(0, 0, 0, 0.15);
+    }
   }
+}
+
+/* =========================================
+   MOVIL (<= 768px) - DISENO REDISENADO
+   ========================================= */
+@media (max-width: 768px) {
   
-  /* 🆕 BOTÓN HAMBURGUESA EN HEADER MÓVIL */
-  ::ng-deep .main-header {
-    .header-left {
-      &::before {
-        content: '☰';
-        font-size: 1.5rem;
-        margin-right: 12px;
-        cursor: pointer;
-        color: $primary-color;
+  /* HEADER MOVIL */
+  .main-header {
+    ion-toolbar {
+      padding: 0 12px;
+      height: 56px;
+
+      .header-left {
+        gap: 8px;
+
+        .logo-icon {
+          font-size: 1.5rem;
+        }
+
+        ion-title {
+          font-size: 1rem;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+        }
       }
     }
   }
-  
+
+  /* BOTON HAMBURGUESA */
+  .mobile-menu-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.6rem !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px !important;
+    background: rgba(10, 77, 104, 0.08);
+    transition: all 0.2s ease;
+
+    &:active {
+      background: rgba(10, 77, 104, 0.2) !important;
+      transform: scale(0.92);
+    }
+  }
+
+  /* CONTENEDOR */
+  .dashboard-container {
+    display: block !important;
+    height: auto !important;
+    min-height: calc(100vh - 56px);
+    background: #f0f4f8;
+  }
+
+  /* SIDEBAR MOVIL */
+  .sidebar {
+    position: fixed !important;
+    left: -300px !important;
+    top: 56px !important;
+    width: 300px !important;
+    min-width: 300px !important;
+    height: calc(100vh - 56px) !important;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: linear-gradient(180deg, #0a4d68 0%, #063a4d 60%, #042a38 100%) !important;
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25) !important;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    &.open {
+      left: 0 !important;
+    }
+
+    /* Boton cerrar */
+    .menu-icon {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 16px 16px 8px auto !important;
+      padding: 0 !important;
+      transition: all 0.2s ease;
+
+      &:active {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(0.9);
+      }
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Info usuario */
+    .user-info {
+      padding: 8px 20px 20px !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      text-align: left !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+
+      ion-avatar {
+        margin: 0 !important;
+        width: 52px !important;
+        height: 52px !important;
+        border: 2px solid rgba(79, 195, 247, 0.5);
+        flex-shrink: 0;
+      }
+
+      .user-details {
+        opacity: 1 !important;
+        text-align: left !important;
+
+        h4 {
+          font-size: 1rem !important;
+          font-weight: 600 !important;
+          color: white !important;
+          margin: 0 0 2px !important;
+        }
+
+        p {
+          font-size: 0.8rem !important;
+          color: rgba(255, 255, 255, 0.5) !important;
+        }
+      }
+    }
+
+    /* Menu principal */
+    ul {
+      padding: 12px 0 !important;
+
+      > li {
+        padding: 0 !important;
+        margin: 2px 10px !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        transition: all 0.2s ease;
+
+        > ion-icon {
+          margin-left: 14px;
+        }
+
+        > span {
+          opacity: 1 !important;
+          font-weight: 500;
+        }
+
+        &:hover, &:active {
+          background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        &.active {
+          background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(79, 195, 247, 0.08)) !important;
+          border-left: none !important;
+          border: 1px solid rgba(79, 195, 247, 0.3) !important;
+
+          ion-icon {
+            color: $accent-color;
+          }
+
+          span {
+            color: white;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
+    /* Items con submenu */
+    .menu-item-with-submenu {
+      margin: 2px 10px !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+
+      .menu-link {
+        padding: 14px !important;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+
+        > span {
+          opacity: 1 !important;
+          font-weight: 500;
+        }
+
+        .submenu-arrow {
+          opacity: 0.5 !important;
+          font-size: 0.9rem !important;
+          transition: all 0.3s ease;
+        }
+
+        &:hover, &:active {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+
+      /* Submenu expandible */
+      .submenu {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        min-width: 100% !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: rgba(0, 0, 0, 0.15) !important;
+        margin: 0 !important;
+
+        li {
+          padding: 12px 16px 12px 48px !important;
+          margin: 0 !important;
+          border-radius: 0 !important;
+          font-size: 0.88rem !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+          position: relative;
+          transition: all 0.2s ease;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(79, 195, 247, 0.4);
+          }
+
+          ion-icon {
+            font-size: 1rem !important;
+            color: rgba(255, 255, 255, 0.6);
+            min-width: 18px;
+          }
+
+          span {
+            color: rgba(255, 255, 255, 0.85);
+          }
+
+          &:hover, &:active {
+            background: rgba(255, 255, 255, 0.08) !important;
+
+            ion-icon {
+              color: $accent-color;
+            }
+
+            span {
+              color: white;
+            }
+
+            &::before {
+              background: $accent-color;
+            }
+          }
+
+          &:last-child {
+            border-bottom: none !important;
+          }
+        }
+      }
+
+      /* Cuando el submenu esta abierto */
+      &.open {
+        background: rgba(255, 255, 255, 0.05);
+
+        .menu-link {
+          background: rgba(79, 195, 247, 0.1);
+          
+          .submenu-arrow {
+            opacity: 1 !important;
+            color: $accent-color;
+          }
+
+          > ion-icon:first-child {
+            color: $accent-color;
+          }
+        }
+      }
+    }
+  }
+
+  /* OVERLAY */
+  .sidebar-overlay {
+    top: 56px !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* CONTENIDO PRINCIPAL MOVIL */
+  .main-content {
+    padding: 16px 14px !important;
+    width: 100%;
+  }
+
+  /* WELCOME CARD MOVIL */
   .welcome-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 20px;
-    
+    flex-direction: column !important;
+    text-align: left !important;
+    padding: 22px 20px !important;
+    border-radius: 18px !important;
+    margin-bottom: 16px !important;
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
     .welcome-content {
+      position: relative;
+      z-index: 1;
+
       h1 {
-        font-size: 1.4rem;
+        font-size: 1.4rem !important;
+        margin: 0 0 4px !important;
+        letter-spacing: -0.3px;
+      }
+
+      p {
+        font-size: 0.88rem !important;
+        opacity: 0.8 !important;
       }
     }
-    
+
     .welcome-icon {
-      display: none;
+      display: none !important;
     }
   }
-  
-  .cita-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 16px;
-    
-    .cita-actions {
-      width: 100%;
-      
+
+  /* PROXIMA CITA MOVIL */
+  .proxima-cita-destacada {
+    padding: 0 !important;
+    border-radius: 18px !important;
+    border: none !important;
+    margin-bottom: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+
+    &::before {
+      height: 3px !important;
+    }
+
+    .cita-header-section {
+      flex-direction: column !important;
+      text-align: center !important;
+      gap: 12px !important;
+      margin-bottom: 0 !important;
+      padding: 20px 18px 16px !important;
+      border-bottom: none !important;
+
+      .cita-icono-grande {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 16px !important;
+
+        ion-icon {
+          font-size: 1.6rem !important;
+        }
+      }
+
+      .cita-titulo-seccion {
+        h2 {
+          font-size: 1.2rem !important;
+        }
+
+        .cita-subtitulo {
+          font-size: 0.82rem !important;
+        }
+      }
+
+      .cita-countdown {
+        width: 100% !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        padding: 10px 16px !important;
+        border-radius: 12px !important;
+
+        .countdown-numero {
+          font-size: 1.5rem !important;
+        }
+
+        .countdown-texto {
+          font-size: 0.8rem !important;
+          margin-top: 0 !important;
+        }
+      }
+    }
+
+    .cita-detalles-completos {
+      grid-template-columns: 1fr !important;
+      gap: 0 !important;
+      margin-bottom: 0 !important;
+      padding: 0 14px 14px !important;
+
+      .detalle-item {
+        padding: 12px 14px !important;
+        border-radius: 10px !important;
+        margin-bottom: 6px !important;
+        background: #f8fafc !important;
+
+        &:hover {
+          transform: none !important;
+        }
+
+        ion-icon {
+          font-size: 1.2rem !important;
+        }
+
+        .detalle-info {
+          .detalle-label {
+            font-size: 0.7rem !important;
+          }
+
+          .detalle-valor {
+            font-size: 0.88rem !important;
+          }
+        }
+      }
+    }
+
+    .cita-acciones-destacadas {
+      flex-direction: column !important;
+      padding: 0 14px 16px !important;
+      gap: 8px !important;
+
       ion-button {
-        width: 100%;
+        width: 100% !important;
+        min-width: auto !important;
+        --border-radius: 12px;
+        height: 44px;
+        font-size: 0.9rem;
+      }
+    }
+
+    .cita-sin-programar {
+      padding: 24px 18px !important;
+      margin-bottom: 0 !important;
+      border-radius: 0 !important;
+
+      ion-icon {
+        font-size: 2.5rem !important;
+        margin-bottom: 12px !important;
+      }
+
+      p {
+        font-size: 0.9rem !important;
       }
     }
   }
-  
+
+  /* TARJETAS DE ACCESO RAPIDO MOVIL */
   .quick-access-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
   }
+
+  .access-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    &:active {
+      transform: scale(0.97) !important;
+    }
+
+    ion-card-content {
+      padding: 16px 10px !important;
+      text-align: center;
+    }
+
+    .card-icon {
+      width: 48px !important;
+      height: 48px !important;
+      border-radius: 14px !important;
+      margin: 0 auto 10px !important;
+
+      ion-icon {
+        font-size: 1.5rem !important;
+      }
+    }
+
+    h3 {
+      margin: 0 0 4px !important;
+      font-size: 0.85rem !important;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0 0 6px !important;
+      font-size: 0.72rem !important;
+      line-height: 1.3;
+    }
+
+    .last-update, .last-value {
+      font-size: 0.68rem !important;
+    }
+
+    ion-badge {
+      top: 8px !important;
+      right: 8px !important;
+      font-size: 0.65rem;
+    }
+  }
+
+  /* RESUMEN DE SALUD MOVIL */
+  .health-summary-card {
+    border-radius: 18px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    margin-bottom: 20px;
+
+    ion-card-header {
+      padding: 18px 18px 8px !important;
+
+      ion-card-title {
+        font-size: 1.05rem !important;
+        gap: 8px !important;
+
+        ion-icon {
+          font-size: 1.2rem !important;
+        }
+      }
+    }
+
+    ion-card-content {
+      padding: 8px 14px 18px !important;
+    }
+
+    .health-metrics {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+
+      .metric {
+        padding: 14px 12px !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 8px !important;
+
+        ion-icon {
+          font-size: 1.6rem !important;
+        }
+
+        .metric-data {
+          align-items: center;
+
+          .metric-value {
+            font-size: 1.1rem !important;
+          }
+
+          .metric-label {
+            font-size: 0.72rem !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* ALERTA MOVIL */
+  ::ng-deep .alert-cita-recordatorio {
+    .alert-wrapper {
+      max-width: 92% !important;
+      margin: 20px auto !important;
+      border-radius: 20px !important;
+    }
+
+    .alert-head {
+      padding: 20px 16px 14px !important;
+      border-radius: 20px 20px 0 0;
+
+      h2 {
+        font-size: 1.1rem !important;
+      }
+    }
+
+    .alert-message {
+      padding: 16px !important;
+      font-size: 0.88rem !important;
+    }
+
+    .alert-button-group {
+      padding: 10px 16px 18px !important;
+
+      button {
+        border-radius: 12px !important;
+        height: 44px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+/* =========================================
+   MOVIL PEQUENO (<= 400px)
+   ========================================= */
+@media (max-width: 400px) {
   
+  .sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+  }
+
+  .main-header ion-toolbar {
+    padding: 0 10px !important;
+
+    .header-left ion-title {
+      font-size: 0.92rem !important;
+    }
+  }
+
+  .welcome-card {
+    padding: 18px 16px !important;
+
+    .welcome-content h1 {
+      font-size: 1.25rem !important;
+    }
+  }
+
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
   .access-card {
     ion-card-content {
-      padding: 16px;
+      padding: 14px 8px !important;
     }
-    
-    .card-icon {
-      width: 56px;
-      height: 56px;
-    }
-  }
-  
-  .health-metrics {
-    grid-template-columns: 1fr !important;
-    gap: 12px;
-  }
-  
-  ::ng-deep .main-content {
-    padding: 16px;
-  }
-}
 
-/* =========================================
-   📱 MÓVIL PEQUEÑO (< 480px)
-   ========================================= */
-@media (max-width: 480px) {
-  ::ng-deep .sidebar {
-    width: 260px !important;
-    min-width: 260px !important;
-    
-    &.open {
-      width: 260px !important;
-      min-width: 260px !important;
-    }
-  }
-  
-  .welcome-card {
-    .welcome-content h1 {
-      font-size: 1.2rem;
-    }
-  }
-  
-  .cita-card {
-    .cita-icon {
-      width: 48px;
-      height: 48px;
-      
+    .card-icon {
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 12px !important;
+
       ion-icon {
-        font-size: 1.5rem;
+        font-size: 1.3rem !important;
+      }
+    }
+
+    h3 {
+      font-size: 0.8rem !important;
+    }
+
+    p {
+      font-size: 0.68rem !important;
+    }
+  }
+
+  .health-metrics {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+
+    .metric {
+      padding: 12px 8px !important;
+
+      .metric-data .metric-value {
+        font-size: 1rem !important;
       }
     }
   }
-}
 
-/* =========================================
-   🖥️ DESKTOP (> 1024px)
-   ========================================= */
-@media (min-width: 1025px) {
-  ::ng-deep .sidebar {
-    /* 🆕 Submenú aparece al hacer hover */
-    .menu-item-with-submenu:hover .submenu {
-      max-height: 400px;
+  .proxima-cita-destacada {
+    .cita-header-section {
+      padding: 16px 14px 12px !important;
     }
-  }
-}
 
-/* =========================================
-   📱 BOTÓN HAMBURGUESA MÓVIL
-   ========================================= */
-.mobile-menu-toggle {
-  display: none;  // 🆕 Oculto en desktop
-  font-size: 1.5rem;
-  color: $primary-color;
-  cursor: pointer;
-  margin-right: 8px;
-  
-  @media (max-width: 768px) {
-    display: block;  // 🆕 Visible en móvil
-  }
-}
+    .cita-detalles-completos {
+      padding: 0 10px 10px !important;
+    }
 
-/* 🆕 OVERLAY PARA MÓVIL */
-.sidebar-overlay {
-  display: none;
-  
-  @media (max-width: 768px) {
-    &.active {
-      display: block;
-      position: fixed;
-      top: 60px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
+    .cita-acciones-destacadas {
+      padding: 0 10px 14px !important;
     }
   }
 }

@@ -1,0 +1,422 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Detalle del Registro Clínico</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="volver()" title="Volver">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreDoctor.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando detalle del registro...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!cargando && errorCarga" class="error-state">
+        <ion-card class="error-card">
+          <ion-card-content>
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            <p>{{ errorCarga }}</p>
+            <ion-button fill="outline" (click)="cargarDetalleRegistro()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Reintentar
+            </ion-button>
+            <ion-button fill="clear" (click)="volver()">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Volver
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Datos cargados -->
+      <div *ngIf="!cargando && !errorCarga && registro" class="registro-container">
+        
+        <!-- Header del registro -->
+        <div class="registro-header">
+          <div class="registro-info">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <div>
+              <h2>Registro Clínico</h2>
+              <p class="registro-meta">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <strong>Fecha:</strong> {{ registro.fecha_finalizacion | date:'medium' }}
+                <span class="separator">•</span>
+                <ion-icon name="person-outline"></ion-icon>
+                <strong>Registrado por:</strong> {{ registro.registrado_por_nombre }} {{ registro.registrado_por_apellido }}
+              </p>
+            </div>
+          </div>
+          <div class="registro-actions">
+            <ion-button fill="outline" color="light" (click)="volver()">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Volver al Paciente
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Info del paciente -->
+        <!-- Info del paciente -->
+<ion-card class="paciente-card" *ngIf="paciente">
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="person-outline" color="primary"></ion-icon>
+      Información del Paciente
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Nombre completo</label>
+            <span>{{ paciente.nombres }} {{ paciente.apellidos }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Cédula</label>
+            <span>{{ paciente.cedula || paciente.numero_identificacion || '---' }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Edad</label>
+            <span>{{ paciente.edad || '---' }} años</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Sexo</label>
+            <span>{{ getSexoLabel(paciente.sexo) }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Teléfono</label>
+            <span>{{ paciente.telefono || '---' }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Ocupación</label>
+            <span>{{ paciente.ocupacion || '---' }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Actividad física</label>
+            <span>{{ getActividadFisicaLabel(paciente.actividad_fisica) }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <div class="info-item">
+            <label>Fecha de nacimiento</label>
+            <span>{{ paciente.fecha_nacimiento | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12">
+          <div class="info-item">
+            <label>Dirección</label>
+            <span>{{ paciente.direccion || '---' }}</span>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+        <!-- Datos Personales -->
+<ion-card class="data-card" *ngIf="registro.datos_personales">
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="person-outline" color="primary"></ion-icon>
+      Datos Personales
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.ocupacion">
+          <div class="info-item">
+            <label>Ocupación</label>
+            <span>{{ registro.datos_personales.ocupacion }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.actividad_fisica">
+          <div class="info-item">
+            <label>Actividad Física</label>
+            <span>{{ registro.datos_personales.actividad_fisica }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.frecuencia_comidas">
+          <div class="info-item">
+            <label>Frecuencia de Comidas</label>
+            <span>{{ registro.datos_personales.frecuencia_comidas }} veces al día</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.alergias_alimentarias">
+          <div class="info-item">
+            <label>Alergias Alimentarias</label>
+            <span>{{ registro.datos_personales.alergias_alimentarias }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.consumo_alcohol">
+          <div class="info-item">
+            <label>Consumo de Alcohol</label>
+            <span>{{ registro.datos_personales.consumo_alcohol }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="6" *ngIf="registro.datos_personales.fuma">
+          <div class="info-item">
+            <label>Fuma</label>
+            <span>{{ registro.datos_personales.fuma }}</span>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+        <!-- Datos Antropométricos -->
+        <ion-card class="data-card" *ngIf="registro.datos_antropometricos">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="body-outline" color="primary"></ion-icon>
+              Datos Antropométricos
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="scale-outline" color="primary"></ion-icon>
+                    <h4>Peso</h4>
+                    <p>{{ registro.datos_antropometricos.peso || '---' }} kg</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="resize-outline" color="primary"></ion-icon>
+                    <h4>Talla</h4>
+                    <p>{{ registro.datos_antropometricos.talla || '---' }} m</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="analytics-outline" color="secondary"></ion-icon>
+                    <h4>IMC</h4>
+                    <p>{{ registro.datos_antropometricos.imc || '---' }}</p>
+                    <small>{{ getIMCLabel(registro.datos_antropometricos.imc) }}</small>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="radio-button-off-outline" color="warning"></ion-icon>
+                    <h4>Cintura</h4>
+                    <p>{{ registro.datos_antropometricos.circunferenciaCintura || '---' }} cm</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Signos Vitales -->
+        <ion-card class="data-card" *ngIf="registro.signos_vitales">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="heart-outline" color="danger"></ion-icon>
+              Signos Vitales
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="heart-outline" color="danger"></ion-icon>
+                    <h4>Presión</h4>
+                    <p>{{ registro.signos_vitales.presionArterial || '---' }}</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="pulse-outline" color="primary"></ion-icon>
+                    <h4>Frec. Cardíaca</h4>
+                    <p>{{ registro.signos_vitales.frecuenciaCardiaca || '---' }} lpm</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="thermometer-outline" color="warning"></ion-icon>
+                    <h4>Temperatura</h4>
+                    <p>{{ registro.signos_vitales.temperatura || '---' }}°C</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="water-outline" color="success"></ion-icon>
+                    <h4>SpO2</h4>
+                    <p>{{ registro.signos_vitales.spo2 || '---' }}%</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="flask-outline" color="tertiary"></ion-icon>
+                    <h4>Glucosa</h4>
+                    <p>{{ registro.signos_vitales.glucosaAyunas || '---' }} mg/dL</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <div class="metric-card">
+                    <ion-icon name="air-outline" color="medium"></ion-icon>
+                    <h4>Frec. Respiratoria</h4>
+                    <p>{{ registro.signos_vitales.frecuenciaRespiratoria || '---' }} rpm</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Condiciones Metabólicas -->
+        <ion-card class="data-card" *ngIf="registro.condiciones_metabolicas">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="medkit-outline" color="primary"></ion-icon>
+              Condiciones Metabólicas
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="4">
+                  <ion-item lines="none">
+                    <ion-icon name="heart-outline" slot="start" color="danger"></ion-icon>
+                    <ion-label>Hipertensión</ion-label>
+                    <ion-badge slot="end" [color]="registro.condiciones_metabolicas.hipertension ? 'danger' : 'success'">
+                      {{ registro.condiciones_metabolicas.hipertension ? 'Sí' : 'No' }}
+                    </ion-badge>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <ion-item lines="none">
+                    <ion-icon name="body-outline" slot="start" color="warning"></ion-icon>
+                    <ion-label>Obesidad</ion-label>
+                    <ion-badge slot="end" [color]="registro.condiciones_metabolicas.obesidad ? 'danger' : 'success'">
+                      {{ registro.condiciones_metabolicas.obesidad ? 'Sí' : 'No' }}
+                    </ion-badge>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <ion-item lines="none">
+                    <ion-icon name="water-outline" slot="start" color="tertiary"></ion-icon>
+                    <ion-label>Dislipidemia</ion-label>
+                    <ion-badge slot="end" [color]="registro.condiciones_metabolicas.dislipidemia ? 'danger' : 'success'">
+                      {{ registro.condiciones_metabolicas.dislipidemia ? 'Sí' : 'No' }}
+                    </ion-badge>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <ion-item lines="none">
+                    <ion-icon name="leaf-outline" slot="start" color="medium"></ion-icon>
+                    <ion-label>Hígado graso</ion-label>
+                    <ion-badge slot="end" [color]="registro.condiciones_metabolicas.higadoGraso ? 'danger' : 'success'">
+                      {{ registro.condiciones_metabolicas.higadoGraso ? 'Sí' : 'No' }}
+                    </ion-badge>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="4">
+                  <ion-item lines="none">
+                    <ion-icon name="flask-outline" slot="start" color="primary"></ion-icon>
+                    <ion-label>Resistencia insulina</ion-label>
+                    <ion-badge slot="end" [color]="registro.condiciones_metabolicas.resistenciaInsulina ? 'danger' : 'success'">
+                      {{ registro.condiciones_metabolicas.resistenciaInsulina ? 'Sí' : 'No' }}
+                    </ion-badge>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Observaciones -->
+        <ion-card class="data-card" *ngIf="registro.observaciones">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="chatbubbles-outline" color="primary"></ion-icon>
+              Observaciones
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="observaciones-texto">{{ registro.observaciones }}</p>
+          </ion-card-content>
+        </ion-card>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

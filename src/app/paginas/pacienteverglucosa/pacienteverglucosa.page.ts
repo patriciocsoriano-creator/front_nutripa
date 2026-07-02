@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -12,24 +12,20 @@ import { environment } from 'src/environments/environment';
 })
 export class PacienteverglucosaPage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   cedulaPaciente: string = '';
+  isMobile = false;
 
-  // 📊 Mediciones
   mediciones: any[] = [];
   medicionesFiltradas: any[] = [];
   cargando = true;
 
-  // 🎛️ Filtros
   filtroPeriodo: string = 'todos';
 
-  // 🔄 Control de expansión
   medicionExpandida: string | null = null;
 
-  // 📊 Estadísticas
   ultimaMedicion: any = null;
   promedioGlucosa: number = 0;
   minGlucosa: number = 0;
@@ -43,8 +39,23 @@ export class PacienteverglucosaPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.detectMobile();
     this.cargarDatosUsuario();
     await this.cargarMediciones();
+  }
+
+  private detectMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const wasMobile = this.isMobile;
+    this.detectMobile();
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.submenuAbierto = null;
+    }
   }
 
   private cargarDatosUsuario(): void {
@@ -53,9 +64,9 @@ export class PacienteverglucosaPage implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
@@ -64,7 +75,7 @@ export class PacienteverglucosaPage implements OnInit {
     this.cargando = true;
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticación');
+      if (!token) throw new Error('Sin autenticacion');
 
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
@@ -82,7 +93,7 @@ export class PacienteverglucosaPage implements OnInit {
       this.calcularEstadisticas();
 
     } catch (error: any) {
-      console.error('❌ Error cargando mediciones:', error);
+      console.error('Error cargando mediciones:', error);
       await this.showToast('Error al cargar el historial', 'danger');
     } finally {
       this.cargando = false;
@@ -106,10 +117,8 @@ export class PacienteverglucosaPage implements OnInit {
   calcularEstadisticas(): void {
     if (this.mediciones.length === 0) return;
 
-    // Última medición
     this.ultimaMedicion = this.mediciones[0];
 
-    // Promedio, min, max
     const valores = this.mediciones.map(m => m.valor_glucosa);
     this.promedioGlucosa = valores.reduce((a, b) => a + b, 0) / valores.length;
     this.minGlucosa = Math.min(...valores);
@@ -159,7 +168,7 @@ export class PacienteverglucosaPage implements OnInit {
     const labels: Record<string, string> = {
       'ayunas': 'En ayunas',
       'antes_comida': 'Antes de comer',
-      'despues_comida': 'Después de comer',
+      'despues_comida': 'Despues de comer',
       'postprandial': 'Postprandial',
       'antes_dormir': 'Antes de dormir',
       'otro': 'Otro momento'
@@ -169,21 +178,21 @@ export class PacienteverglucosaPage implements OnInit {
 
   getRecomendacion(valor: number, tipoMomento: string): string {
     if (valor >= 126 || (tipoMomento !== 'ayunas' && valor >= 200)) {
-      return 'Tu nivel de glucosa está elevado. Consulta con tu médico y revisa tu alimentación. Mantén un registro detallado de tus comidas.';
+      return 'Tu nivel de glucosa esta elevado. Consulta con tu medico y revisa tu alimentacion. Manten un registro detallado de tus comidas.';
     }
     if (valor >= 100) {
-      return 'Tu nivel está en el rango de pre-diabetes. Mantén una dieta balanceada, haz ejercicio regularmente y monitorea tu glucosa frecuentemente.';
+      return 'Tu nivel esta en el rango de pre-diabetes. Manten una dieta balanceada, haz ejercicio regularmente y monitorea tu glucosa frecuentemente.';
     }
     if (valor >= 70) {
-      return '¡Excelente! Tu nivel de glucosa está en rango normal. Continúa con tus hábitos saludables.';
+      return 'Excelente! Tu nivel de glucosa esta en rango normal. Continua con tus habitos saludables.';
     }
-    return 'Tu nivel de glucosa está bajo. Consume algo con carbohidratos de absorción rápida (jugo, fruta) y consulta con tu médico si persiste.';
+    return 'Tu nivel de glucosa esta bajo. Consume algo con carbohidratos de absorcion rapida (jugo, fruta) y consulta con tu medico si persiste.';
   }
 
   async eliminarMedicion(medicion: any): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Eliminar Medición',
-      message: `¿Estás seguro de eliminar la medición de <strong>${medicion.valor_glucosa} mg/dL</strong> del ${new Date(medicion.fecha_hora).toLocaleDateString()}?`,
+      header: 'Eliminar Medicion',
+      message: `Estas seguro de eliminar la medicion de <strong>${medicion.valor_glucosa} mg/dL</strong> del ${new Date(medicion.fecha_hora).toLocaleDateString()}?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -198,7 +207,7 @@ export class PacienteverglucosaPage implements OnInit {
                 { headers }
               ).toPromise();
 
-              await this.showToast('Medición eliminada', 'success');
+              await this.showToast('Medicion eliminada', 'success');
               this.medicionExpandida = null;
               await this.cargarMediciones();
             } catch (error) {
@@ -211,10 +220,11 @@ export class PacienteverglucosaPage implements OnInit {
     await alert.present();
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
+    this.submenuAbierto = null;
     const rutas: Record<string, string> = {
+      'paciente': '/paciente',
       'pacienteprincipal': '/pacienteprincipal',
       'pacienteverplan': '/pacienteverplan',
       'pacienteplanhistorial': '/pacienteplanhistorial',
@@ -233,10 +243,17 @@ export class PacienteverglucosaPage implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
+    }
   }
 
   toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
   }
 
   async contactarWhatsApp(): Promise<void> {
@@ -247,8 +264,8 @@ export class PacienteverglucosaPage implements OnInit {
 
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {

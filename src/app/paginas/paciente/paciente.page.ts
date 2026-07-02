@@ -12,7 +12,6 @@ import { environment } from 'src/environments/environment';
 })
 export class PacientePage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
@@ -21,9 +20,8 @@ export class PacientePage implements OnInit {
   medicoId: string = '';
   medicoTelefono: string = '';
   medicoNombre: string = '';
-  isMobile = false;  // 🆕 Detectar móvil
+  isMobile = false;
 
-  // 📊 Datos de salud
   cargando = true;
   planActivo: boolean = false;
   pesoActual: number | null = null;
@@ -32,11 +30,9 @@ export class PacientePage implements OnInit {
   ultimaPresion: string | null = null;
   ultimoRegistro: any = null;
 
-  // 📅 Próxima cita
   proximaCita: any = null;
   diasParaCita: number = 0;
 
-  // 💬 Mensajes
   mensajesNoLeidos: number = 0;
 
   constructor(
@@ -53,71 +49,64 @@ export class PacientePage implements OnInit {
     await this.cargarProximaCita();
   }
 
-  // 🆕 Detectar si es móvil
   private detectMobile(): void {
     this.isMobile = window.innerWidth <= 768;
   }
 
-  // 🆕 Listener para detectar cambios de tamaño
   @HostListener('window:resize', ['$event'])
   onResize(): void {
+    const wasMobile = this.isMobile;
     this.detectMobile();
-    // Cerrar sidebar si cambia a desktop
-    if (!this.isMobile && this.sidebarOpen) {
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
       this.sidebarOpen = false;
+      this.submenuAbierto = null;
     }
   }
 
-  // 🆕 Toggle sidebar (funciona en móvil y desktop)
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
-  }
-
-  // 🆕 Cerrar sidebar al hacer clic fuera (solo móvil)
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: Event): void {
-    if (this.isMobile && this.sidebarOpen) {
-      const target = event.target as HTMLElement;
-      const sidebar = document.querySelector('.sidebar');
-      const menuIcon = document.querySelector('.menu-icon');
-      
-      if (sidebar && !sidebar.contains(target) && !menuIcon?.contains(target)) {
-        this.sidebarOpen = false;
-      }
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
     }
   }
 
-  // 👤 Cargar datos del paciente
+  toggleSubmenu(item: string): void {
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
+  }
+
   private async cargarDatosPaciente(): Promise<void> {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
         this.pacienteId = user.id || '';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
 
-  // 📊 Cargar datos de salud
   private async cargarDatosSalud(): Promise<void> {
     this.cargando = true;
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticación');
+      if (!token) throw new Error('Sin autenticacion');
 
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
       const [planResp, registroResp] = await Promise.all([
         this.http.get<any>(
-          `${environment.apiUrl}/nutricionapp-api/paciente/plan-activo`,
+          `${environment.apiUrl}/nutricionapp-api/paciente/plan/plan-activo`,
           { headers }
         ).toPromise().catch(() => null),
         this.http.get<any>(
-          `${environment.apiUrl}/nutricionapp-api/paciente/ultimo-registro`,
+          `${environment.apiUrl}/nutricionapp-api/paciente/plan/ultimo-registro`,
           { headers }
         ).toPromise().catch(() => null)
       ]);
@@ -143,13 +132,12 @@ export class PacientePage implements OnInit {
       }
 
     } catch (error: any) {
-      console.error('❌ Error cargando datos de salud:', error);
+      console.error('Error cargando datos de salud:', error);
     } finally {
       this.cargando = false;
     }
   }
 
-  // 📅 Cargar próxima cita
   private async cargarProximaCita(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -158,13 +146,13 @@ export class PacientePage implements OnInit {
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
       const resp: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/proxima-cita`,
+        `${environment.apiUrl}/nutricionapp-api/paciente/plan/proxima-cita`,
         { headers }
       ).toPromise();
 
       if (resp?.cita) {
         this.proximaCita = resp.cita;
-        this.medicoNombre = resp.cita.medico_nombre || 'Tu médico';
+        this.medicoNombre = resp.cita.medico_nombre || 'Tu medico';
         this.medicoTelefono = resp.cita.medico_telefono || '';
         
         const fechaCita = new Date(this.proximaCita.fecha_hora);
@@ -177,29 +165,91 @@ export class PacientePage implements OnInit {
         }
       }
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar próxima cita');
+      console.warn('No se pudo cargar proxima cita');
     }
   }
 
-  // 🔔 Mostrar alerta de cita próxima
   private async mostrarAlertaCita(): Promise<void> {
     const mensaje = this.diasParaCita === 0 
-      ? '¡Tienes una cita HOY!'
+      ? 'Tienes una cita HOY!'
       : this.diasParaCita === 1
-        ? '¡Tienes una cita MAÑANA!'
-        : `Tienes una cita en ${this.diasParaCita} días`;
+        ? 'Tienes una cita MANANA!'
+        : `Tienes una cita en ${this.diasParaCita} dias`;
 
     const alert = await this.alertCtrl.create({
-      header: '📅 Recordatorio de Cita',
+      header: 'Recordatorio de Cita',
       message: `${mensaje}<br><br>
         <strong>Fecha:</strong> ${new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long' })}<br>
         <strong>Hora:</strong> ${new Date(this.proximaCita.fecha_hora).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}<br><br>
-        ¿Deseas confirmar tu asistencia?`,
+        Deseas confirmar tu asistencia?`,
+      cssClass: 'alert-cita-recordatorio',
       buttons: [
-        { text: 'Recordar después', role: 'cancel' },
+        { 
+          text: 'Cancelar cita', 
+          role: 'cancel',
+          handler: () => this.cancelarCita()
+        },
         {
-          text: 'Confirmar por WhatsApp',
-          handler: () => this.contactarWhatsApp()
+          text: 'Confirmar asistencia',
+          handler: () => this.confirmarAsistencia()
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async confirmarAsistencia(): Promise<void> {
+    if (!this.proximaCita) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+      await this.http.put(
+        `${environment.apiUrl}/nutricionapp-api/paciente/plan/confirmar-cita/${this.proximaCita.id}`,
+        {},
+        { headers }
+      ).toPromise();
+
+      this.proximaCita.estado = 'confirmada';
+      await this.mostrarToast('Asistencia confirmada exitosamente', 'success');
+      this.contactarWhatsApp('confirmar');
+
+    } catch (error) {
+      console.error('Error confirmando asistencia:', error);
+      await this.mostrarToast('Error al confirmar asistencia', 'danger');
+    }
+  }
+
+  async cancelarCita(): Promise<void> {
+    if (!this.proximaCita) return;
+
+    const alert = await this.alertCtrl.create({
+      header: 'Cancelar Cita',
+      message: 'Estas seguro de que deseas cancelar esta cita?',
+      buttons: [
+        { text: 'No', role: 'cancel' },
+        {
+          text: 'Si, cancelar',
+          handler: async () => {
+            try {
+              const token = localStorage.getItem('token');
+              const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+              await this.http.put(
+                `${environment.apiUrl}/nutricionapp-api/paciente/plan/cancelar-cita/${this.proximaCita.id}`,
+                {},
+                { headers }
+              ).toPromise();
+
+              await this.mostrarToast('Cita cancelada', 'warning');
+              await this.cargarProximaCita();
+
+            } catch (error) {
+              console.error('Error cancelando cita:', error);
+              await this.mostrarToast('Error al cancelar cita', 'danger');
+            }
+          }
         }
       ]
     });
@@ -212,10 +262,9 @@ export class PacientePage implements OnInit {
     }
   }
 
-  // 💬 Contactar por WhatsApp
-  async contactarWhatsApp(): Promise<void> {
+  async contactarWhatsApp(accion: string = 'general'): Promise<void> {
     if (!this.medicoTelefono) {
-      await this.mostrarToast('No hay teléfono del médico registrado', 'warning');
+      await this.mostrarToast('No hay telefono del medico registrado', 'warning');
       return;
     }
 
@@ -227,26 +276,38 @@ export class PacientePage implements OnInit {
       telefonoLimpio = '593' + telefonoLimpio;
     }
 
-    const mensaje = `Hola Dr. ${this.medicoNombre}, soy ${this.nombrePaciente}. Le contacto desde la plataforma NutriPa.`;
+    let mensaje = '';
+    
+    if (accion === 'confirmar' && this.proximaCita) {
+      const fecha = new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long' 
+      });
+      const hora = new Date(this.proximaCita.fecha_hora).toLocaleTimeString('es-EC', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      mensaje = `Hola Dr. ${this.medicoNombre}, soy ${this.nombrePaciente}. Le contacto desde la plataforma NutriPa para CONFIRMAR mi asistencia a la cita programada para el ${fecha} a las ${hora}. Gracias!`;
+    } else {
+      mensaje = `Hola Dr. ${this.medicoNombre}, soy ${this.nombrePaciente}. Le contacto desde la plataforma NutriPa.`;
+    }
+
     const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
-    this.sidebarOpen = false;  // 🆕 Cerrar sidebar al navegar
+    this.sidebarOpen = false;
+    this.submenuAbierto = null;
     this.router.navigate([`/${ruta}`]);
   }
 
-  toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
-  }
-
-  // 🚪 Cerrar sesión
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -270,5 +331,16 @@ export class PacientePage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  getTipoCitaLabel(tipo: string): string {
+    const labels: Record<string, string> = {
+      'control': 'Control de rutina',
+      'seguimiento': 'Seguimiento de plan',
+      'evaluacion': 'Evaluacion inicial',
+      'urgencia': 'Urgencia',
+      'teleconsulta': 'Teleconsulta'
+    };
+    return labels[tipo] || tipo;
   }
 }

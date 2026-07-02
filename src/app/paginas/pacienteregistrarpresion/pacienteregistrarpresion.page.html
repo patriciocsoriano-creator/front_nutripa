@@ -1,29 +1,40 @@
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
+      <ion-icon
+        name="menu-outline"
+        class="mobile-menu-toggle"
+        (click)="toggleSidebar()">
+      </ion-icon>
+      
       <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
-      <ion-title>Registro de Presión Arterial</ion-title>
+      <ion-title>Registro de Presion Arterial</ion-title>
     </div>
     <ion-buttons slot="end">
-      <ion-button (click)="cerrarSesion()">
+      <ion-button (click)="cerrarSesion()" color="danger">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+<div class="sidebar-overlay" 
+     [class.active]="sidebarOpen && isMobile" 
+     (click)="toggleSidebar()">
+</div>
+
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR -->
     <div class="sidebar" [class.open]="sidebarOpen">
+      
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="close-outline"></ion-icon>
       </div>
       
       <div class="user-info">
         <ion-avatar>
-          <img src="assets/avatar-patient.png" alt="Paciente" />
+          <img src="assets/icon/paciente.png" alt="Paciente" />
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombrePaciente}}</h4>
@@ -37,13 +48,13 @@
           <span>Inicio</span>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'plan'">
           <div class="menu-link" (click)="toggleSubmenu('plan')">
             <ion-icon name="nutrition-outline"></ion-icon>
             <span>Plan Nutricional</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+          <ul class="submenu">
             <li (click)="navegarA('pacienteverplan')">
               <ion-icon name="eye-outline"></ion-icon>
               <span>Ver mi plan</span>
@@ -55,16 +66,16 @@
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'seguimiento'">
           <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
             <ion-icon name="pulse-outline"></ion-icon>
             <span>Seguimiento Salud</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+          <ul class="submenu">
             <li (click)="navegarA('pacientedatosantropometricos')">
               <ion-icon name="body-outline"></ion-icon>
-              <span>Datos antropométricos</span>
+              <span>Datos antropometricos</span>
             </li>
             <li (click)="navegarA('pacienteregistrarglucosa')">
               <ion-icon name="water-outline"></ion-icon>
@@ -76,7 +87,7 @@
             </li>
             <li (click)="navegarA('pacienteregistrarpresion')" class="active">
               <ion-icon name="heart-outline"></ion-icon>
-              <span>Registrar presión arterial</span>
+              <span>Registrar presion arterial</span>
             </li>
             <li (click)="navegarA('pacienteverpresion')">
               <ion-icon name="heart-outline"></ion-icon>
@@ -84,58 +95,55 @@
             </li>
             <li (click)="navegarA('pacientehistorialmedico')">
               <ion-icon name="analytics-outline"></ion-icon>
-              <span>Historial médico</span>
+              <span>Historial medico</span>
             </li>
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'comunicacion'">
           <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
             <ion-icon name="chatbubbles-outline"></ion-icon>
-            <span>Comunicación</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+            <span>Comunicacion</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+          <ul class="submenu">
             <li (click)="contactarWhatsApp()">
               <ion-icon name="logo-whatsapp"></ion-icon>
-              <span>WhatsApp médico</span>
+              <span>WhatsApp medico</span>
             </li>
             <li (click)="navegarA('pacientemensajes')">
               <ion-icon name="mail-outline"></ion-icon>
-              <span>Mensajes al médico</span>
+              <span>Mensajes al medico</span>
             </li>
           </ul>
         </li>
 
         <li (click)="navegarA('pacienteconfiguracion')">
           <ion-icon name="settings-outline"></ion-icon>
-          <span>Configuración</span>
+          <span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
     <div class="main-content">
       
-      <!-- Header de la página -->
       <div class="page-header">
         <div class="page-title">
-          <ion-icon name="heart-outline"></ion-icon>
+          <ion-icon name="heart-outline" class="page-icon"></ion-icon>
           <div>
-            <h1>Registro de Presión Arterial</h1>
-            <p>Monitorea tu presión arterial regularmente</p>
+            <h1>Registro de Presion Arterial</h1>
+            <p class="subtitle">Monitorea tu presion arterial regularmente</p>
           </div>
         </div>
       </div>
 
-      <!-- 📊 Tarjetas de estadísticas rápidas -->
       <div class="stats-grid" *ngIf="estadisticas">
         <div class="stat-card">
           <div class="stat-icon-wrapper ultima">
             <ion-icon name="heart-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <label>Última medición</label>
+            <label>Ultima medicion</label>
             <span class="stat-value" [ngClass]="getClasificacionColor(ultimaMedicion?.sistolica, ultimaMedicion?.diastolica)">
               {{ultimaMedicion?.sistolica || '--'}}/{{ultimaMedicion?.diastolica || '--'}}
             </span>
@@ -152,7 +160,7 @@
             <span class="stat-value" [ngClass]="getClasificacionColor(estadisticas.promedio_sistolica, estadisticas.promedio_diastolica)">
               {{estadisticas.promedio_sistolica || '--'}}/{{estadisticas.promedio_diastolica || '--'}}
             </span>
-            <small>Últimos 7 días</small>
+            <small>Ultimos 7 dias</small>
           </div>
         </div>
 
@@ -165,7 +173,7 @@
             <span class="stat-value">
               {{estadisticas.minimo_sistolica || '--'}} - {{estadisticas.maximo_sistolica || '--'}}
             </span>
-            <small>Sistólica mín-máx</small>
+            <small>Sistolica min-max</small>
           </div>
         </div>
 
@@ -181,65 +189,59 @@
         </div>
       </div>
 
-      <!-- 🆕 Formulario de registro -->
-      <ion-card class="registro-card">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="add-circle-outline"></ion-icon>
-            Registrar Nueva Medición
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <form #presionForm="ngForm" (ngSubmit)="registrarPresion()">
-            
-            <!-- Valores principales -->
-            <div class="presion-principal">
-              <div class="presion-input-group">
-                <div class="presion-input-item sistolica">
-                  <label>Sistólica (alta)</label>
-                  <div class="input-wrapper">
-                    <ion-input 
-                      type="number" 
-                      [(ngModel)]="nuevaMedicion.sistolica" 
-                      name="sistolica"
-                      placeholder="120"
-                      required
-                      min="60"
-                      max="250"
-                      class="custom-input">
-                    </ion-input>
-                    <span class="unit">mmHg</span>
-                  </div>
-                  <small>Valor superior</small>
+      <div class="registro-card">
+        <div class="card-header">
+          <ion-icon name="add-circle-outline"></ion-icon>
+          <h2>Registrar Nueva Medicion</h2>
+        </div>
+        
+        <form #presionForm="ngForm" (ngSubmit)="registrarPresion()">
+          
+          <div class="presion-principal">
+            <div class="presion-input-group">
+              <div class="presion-input-item sistolica">
+                <label>Sistolica (alta)</label>
+                <div class="input-wrapper">
+                  <input 
+                    type="number" 
+                    [(ngModel)]="nuevaMedicion.sistolica" 
+                    name="sistolica"
+                    placeholder="120"
+                    required
+                    min="60"
+                    max="250"
+                    class="custom-input">
+                  <span class="unit">mmHg</span>
                 </div>
+                <small>Valor superior</small>
+              </div>
 
-                <div class="presion-separator">/</div>
+              <div class="presion-separator">/</div>
 
-                <div class="presion-input-item diastolica">
-                  <label>Diastólica (baja)</label>
-                  <div class="input-wrapper">
-                    <ion-input 
-                      type="number" 
-                      [(ngModel)]="nuevaMedicion.diastolica" 
-                      name="diastolica"
-                      placeholder="80"
-                      required
-                      min="30"
-                      max="150"
-                      class="custom-input">
-                    </ion-input>
-                    <span class="unit">mmHg</span>
-                  </div>
-                  <small>Valor inferior</small>
+              <div class="presion-input-item diastolica">
+                <label>Diastolica (baja)</label>
+                <div class="input-wrapper">
+                  <input 
+                    type="number" 
+                    [(ngModel)]="nuevaMedicion.diastolica" 
+                    name="diastolica"
+                    placeholder="80"
+                    required
+                    min="30"
+                    max="150"
+                    class="custom-input">
+                  <span class="unit">mmHg</span>
                 </div>
+                <small>Valor inferior</small>
               </div>
             </div>
+          </div>
 
-            <!-- Pulso -->
+          <div class="form-grid">
             <div class="form-group">
               <label>Pulso (opcional)</label>
-              <div class="input-with-icon">
-                <ion-input 
+              <div class="input-with-unit">
+                <input 
                   type="number" 
                   [(ngModel)]="nuevaMedicion.pulso" 
                   name="pulso"
@@ -247,174 +249,164 @@
                   min="30"
                   max="220"
                   class="custom-input">
-                </ion-input>
                 <span class="unit-label">lpm</span>
               </div>
             </div>
 
-            <!-- Opciones adicionales -->
-            <div class="form-row">
-              <div class="form-group half">
-                <label>Posición</label>
-                <ion-select 
-                  [(ngModel)]="nuevaMedicion.posicion" 
-                  name="posicion"
-                  interface="action-sheet"
-                  class="custom-select">
-                  <ion-select-option value="sentado">Sentado</ion-select-option>
-                  <ion-select-option value="acostado">Acostado</ion-select-option>
-                  <ion-select-option value="de_pie">De pie</ion-select-option>
-                </ion-select>
-              </div>
-
-              <div class="form-group half">
-                <label>Brazo</label>
-                <ion-select 
-                  [(ngModel)]="nuevaMedicion.brazo" 
-                  name="brazo"
-                  interface="action-sheet"
-                  class="custom-select">
-                  <ion-select-option value="izquierdo">Izquierdo</ion-select-option>
-                  <ion-select-option value="derecho">Derecho</ion-select-option>
-                </ion-select>
-              </div>
+            <div class="form-group">
+              <label>Posicion</label>
+              <select [(ngModel)]="nuevaMedicion.posicion" name="posicion">
+                <option value="sentado">Sentado</option>
+                <option value="acostado">Acostado</option>
+                <option value="de_pie">De pie</option>
+              </select>
             </div>
 
-            <!-- Fecha y hora -->
+            <div class="form-group">
+              <label>Brazo</label>
+              <select [(ngModel)]="nuevaMedicion.brazo" name="brazo">
+                <option value="izquierdo">Izquierdo</option>
+                <option value="derecho">Derecho</option>
+              </select>
+            </div>
+
             <div class="form-group">
               <label>Fecha y hora</label>
-              <ion-input 
+              <input 
                 type="datetime-local" 
                 [(ngModel)]="nuevaMedicion.fecha_hora" 
                 name="fecha_hora"
                 class="custom-input">
-              </ion-input>
             </div>
 
-            <!-- Notas -->
-            <div class="form-group">
+            <div class="form-group full-width">
               <label>Notas (opcional)</label>
-              <ion-textarea 
+              <textarea 
                 [(ngModel)]="nuevaMedicion.notas" 
                 name="notas"
-                placeholder="Ej: Después de hacer ejercicio, me sentía mareado..."
-                rows="2"
-                class="custom-input">
-              </ion-textarea>
+                placeholder="Ej: Despues de hacer ejercicio, me sentia mareado..."
+                rows="2"></textarea>
             </div>
+          </div>
 
-            <!-- Referencia de rangos -->
-            <div class="rangos-referencia">
-              <h4>📊 Clasificación de Presión Arterial (AHA):</h4>
-              <div class="rangos-grid">
-                <div class="rango-item normal">
-                  <strong>&lt;120 / &lt;80</strong>
-                  <span>Normal</span>
-                </div>
-                <div class="rango-item elevada">
-                  <strong>120-129 / &lt;80</strong>
-                  <span>Elevada</span>
-                </div>
-                <div class="rango-item alta1">
-                  <strong>130-139 / 80-89</strong>
-                  <span>Hipertensión Etapa 1</span>
-                </div>
-                <div class="rango-item alta2">
-                  <strong>≥140 / ≥90</strong>
-                  <span>Hipertensión Etapa 2</span>
-                </div>
-                <div class="rango-item crisis">
-                  <strong>&gt;180 / &gt;120</strong>
-                  <span>Crisis Hipertensiva</span>
-                </div>
+          <div class="rangos-referencia">
+            <h4>Clasificacion de Presion Arterial (AHA):</h4>
+            <div class="rangos-grid">
+              <div class="rango-item normal">
+                <strong>&lt;120 / &lt;80</strong>
+                <span>Normal</span>
+              </div>
+              <div class="rango-item elevada">
+                <strong>120-129 / &lt;80</strong>
+                <span>Elevada</span>
+              </div>
+              <div class="rango-item alta1">
+                <strong>130-139 / 80-89</strong>
+                <span>Hipertension Etapa 1</span>
+              </div>
+              <div class="rango-item alta2">
+                <strong>&ge;140 / &ge;90</strong>
+                <span>Hipertension Etapa 2</span>
+              </div>
+              <div class="rango-item crisis">
+                <strong>&gt;180 / &gt;120</strong>
+                <span>Crisis Hipertensiva</span>
               </div>
             </div>
+          </div>
 
-            <!-- Botones -->
-            <div class="form-actions">
-              <ion-button type="button" fill="outline" color="medium" (click)="limpiarFormulario()">
-                <ion-icon name="refresh-outline" slot="start"></ion-icon>
-                Limpiar
-              </ion-button>
-              <ion-button type="submit" color="primary" [disabled]="!presionForm.valid">
-                <ion-icon name="save-outline" slot="start"></ion-icon>
-                Guardar Medición
-              </ion-button>
-            </div>
-          </form>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- 📋 Historial de mediciones -->
-      <ion-card class="historial-card">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="time-outline"></ion-icon>
-            Historial de Mediciones
-          </ion-card-title>
-          <div class="filter-buttons">
-            <ion-button 
-              *ngFor="let filtro of filtrosDias" 
-              fill="outline" 
-              size="small"
-              [color]="diasHistorial === filtro.dias ? 'primary' : 'medium'"
-              (click)="cambiarFiltroDias(filtro.dias)">
-              {{filtro.label}}
+          <div class="form-actions">
+            <ion-button type="button" fill="outline" color="medium" expand="block" (click)="limpiarFormulario()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Limpiar
+            </ion-button>
+            <ion-button type="submit" color="primary" expand="block" [disabled]="!presionForm.valid">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              Guardar Medicion
             </ion-button>
           </div>
-        </ion-card-header>
-        <ion-card-content>
-          
-          <div *ngIf="cargandoHistorial" class="loading-inline">
-            <ion-spinner name="crescent" color="primary"></ion-spinner>
-            <span>Cargando historial...</span>
-          </div>
+        </form>
+      </div>
 
-          <div *ngIf="!cargandoHistorial && mediciones.length === 0" class="empty-inline">
-            <ion-icon name="heart-outline"></ion-icon>
-            <p>No hay mediciones registradas en este período</p>
-          </div>
+      <div class="historial-card">
+        <div class="card-header">
+          <ion-icon name="time-outline"></ion-icon>
+          <h2>Historial de Mediciones</h2>
+        </div>
 
-          <div *ngIf="!cargandoHistorial && mediciones.length > 0" class="mediciones-list">
-            <div 
-              *ngFor="let med of mediciones" 
-              class="medicion-item"
-              [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
-              
-              <div class="medicion-valor">
-                <span class="valor">{{med.sistolica}}/{{med.diastolica}}</span>
-                <span class="unidad">mmHg</span>
-                <span class="pulso" *ngIf="med.pulso">💓 {{med.pulso}} lpm</span>
+        <div class="filtros-dias">
+          <ion-button 
+            *ngFor="let filtro of filtrosDias" 
+            [fill]="diasHistorial === filtro.dias ? 'solid' : 'outline'"
+            size="small"
+            (click)="cambiarFiltroDias(filtro.dias)">
+            {{filtro.label}}
+          </ion-button>
+        </div>
+
+        <div *ngIf="cargandoHistorial" class="loading-state">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p>Cargando historial...</p>
+        </div>
+
+        <div *ngIf="!cargandoHistorial && mediciones.length === 0" class="empty-state">
+          <ion-icon name="heart-outline" class="empty-icon"></ion-icon>
+          <p>No hay mediciones registradas en este periodo</p>
+        </div>
+
+        <div *ngIf="!cargandoHistorial && mediciones.length > 0" class="mediciones-list">
+          <div 
+            *ngFor="let med of mediciones" 
+            class="medicion-item"
+            [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
+            
+            <div class="medicion-header">
+              <div class="medicion-icon" [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
+                <ion-icon name="heart-outline"></ion-icon>
               </div>
-              
               <div class="medicion-info">
-                <div class="clasificacion" [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
+                <div class="medicion-valor" [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
+                  {{med.sistolica}}/{{med.diastolica}} <small>mmHg</small>
+                </div>
+                <div class="medicion-clasificacion" [ngClass]="getClasificacionColor(med.sistolica, med.diastolica)">
                   {{getClasificacion(med.sistolica, med.diastolica)}}
                 </div>
-                <div class="fecha">
-                  <ion-icon name="calendar-outline"></ion-icon>
-                  <span>{{med.fecha_hora | date:'dd/MM/yyyy HH:mm'}}</span>
-                </div>
-                <div class="detalles-adicionales" *ngIf="med.posicion || med.brazo">
-                  <span *ngIf="med.posicion">📍 {{getPosicionLabel(med.posicion)}}</span>
-                  <span *ngIf="med.brazo">💪 Brazo {{med.brazo}}</span>
-                </div>
-                <div class="notas" *ngIf="med.notas">
-                  <ion-icon name="chatbubble-outline"></ion-icon>
-                  <span>{{med.notas}}</span>
+                <div class="medicion-fecha">
+                  {{med.fecha_hora | date:'dd/MM/yyyy HH:mm'}}
                 </div>
               </div>
-
-              <div class="medicion-actions">
-                <ion-button fill="clear" size="small" color="danger" (click)="eliminarMedicion(med)">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
+              <div class="medicion-pulso" *ngIf="med.pulso">
+                <ion-icon name="pulse-outline"></ion-icon>
+                <span>{{med.pulso}} lpm</span>
               </div>
             </div>
-          </div>
+            
+            <div class="medicion-detalles" *ngIf="med.posicion || med.brazo || med.notas">
+              <div class="detalle-chips">
+                <span class="chip" *ngIf="med.posicion">
+                  <ion-icon name="body-outline"></ion-icon>
+                  {{getPosicionLabel(med.posicion)}}
+                </span>
+                <span class="chip" *ngIf="med.brazo">
+                  <ion-icon name="fitness-outline"></ion-icon>
+                  Brazo {{med.brazo}}
+                </span>
+              </div>
+              <div *ngIf="med.notas" class="medicion-notas">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>{{med.notas}}</span>
+              </div>
+            </div>
 
-        </ion-card-content>
-      </ion-card>
+            <div class="medicion-actions">
+              <ion-button size="small" color="danger" fill="clear" (click)="eliminarMedicion(med)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+      </div>
 
     </div>
   </div>

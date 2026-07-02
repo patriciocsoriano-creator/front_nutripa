@@ -1,37 +1,27 @@
-/* =========================================
-   🎨 VARIABLES
-   ========================================= */
 $primary-color: #0a4d68;
-$secondary-color: #145da0;
+$secondary-color: #086b8f;
 $accent-color: #4fc3f7;
-$bg-color: #f4f7fb;
-$card-bg: #ffffff;
 $text-primary: #1a1f36;
 $text-secondary: #6c7293;
 $text-muted: #9499b7;
 $border-color: #e2e8f0;
-
-$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-$shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+$radius-sm: 8px;
+$radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 20px;
+$shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
-$menu-icon-size: 1.3rem;
-$menu-icon-width: 28px;
-$menu-padding-left: 20px;
-
-/* =========================================
-   📦 HEADER
-   ========================================= */
-::ng-deep .main-header {
+.main-header {
   ion-toolbar {
-    --background: #f7fbff !important;
-    border-bottom: 1px solid #dce5f3 !important;
-    padding: 0 20px;
-    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: #f7fbff;
+    border-bottom: 1px solid #dce5f3;
+    padding: 0 20px;
+    height: 60px;
 
     .header-left {
       display: flex;
@@ -47,73 +37,94 @@ $menu-padding-left: 20px;
         font-weight: 600;
         color: $primary-color;
         font-size: 1.2rem;
-        padding: 0 !important;
       }
     }
   }
 }
 
-/* =========================================
-   🧭 DASHBOARD CONTAINER
-   ========================================= */
-::ng-deep .dashboard-container {
+.mobile-menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  color: $primary-color;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
-  background: $bg-color;
+  background: #f4f7fb;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
-/* =========================================
-   🧭 SIDEBAR
-   ========================================= */
-::ng-deep .sidebar {
+.sidebar {
   width: 70px;
-  min-width: 70px;
-  background: linear-gradient(180deg, #145da0 0%, #0a4d68 100%);
+  background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
   color: white;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   overflow: visible;
   position: relative;
-  z-index: 100;
-  white-space: nowrap;
+  z-index: 999;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 
   &.open {
-    width: 260px !important;
-    min-width: 260px;
-    
-    .user-details { opacity: 1; pointer-events: auto; }
-    ul li span { opacity: 1; }
-    .submenu-arrow { opacity: 1; }
+    width: 260px;
   }
 
   .menu-icon {
-    margin: 1rem auto;
+    display: none;
+    margin: 1rem 0;
     font-size: 1.6rem;
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
-    width: fit-content;
-    align-self: center;
-    &:hover { background: rgba(255,255,255,0.15); }
+    transition: background 0.2s;
+    align-self: flex-end;
+    margin-right: 1rem;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
   }
 
   .user-info {
     text-align: center;
     padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
-    
+
     ion-avatar {
       margin: 0 auto 8px;
       width: 56px;
       height: 56px;
-      --background: rgba(255,255,255,0.2);
+      --background: rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
-      
+
       img {
         width: 100%;
         height: 100%;
@@ -121,28 +132,33 @@ $menu-padding-left: 20px;
         border-radius: 50%;
       }
     }
-    
+
     .user-details {
       opacity: 0;
-      transition: opacity 0.2s ease-in-out;
-      pointer-events: none;
-      
+      transition: opacity 0.3s ease;
+
       h4 {
         font-size: 0.95rem;
         margin: 0 0 4px;
         font-weight: 500;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       p {
         font-size: 0.75rem;
         color: #b0c7d9;
         margin: 0;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
     }
+  }
+
+  &.open .user-details {
+    opacity: 1;
   }
 
   ul {
@@ -150,180 +166,212 @@ $menu-padding-left: 20px;
     padding: 0.5rem 0;
     width: 100%;
     margin: 0;
-    
-    li {
+
+    > li {
       display: flex;
       align-items: center;
-      padding: 12px $menu-padding-left;
+      gap: 14px;
+      padding: 12px 20px;
       cursor: pointer;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255, 255, 255, 0.9);
       transition: all 0.2s ease;
       font-size: 0.9rem;
-      position: relative;
-      
-      ion-icon { 
-        font-size: $menu-icon-size;
-        width: $menu-icon-width;
-        min-width: $menu-icon-width;
+
+      > ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
         text-align: center;
-        flex-shrink: 0;
       }
-      
-      span { 
+
+      > span {
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        margin-left: 10px;
-        overflow: hidden;
+        transition: opacity 0.3s ease;
         white-space: nowrap;
       }
-      
-      &:hover { background: rgba(255,255,255,0.15); }
-      
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
       &.active {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
         border-left: 3px solid $accent-color;
       }
     }
   }
 
+  &.open ul > li > span {
+    opacity: 1;
+  }
+
   .menu-item-with-submenu {
     position: relative;
-    
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+
     .menu-link {
       display: flex;
       align-items: center;
-      width: 100%;
-      padding: 12px $menu-padding-left;
+      gap: 14px;
+      padding: 12px 20px;
       cursor: pointer;
-      color: rgba(255,255,255,0.9);
-      
-      ion-icon:first-child {
-        width: $menu-icon-width;
-        min-width: $menu-icon-width;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+
+      > ion-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
         text-align: center;
       }
-      
-      span {
+
+      > span {
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-        margin-left: 10px;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
         flex: 1;
       }
-      
+
       .submenu-arrow {
         margin-left: auto;
-        padding-right: 12px;
+        transition: transform 0.3s ease;
+        font-size: 1rem;
         opacity: 0;
-        transition: opacity 0.2s, transform 0.3s ease;
-        
-        &.rotate { transform: rotate(180deg); }
       }
-      
-      &:hover { background: rgba(255,255,255,0.15); }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
     }
-    
+
     .submenu {
-      position: absolute;
-      left: 100%;
-      top: 0;
-      background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
-      min-width: 240px;
-      border-radius: 0 12px 12px 0;
-      box-shadow: 4px 0 16px rgba(0,0,0,0.3);
-      z-index: 1000;
-      max-height: 0;
+      background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
       overflow: hidden;
+      max-height: 0;
       transition: max-height 0.3s ease;
+      list-style: none;
       padding: 0;
       margin: 0;
-      list-style: none;
-      
-      &.active { 
-        max-height: 400px;
-        box-shadow: 4px 4px 16px rgba(0,0,0,0.3);
-      }
-      
+
       li {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
+        padding: 10px 20px 10px 54px;
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.9);
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         cursor: pointer;
         transition: all 0.2s ease;
-        
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
         ion-icon {
-          width: $menu-icon-width;
-          min-width: $menu-icon-width;
-          text-align: center;
           font-size: 1.1rem;
-          margin-right: 10px;
         }
-        
-        span { 
+
+        span {
           opacity: 1;
           white-space: nowrap;
         }
-        
+
         &:hover {
-          background: rgba(255,255,255,0.15);
+          background: rgba(255, 255, 255, 0.15);
           color: white;
+        }
+
+        &.active {
+          background: rgba(79, 195, 247, 0.15);
+          color: $accent-color;
+          border-left: 2px solid $accent-color;
         }
       }
     }
+
+    &.open .submenu {
+      max-height: 800px;
+    }
+
+    &.open .menu-link .submenu-arrow {
+      transform: rotate(180deg);
+    }
   }
-  
+
+  &.open .menu-item-with-submenu .menu-link span,
   &.open .menu-item-with-submenu .menu-link .submenu-arrow {
     opacity: 1;
   }
 }
 
-/* =========================================
-   📦 MAIN CONTENT
-   ========================================= */
-::ng-deep .main-content {
+.main-content {
   flex: 1;
-  padding: 24px;
+  padding: 20px 30px;
   overflow-y: auto;
-  background: $bg-color;
+  background: #f4f7fb;
 }
 
-/* =========================================
-   🔄 LOADING / EMPTY
-   ========================================= */
-.loading-state, .empty-state {
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 60vh;
   text-align: center;
-  color: $text-secondary;
-  
-  ion-spinner { margin-bottom: 16px; }
-  .empty-icon { font-size: 5rem; color: $primary-color; margin-bottom: 16px; opacity: 0.5; }
-  h3 { color: $text-primary; margin: 0 0 8px; }
-  p { margin: 0 0 24px; max-width: 400px; }
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #6c7293;
+    font-size: 1rem;
+  }
 }
 
-/* =========================================
-   📊 DATOS CONTAINER
-   ========================================= */
-.datos-container {
+.empty-state {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 5rem;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    color: $text-primary;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-secondary;
+    max-width: 400px;
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
 }
 
-/* =========================================
-   ℹ️ INFO HEADER
-   ========================================= */
+.datos-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .info-header {
   background: linear-gradient(135deg, $primary-color, $secondary-color);
   color: white;
   padding: 20px 24px;
   border-radius: $radius-lg;
+  margin-bottom: 24px;
   box-shadow: $shadow-md;
 
   .info-content {
@@ -333,7 +381,9 @@ $menu-padding-left: 20px;
 
     ion-icon {
       font-size: 2rem;
-      opacity: 0.8;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 12px;
     }
 
     h3 {
@@ -344,19 +394,17 @@ $menu-padding-left: 20px;
 
     p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       opacity: 0.9;
     }
   }
 }
 
-/* =========================================
-   📏 METRICS GRID
-   ========================================= */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
+  margin-bottom: 24px;
 }
 
 .metric-card {
@@ -384,66 +432,67 @@ $menu-padding-left: 20px;
     flex-shrink: 0;
 
     ion-icon {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       color: white;
     }
 
-    &.peso { background: linear-gradient(135deg, #667eea, #764ba2); }
-    &.talla { background: linear-gradient(135deg, #f093fb, #f5576c); }
-    &.imc { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-    &.cintura { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-
-    &.bajo-peso { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-    &.normal { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-    &.sobrepeso { background: linear-gradient(135deg, #fa709a, #fee140); }
-    &.obesidad { background: linear-gradient(135deg, #f5576c, #ff6b6b); }
+    &.peso { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    &.talla { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    &.imc { background: linear-gradient(135deg, #10b981, #059669); }
+    &.cintura { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    
+    &.bajo-peso { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    &.normal { background: linear-gradient(135deg, #10b981, #059669); }
+    &.sobrepeso { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    &.obesidad { background: linear-gradient(135deg, #ef4444, #dc2626); }
   }
 
   .metric-info {
     flex: 1;
+    min-width: 0;
 
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: $text-secondary;
-      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
 
     .metric-value {
       display: block;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: $text-primary;
-      line-height: 1;
-      margin-bottom: 4px;
+      line-height: 1.2;
     }
 
     small {
       display: block;
       font-size: 0.8rem;
-      color: $text-muted;
+      color: $text-secondary;
+      margin-top: 4px;
+    }
 
-      &.metric-status {
-        font-weight: 600;
-
-        &.bajo-peso { color: #3b82f6; }
-        &.normal { color: #10b981; }
-        &.sobrepeso, &.alto { color: #f59e0b; }
-        &.obesidad, &.muy-alto { color: #ef4444; }
-      }
+    .metric-status {
+      font-weight: 600;
+      
+      &.normal { color: #10b981; }
+      &.bajo-peso { color: #3b82f6; }
+      &.sobrepeso { color: #f59e0b; }
+      &.obesidad { color: #ef4444; }
+      &.alto { color: #f59e0b; }
+      &.muy-alto { color: #ef4444; }
     }
   }
 }
 
-/* =========================================
-   📋 SECTION CARD
-   ========================================= */
 .section-card {
   background: white;
   border-radius: $radius-lg;
   padding: 24px;
+  margin-bottom: 24px;
   box-shadow: $shadow-md;
 
   .section-header {
@@ -451,26 +500,23 @@ $menu-padding-left: 20px;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
-    padding-bottom: 12px;
+    padding-bottom: 16px;
     border-bottom: 2px solid $border-color;
 
     ion-icon {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       color: $primary-color;
     }
 
     h2 {
       margin: 0;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: 600;
       color: $text-primary;
     }
   }
 }
 
-/* =========================================
-   ❤️ SIGNOS GRID
-   ========================================= */
 .signos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -480,17 +526,22 @@ $menu-padding-left: 20px;
 .signo-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 16px;
   background: #f8fafc;
   border-radius: 12px;
-  border-left: 4px solid $primary-color;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+  }
 
   .signo-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
     background: linear-gradient(135deg, $primary-color, $secondary-color);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -504,73 +555,85 @@ $menu-padding-left: 20px;
 
   .signo-info {
     flex: 1;
+    min-width: 0;
 
     label {
       display: block;
       font-size: 0.75rem;
       color: $text-secondary;
-      margin-bottom: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
     }
 
     .signo-value {
       display: block;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: $text-primary;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     small {
       display: block;
       font-size: 0.8rem;
-      color: $text-muted;
-      font-weight: 500;
+      color: $text-secondary;
 
-      &.normal { color: #10b981; }
-      &.elevada, &.pre-diabetes, &.bajo { color: #f59e0b; }
-      &.alta, &.diabetes, &.critico { color: #ef4444; }
-      &.critica { color: #dc2626; font-weight: 700; }
+      &.normal { color: #10b981; font-weight: 600; }
+      &.elevada { color: #f59e0b; font-weight: 600; }
+      &.alta { color: #ef4444; font-weight: 600; }
+      &.critica { color: #dc2626; font-weight: 600; }
+      &.bajo { color: #f59e0b; font-weight: 600; }
+      &.critico { color: #ef4444; font-weight: 600; }
+      &.pre-diabetes { color: #f59e0b; font-weight: 600; }
+      &.diabetes { color: #ef4444; font-weight: 600; }
     }
   }
 }
 
-/* =========================================
-   📊 HISTORIAL TABLE
-   ========================================= */
 .historial-table {
   overflow-x: auto;
+  border-radius: 12px;
 
   table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 700px;
 
     thead {
       background: linear-gradient(135deg, $primary-color, $secondary-color);
       color: white;
 
       th {
-        padding: 12px;
+        padding: 14px 12px;
         text-align: left;
         font-size: 0.85rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
 
-        &:first-child { border-top-left-radius: 8px; }
-        &:last-child { border-top-right-radius: 8px; }
+        &:first-child {
+          border-radius: 12px 0 0 0;
+        }
+
+        &:last-child {
+          border-radius: 0 12px 0 0;
+        }
       }
     }
 
     tbody {
       tr {
         border-bottom: 1px solid $border-color;
-        transition: background 0.2s ease;
+        transition: all 0.2s ease;
 
-        &:hover { background: #f8fafc; }
+        &:hover {
+          background: #f8fafc;
+        }
 
-        &:last-child { border-bottom: none; }
+        &:last-child {
+          border-bottom: none;
+        }
 
         td {
           padding: 12px;
@@ -578,8 +641,8 @@ $menu-padding-left: 20px;
           color: $text-primary;
 
           span {
-            &.bajo-peso { color: #3b82f6; font-weight: 600; }
             &.normal { color: #10b981; font-weight: 600; }
+            &.bajo-peso { color: #3b82f6; font-weight: 600; }
             &.sobrepeso { color: #f59e0b; font-weight: 600; }
             &.obesidad { color: #ef4444; font-weight: 600; }
           }
@@ -589,13 +652,11 @@ $menu-padding-left: 20px;
   }
 }
 
-/* =========================================
-   💡 RECOMENDACIONES
-   ========================================= */
 .recomendaciones-card {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  background: white;
   border-radius: $radius-lg;
   padding: 24px;
+  margin-bottom: 24px;
   box-shadow: $shadow-md;
   border-left: 4px solid #f59e0b;
 
@@ -606,77 +667,295 @@ $menu-padding-left: 20px;
     margin-bottom: 16px;
 
     ion-icon {
-      font-size: 1.5rem;
-      color: #92400e;
+      font-size: 1.8rem;
+      color: #f59e0b;
     }
 
     h2 {
       margin: 0;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: 600;
-      color: #92400e;
+      color: $text-primary;
     }
   }
 
   .recomendaciones-content {
     p {
-      margin: 0;
+      color: $text-secondary;
+      line-height: 1.8;
       font-size: 0.95rem;
-      line-height: 1.6;
-      color: #78350f;
+      margin: 0;
 
       strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 1rem;
+        color: $text-primary;
+        font-size: 1.05rem;
       }
     }
   }
 }
 
-/* =========================================
-   📱 RESPONSIVE
-   ========================================= */
-@media (max-width: 768px) {
-  ::ng-deep .dashboard-container {
-    flex-direction: column;
+@media (min-width: 769px) {
+  
+  .mobile-menu-toggle {
+    display: none !important;
   }
 
-  ::ng-deep .sidebar {
-    position: fixed;
-    left: -280px;
-    top: 60px;
-    height: calc(100vh - 60px);
-    width: 280px !important;
-    min-width: 280px !important;
-    z-index: 1000;
-    transition: left 0.3s ease;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  .sidebar .menu-icon {
+    display: none !important;
+  }
+
+  .sidebar:not(.open) {
+    
+    ul > li > span {
+      opacity: 0;
+    }
+
+    .menu-item-with-submenu:hover {
+      
+      .menu-link > span {
+        opacity: 1;
+      }
+
+      .menu-link .submenu-arrow {
+        opacity: 1;
+      }
+
+      .submenu {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        min-width: 260px;
+        max-height: 600px;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(180deg, #0a4d68 0%, #083d52 100%);
+        z-index: 1000;
+        padding: 8px 0;
+
+        li {
+          padding: 12px 20px;
+          font-size: 0.9rem;
+
+          span {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+
+  .sidebar.open {
+    
+    .menu-item-with-submenu .submenu {
+      position: static;
+      left: auto;
+      top: auto;
+      min-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      background: rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  
+  .main-header {
+    ion-toolbar {
+      padding: 0 12px;
+      height: 56px;
+
+      .header-left {
+        gap: 8px;
+
+        .logo-icon {
+          font-size: 1.5rem;
+        }
+
+        ion-title {
+          font-size: 1rem;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+        }
+      }
+    }
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.6rem !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px !important;
+    background: rgba(10, 77, 104, 0.08);
+    transition: all 0.2s ease;
+
+    &:active {
+      background: rgba(10, 77, 104, 0.2) !important;
+      transform: scale(0.92);
+    }
+  }
+
+  .dashboard-container {
+    display: block !important;
+    height: auto !important;
+    min-height: calc(100vh - 56px);
+    background: #f0f4f8;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    left: -300px !important;
+    top: 56px !important;
+    width: 300px !important;
+    min-width: 300px !important;
+    height: calc(100vh - 56px) !important;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: linear-gradient(180deg, #0a4d68 0%, #063a4d 60%, #042a38 100%) !important;
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.25) !important;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
 
     &.open {
-      left: 0;
+      left: 0 !important;
     }
 
     .menu-icon {
-      display: block;
-    }
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 16px 16px 8px auto !important;
+      padding: 0 !important;
+      transition: all 0.2s ease;
 
-    .user-info {
-      display: block;
+      &:active {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(0.9);
+      }
 
-      .user-details {
-        opacity: 1 !important;
-        pointer-events: auto !important;
+      ion-icon {
+        font-size: 1.3rem;
       }
     }
 
-    ul li span {
-      opacity: 1 !important;
+    .user-info {
+      padding: 8px 20px 20px !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      text-align: left !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+
+      ion-avatar {
+        margin: 0 !important;
+        width: 52px !important;
+        height: 52px !important;
+        border: 2px solid rgba(79, 195, 247, 0.5);
+        flex-shrink: 0;
+      }
+
+      .user-details {
+        opacity: 1 !important;
+        text-align: left !important;
+
+        h4 {
+          font-size: 1rem !important;
+          font-weight: 600 !important;
+          color: white !important;
+          margin: 0 0 2px !important;
+        }
+
+        p {
+          font-size: 0.8rem !important;
+          color: rgba(255, 255, 255, 0.5) !important;
+        }
+      }
+    }
+
+    ul {
+      padding: 12px 0 !important;
+
+      > li {
+        padding: 0 !important;
+        margin: 2px 10px !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        transition: all 0.2s ease;
+
+        > ion-icon {
+          margin-left: 14px;
+        }
+
+        > span {
+          opacity: 1 !important;
+          font-weight: 500;
+        }
+
+        &:hover, &:active {
+          background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        &.active {
+          background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(79, 195, 247, 0.08)) !important;
+          border-left: none !important;
+          border: 1px solid rgba(79, 195, 247, 0.3) !important;
+
+          ion-icon {
+            color: $accent-color;
+          }
+
+          span {
+            color: white;
+            font-weight: 600;
+          }
+        }
+      }
     }
 
     .menu-item-with-submenu {
-      .menu-link span {
-        opacity: 1 !important;
+      margin: 2px 10px !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+
+      .menu-link {
+        padding: 14px !important;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+
+        > span {
+          opacity: 1 !important;
+          font-weight: 500;
+        }
+
+        .submenu-arrow {
+          opacity: 0.5 !important;
+          font-size: 0.9rem !important;
+          transition: all 0.3s ease;
+        }
+
+        &:hover, &:active {
+          background: rgba(255, 255, 255, 0.1);
+        }
       }
 
       .submenu {
@@ -684,34 +963,308 @@ $menu-padding-left: 20px;
         left: auto !important;
         top: auto !important;
         min-width: 100% !important;
+        width: 100% !important;
         border-radius: 0 !important;
         box-shadow: none !important;
-        background: rgba(0, 0, 0, 0.2) !important;
+        background: rgba(0, 0, 0, 0.15) !important;
+        margin: 0 !important;
 
         li {
-          padding-left: 48px !important;
+          padding: 12px 16px 12px 48px !important;
+          margin: 0 !important;
+          border-radius: 0 !important;
+          font-size: 0.88rem !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+          position: relative;
+          transition: all 0.2s ease;
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(79, 195, 247, 0.4);
+          }
+
+          ion-icon {
+            font-size: 1rem !important;
+            color: rgba(255, 255, 255, 0.6);
+            min-width: 18px;
+          }
+
+          span {
+            color: rgba(255, 255, 255, 0.85);
+          }
+
+          &:hover, &:active {
+            background: rgba(255, 255, 255, 0.08) !important;
+
+            ion-icon {
+              color: $accent-color;
+            }
+
+            span {
+              color: white;
+            }
+
+            &::before {
+              background: $accent-color;
+            }
+          }
+
+          &.active {
+            background: rgba(79, 195, 247, 0.15) !important;
+            border-left: 2px solid $accent-color !important;
+
+            ion-icon {
+              color: $accent-color !important;
+            }
+
+            span {
+              color: $accent-color !important;
+              font-weight: 600;
+            }
+
+            &::before {
+              background: $accent-color !important;
+            }
+          }
+
+          &:last-child {
+            border-bottom: none !important;
+          }
+        }
+      }
+
+      &.open {
+        background: rgba(255, 255, 255, 0.05);
+
+        .menu-link {
+          background: rgba(79, 195, 247, 0.1);
+          
+          .submenu-arrow {
+            opacity: 1 !important;
+            color: $accent-color;
+          }
+
+          > ion-icon:first-child {
+            color: $accent-color;
+          }
         }
       }
     }
   }
 
-  ::ng-deep .main-content {
-    padding: 16px;
+  .sidebar-overlay {
+    top: 56px !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .main-content {
+    padding: 16px 14px !important;
+    width: 100%;
+  }
+
+  .info-header {
+    padding: 16px 18px !important;
+    border-radius: 16px !important;
+    margin-bottom: 16px !important;
+
+    .info-content {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+
+      ion-icon {
+        font-size: 1.6rem !important;
+        padding: 8px !important;
+      }
+
+      h3 {
+        font-size: 0.95rem !important;
+      }
+
+      p {
+        font-size: 0.78rem !important;
+      }
+    }
   }
 
   .metrics-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .metric-card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+
+    .metric-icon-wrapper {
+      width: 48px !important;
+      height: 48px !important;
+      border-radius: 12px !important;
+
+      ion-icon {
+        font-size: 1.5rem !important;
+      }
+    }
+
+    .metric-info {
+      label {
+        font-size: 0.7rem !important;
+      }
+
+      .metric-value {
+        font-size: 1.4rem !important;
+      }
+
+      small {
+        font-size: 0.75rem !important;
+      }
+    }
+  }
+
+  .section-card {
+    padding: 18px !important;
+    margin-bottom: 16px !important;
+    border-radius: 16px !important;
+
+    .section-header {
+      margin-bottom: 16px !important;
+      padding-bottom: 12px !important;
+
+      ion-icon {
+        font-size: 1.5rem !important;
+      }
+
+      h2 {
+        font-size: 1.1rem !important;
+      }
+    }
   }
 
   .signos-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 
-  .historial-table table {
-    font-size: 0.8rem;
+  .signo-item {
+    padding: 14px !important;
+    border-radius: 12px !important;
 
-    th, td {
-      padding: 8px;
+    .signo-icon {
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 10px !important;
+
+      ion-icon {
+        font-size: 1.2rem !important;
+      }
     }
+
+    .signo-info {
+      label {
+        font-size: 0.7rem !important;
+      }
+
+      .signo-value {
+        font-size: 1.1rem !important;
+      }
+
+      small {
+        font-size: 0.75rem !important;
+      }
+    }
+  }
+
+  .historial-table {
+    border-radius: 12px !important;
+
+    table {
+      thead th {
+        padding: 12px 10px !important;
+        font-size: 0.75rem !important;
+      }
+
+      tbody td {
+        padding: 10px !important;
+        font-size: 0.82rem !important;
+      }
+    }
+  }
+
+  .recomendaciones-card {
+    padding: 18px !important;
+    margin-bottom: 16px !important;
+    border-radius: 16px !important;
+
+    .section-header {
+      margin-bottom: 12px !important;
+
+      ion-icon {
+        font-size: 1.5rem !important;
+      }
+
+      h2 {
+        font-size: 1.1rem !important;
+      }
+    }
+
+    .recomendaciones-content p {
+      font-size: 0.88rem !important;
+      line-height: 1.7 !important;
+    }
+  }
+
+  .empty-state {
+    padding: 40px 20px !important;
+    min-height: 50vh !important;
+
+    .empty-icon {
+      font-size: 4rem !important;
+    }
+
+    h3 {
+      font-size: 1.2rem !important;
+    }
+
+    p {
+      font-size: 0.9rem !important;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  
+  .sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+  }
+
+  .main-header ion-toolbar {
+    padding: 0 10px !important;
+
+    .header-left ion-title {
+      font-size: 0.92rem !important;
+    }
+  }
+
+  .info-header .info-content h3 {
+    font-size: 0.88rem !important;
+  }
+
+  .metric-card .metric-info .metric-value {
+    font-size: 1.3rem !important;
+  }
+
+  .signo-item .signo-info .signo-value {
+    font-size: 1rem !important;
   }
 }

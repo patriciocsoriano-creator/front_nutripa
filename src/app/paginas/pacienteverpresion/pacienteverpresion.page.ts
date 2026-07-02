@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -12,24 +12,20 @@ import { environment } from 'src/environments/environment';
 })
 export class PacienteverpresionPage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   cedulaPaciente: string = '';
+  isMobile = false;
 
-  // 📊 Mediciones
   mediciones: any[] = [];
   medicionesFiltradas: any[] = [];
   cargando = true;
 
-  // 🎛️ Filtros
   filtroPeriodo: string = 'todos';
 
-  // 🔄 Control de expansión
   medicionExpandida: string | null = null;
 
-  // 📊 Estadísticas
   ultimaMedicion: any = null;
   promedioSistolica: number = 0;
   promedioDiastolica: number = 0;
@@ -44,8 +40,23 @@ export class PacienteverpresionPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.detectMobile();
     this.cargarDatosUsuario();
     await this.cargarMediciones();
+  }
+
+  private detectMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const wasMobile = this.isMobile;
+    this.detectMobile();
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.submenuAbierto = null;
+    }
   }
 
   private cargarDatosUsuario(): void {
@@ -54,9 +65,9 @@ export class PacienteverpresionPage implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
@@ -65,12 +76,12 @@ export class PacienteverpresionPage implements OnInit {
     this.cargando = true;
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticación');
+      if (!token) throw new Error('Sin autenticacion');
 
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/presion/historial?dias=365`,
+  `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/historial?dias=365`,
         { headers }
       ).toPromise();
 
@@ -83,7 +94,7 @@ export class PacienteverpresionPage implements OnInit {
       this.calcularEstadisticas();
 
     } catch (error: any) {
-      console.error('❌ Error cargando mediciones:', error);
+      console.error('Error cargando mediciones:', error);
       await this.showToast('Error al cargar el historial', 'danger');
     } finally {
       this.cargando = false;
@@ -107,10 +118,8 @@ export class PacienteverpresionPage implements OnInit {
   calcularEstadisticas(): void {
     if (this.mediciones.length === 0) return;
 
-    // Última medición
     this.ultimaMedicion = this.mediciones[0];
 
-    // Promedios y rangos
     const sistolicas = this.mediciones.map(m => parseFloat(m.sistolica));
     const diastolicas = this.mediciones.map(m => parseFloat(m.diastolica));
     
@@ -124,18 +133,17 @@ export class PacienteverpresionPage implements OnInit {
     this.medicionExpandida = this.medicionExpandida === medicionId ? null : medicionId;
   }
 
-  // 🎯 Clasificación según AHA (American Heart Association)
   getClasificacion(sistolica: number, diastolica: number): string {
     if (!sistolica || !diastolica) return '';
     
     const sis = parseInt(String(sistolica));
     const dia = parseInt(String(diastolica));
 
-    if (sis > 180 || dia > 120) return '🚨 Crisis Hipertensiva';
-    if (sis >= 140 || dia >= 90) return 'Hipertensión Etapa 2';
-    if (sis >= 130 || dia >= 80) return 'Hipertensión Etapa 1';
-    if (sis >= 120 && dia < 80) return 'Presión Elevada';
-    return '✅ Normal';
+    if (sis > 180 || dia > 120) return 'Crisis Hipertensiva';
+    if (sis >= 140 || dia >= 90) return 'Hipertension Etapa 2';
+    if (sis >= 130 || dia >= 80) return 'Hipertension Etapa 1';
+    if (sis >= 120 && dia < 80) return 'Presion Elevada';
+    return 'Normal';
   }
 
   getClasificacionColor(sistolica: number, diastolica: number): string {
@@ -158,18 +166,18 @@ export class PacienteverpresionPage implements OnInit {
     const dia = parseInt(String(diastolica));
 
     if (sis > 180 || dia > 120) {
-      return '⚠️ Busca atención médica inmediata. Si presentas dolor de pecho, dolor de cabeza severo, confusión o dificultad para respirar, llama al 911.';
+      return 'Busca atencion medica inmediata. Si presentas dolor de pecho, dolor de cabeza severo, confusion o dificultad para respirar, llama al 911.';
     }
     if (sis >= 140 || dia >= 90) {
-      return 'Consulta con tu médico. Es posible que necesites medicación y cambios en el estilo de vida.';
+      return 'Consulta con tu medico. Es posible que necesites medicacion y cambios en el estilo de vida.';
     }
     if (sis >= 130 || dia >= 80) {
-      return 'Monitorea regularmente y realiza cambios en el estilo de vida: dieta saludable, ejercicio y reducción de sal.';
+      return 'Monitorea regularmente y realiza cambios en el estilo de vida: dieta saludable, ejercicio y reduccion de sal.';
     }
     if (sis >= 120 && dia < 80) {
-      return 'Tu presión está elevada. Mejora tus hábitos alimenticios y haz ejercicio regularmente.';
+      return 'Tu presion esta elevada. Mejora tus habitos alimenticios y haz ejercicio regularmente.';
     }
-    return '¡Excelente! Mantén tus hábitos saludables: dieta balanceada, ejercicio regular y control del estrés.';
+    return 'Excelente! Manten tus habitos saludables: dieta balanceada, ejercicio regular y control del estres.';
   }
 
   getPosicionLabel(posicion: string): string {
@@ -183,8 +191,8 @@ export class PacienteverpresionPage implements OnInit {
 
   async eliminarMedicion(medicion: any): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Eliminar Medición',
-      message: `¿Estás seguro de eliminar la medición de <strong>${medicion.sistolica}/${medicion.diastolica} mmHg</strong>?`,
+      header: 'Eliminar Medicion',
+      message: `Estas seguro de eliminar la medicion de <strong>${medicion.sistolica}/${medicion.diastolica} mmHg</strong>?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -195,11 +203,11 @@ export class PacienteverpresionPage implements OnInit {
               const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
               await this.http.delete(
-                `${environment.apiUrl}/nutricionapp-api/paciente/presion/${medicion.id}`,
+  `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/${medicion.id}`,
                 { headers }
               ).toPromise();
 
-              await this.showToast('Medición eliminada', 'success');
+              await this.showToast('Medicion eliminada', 'success');
               this.medicionExpandida = null;
               await this.cargarMediciones();
             } catch (error) {
@@ -212,10 +220,11 @@ export class PacienteverpresionPage implements OnInit {
     await alert.present();
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
+    this.submenuAbierto = null;
     const rutas: Record<string, string> = {
+      'paciente': '/paciente',
       'pacienteprincipal': '/pacienteprincipal',
       'pacienteverplan': '/pacienteverplan',
       'pacienteplanhistorial': '/pacienteplanhistorial',
@@ -234,22 +243,29 @@ export class PacienteverpresionPage implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
+    }
   }
 
   toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
   }
 
   async contactarWhatsApp(): Promise<void> {
-    const mensaje = `Hola, soy ${this.nombrePaciente}. Tengo una consulta sobre mi presión arterial.`;
+    const mensaje = `Hola, soy ${this.nombrePaciente}. Tengo una consulta sobre mi presion arterial.`;
     const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {

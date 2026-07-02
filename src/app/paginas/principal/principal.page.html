@@ -1,19 +1,13 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>NutriPA - Inicio de Sesión</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
     
-    <!-- 🖼️ Logo con efecto neumórfico -->
+    <!-- Logo con efecto neumorfico -->
     <ion-img src="assets/icon/NutriAI.png" class="logo" alt="Logo NutriPA"></ion-img>
     
-    <!-- 🧱 Formulario principal -->
+    <!-- Formulario principal -->
     <form (ngSubmit)="iniciarSesion()" [formGroup]="loginForm" novalidate>
       
-      <!-- ✉️ Campo Email -->
+      <!-- Campo Email -->
       <ion-item lines="none">
         <div class="neu-input-wrapper" 
              [class.has-value]="loginForm.get('email')?.value" 
@@ -31,30 +25,30 @@
             name="email"
             (ionBlur)="onBlur('email')"
             (ionChange)="onInputChange('email')"
-            aria-label="Correo electrónico"
+            aria-label="Correo electronico"
             aria-describedby="email-error">
           </ion-input>
           
           <!-- Label flotante -->
           <span class="neu-label" 
                 [class.floating]="loginForm.get('email')?.touched || loginForm.get('email')?.value">
-            Correo Electrónico
+            Correo Electronico
           </span>
         </div>
       </ion-item>
       
-      <!-- ⚠️ Mensajes de error para email -->
+      <!-- Mensajes de error para email -->
       <ion-text color="danger" class="error-message" 
                 id="email-error"
                 [class.show]="hasError('email')" 
                 role="alert">
         <small>
           <span *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido</span>
-          <span *ngIf="loginForm.get('email')?.errors?.['email']">Ingresa un correo válido</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email']">Ingresa un correo valido</span>
         </small>
       </ion-text>
 
-      <!-- 🔐 Campo Password -->
+      <!-- Campo Password -->
       <ion-item lines="none">
         <div class="neu-input-wrapper password-group" 
              [class.has-value]="loginForm.get('password')?.value"
@@ -72,40 +66,40 @@
             name="password"
             (ionBlur)="onBlur('password')"
             (ionChange)="onInputChange('password')"
-            aria-label="Contraseña"
+            aria-label="Contrasena"
             aria-describedby="password-error">
           </ion-input>
           
           <!-- Label flotante -->
           <span class="neu-label"
                 [class.floating]="loginForm.get('password')?.touched || loginForm.get('password')?.value">
-            Contraseña
+            Contrasena
           </span>
           
-          <!-- 👁️ Toggle visibilidad password -->
+          <!-- Toggle visibilidad password -->
           <button 
             type="button" 
             class="password-toggle" 
             (click)="togglePassword()"
-            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-label]="mostrarPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
             aria-pressed="{{mostrarPassword}}">
             <ion-icon [name]="mostrarPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
           </button>
         </div>
       </ion-item>
       
-      <!-- ⚠️ Mensajes de error para password -->
+      <!-- Mensajes de error para password -->
       <ion-text color="danger" class="error-message" 
                 id="password-error"
                 [class.show]="hasError('password')" 
                 role="alert">
         <small>
-          <span *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
-          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Mínimo 6 caracteres</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['required']">La contrasena es requerida</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Minimo 6 caracteres</span>
         </small>
       </ion-text>
 
-      <!-- 🔘 Botón de inicio de sesión -->
+      <!-- Boton de inicio de sesion -->
       <ion-button 
         expand="block" 
         type="submit" 
@@ -114,18 +108,18 @@
         aria-busy="{{cargando}}">
         
         <ion-spinner name="crescent" *ngIf="cargando" slot="start"></ion-spinner>
-        {{ cargando ? 'Iniciando...' : 'Iniciar Sesión' }}
+        {{ cargando ? 'Iniciando...' : 'Iniciar Sesion' }}
       </ion-button>
       
     </form>
     
-    <!-- 🔗 Links secundarios -->
+    <!-- Links secundarios -->
     <div class="links">
       <ion-text color="primary" (click)="irARegistro()" role="link" tabindex="0">
-        ¿No tienes cuenta? <strong>Regístrate</strong>
+        No tienes cuenta? <strong>Registrate</strong>
       </ion-text>
       <ion-text color="medium" (click)="recuperarPassword()" role="link" tabindex="0">
-        ¿Olvidaste tu contraseña?
+        Olvidaste tu contrasena?
       </ion-text>
     </div>
     

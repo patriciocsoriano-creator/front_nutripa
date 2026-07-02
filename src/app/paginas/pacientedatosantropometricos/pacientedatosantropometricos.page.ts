@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -12,13 +12,12 @@ import { environment } from 'src/environments/environment';
 })
 export class PacientedatosantropometricosPage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   cedulaPaciente: string = '';
+  isMobile = false;
 
-  // 📊 Datos
   datos: any = null;
   cargando = true;
 
@@ -30,8 +29,23 @@ export class PacientedatosantropometricosPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.detectMobile();
     this.cargarDatosUsuario();
     await this.cargarDatosAntropometricos();
+  }
+
+  private detectMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const wasMobile = this.isMobile;
+    this.detectMobile();
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.submenuAbierto = null;
+    }
   }
 
   private cargarDatosUsuario(): void {
@@ -40,9 +54,9 @@ export class PacientedatosantropometricosPage implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
@@ -51,7 +65,7 @@ export class PacientedatosantropometricosPage implements OnInit {
     this.cargando = true;
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticación');
+      if (!token) throw new Error('Sin autenticacion');
 
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
@@ -60,8 +74,6 @@ export class PacientedatosantropometricosPage implements OnInit {
         { headers }
       ).toPromise();
 
-      console.log('📏 [DATOS] Respuesta:', response);
-
       if (response?.error) {
         throw new Error(response.mensaje);
       }
@@ -69,14 +81,13 @@ export class PacientedatosantropometricosPage implements OnInit {
       this.datos = response.datos;
 
     } catch (error: any) {
-      console.error('❌ Error cargando datos:', error);
+      console.error('Error cargando datos:', error);
       await this.showToast('Error al cargar los datos', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
-  // 🎯 Clasificación de IMC
   getIMCClass(imc: number): string {
     if (imc < 18.5) return 'bajo-peso';
     if (imc < 25) return 'normal';
@@ -91,7 +102,6 @@ export class PacientedatosantropometricosPage implements OnInit {
     return 'Obesidad';
   }
 
-  // 🎯 Clasificación de peso
   getPesoStatus(peso: number, talla: number): string {
     if (!peso || !talla) return '';
     const imc = peso / (talla * talla);
@@ -104,7 +114,6 @@ export class PacientedatosantropometricosPage implements OnInit {
     return this.getIMCLabel(imc);
   }
 
-  // 🎯 Clasificación de cintura
   getCinturaStatus(cintura: number): string {
     if (cintura < 94) return 'normal';
     if (cintura < 102) return 'alto';
@@ -117,7 +126,6 @@ export class PacientedatosantropometricosPage implements OnInit {
     return 'Riesgo muy alto';
   }
 
-  // 🎯 Clasificación de presión arterial
   getPresionClass(presion: string): string {
     const [sist, dia] = presion.split('/').map(n => parseInt(n.trim()));
     if (sist < 120 && dia < 80) return 'normal';
@@ -134,22 +142,19 @@ export class PacientedatosantropometricosPage implements OnInit {
     return 'Crisis hipertensiva';
   }
 
-  // 🎯 Clasificación de frecuencia cardíaca
   getFrecuenciaLabel(fc: number): string {
     if (fc < 60) return 'Baja (bradicardia)';
     if (fc <= 100) return 'Normal';
     return 'Alta (taquicardia)';
   }
 
-  // 🎯 Clasificación de temperatura
   getTemperaturaLabel(temp: number): string {
     if (temp < 36) return 'Hipotermia';
     if (temp <= 37.5) return 'Normal';
-    if (temp <= 38) return 'Febrícula';
+    if (temp <= 38) return 'Febricula';
     return 'Fiebre';
   }
 
-  // 🎯 Clasificación de SpO2
   getSpo2Class(spo2: number): string {
     if (spo2 >= 95) return 'normal';
     if (spo2 >= 90) return 'bajo';
@@ -159,10 +164,9 @@ export class PacientedatosantropometricosPage implements OnInit {
   getSpo2Label(spo2: number): string {
     if (spo2 >= 95) return 'Normal';
     if (spo2 >= 90) return 'Bajo';
-    return 'Crítico';
+    return 'Critico';
   }
 
-  // 🎯 Clasificación de glucosa
   getGlucosaClass(glucosa: number): string {
     if (glucosa < 100) return 'normal';
     if (glucosa < 126) return 'pre-diabetes';
@@ -175,62 +179,63 @@ export class PacientedatosantropometricosPage implements OnInit {
     return 'Diabetes';
   }
 
-  // 💡 Recomendaciones según IMC
   getRecomendaciones(imc: number): string {
     if (imc < 18.5) {
       return `
-        <strong>🔵 Bajo peso (IMC: ${imc})</strong><br>
+        <strong>Bajo peso (IMC: ${imc})</strong><br>
         • Consulta con un nutricionista para aumentar peso de forma saludable<br>
-        • Incrementa la ingesta de proteínas y carbohidratos complejos<br>
+        • Incrementa la ingesta de proteinas y carbohidratos complejos<br>
         • Realiza ejercicios de fuerza para ganar masa muscular<br>
-        • Come porciones más frecuentes (5-6 comidas al día)
+        • Come porciones mas frecuentes (5-6 comidas al dia)
       `;
     }
     if (imc < 25) {
       return `
-        <strong>🟢 Peso normal (IMC: ${imc})</strong><br>
-        • ¡Excelente! Mantén tus hábitos saludables<br>
-        • Continúa con una dieta balanceada y ejercicio regular<br>
-        • Realiza chequeos médicos anuales<br>
-        • Mantén una hidratación adecuada (2L de agua al día)
+        <strong>Peso normal (IMC: ${imc})</strong><br>
+        • Excelente! Manten tus habitos saludables<br>
+        • Continua con una dieta balanceada y ejercicio regular<br>
+        • Realiza chequeos medicos anuales<br>
+        • Manten una hidratacion adecuada (2L de agua al dia)
       `;
     }
     if (imc < 30) {
       return `
-        <strong>🟡 Sobrepeso (IMC: ${imc})</strong><br>
-        • Consulta con un nutricionista para un plan de alimentación<br>
-        • Incrementa la actividad física (30 min diarios)<br>
-        • Reduce el consumo de azúcares y grasas saturadas<br>
+        <strong>Sobrepeso (IMC: ${imc})</strong><br>
+        • Consulta con un nutricionista para un plan de alimentacion<br>
+        • Incrementa la actividad fisica (30 min diarios)<br>
+        • Reduce el consumo de azucares y grasas saturadas<br>
         • Monitorea tu peso semanalmente
       `;
     }
     return `
-      <strong>🔴 Obesidad (IMC: ${imc})</strong><br>
-      • Consulta médica urgente para evaluar tu estado de salud<br>
+      <strong>Obesidad (IMC: ${imc})</strong><br>
+      • Consulta medica urgente para evaluar tu estado de salud<br>
       • Sigue un plan nutricional estricto supervisado por profesional<br>
-      • Realiza ejercicio físico adaptado a tu condición<br>
-      • Monitorea presión arterial y glucosa regularmente<br>
-      • Considera apoyo psicológico para cambios de hábitos
+      • Realiza ejercicio fisico adaptado a tu condicion<br>
+      • Monitorea presion arterial y glucosa regularmente<br>
+      • Considera apoyo psicologico para cambios de habitos
     `;
   }
 
-  // 💬 Contactar médico
   async contactarWhatsApp(): Promise<void> {
-    const mensaje = `Hola, soy ${this.nombrePaciente}. Me gustaría agendar una evaluación para registrar mis datos antropométricos.`;
+    const mensaje = `Hola, soy ${this.nombrePaciente}. Me gustaria agendar una evaluacion para registrar mis datos antropometricos.`;
     const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
+    this.submenuAbierto = null;
     const rutas: Record<string, string> = {
+      'paciente': '/paciente',
       'pacienteprincipal': '/pacienteprincipal',
       'pacienteverplan': '/pacienteverplan',
       'pacienteplanhistorial': '/pacienteplanhistorial',
       'pacientedatosantropometricos': '/pacientedatosantropometricos',
       'pacienteregistrarglucosa': '/pacienteregistrarglucosa',
+      'pacienteverglucosa': '/pacienteverglucosa',
       'pacienteregistrarpresion': '/pacienteregistrarpresion',
+      'pacienteverpresion': '/pacienteverpresion',
       'pacientehistorialmedico': '/pacientehistorialmedico',
       'pacientemensajes': '/pacientemensajes',
       'pacienteconfiguracion': '/pacienteconfiguracion'
@@ -241,16 +246,23 @@ export class PacientedatosantropometricosPage implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
+    }
   }
 
   toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
   }
 
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {

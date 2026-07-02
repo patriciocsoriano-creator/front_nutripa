@@ -1,6 +1,12 @@
 <ion-header [translucent]="true" class="main-header">
   <ion-toolbar class="header-toolbar">
     <div class="header-left">
+      <ion-icon
+        name="menu-outline"
+        class="mobile-menu-toggle"
+        (click)="toggleSidebar()">
+      </ion-icon>
+      
       <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
       <ion-title>Mis Niveles de Glucosa</ion-title>
     </div>
@@ -8,25 +14,30 @@
       <ion-button (click)="navegarA('pacienteregistrarglucosa')">
         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="cerrarSesion()">
+      <ion-button (click)="cerrarSesion()" color="danger">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+<div class="sidebar-overlay" 
+     [class.active]="sidebarOpen && isMobile" 
+     (click)="toggleSidebar()">
+</div>
+
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR -->
     <div class="sidebar" [class.open]="sidebarOpen">
+      
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="close-outline"></ion-icon>
       </div>
       
       <div class="user-info">
         <ion-avatar>
-          <img src="assets/avatar-patient.png" alt="Paciente" />
+          <img src="assets/icon/paciente.png" alt="Paciente" />
         </ion-avatar>
         <div class="user-details">
           <h4>{{nombrePaciente}}</h4>
@@ -40,13 +51,13 @@
           <span>Inicio</span>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'plan'">
           <div class="menu-link" (click)="toggleSubmenu('plan')">
             <ion-icon name="nutrition-outline"></ion-icon>
             <span>Plan Nutricional</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'plan'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'plan'">
+          <ul class="submenu">
             <li (click)="navegarA('pacienteverplan')">
               <ion-icon name="eye-outline"></ion-icon>
               <span>Ver mi plan</span>
@@ -58,16 +69,16 @@
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'seguimiento'">
           <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
             <ion-icon name="pulse-outline"></ion-icon>
             <span>Seguimiento Salud</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'seguimiento'"></ion-icon>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'seguimiento'">
+          <ul class="submenu">
             <li (click)="navegarA('pacientedatosantropometricos')">
               <ion-icon name="body-outline"></ion-icon>
-              <span>Datos antropométricos</span>
+              <span>Datos antropometricos</span>
             </li>
             <li (click)="navegarA('pacienteregistrarglucosa')">
               <ion-icon name="water-outline"></ion-icon>
@@ -79,7 +90,7 @@
             </li>
             <li (click)="navegarA('pacienteregistrarpresion')">
               <ion-icon name="heart-outline"></ion-icon>
-              <span>Registrar presión arterial</span>
+              <span>Registrar presion arterial</span>
             </li>
             <li (click)="navegarA('pacienteverpresion')">
               <ion-icon name="water-outline"></ion-icon>
@@ -87,62 +98,59 @@
             </li>
             <li (click)="navegarA('pacientehistorialmedico')">
               <ion-icon name="analytics-outline"></ion-icon>
-              <span>Historial médico</span>
+              <span>Historial medico</span>
             </li>
           </ul>
         </li>
 
-        <li class="menu-item-with-submenu">
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'comunicacion'">
           <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
             <ion-icon name="chatbubbles-outline"></ion-icon>
-            <span>Comunicación</span>
-            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'comunicacion'"></ion-icon>
+            <span>Comunicacion</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
           </div>
-          <ul class="submenu" [class.active]="submenuAbierto === 'comunicacion'">
+          <ul class="submenu">
             <li (click)="contactarWhatsApp()">
               <ion-icon name="logo-whatsapp"></ion-icon>
-              <span>WhatsApp médico</span>
+              <span>WhatsApp medico</span>
             </li>
             <li (click)="navegarA('pacientemensajes')">
               <ion-icon name="mail-outline"></ion-icon>
-              <span>Mensajes al médico</span>
+              <span>Mensajes al medico</span>
             </li>
           </ul>
         </li>
 
         <li (click)="navegarA('pacienteconfiguracion')">
           <ion-icon name="settings-outline"></ion-icon>
-          <span>Configuración</span>
+          <span>Configuracion</span>
         </li>
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
     <div class="main-content">
       
-      <!-- Header de la página -->
       <div class="page-header">
         <div class="page-title">
-          <ion-icon name="water-outline"></ion-icon>
+          <ion-icon name="water-outline" class="page-icon"></ion-icon>
           <div>
             <h1>Historial de Glucosa</h1>
-            <p>Revisa todas tus mediciones de glucosa registradas</p>
+            <p class="subtitle">Revisa todas tus mediciones de glucosa registradas</p>
           </div>
         </div>
         <ion-button color="primary" (click)="navegarA('pacienteregistrarglucosa')">
           <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-          Nueva Medición
+          Nueva Medicion
         </ion-button>
       </div>
 
-      <!-- Estadísticas rápidas -->
       <div class="stats-grid" *ngIf="mediciones.length > 0">
         <div class="stat-card">
           <div class="stat-icon-wrapper ultima">
             <ion-icon name="water-outline"></ion-icon>
           </div>
           <div class="stat-info">
-            <label>Última medición</label>
+            <label>Ultima medicion</label>
             <span class="stat-value" [ngClass]="getClasificacionColor(ultimaMedicion?.valor_glucosa)">
               {{ultimaMedicion?.valor_glucosa || '--'}} <small>mg/dL</small>
             </span>
@@ -172,7 +180,7 @@
             <span class="stat-value">
               {{minGlucosa}} - {{maxGlucosa}}
             </span>
-            <small>Mínimo - Máximo</small>
+            <small>Minimo - Maximo</small>
           </div>
         </div>
 
@@ -188,17 +196,16 @@
         </div>
       </div>
 
-      <!-- Filtros -->
       <div class="filtros-bar" *ngIf="mediciones.length > 0">
         <ion-segment [(ngModel)]="filtroPeriodo" (ionChange)="aplicarFiltro()" scrollable>
           <ion-segment-button value="todos">
             <ion-label>Todos</ion-label>
           </ion-segment-button>
           <ion-segment-button value="7">
-            <ion-label>7 días</ion-label>
+            <ion-label>7 dias</ion-label>
           </ion-segment-button>
           <ion-segment-button value="30">
-            <ion-label>30 días</ion-label>
+            <ion-label>30 dias</ion-label>
           </ion-segment-button>
           <ion-segment-button value="90">
             <ion-label>3 meses</ion-label>
@@ -206,24 +213,21 @@
         </ion-segment>
       </div>
 
-      <!-- Loading -->
       <div *ngIf="cargando" class="loading-state">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
         <p>Cargando historial de glucosa...</p>
       </div>
 
-      <!-- Sin mediciones -->
       <div *ngIf="!cargando && medicionesFiltradas.length === 0" class="empty-state">
         <ion-icon name="water-outline" class="empty-icon"></ion-icon>
         <h3>Sin mediciones registradas</h3>
-        <p>Aún no has registrado ninguna medición de glucosa. Comienza registrando tu primera medición.</p>
+        <p>Aun no has registrado ninguna medicion de glucosa. Comienza registrando tu primera medicion.</p>
         <ion-button color="primary" (click)="navegarA('pacienteregistrarglucosa')">
           <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-          Registrar primera medición
+          Registrar primera medicion
         </ion-button>
       </div>
 
-      <!-- Lista de mediciones con detalle expandible -->
       <div *ngIf="!cargando && medicionesFiltradas.length > 0" class="mediciones-container">
         
         <div 
@@ -232,7 +236,6 @@
           [class.expanded]="medicionExpandida === med.id"
           [ngClass]="getClasificacionColor(med.valor_glucosa)">
           
-          <!-- Resumen de la medición (siempre visible) -->
           <div class="medicion-resumen" (click)="toggleDetalle(med.id)">
             <div class="medicion-fecha">
               <div class="fecha-dia">{{med.fecha_hora | date:'dd'}}</div>
@@ -260,7 +263,6 @@
             </div>
           </div>
 
-          <!-- Detalle completo (se expande al hacer clic) -->
           <div class="medicion-detalle" *ngIf="medicionExpandida === med.id">
             <div class="detalle-grid">
               <div class="detalle-item">
@@ -274,7 +276,7 @@
               <div class="detalle-item">
                 <label>
                   <ion-icon name="time-outline"></ion-icon>
-                  Momento de la medición
+                  Momento de la medicion
                 </label>
                 <span>{{getMomentoLabel(med.tipo_momento)}}</span>
               </div>
@@ -292,7 +294,7 @@
               <div class="detalle-item">
                 <label>
                   <ion-icon name="checkmark-circle-outline"></ion-icon>
-                  Clasificación
+                  Clasificacion
                 </label>
                 <span class="clasificacion-badge" [ngClass]="getClasificacionColor(med.valor_glucosa)">
                   {{getClasificacion(med.valor_glucosa, med.tipo_momento)}}
@@ -300,7 +302,6 @@
               </div>
             </div>
 
-            <!-- Notas si existen -->
             <div class="detalle-notas" *ngIf="med.observaciones">
               <label>
                 <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
@@ -309,16 +310,14 @@
               <p>{{med.observaciones}}</p>
             </div>
 
-            <!-- Recomendación según el valor -->
             <div class="detalle-recomendacion" [ngClass]="getClasificacionColor(med.valor_glucosa)">
               <ion-icon name="bulb-outline"></ion-icon>
               <div>
-                <strong>Recomendación:</strong>
+                <strong>Recomendacion:</strong>
                 <p>{{getRecomendacion(med.valor_glucosa, med.tipo_momento)}}</p>
               </div>
             </div>
 
-            <!-- Acciones -->
             <div class="detalle-actions">
               <ion-button fill="outline" size="small" color="danger" (click)="eliminarMedicion(med); $event.stopPropagation()">
                 <ion-icon name="trash-outline" slot="start"></ion-icon>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -12,19 +12,15 @@ import { environment } from 'src/environments/environment';
 })
 export class PacienteregistrarpresionPage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   cedulaPaciente: string = '';
+  isMobile = false;
 
-  // 📊 Estadísticas
   estadisticas: any = null;
-  
-  // 🆕 ÚLTIMA MEDICIÓN (LA QUE FALTABA)
   ultimaMedicion: any = null;
 
-  // 🆕 Nueva medición
   nuevaMedicion = {
     sistolica: null as number | null,
     diastolica: null as number | null,
@@ -35,16 +31,15 @@ export class PacienteregistrarpresionPage implements OnInit {
     notas: ''
   };
 
-  // 📋 Historial
   mediciones: any[] = [];
   cargandoHistorial = false;
   diasHistorial = 7;
   
   filtrosDias = [
     { dias: 1, label: 'Hoy' },
-    { dias: 7, label: '7 días' },
-    { dias: 15, label: '15 días' },
-    { dias: 30, label: '30 días' }
+    { dias: 7, label: '7 dias' },
+    { dias: 15, label: '15 dias' },
+    { dias: 30, label: '30 dias' }
   ];
 
   constructor(
@@ -55,9 +50,24 @@ export class PacienteregistrarpresionPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.detectMobile();
     this.cargarDatosUsuario();
     this.inicializarFechaHora();
     await this.cargarHistorial();
+  }
+
+  private detectMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const wasMobile = this.isMobile;
+    this.detectMobile();
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.submenuAbierto = null;
+    }
   }
 
   private cargarDatosUsuario(): void {
@@ -66,9 +76,9 @@ export class PacienteregistrarpresionPage implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
@@ -79,7 +89,6 @@ export class PacienteregistrarpresionPage implements OnInit {
     this.nuevaMedicion.fecha_hora = fecha;
   }
 
-  // 📋 Cargar historial (ahora también calcula la última medición)
   async cargarHistorial(): Promise<void> {
     this.cargandoHistorial = true;
     try {
@@ -89,19 +98,17 @@ export class PacienteregistrarpresionPage implements OnInit {
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
       const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/presion/historial?dias=${this.diasHistorial}`,
+        `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/historial?dias=${this.diasHistorial}`,
         { headers }
       ).toPromise();
 
       if (response?.error === false) {
         this.mediciones = response.mediciones || [];
         this.estadisticas = response.estadisticas || null;
-        
-        // 🆕 CALCULAR ÚLTIMA MEDICIÓN (la primera del array porque viene ordenada DESC)
         this.ultimaMedicion = this.mediciones.length > 0 ? this.mediciones[0] : null;
       }
     } catch (error) {
-      console.error('❌ Error cargando historial:', error);
+      console.error('Error cargando historial:', error);
       this.ultimaMedicion = null;
       this.estadisticas = null;
     } finally {
@@ -109,21 +116,19 @@ export class PacienteregistrarpresionPage implements OnInit {
     }
   }
 
-  // 🔄 Cambiar filtro de días
   async cambiarFiltroDias(dias: number): Promise<void> {
     this.diasHistorial = dias;
     await this.cargarHistorial();
   }
 
-  // 🫀 Registrar nueva medición
   async registrarPresion(): Promise<void> {
     if (!this.nuevaMedicion.sistolica || !this.nuevaMedicion.diastolica) {
-      await this.showToast('Ingresa los valores de presión sistólica y diastólica', 'danger');
+      await this.showToast('Ingresa los valores de presion sistolica y diastolica', 'danger');
       return;
     }
 
     if (this.nuevaMedicion.sistolica <= this.nuevaMedicion.diastolica) {
-      await this.showToast('La presión sistólica debe ser mayor que la diastólica', 'danger');
+      await this.showToast('La presion sistolica debe ser mayor que la diastolica', 'danger');
       return;
     }
 
@@ -135,7 +140,7 @@ export class PacienteregistrarpresionPage implements OnInit {
       });
 
       const response: any = await this.http.post(
-        `${environment.apiUrl}/nutricionapp-api/paciente/presion/registrar`,
+  `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/registrar`,
         {
           sistolica: this.nuevaMedicion.sistolica,
           diastolica: this.nuevaMedicion.diastolica,
@@ -152,36 +157,33 @@ export class PacienteregistrarpresionPage implements OnInit {
         throw new Error(response.mensaje);
       }
 
-      // Mostrar mensaje de clasificación
       const color = response.clasificacion === 'normal' ? 'success' : 
                     response.clasificacion === 'elevada' || response.clasificacion === 'alta_etapa1' ? 'warning' : 'danger';
       
       await this.showToast(
-        `✅ ${response.mensaje_clasificacion || 'Medición registrada'}`, 
+        `${response.mensaje_clasificacion || 'Medicion registrada'}`, 
         color, 
         4000
       );
 
-      // Si es crisis hipertensiva, mostrar alerta especial
       if (response.clasificacion === 'crisis') {
         const alert = await this.alertCtrl.create({
-          header: '⚠️ Crisis Hipertensiva',
-          message: 'Tu presión arterial está extremadamente alta. <strong>Busca atención médica inmediata.</strong><br><br>Si presentas dolor de pecho, dolor de cabeza severo, confusión o dificultad para respirar, llama al 911.',
+          header: 'Crisis Hipertensiva',
+          message: 'Tu presion arterial esta extremadamente alta. <strong>Busca atencion medica inmediata.</strong><br><br>Si presentas dolor de pecho, dolor de cabeza severo, confusion o dificultad para respirar, llama al 911.',
           buttons: ['Entendido']
         });
         await alert.present();
       }
 
       this.limpiarFormulario();
-      await this.cargarHistorial(); // Recarga todo incluyendo últimaMedicion
+      await this.cargarHistorial();
 
     } catch (error: any) {
-      console.error('❌ Error registrando:', error);
-      await this.showToast(error?.message || 'Error al registrar la medición', 'danger');
+      console.error('Error registrando:', error);
+      await this.showToast(error?.message || 'Error al registrar la medicion', 'danger');
     }
   }
 
-  // 🧹 Limpiar formulario
   limpiarFormulario(): void {
     this.nuevaMedicion = {
       sistolica: null,
@@ -195,11 +197,10 @@ export class PacienteregistrarpresionPage implements OnInit {
     this.inicializarFechaHora();
   }
 
-  // 🗑️ Eliminar medición
   async eliminarMedicion(medicion: any): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Eliminar Medición',
-      message: `¿Estás seguro de eliminar la medición de <strong>${medicion.sistolica}/${medicion.diastolica} mmHg</strong>?`,
+      header: 'Eliminar Medicion',
+      message: `Estas seguro de eliminar la medicion de <strong>${medicion.sistolica}/${medicion.diastolica} mmHg</strong>?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -210,12 +211,12 @@ export class PacienteregistrarpresionPage implements OnInit {
               const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
               await this.http.delete(
-                `${environment.apiUrl}/nutricionapp-api/paciente/presion/${medicion.id}`,
+                `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/${medicion.id}`,
                 { headers }
               ).toPromise();
 
-              await this.showToast('Medición eliminada', 'success');
-              await this.cargarHistorial(); // Recarga todo
+              await this.showToast('Medicion eliminada', 'success');
+              await this.cargarHistorial();
             } catch (error) {
               await this.showToast('Error al eliminar', 'danger');
             }
@@ -226,18 +227,17 @@ export class PacienteregistrarpresionPage implements OnInit {
     await alert.present();
   }
 
-  // 🎯 Clasificación de presión arterial (AHA)
   getClasificacion(sistolica: number, diastolica: number): string {
     if (!sistolica || !diastolica) return '';
     
     const sis = parseInt(String(sistolica));
     const dia = parseInt(String(diastolica));
 
-    if (sis > 180 || dia > 120) return '🚨 Crisis Hipertensiva';
-    if (sis >= 140 || dia >= 90) return 'Hipertensión Etapa 2';
-    if (sis >= 130 || dia >= 80) return 'Hipertensión Etapa 1';
-    if (sis >= 120 && dia < 80) return 'Presión Elevada';
-    return '✅ Normal';
+    if (sis > 180 || dia > 120) return 'Crisis Hipertensiva';
+    if (sis >= 140 || dia >= 90) return 'Hipertension Etapa 2';
+    if (sis >= 130 || dia >= 80) return 'Hipertension Etapa 1';
+    if (sis >= 120 && dia < 80) return 'Presion Elevada';
+    return 'Normal';
   }
 
   getClasificacionColor(sistolica: number, diastolica: number): string {
@@ -253,7 +253,6 @@ export class PacienteregistrarpresionPage implements OnInit {
     return 'valor-normal';
   }
 
-  // 🎯 Label de posición
   getPosicionLabel(posicion: string): string {
     const labels: Record<string, string> = {
       'sentado': 'Sentado',
@@ -263,10 +262,11 @@ export class PacienteregistrarpresionPage implements OnInit {
     return labels[posicion] || posicion;
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
+    this.submenuAbierto = null;
     const rutas: Record<string, string> = {
+      'paciente': '/paciente',
       'pacienteprincipal': '/pacienteprincipal',
       'pacienteverplan': '/pacienteverplan',
       'pacienteplanhistorial': '/pacienteplanhistorial',
@@ -285,22 +285,29 @@ export class PacienteregistrarpresionPage implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
+    }
   }
 
   toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
   }
 
   async contactarWhatsApp(): Promise<void> {
-    const mensaje = `Hola, soy ${this.nombrePaciente}. Tengo una consulta sobre mi presión arterial.`;
+    const mensaje = `Hola, soy ${this.nombrePaciente}. Tengo una consulta sobre mi presion arterial.`;
     const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {

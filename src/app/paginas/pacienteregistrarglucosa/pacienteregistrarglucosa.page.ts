@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -12,16 +12,14 @@ import { environment } from 'src/environments/environment';
 })
 export class PacienteregistrarglucosaPage implements OnInit {
 
-  // 👤 Datos del paciente
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   cedulaPaciente: string = '';
+  isMobile = false;
 
-  // 📊 Estadísticas
   estadisticas: any = null;
 
-  // 🆕 Nueva medición
   nuevaMedicion = {
     valor_glucosa: null as number | null,
     tipo_momento: 'ayunas',
@@ -29,16 +27,15 @@ export class PacienteregistrarglucosaPage implements OnInit {
     notas: ''
   };
 
-  // 📋 Historial
   mediciones: any[] = [];
   cargandoHistorial = false;
   diasHistorial = 7;
   
   filtrosDias = [
     { dias: 1, label: 'Hoy' },
-    { dias: 7, label: '7 días' },
-    { dias: 15, label: '15 días' },
-    { dias: 30, label: '30 días' }
+    { dias: 7, label: '7 dias' },
+    { dias: 15, label: '15 dias' },
+    { dias: 30, label: '30 dias' }
   ];
 
   constructor(
@@ -49,10 +46,25 @@ export class PacienteregistrarglucosaPage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.detectMobile();
     this.cargarDatosUsuario();
     this.inicializarFechaHora();
     await this.cargarEstadisticas();
     await this.cargarHistorial();
+  }
+
+  private detectMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const wasMobile = this.isMobile;
+    this.detectMobile();
+    if (wasMobile && !this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.submenuAbierto = null;
+    }
   }
 
   private cargarDatosUsuario(): void {
@@ -61,21 +73,19 @@ export class PacienteregistrarglucosaPage implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.nombrePaciente = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Paciente';
-        this.cedulaPaciente = user.cedula || 'Sin cédula';
+        this.cedulaPaciente = user.cedula || 'Sin cedula';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn('Error parseando usuario');
       }
     }
   }
 
   private inicializarFechaHora(): void {
     const ahora = new Date();
-    // Formato para input datetime-local: YYYY-MM-DDTHH:mm
     const fecha = ahora.toISOString().slice(0, 16);
     this.nuevaMedicion.fecha_hora = fecha;
   }
 
-  // 📊 Cargar estadísticas
   private async cargarEstadisticas(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -92,11 +102,10 @@ export class PacienteregistrarglucosaPage implements OnInit {
         this.estadisticas = response.estadisticas;
       }
     } catch (error) {
-      console.error('❌ Error cargando estadísticas:', error);
+      console.error('Error cargando estadisticas:', error);
     }
   }
 
-  // 📋 Cargar historial
   async cargarHistorial(): Promise<void> {
     this.cargandoHistorial = true;
     try {
@@ -114,22 +123,20 @@ export class PacienteregistrarglucosaPage implements OnInit {
         this.mediciones = response.mediciones || [];
       }
     } catch (error) {
-      console.error('❌ Error cargando historial:', error);
+      console.error('Error cargando historial:', error);
     } finally {
       this.cargandoHistorial = false;
     }
   }
 
-  // 🔄 Cambiar filtro de días
   async cambiarFiltroDias(dias: number): Promise<void> {
     this.diasHistorial = dias;
     await this.cargarHistorial();
   }
 
-  // 🩸 Registrar nueva medición
   async registrarGlucosa(): Promise<void> {
     if (!this.nuevaMedicion.valor_glucosa || this.nuevaMedicion.valor_glucosa <= 0) {
-      await this.showToast('Ingresa un valor de glucosa válido', 'danger');
+      await this.showToast('Ingresa un valor de glucosa valido', 'danger');
       return;
     }
 
@@ -155,28 +162,25 @@ export class PacienteregistrarglucosaPage implements OnInit {
         throw new Error(response.mensaje);
       }
 
-      // Mostrar mensaje de clasificación
       const color = response.clasificacion === 'normal' ? 'success' : 
                     response.clasificacion === 'pre-diabetes' ? 'warning' : 'danger';
       
       await this.showToast(
-        `✅ ${response.mensaje_clasificacion || 'Medición registrada'}`, 
+        `${response.mensaje_clasificacion || 'Medicion registrada'}`, 
         color, 
         4000
       );
 
-      // Limpiar formulario y recargar
       this.limpiarFormulario();
       await this.cargarEstadisticas();
       await this.cargarHistorial();
 
     } catch (error: any) {
-      console.error('❌ Error registrando:', error);
-      await this.showToast(error?.message || 'Error al registrar la medición', 'danger');
+      console.error('Error registrando:', error);
+      await this.showToast(error?.message || 'Error al registrar la medicion', 'danger');
     }
   }
 
-  // 🧹 Limpiar formulario
   limpiarFormulario(): void {
     this.nuevaMedicion = {
       valor_glucosa: null,
@@ -187,11 +191,10 @@ export class PacienteregistrarglucosaPage implements OnInit {
     this.inicializarFechaHora();
   }
 
-  // 🗑️ Eliminar medición
   async eliminarMedicion(medicion: any): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Eliminar Medición',
-      message: `¿Estás seguro de eliminar la medición de <strong>${medicion.valor_glucosa} mg/dL</strong>?`,
+      header: 'Eliminar Medicion',
+      message: `Estas seguro de eliminar la medicion de <strong>${medicion.valor_glucosa} mg/dL</strong>?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -206,7 +209,7 @@ export class PacienteregistrarglucosaPage implements OnInit {
                 { headers }
               ).toPromise();
 
-              await this.showToast('Medición eliminada', 'success');
+              await this.showToast('Medicion eliminada', 'success');
               await this.cargarEstadisticas();
               await this.cargarHistorial();
             } catch (error) {
@@ -219,19 +222,18 @@ export class PacienteregistrarglucosaPage implements OnInit {
     await alert.present();
   }
 
-  // 🎯 Clasificación de glucosa
   getClasificacion(valor: number, tipoMomento: string): string {
     if (!valor) return '';
     
     if (tipoMomento === 'ayunas') {
-      if (valor >= 126) return '⚠️ Elevada';
-      if (valor >= 100) return '⚡ Pre-diabetes';
-      if (valor >= 70) return '✅ Normal';
-      return '⚠️ Baja';
+      if (valor >= 126) return 'Elevada';
+      if (valor >= 100) return 'Pre-diabetes';
+      if (valor >= 70) return 'Normal';
+      return 'Baja';
     } else {
-      if (valor >= 200) return '⚠️ Elevada';
-      if (valor >= 140) return '⚡ Elevada';
-      return '✅ Normal';
+      if (valor >= 200) return 'Elevada';
+      if (valor >= 140) return 'Elevada';
+      return 'Normal';
     }
   }
 
@@ -243,7 +245,6 @@ export class PacienteregistrarglucosaPage implements OnInit {
     return 'valor-bajo';
   }
 
-  // 🎯 Icono del momento
   getMomentoIcono(tipo: string): string {
     const iconos: Record<string, string> = {
       'ayunas': 'sunny-outline',
@@ -256,12 +257,11 @@ export class PacienteregistrarglucosaPage implements OnInit {
     return iconos[tipo] || 'time-outline';
   }
 
-  // 🎯 Label del momento
   getMomentoLabel(tipo: string): string {
     const labels: Record<string, string> = {
       'ayunas': 'En ayunas',
       'antes_comida': 'Antes de comer',
-      'despues_comida': 'Después de comer',
+      'despues_comida': 'Despues de comer',
       'postprandial': 'Postprandial',
       'antes_dormir': 'Antes de dormir',
       'otro': 'Otro momento'
@@ -269,16 +269,19 @@ export class PacienteregistrarglucosaPage implements OnInit {
     return labels[tipo] || tipo;
   }
 
-  // 🧭 Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
+    this.submenuAbierto = null;
     const rutas: Record<string, string> = {
+      'paciente': '/paciente',
       'pacienteprincipal': '/pacienteprincipal',
       'pacienteverplan': '/pacienteverplan',
       'pacienteplanhistorial': '/pacienteplanhistorial',
       'pacientedatosantropometricos': '/pacientedatosantropometricos',
       'pacienteregistrarglucosa': '/pacienteregistrarglucosa',
+      'pacienteverglucosa': '/pacienteverglucosa',
       'pacienteregistrarpresion': '/pacienteregistrarpresion',
+      'pacienteverpresion': '/pacienteverpresion',
       'pacientehistorialmedico': '/pacientehistorialmedico',
       'pacientemensajes': '/pacientemensajes',
       'pacienteconfiguracion': '/pacienteconfiguracion'
@@ -289,10 +292,17 @@ export class PacienteregistrarglucosaPage implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+    if (!this.sidebarOpen) {
+      this.submenuAbierto = null;
+    }
   }
 
   toggleSubmenu(item: string): void {
-    this.submenuAbierto = this.submenuAbierto === item ? null : item;
+    if (this.submenuAbierto === item) {
+      this.submenuAbierto = null;
+    } else {
+      this.submenuAbierto = item;
+    }
   }
 
   async contactarWhatsApp(): Promise<void> {
@@ -303,8 +313,8 @@ export class PacienteregistrarglucosaPage implements OnInit {
 
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Cerrar Sesion',
+      message: 'Estas seguro de que deseas cerrar sesion?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {

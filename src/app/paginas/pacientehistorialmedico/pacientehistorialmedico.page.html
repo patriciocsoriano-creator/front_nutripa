@@ -1,0 +1,317 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon
+        name="menu-outline"
+        class="mobile-menu-toggle"
+        (click)="toggleSidebar()">
+      </ion-icon>
+      
+      <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
+      <ion-title>Historial Medico</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()" color="danger">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<div class="sidebar-overlay" 
+     [class.active]="sidebarOpen && isMobile" 
+     (click)="toggleSidebar()">
+</div>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <div class="sidebar" [class.open]="sidebarOpen">
+      
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
+      
+      <div class="user-info">
+        <ion-avatar>
+          <img src="assets/icon/paciente.png" alt="Paciente" />
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombrePaciente}}</h4>
+          <p>{{cedulaPaciente}}</p>
+        </div>
+      </div>
+
+      <ul>
+        <li (click)="navegarA('paciente')">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Inicio</span>
+        </li>
+
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'plan'">
+          <div class="menu-link" (click)="toggleSubmenu('plan')">
+            <ion-icon name="nutrition-outline"></ion-icon>
+            <span>Plan Nutricional</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li (click)="navegarA('pacienteverplan')">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>Ver mi plan</span>
+            </li>
+            <li (click)="navegarA('pacienteplanhistorial')">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Historial de planes</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'seguimiento'">
+          <div class="menu-link" (click)="toggleSubmenu('seguimiento')">
+            <ion-icon name="pulse-outline"></ion-icon>
+            <span>Seguimiento Salud</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li (click)="navegarA('pacientedatosantropometricos')">
+              <ion-icon name="body-outline"></ion-icon>
+              <span>Datos antropometricos</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Registrar glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteverglucosa')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de glucosa</span>
+            </li>
+            <li (click)="navegarA('pacienteregistrarpresion')">
+              <ion-icon name="heart-outline"></ion-icon>
+              <span>Registrar presion arterial</span>
+            </li>
+            <li (click)="navegarA('pacienteverpresion')">
+              <ion-icon name="water-outline"></ion-icon>
+              <span>Ver niveles de presion arterial</span>
+            </li>
+            <li (click)="navegarA('pacientehistorialmedico')" class="active">
+              <ion-icon name="analytics-outline"></ion-icon>
+              <span>Historial medico</span>
+            </li>
+          </ul>
+        </li>
+
+        <li class="menu-item-with-submenu" [class.open]="submenuAbierto === 'comunicacion'">
+          <div class="menu-link" (click)="toggleSubmenu('comunicacion')">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <span>Comunicacion</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow"></ion-icon>
+          </div>
+          <ul class="submenu">
+            <li (click)="contactarWhatsApp()">
+              <ion-icon name="logo-whatsapp"></ion-icon>
+              <span>WhatsApp medico</span>
+            </li>
+            <li (click)="navegarA('pacientemensajes')">
+              <ion-icon name="mail-outline"></ion-icon>
+              <span>Mensajes al medico</span>
+            </li>
+          </ul>
+        </li>
+
+        <li (click)="navegarA('pacienteconfiguracion')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Configuracion</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      
+      <div class="page-header">
+        <div class="page-title">
+          <ion-icon name="medical-outline" class="page-icon"></ion-icon>
+          <div>
+            <h1>Historial Medico</h1>
+            <p class="subtitle">Evoluciones, citas y mediciones registradas por tu medico</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando historial medico...</p>
+      </div>
+
+      <div *ngIf="!cargando && !historial" class="empty-state">
+        <ion-icon name="medical-outline" class="empty-icon"></ion-icon>
+        <h3>Sin historial medico registrado</h3>
+        <p>Aun no tienes informacion medica registrada. Contacta a tu medico para que actualice tu historial.</p>
+        <ion-button color="primary" (click)="contactarWhatsApp()">
+          <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+          Contactar medico
+        </ion-button>
+      </div>
+
+      <div *ngIf="!cargando && historial" class="historial-container">
+        
+        <!-- Tabs -->
+        <ion-segment [(ngModel)]="tabActiva" (ionChange)="cambiarTab()">
+          <ion-segment-button value="evoluciones">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <ion-label>Evoluciones</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="citas">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ion-label>Citas</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="glucosa">
+            <ion-icon name="water-outline"></ion-icon>
+            <ion-label>Glucosa</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- TAB: EVOLUCIONES -->
+        <div *ngIf="tabActiva === 'evoluciones'" class="tab-content">
+          
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              <h2>Evoluciones Registradas</h2>
+            </div>
+            <div class="card-content">
+              <div *ngIf="!historial.evoluciones || historial.evoluciones.length === 0" class="no-data">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <p>No hay evoluciones registradas aun.</p>
+              </div>
+              <div *ngIf="historial.evoluciones && historial.evoluciones.length > 0" class="timeline">
+                <div *ngFor="let evolucion of historial.evoluciones" class="timeline-item">
+                  <div class="timeline-marker"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <strong>{{evolucion.fecha | date:'dd/MM/yyyy'}}</strong>
+                      <ion-badge [color]="getAdherenciaColor(evolucion.adherencia)">
+                        {{evolucion.adherencia | titlecase}}
+                      </ion-badge>
+                    </div>
+                    <div class="timeline-body">
+                      <div *ngIf="evolucion.objetivos" class="timeline-section">
+                        <label>Objetivos alcanzados:</label>
+                        <p>{{evolucion.objetivos}}</p>
+                      </div>
+                      <div *ngIf="evolucion.observaciones" class="timeline-section">
+                        <label>Observaciones clinicas:</label>
+                        <p>{{evolucion.observaciones}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: CITAS -->
+        <div *ngIf="tabActiva === 'citas'" class="tab-content">
+          
+          <div class="info-card">
+            <div class="card-header">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <h2>Citas Agendadas</h2>
+            </div>
+            <div class="card-content">
+              <div *ngIf="!historial.citas || historial.citas.length === 0" class="no-data">
+                <ion-icon name="calendar-clear-outline"></ion-icon>
+                <p>No hay citas agendadas.</p>
+              </div>
+              <div *ngIf="historial.citas && historial.citas.length > 0" class="citas-list">
+                <div *ngFor="let cita of historial.citas" class="cita-item" [class.pasada]="esCitaPasada(cita.fecha_hora)">
+                  <div class="cita-date">
+                    <div class="cita-day">{{formatearFechaCita(cita.fecha_hora, 'day')}}</div>
+                    <div class="cita-month">{{formatearFechaCita(cita.fecha_hora, 'month')}}</div>
+                    <div class="cita-time">{{formatearFechaCita(cita.fecha_hora, 'time')}}</div>
+                  </div>
+                  <div class="cita-info">
+                    <div class="cita-header">
+                      <ion-badge [color]="getTipoCitaColor(cita.tipo)">{{getTipoCitaLabel(cita.tipo)}}</ion-badge>
+                      <ion-badge *ngIf="esCitaPasada(cita.fecha_hora)" color="medium">Pasada</ion-badge>
+                    </div>
+                    <p class="cita-motivo" *ngIf="cita.motivo">{{cita.motivo}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: GLUCOSA -->
+        <div *ngIf="tabActiva === 'glucosa'" class="tab-content">
+  
+  <!-- Métricas actuales -->
+  <div class="metrics-grid" *ngIf="historial.ultima_medicion_glucosa">
+    <div class="metric-card">
+      <div class="metric-icon" [ngClass]="getGlucosaColor(historial.ultima_medicion_glucosa.valor_glucosa)">
+        <ion-icon name="water-outline"></ion-icon>
+      </div>
+      <div class="metric-info">
+        <label>Última Medición</label>
+        <span class="metric-value">{{historial.ultima_medicion_glucosa.valor_glucosa || '-'}} mg/dL</span>
+        <small>{{getMomentoLabel(historial.ultima_medicion_glucosa.tipo_momento)}}</small>
+      </div>
+    </div>
+  </div>
+
+          <div class="info-card">
+    <div class="card-header">
+      <ion-icon name="analytics-outline"></ion-icon>
+      <h2>Historial de Mediciones de Glucosa</h2>
+    </div>
+    <div class="card-content">
+      <div *ngIf="!historial.mediciones_glucosa || historial.mediciones_glucosa.length === 0" class="no-data">
+        <ion-icon name="water-outline"></ion-icon>
+        <p>No hay mediciones de glucosa registradas.</p>
+      </div>
+      <div *ngIf="historial.mediciones_glucosa && historial.mediciones_glucosa.length > 0" class="glucosa-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Momento</th>
+              <th>Valor</th>
+              <th>Estado</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let med of historial.mediciones_glucosa">
+              <td>{{med.fecha | date:'dd/MM/yyyy HH:mm'}}</td>
+              <td>
+                <ion-badge color="primary">{{getMomentoLabel(med.tipo_momento)}}</ion-badge>
+              </td>
+              <td>
+                <span [ngClass]="getGlucosaColor(med.valor_glucosa)">
+                  {{med.valor_glucosa}} {{med.unidad}}
+                </span>
+              </td>
+              <td>
+                <ion-badge [color]="getEstadoGlucosaColor(med.valor_glucosa)">
+                  {{getGlucosaEstado(med.valor_glucosa)}}
+                </ion-badge>
+              </td>
+              <td>{{med.observaciones || '-'}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

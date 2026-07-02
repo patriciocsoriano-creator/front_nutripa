@@ -350,109 +350,6 @@ $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-
-  .stat-card {
-    background: white;
-    border-radius: $radius-lg;
-    padding: 20px;
-    box-shadow: $shadow-md;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: $shadow-lg;
-    }
-
-    .stat-icon-wrapper {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      ion-icon {
-        font-size: 1.6rem;
-        color: white;
-      }
-
-      &.ultima { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-      &.promedio { background: linear-gradient(135deg, #10b981, #059669); }
-      &.rango { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-      &.total { background: linear-gradient(135deg, #f59e0b, #d97706); }
-    }
-
-    .stat-info {
-      flex: 1;
-      min-width: 0;
-
-      label {
-        display: block;
-        font-size: 0.75rem;
-        color: $text-secondary;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-      }
-
-      .stat-value {
-        display: block;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: $text-primary;
-        line-height: 1.2;
-
-        small {
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: $text-secondary;
-        }
-
-        &.valor-normal { color: #10b981; }
-        &.valor-medio { color: #f59e0b; }
-        &.valor-alto { color: #ef4444; }
-        &.valor-bajo { color: #3b82f6; }
-      }
-
-      small {
-        display: block;
-        font-size: 0.75rem;
-        color: $text-secondary;
-        margin-top: 4px;
-      }
-    }
-  }
-}
-
-.filtros-bar {
-  margin-bottom: 24px;
-}
-
-ion-segment {
-  --background: white;
-  border-radius: 12px;
-  padding: 6px;
-  box-shadow: $shadow-sm;
-
-  ion-segment-button {
-    --indicator-color: #{$primary-color};
-    --color: #{$text-secondary};
-    --color-checked: white;
-    font-weight: 500;
-    text-transform: none;
-    border-radius: 8px;
-  }
-}
-
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -471,306 +368,215 @@ ion-segment {
   }
 }
 
-.empty-state {
+.config-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-  padding: 40px 20px;
-
-  .empty-icon {
-    font-size: 5rem;
-    color: #cbd5e1;
-    margin-bottom: 20px;
-  }
-
-  h3 {
-    font-size: 1.5rem;
-    color: $text-primary;
-    margin: 0 0 12px;
-    font-weight: 600;
-  }
-
-  p {
-    font-size: 1rem;
-    color: $text-secondary;
-    max-width: 400px;
-    margin: 0 0 24px;
-    line-height: 1.6;
-  }
+  gap: 20px;
 }
 
-.mediciones-container {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.medicion-card {
+.info-card {
   background: white;
   border-radius: $radius-lg;
   box-shadow: $shadow-md;
   overflow: hidden;
-  transition: all 0.3s ease;
-  border-left: 4px solid $border-color;
 
-  &:hover {
-    box-shadow: $shadow-lg;
-  }
-
-  &.valor-normal { border-left-color: #10b981; }
-  &.valor-medio { border-left-color: #f59e0b; }
-  &.valor-alto { border-left-color: #ef4444; }
-  &.valor-bajo { border-left-color: #3b82f6; }
-
-  &.expanded {
-    box-shadow: $shadow-lg;
-  }
-
-  .medicion-resumen {
+  .card-header {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 18px 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 2px solid $border-color;
 
-    &:hover {
-      background: #f8fafc;
+    ion-icon {
+      font-size: 1.8rem;
+      color: $primary-color;
     }
 
-    .medicion-fecha {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 60px;
-      padding: 8px 10px;
-      background: linear-gradient(135deg, $primary-color, $secondary-color);
-      border-radius: 10px;
-      color: white;
-
-      .fecha-dia {
-        font-size: 1.4rem;
-        font-weight: 700;
-        line-height: 1;
-      }
-
-      .fecha-mes {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 2px;
-      }
-
-      .fecha-hora {
-        font-size: 0.7rem;
-        opacity: 0.8;
-        margin-top: 4px;
-      }
-    }
-
-    .medicion-valor-container {
-      flex: 1;
-      min-width: 0;
-
-      .valor-principal {
-        font-size: 1.8rem;
-        font-weight: 700;
-        line-height: 1;
-        margin-bottom: 4px;
-
-        &.valor-normal { color: #10b981; }
-        &.valor-medio { color: #f59e0b; }
-        &.valor-alto { color: #ef4444; }
-        &.valor-bajo { color: #3b82f6; }
-      }
-
-      .valor-unidad {
-        font-size: 0.75rem;
-        color: $text-secondary;
-        margin-bottom: 4px;
-      }
-
-      .valor-clasificacion {
-        display: inline-block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 3px 10px;
-        border-radius: 12px;
-
-        &.valor-normal { background: #dcfce7; color: #166534; }
-        &.valor-medio { background: #fef3c7; color: #92400e; }
-        &.valor-alto { background: #fee2e2; color: #991b1b; }
-        &.valor-bajo { background: #dbeafe; color: #1e40af; }
-      }
-    }
-
-    .medicion-momento {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: $text-secondary;
-
-      ion-icon {
-        font-size: 1.1rem;
-        color: $primary-color;
-      }
-    }
-
-    .medicion-expand-icon {
-      ion-icon {
-        font-size: 1.3rem;
-        color: $text-secondary;
-        transition: transform 0.3s ease;
-      }
+    h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: $text-primary;
     }
   }
 
-  .medicion-detalle {
-    padding: 0 20px 20px;
-    border-top: 1px solid $border-color;
-    animation: slideDown 0.3s ease;
+  .card-content {
+    padding: 24px;
+  }
+}
 
-    .detalle-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-top: 18px;
-      margin-bottom: 18px;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 
-      .detalle-item {
-        padding: 12px 14px;
-        background: #f8fafc;
-        border-radius: 10px;
+  &.full-width {
+    grid-column: 1 / -1;
+  }
 
-        label {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.75rem;
-          color: $text-secondary;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-          margin-bottom: 6px;
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-primary;
 
-          ion-icon {
-            font-size: 0.9rem;
-            color: $primary-color;
-          }
-        }
-
-        span {
-          display: block;
-          font-size: 0.9rem;
-          color: $text-primary;
-          font-weight: 500;
-
-          &.valor-destacado {
-            font-size: 1.2rem;
-            font-weight: 700;
-
-            &.valor-normal { color: #10b981; }
-            &.valor-medio { color: #f59e0b; }
-            &.valor-alto { color: #ef4444; }
-            &.valor-bajo { color: #3b82f6; }
-          }
-
-          &.clasificacion-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-
-            &.valor-normal { background: #dcfce7; color: #166534; }
-            &.valor-medio { background: #fef3c7; color: #92400e; }
-            &.valor-alto { background: #fee2e2; color: #991b1b; }
-            &.valor-bajo { background: #dbeafe; color: #1e40af; }
-          }
-        }
-      }
+    ion-icon {
+      font-size: 1.1rem;
+      color: $secondary-color;
     }
 
-    .detalle-notas {
-      padding: 14px;
-      background: #f0f9ff;
-      border-radius: 10px;
-      margin-bottom: 14px;
+    .badge-bloqueado {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+  }
 
-      label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.8rem;
-        color: $text-secondary;
-        font-weight: 600;
-        margin-bottom: 6px;
+  input,
+  select {
+    padding: 12px 14px;
+    border: 1.5px solid $border-color;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: $text-primary;
+    background: white;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
 
-        ion-icon {
-          font-size: 1rem;
-          color: $primary-color;
-        }
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: $text-primary;
-        line-height: 1.5;
-      }
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(10, 77, 104, 0.1);
     }
 
-    .detalle-recomendacion {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 10px;
-      margin-bottom: 14px;
+    &:disabled {
+      background: #f8fafc;
+      color: $text-muted;
+      cursor: not-allowed;
+    }
+  }
 
-      ion-icon {
-        font-size: 1.3rem;
-        flex-shrink: 0;
-        margin-top: 2px;
-      }
+  .input-bloqueado {
+    background: #f8fafc !important;
+    color: $text-secondary !important;
+    cursor: not-allowed !important;
+  }
 
-      strong {
-        display: block;
-        font-size: 0.9rem;
-        margin-bottom: 4px;
-      }
+  .form-hint {
+    font-size: 0.75rem;
+    color: $text-muted;
+    margin-top: 4px;
+  }
+}
 
-      p {
-        margin: 0;
-        font-size: 0.85rem;
-        line-height: 1.5;
-      }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
 
-      &.valor-normal { background: #dcfce7; color: #166534; }
-      &.valor-medio { background: #fef3c7; color: #92400e; }
-      &.valor-alto { background: #fee2e2; color: #991b1b; }
-      &.valor-bajo { background: #dbeafe; color: #1e40af; }
+.loading-ubicaciones,
+.error-ubicaciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+
+  ion-icon {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 0.95rem;
+    color: $text-secondary;
+  }
+}
+
+.error-ubicaciones {
+  ion-icon {
+    color: #ef4444;
+  }
+}
+
+.nota-seguridad {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: $primary-color;
+    flex-shrink: 0;
+  }
+
+  div {
+    strong {
+      display: block;
+      font-size: 0.95rem;
+      color: $text-primary;
+      margin-bottom: 4px;
     }
 
-    .detalle-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: $text-secondary;
+      line-height: 1.5;
     }
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
+.password-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  ion-icon {
+    font-size: 1.2rem;
   }
-  to {
-    opacity: 1;
-    max-height: 1000px;
+
+  &.coincide {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.no-coincide {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 0;
+
+  ion-button {
+    min-width: 150px;
   }
 }
 
@@ -1175,192 +981,40 @@ ion-segment {
         font-size: 0.82rem !important;
       }
     }
+  }
+
+  .info-card {
+    border-radius: 16px !important;
+
+    .card-header {
+      padding: 16px 18px !important;
+
+      ion-icon {
+        font-size: 1.5rem !important;
+      }
+
+      h2 {
+        font-size: 1.1rem !important;
+      }
+    }
+
+    .card-content {
+      padding: 18px !important;
+    }
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .action-buttons {
+    flex-direction: column !important;
+    gap: 10px !important;
 
     ion-button {
       width: 100%;
-      --border-radius: 12px;
-    }
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-    margin-bottom: 16px !important;
-
-    .stat-card {
-      padding: 16px !important;
-      border-radius: 14px !important;
-
-      .stat-icon-wrapper {
-        width: 44px !important;
-        height: 44px !important;
-        border-radius: 12px !important;
-
-        ion-icon {
-          font-size: 1.3rem !important;
-        }
-      }
-
-      .stat-info {
-        label {
-          font-size: 0.7rem !important;
-        }
-
-        .stat-value {
-          font-size: 1.2rem !important;
-        }
-
-        small {
-          font-size: 0.7rem !important;
-        }
-      }
-    }
-  }
-
-  ion-segment {
-    margin-bottom: 16px !important;
-    border-radius: 14px !important;
-    padding: 4px !important;
-
-    ion-segment-button {
-      font-size: 0.82rem !important;
-      min-height: 38px !important;
-    }
-  }
-
-  .medicion-card {
-    border-radius: 16px !important;
-
-    .medicion-resumen {
-      flex-wrap: wrap !important;
-      gap: 12px !important;
-      padding: 14px !important;
-
-      .medicion-fecha {
-        min-width: 54px !important;
-        padding: 6px 8px !important;
-
-        .fecha-dia {
-          font-size: 1.2rem !important;
-        }
-
-        .fecha-mes {
-          font-size: 0.7rem !important;
-        }
-
-        .fecha-hora {
-          font-size: 0.65rem !important;
-        }
-      }
-
-      .medicion-valor-container {
-        .valor-principal {
-          font-size: 1.5rem !important;
-        }
-
-        .valor-unidad {
-          font-size: 0.7rem !important;
-        }
-
-        .valor-clasificacion {
-          font-size: 0.7rem !important;
-          padding: 2px 8px !important;
-        }
-      }
-
-      .medicion-momento {
-        font-size: 0.78rem !important;
-
-        ion-icon {
-          font-size: 1rem !important;
-        }
-      }
-
-      .medicion-expand-icon {
-        ion-icon {
-          font-size: 1.1rem !important;
-        }
-      }
-    }
-
-    .medicion-detalle {
-      padding: 0 14px 14px !important;
-
-      .detalle-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-        margin-top: 14px !important;
-        margin-bottom: 14px !important;
-
-        .detalle-item {
-          padding: 10px 12px !important;
-
-          label {
-            font-size: 0.7rem !important;
-          }
-
-          span {
-            font-size: 0.85rem !important;
-
-            &.valor-destacado {
-              font-size: 1.1rem !important;
-            }
-          }
-        }
-      }
-
-      .detalle-notas {
-        padding: 12px !important;
-        margin-bottom: 12px !important;
-
-        label {
-          font-size: 0.75rem !important;
-        }
-
-        p {
-          font-size: 0.85rem !important;
-        }
-      }
-
-      .detalle-recomendacion {
-        padding: 12px !important;
-        margin-bottom: 12px !important;
-
-        ion-icon {
-          font-size: 1.1rem !important;
-        }
-
-        strong {
-          font-size: 0.85rem !important;
-        }
-
-        p {
-          font-size: 0.8rem !important;
-        }
-      }
-
-      .detalle-actions {
-        ion-button {
-          width: 100%;
-        }
-      }
-    }
-  }
-
-  .empty-state {
-    padding: 40px 20px !important;
-    min-height: 50vh !important;
-
-    .empty-icon {
-      font-size: 4rem !important;
-    }
-
-    h3 {
-      font-size: 1.2rem !important;
-    }
-
-    p {
-      font-size: 0.9rem !important;
+      min-width: auto;
     }
   }
 }
@@ -1380,15 +1034,7 @@ ion-segment {
     }
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr !important;
-  }
-
   .page-header .page-title h1 {
     font-size: 1.15rem !important;
-  }
-
-  .medicion-card .medicion-resumen .medicion-valor-container .valor-principal {
-    font-size: 1.3rem !important;
   }
 }

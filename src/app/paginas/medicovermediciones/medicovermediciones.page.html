@@ -1,0 +1,336 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Mediciones del Paciente</ion-title>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="volver()" title="Volver">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreDoctor.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando mediciones...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!cargando && errorCarga" class="error-state">
+        <ion-card class="error-card">
+          <ion-card-content>
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            <p>{{ errorCarga }}</p>
+            <ion-button fill="outline" (click)="cargarMediciones()">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Reintentar
+            </ion-button>
+            <ion-button fill="clear" (click)="volver()">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Volver
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Datos cargados -->
+      <div *ngIf="!cargando && !errorCarga && paciente" class="mediciones-container">
+        
+        <!-- Header del paciente -->
+        <div class="paciente-header">
+          <ion-avatar class="paciente-avatar">
+            <img src="assets/icon/paciente.png" alt="Paciente">
+          </ion-avatar>
+          <div class="paciente-info">
+            <h2>{{ paciente.nombres }} {{ paciente.apellidos }}</h2>
+            <p class="paciente-meta">
+              <ion-icon name="card-outline"></ion-icon>
+              <strong>Cédula:</strong> {{ paciente.cedula || paciente.numero_identificacion || '---' }}
+              <span class="separator">•</span>
+              <ion-icon name="calendar-outline"></ion-icon>
+              <strong>Edad:</strong> {{ paciente.edad || '---' }} años
+            </p>
+          </div>
+          <div class="paciente-actions">
+            <ion-button fill="outline" color="light" (click)="volver()">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Volver al Paciente
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <ion-segment [(ngModel)]="tabActiva" (ionChange)="cambiarTab()">
+          <ion-segment-button value="glucosa">
+            <ion-icon name="water-outline"></ion-icon>
+            <ion-label>Glucosa</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="presion">
+            <ion-icon name="heart-outline"></ion-icon>
+            <ion-label>Presión Arterial</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- TAB: GLUCOSA -->
+        <div *ngIf="tabActiva === 'glucosa'" class="tab-content">
+          
+          <!-- Estadísticas -->
+          <div class="stats-grid" *ngIf="estadisticasGlucosa">
+            <div class="stat-card">
+              <div class="stat-icon promedio">
+                <ion-icon name="analytics-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Promedio</label>
+                <span class="stat-value">{{ estadisticasGlucosa.promedio | number:'1.0-0' }} mg/dL</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon minimo">
+                <ion-icon name="trending-down-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Mínimo</label>
+                <span class="stat-value">{{ estadisticasGlucosa.minimo }} mg/dL</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon maximo">
+                <ion-icon name="trending-up-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Máximo</label>
+                <span class="stat-value">{{ estadisticasGlucosa.maximo }} mg/dL</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon total">
+                <ion-icon name="documents-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Total registros</label>
+                <span class="stat-value">{{ estadisticasGlucosa.total }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="filtros-section">
+            <ion-button 
+              *ngFor="let filtro of filtrosDias" 
+              [fill]="diasHistorial === filtro.dias ? 'solid' : 'outline'"
+              size="small"
+              (click)="cambiarFiltroDias(filtro.dias)">
+              {{ filtro.label }}
+            </ion-button>
+          </div>
+
+          <!-- Lista de mediciones -->
+          <div *ngIf="cargandoGlucosa" class="loading-state">
+            <ion-spinner name="crescent" color="primary"></ion-spinner>
+            <p>Cargando mediciones de glucosa...</p>
+          </div>
+
+          <div *ngIf="!cargandoGlucosa && medicionesGlucosa.length === 0" class="empty-state">
+            <ion-icon name="water-outline" class="empty-icon"></ion-icon>
+            <p>No hay mediciones de glucosa registradas</p>
+          </div>
+
+          <div *ngIf="!cargandoGlucosa && medicionesGlucosa.length > 0" class="mediciones-list">
+            <div *ngFor="let med of medicionesGlucosa" class="medicion-item">
+              <div class="medicion-header">
+                <div class="medicion-icon" [ngClass]="getClasificacionGlucosaColor(med.valor_glucosa)">
+                  <ion-icon [name]="getMomentoIcono(med.tipo_momento)"></ion-icon>
+                </div>
+                <div class="medicion-info">
+                  <div class="medicion-valor" [ngClass]="getClasificacionGlucosaColor(med.valor_glucosa)">
+                    {{ med.valor_glucosa }} mg/dL
+                  </div>
+                  <div class="medicion-momento">
+                    {{ getMomentoLabel(med.tipo_momento) }}
+                  </div>
+                  <div class="medicion-fecha">
+                    {{ med.fecha_hora | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                </div>
+                <div class="medicion-clasificacion" [ngClass]="getClasificacionGlucosaColor(med.valor_glucosa)">
+                  {{ getClasificacionGlucosa(med.valor_glucosa, med.tipo_momento) }}
+                </div>
+              </div>
+              <div *ngIf="med.notas" class="medicion-notas">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <span>{{ med.notas }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: PRESIÓN -->
+        <div *ngIf="tabActiva === 'presion'" class="tab-content">
+          
+          <!-- Estadísticas -->
+          <div class="stats-grid" *ngIf="estadisticasPresion">
+            <div class="stat-card">
+              <div class="stat-icon promedio">
+                <ion-icon name="analytics-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Promedio</label>
+                <span class="stat-value">{{ estadisticasPresion.promedio_sistolica | number:'1.0-0' }}/{{ estadisticasPresion.promedio_diastolica | number:'1.0-0' }}</span>
+                <small>mmHg</small>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon rango">
+                <ion-icon name="swap-vertical-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Rango</label>
+                <span class="stat-value">{{ estadisticasPresion.minimo_sistolica }} - {{ estadisticasPresion.maximo_sistolica }}</span>
+                <small>Sistólica</small>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon total">
+                <ion-icon name="documents-outline"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <label>Total registros</label>
+                <span class="stat-value">{{ estadisticasPresion.total }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="filtros-section">
+            <ion-button 
+              *ngFor="let filtro of filtrosDias" 
+              [fill]="diasHistorial === filtro.dias ? 'solid' : 'outline'"
+              size="small"
+              (click)="cambiarFiltroDias(filtro.dias)">
+              {{ filtro.label }}
+            </ion-button>
+          </div>
+
+          <!-- Lista de mediciones -->
+          <div *ngIf="cargandoPresion" class="loading-state">
+            <ion-spinner name="crescent" color="primary"></ion-spinner>
+            <p>Cargando mediciones de presión...</p>
+          </div>
+
+          <div *ngIf="!cargandoPresion && medicionesPresion.length === 0" class="empty-state">
+            <ion-icon name="heart-outline" class="empty-icon"></ion-icon>
+            <p>No hay mediciones de presión registradas</p>
+          </div>
+
+          <div *ngIf="!cargandoPresion && medicionesPresion.length > 0" class="mediciones-list">
+            <div 
+              *ngFor="let med of medicionesPresion" 
+              class="medicion-item"
+              [ngClass]="getClasificacionPresionColor(med.sistolica, med.diastolica)">
+              
+              <div class="medicion-header">
+                <div class="medicion-icon" [ngClass]="getClasificacionPresionColor(med.sistolica, med.diastolica)">
+                  <ion-icon name="heart-outline"></ion-icon>
+                </div>
+                <div class="medicion-info">
+                  <div class="medicion-valor" [ngClass]="getClasificacionPresionColor(med.sistolica, med.diastolica)">
+                    {{ med.sistolica }}/{{ med.diastolica }} <small>mmHg</small>
+                  </div>
+                  <div class="medicion-clasificacion" [ngClass]="getClasificacionPresionColor(med.sistolica, med.diastolica)">
+                    {{ getClasificacionPresion(med.sistolica, med.diastolica) }}
+                  </div>
+                  <div class="medicion-fecha">
+                    {{ med.fecha_hora | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                </div>
+                <div class="medicion-pulso" *ngIf="med.pulso">
+                  <ion-icon name="pulse-outline"></ion-icon>
+                  <span>{{ med.pulso }} lpm</span>
+                </div>
+              </div>
+              
+              <div class="medicion-detalles" *ngIf="med.posicion || med.brazo || med.notas">
+                <div class="detalle-chips">
+                  <span class="chip" *ngIf="med.posicion">
+                    <ion-icon name="body-outline"></ion-icon>
+                    {{ getPosicionLabel(med.posicion) }}
+                  </span>
+                  <span class="chip" *ngIf="med.brazo">
+                    <ion-icon name="fitness-outline"></ion-icon>
+                    Brazo {{ med.brazo }}
+                  </span>
+                </div>
+                <div *ngIf="med.notas" class="medicion-notas">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                  <span>{{ med.notas }}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</ion-content>

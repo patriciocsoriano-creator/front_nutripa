@@ -223,6 +223,23 @@ const routes: Routes = [
     path: 'enfermeria-configuracion',
     loadChildren: () => import('./paginas/enfermeria-configuracion/enfermeria-configuracion.module').then( m => m.EnfermeriaConfiguracionPageModule)
   },
+  {
+    path: 'pacientehistorialmedico',
+    loadChildren: () => import('./paginas/pacientehistorialmedico/pacientehistorialmedico.module').then( m => m.PacientehistorialmedicoPageModule)
+  },
+  {
+    path: 'pacienteconfiguracion',
+    loadChildren: () => import('./paginas/pacienteconfiguracion/pacienteconfiguracion.module').then( m => m.PacienteconfiguracionPageModule)
+  },
+  {
+    path: 'medicoverregistro',
+    loadChildren: () => import('./paginas/medicoverregistro/medicoverregistro.module').then( m => m.MedicoverregistroPageModule)
+  },
+  {
+    path: 'medicovermediciones',
+    loadChildren: () => import('./paginas/medicovermediciones/medicovermediciones.module').then( m => m.MedicovermedicionesPageModule)
+  },
+ 
   
 ];
 

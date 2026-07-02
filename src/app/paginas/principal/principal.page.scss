@@ -1,7 +1,5 @@
-// src/theme/variables.scss o principal.page.scss
-
 // ============================================
-// 🎨 VARIABLES NEUMÓRFICAS (Personalizables)
+// VARIABLES NEUMORFICAS (Personalizables)
 // ============================================
 $neu-bg: #e0e5ec;
 $neu-bg-dark: #bec3cf;
@@ -16,7 +14,7 @@ $neu-radius-md: 20px;
 $neu-radius-sm: 15px;
 $neu-radius-xs: 10px;
 
-// Sombras neumórficas
+// Sombras neumorficas
 $neu-shadow-out: 
   20px 20px 60px $neu-bg-dark,
   -20px -20px 60px $neu-bg-light;
@@ -38,7 +36,7 @@ $neu-shadow-btn-active:
   inset -4px -4px 10px $neu-bg-light;
 
 // ============================================
-// 🔄 RESET Y BASE
+// RESET Y BASE
 // ============================================
 * {
   margin: 0;
@@ -46,7 +44,7 @@ $neu-shadow-btn-active:
   box-sizing: border-box;
 }
 
-// Forzar fondo neumórfico en todo el contenido
+// Forzar fondo neumorfico en todo el contenido
 ion-content {
   --background: #{$neu-bg};
   --padding-start: 16px;
@@ -56,20 +54,21 @@ ion-content {
 }
 
 // ============================================
-// 📦 LOGIN CONTAINER
+// LOGIN CONTAINER - DESKTOP (por defecto arriba)
 // ============================================
 .login-container {
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 40px 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeIn 0.5s ease-out;
 }
 
 // ============================================
-// 🖼️ LOGO
+// LOGO
 // ============================================
 .logo {
   width: 100px;
@@ -93,7 +92,7 @@ ion-content {
 }
 
 // ============================================
-// 🧱 FORMULARIO NEUMÓRFICO
+// FORMULARIO NEUMORFICO
 // ============================================
 form {
   width: 100%;
@@ -109,7 +108,7 @@ form {
 }
 
 // ============================================
-// 📝 ION-ITEM PERSONALIZADO
+// ION-ITEM PERSONALIZADO
 // ============================================
 ion-item {
   --background: transparent;
@@ -125,7 +124,7 @@ ion-item {
   position: relative;
 }
 
-// Contenedor neumórfico para el input
+// Contenedor neumorfico para el input
 .neu-input-wrapper {
   position: relative;
   background: $neu-bg;
@@ -150,11 +149,11 @@ ion-item {
 }
 
 // ============================================
-// ⌨️ ION-INPUT PERSONALIZADO
+// ION-INPUT PERSONALIZADO
 // ============================================
 ion-input {
   --padding-start: 52px;
-  --padding-end: 16px;
+  --padding-end: 52px;
   --padding-top: 20px;
   --padding-bottom: 20px;
   --color: #{$neu-text-primary};
@@ -173,7 +172,7 @@ ion-input {
 }
 
 // ============================================
-// 🏷️ FLOATING LABEL NEUMÓRFICO
+// FLOATING LABEL NEUMORFICO
 // ============================================
 .neu-label {
   position: absolute;
@@ -199,7 +198,7 @@ ion-input {
 }
 
 // ============================================
-// 🔍 ICONO DENTRO DEL INPUT
+// ICONO DENTRO DEL INPUT
 // ============================================
 .input-icon {
   position: absolute;
@@ -221,7 +220,7 @@ ion-input {
 }
 
 // ============================================
-// 👁️ TOGGLE PASSWORD
+// TOGGLE PASSWORD
 // ============================================
 .password-toggle {
   position: absolute;
@@ -260,7 +259,7 @@ ion-input {
 }
 
 // ============================================
-// ⚠️ MENSAJES DE ERROR
+// MENSAJES DE ERROR
 // ============================================
 ion-text[color="danger"] {
   display: block;
@@ -282,14 +281,14 @@ ion-text[color="danger"] {
     gap: 4px;
 
     &::before {
-      content: "•";
+      content: "\2022";
       color: $neu-error;
     }
   }
 }
 
 // ============================================
-// 🔘 BOTÓN NEUMÓRFICO (ion-button)
+// BOTON NEUMORFICO (ion-button)
 // ============================================
 ion-button {
   --background: #{$neu-bg};
@@ -358,7 +357,7 @@ ion-button {
 }
 
 // ============================================
-// 🔗 LINKS INFERIORES
+// LINKS INFERIORES
 // ============================================
 .links {
   width: 100%;
@@ -383,44 +382,82 @@ ion-button {
 }
 
 // ============================================
-// 🎭 ANIMACIONES Y EFECTOS
+// ANIMACIONES Y EFECTOS
 // ============================================
-@keyframes neu-pulse {
-  0%, 100% { box-shadow: $neu-shadow-out; }
-  50% { box-shadow: 
-    25px 25px 70px $neu-bg-dark,
-    -25px -25px 70px $neu-bg-light;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.login-container {
-  animation: neu-pulse 3s ease-in-out infinite;
-}
-
 // ============================================
-// 📱 RESPONSIVE - MÓVILES
+// RESPONSIVE - TABLETS (max-width: 768px)
 // ============================================
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   ion-content {
-    --padding-start: 12px;
-    --padding-end: 12px;
-    --padding-top: 12px;
-    --padding-bottom: 12px;
+    --padding-start: 20px;
+    --padding-end: 20px;
   }
 
   .login-container {
-    padding: 12px 0;
+    padding: 30px 0;
+  }
+
+  .logo {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 22px;
+  }
+
+  form {
+    padding: 36px 28px;
+    border-radius: $neu-radius-md;
+  }
+
+  ion-item {
+    margin-bottom: 22px;
+  }
+}
+
+// ============================================
+// RESPONSIVE - MOVILES (max-width: 480px) - CENTRADO TOTAL
+// ============================================
+@media (max-width: 480px) {
+  // Forzar que ion-content ocupe toda la pantalla
+  ion-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    min-height: 100vh;
+  }
+
+  // El contenedor debe ocupar toda la altura y centrar su contenido
+  .login-container {
+    min-height: 100vh;
+    max-width: 100%;
+    padding: 0 16px;
+    justify-content: center;
   }
 
   .logo {
     width: 80px;
     height: 80px;
     margin-bottom: 20px;
+    padding: 6px;
   }
 
   form {
-    padding: 32px 24px;
+    padding: 28px 20px;
     border-radius: $neu-radius-md;
+    box-shadow: 
+      15px 15px 40px $neu-bg-dark,
+      -15px -15px 40px $neu-bg-light;
   }
 
   ion-item {
@@ -453,50 +490,167 @@ ion-button {
     width: 32px;
     height: 32px;
     right: 10px;
+
+    ion-icon {
+      font-size: 18px;
+    }
   }
 
   ion-button {
     --padding-top: 16px;
     --padding-bottom: 16px;
     font-size: 15px;
+    --border-radius: 12px;
   }
 
   .links {
     gap: 12px;
     margin-top: 20px;
+    padding: 0 8px;
 
     ion-text {
       font-size: 13px;
     }
   }
+
+  ion-text[color="danger"] {
+    font-size: 11px;
+    margin: -12px 0 12px 16px;
+  }
 }
 
 // ============================================
-// 📱 MÓVILES MUY PEQUEÑOS (< 360px)
+// RESPONSIVE - MOVILES MUY PEQUENOS (max-width: 360px) - CENTRADO
 // ============================================
 @media (max-width: 360px) {
-  form {
-    padding: 28px 20px;
-    border-radius: $neu-radius-md;
+  ion-content {
+    min-height: 100vh;
   }
 
-  .neu-label {
-    left: 44px;
+  .login-container {
+    min-height: 100vh;
+    padding: 0 12px;
+    justify-content: center;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 16px;
+  }
+
+  form {
+    padding: 24px 16px;
+    border-radius: 18px;
+    box-shadow: 
+      12px 12px 30px $neu-bg-dark,
+      -12px -12px 30px $neu-bg-light;
+  }
+
+  ion-item {
+    margin-bottom: 16px;
   }
 
   ion-input {
     --padding-start: 44px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .neu-label {
+    left: 44px;
+    font-size: 14px;
+
+    &.floating {
+      font-size: 10px;
+    }
   }
 
   .input-icon {
     left: 12px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .password-toggle {
+    width: 28px;
+    height: 28px;
+    right: 8px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+
+  ion-button {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-size: 14px;
+  }
+
+  .links {
+    gap: 10px;
+    margin-top: 16px;
+
+    ion-text {
+      font-size: 12px;
+    }
   }
 }
 
 // ============================================
-// ♿ ACCESIBILIDAD
+// RESPONSIVE - LANDSCAPE MOVIL (max-height: 500px) - CENTRADO
 // ============================================
-// Focus visible para navegación con teclado
+@media (max-height: 500px) and (orientation: landscape) {
+  ion-content {
+    min-height: 100vh;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+
+  .login-container {
+    min-height: 100vh;
+    padding: 0 16px;
+    justify-content: center;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+
+  form {
+    padding: 20px 24px;
+  }
+
+  ion-item {
+    margin-bottom: 14px;
+  }
+
+  ion-input {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+  }
+
+  ion-button {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+
+  .links {
+    margin-top: 12px;
+    gap: 8px;
+  }
+}
+
+// ============================================
+// ACCESIBILIDAD
+// ============================================
+// Focus visible para navegacion con teclado
 :focus-visible {
   outline: 2px solid $neu-text-accent;
   outline-offset: 2px;
@@ -514,18 +668,3 @@ ion-button {
     scroll-behavior: auto !important;
   }
 }
-
-// ============================================
-// 🎨 DARK MODE (Opcional - Descomentar si lo usas)
-// ============================================
-/*
-@media (prefers-color-scheme: dark) {
-  $neu-bg: #2a2d3a;
-  $neu-bg-dark: #1a1d26;
-  $neu-bg-light: #3a3d4a;
-  $neu-text-primary: #e0e5ec;
-  $neu-text-secondary: #9499b7;
-  
-  // Re-definir sombras para dark mode aquí si es necesario
-}
-*/

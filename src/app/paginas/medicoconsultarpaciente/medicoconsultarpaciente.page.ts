@@ -159,6 +159,8 @@ export class MedicoconsultarpacientePage implements OnInit {
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
       'medico-informes': '/medico-informes',
       'medico-configuracion': '/medico-configuracion'
+    
+      
     };
     const rutaDestino = rutas[ruta] || `/${ruta}`;
     this.router.navigate([rutaDestino]);
@@ -229,13 +231,27 @@ export class MedicoconsultarpacientePage implements OnInit {
 
   // Ver detalle de un registro clínico
   verRegistro(registro: any) {
-    console.log('Ver registro:', registro.id);
-    this.toastCtrl.create({ 
-      message: `Registro del ${new Date(registro.fecha_finalizacion).toLocaleDateString('es-EC')}`, 
-      duration: 2000,
-      position: 'bottom'
-    }).then(t => t.present());
-  }
+  console.log('[HISTORIAL] Ver registro:', registro.id);
+  this.router.navigate(['/medicoverregistro'], { 
+    queryParams: { 
+      paciente_id: this.pacienteId,
+      registro_id: registro.id
+    },
+    state: { 
+      pacienteData: this.paciente,
+      registroData: registro
+    }
+  });
+}
+
+// Ver mediciones del paciente (glucosa y presión desde casa)
+verMedicionesPaciente() {
+  console.log('[MEDICIONES] Ver mediciones del paciente:', this.pacienteId);
+  this.router.navigate(['/medicovermediciones'], { 
+    queryParams: { paciente_id: this.pacienteId },
+    state: { pacienteData: this.paciente }
+  });
+}
 
   // Volver a lista de pacientes
   volver() {

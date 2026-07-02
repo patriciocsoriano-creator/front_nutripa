@@ -1,28 +1,42 @@
 // ============================================
-// 🎨 VARIABLES NEUMÓRFICAS (BASE DEL DISEÑO)
+// VARIABLES NEUMORFICAS
 // ============================================
-$neu-bg: #e0e5ec !default;
-$neu-bg-dark: #bec3cf !default;
-$neu-bg-light: #ffffff !default;
-$neu-text-primary: #3d4468 !default;
-$neu-text-secondary: #9499b7 !default;
-$neu-text-accent: #6c7293 !default;
-$neu-success: #00c896 !default;
-$neu-error: #ff3b5c !default;
+$neu-bg: #e0e5ec;
+$neu-bg-dark: #bec3cf;
+$neu-bg-light: #ffffff;
+$neu-text-primary: #3d4468;
+$neu-text-secondary: #9499b7;
+$neu-text-accent: #6c7293;
+$neu-success: #00c896;
+$neu-error: #ff3b5c;
+$neu-radius-lg: 30px;
+$neu-radius-md: 20px;
+$neu-radius-sm: 15px;
+$neu-radius-xs: 10px;
 
-$neu-radius-lg: 30px !default;
-$neu-radius-md: 20px !default;
-$neu-radius-sm: 15px !default;
-$neu-radius-xs: 10px !default;
+// Sombras neumorficas
+$neu-shadow-out: 
+  20px 20px 60px $neu-bg-dark,
+  -20px -20px 60px $neu-bg-light;
 
-$neu-shadow-out: 20px 20px 60px $neu-bg-dark, -20px -20px 60px $neu-bg-light !default;
-$neu-shadow-in: inset 8px 8px 16px $neu-bg-dark, inset -8px -8px 16px $neu-bg-light !default;
-$neu-shadow-in-focus: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light !default;
-$neu-shadow-btn: 8px 8px 20px $neu-bg-dark, -8px -8px 20px $neu-bg-light !default;
-$neu-shadow-btn-active: inset 4px 4px 10px $neu-bg-dark, inset -4px -4px 10px $neu-bg-light !default;
+$neu-shadow-in: 
+  inset 8px 8px 16px $neu-bg-dark,
+  inset -8px -8px 16px $neu-bg-light;
+
+$neu-shadow-in-focus: 
+  inset 4px 4px 8px $neu-bg-dark,
+  inset -4px -4px 8px $neu-bg-light;
+
+$neu-shadow-btn: 
+  8px 8px 20px $neu-bg-dark,
+  -8px -8px 20px $neu-bg-light;
+
+$neu-shadow-btn-active: 
+  inset 4px 4px 10px $neu-bg-dark,
+  inset -4px -4px 10px $neu-bg-light;
 
 // ============================================
-// 🔄 RESET Y BASE IONIC
+// RESET Y BASE
 // ============================================
 * {
   margin: 0;
@@ -39,7 +53,29 @@ ion-content {
 }
 
 // ============================================
-// 📦 CONTENEDOR PRINCIPAL
+// HEADER
+// ============================================
+.main-header {
+  ion-toolbar {
+    --background: #{$neu-bg};
+    --color: #{$neu-text-primary};
+    --border-color: transparent;
+    
+    ion-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: $neu-text-primary;
+    }
+
+    ion-back-button {
+      --color: #{$neu-text-primary};
+      --icon-color: #{$neu-text-primary};
+    }
+  }
+}
+
+// ============================================
+// LOGIN CONTAINER - DESKTOP
 // ============================================
 .login-container {
   width: 100%;
@@ -49,10 +85,11 @@ ion-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeIn 0.5s ease-out;
 }
 
 // ============================================
-// 🖼️ LOGO
+// LOGO
 // ============================================
 .logo {
   width: 100px;
@@ -61,7 +98,9 @@ ion-content {
   border-radius: 50%;
   object-fit: cover;
   background: $neu-bg;
-  box-shadow: 8px 8px 20px $neu-bg-dark, -8px -8px 20px $neu-bg-light;
+  box-shadow: 
+    8px 8px 20px $neu-bg-dark,
+    -8px -8px 20px $neu-bg-light;
   transition: all 0.3s ease;
   padding: 8px;
 
@@ -71,23 +110,58 @@ ion-content {
 }
 
 // ============================================
-// 🧱 FORMULARIO PRINCIPAL
+// FORMULARIO NEUMORFICO
 // ============================================
 form {
   width: 100%;
   background: $neu-bg;
   border-radius: $neu-radius-lg;
-  padding: 40px 32px;
+  padding: 32px 28px;
   box-shadow: $neu-shadow-out;
   transition: all 0.3s ease;
+}
 
-  &:hover {
-    transform: translateY(-2px);
+// ============================================
+// STEP CONTENT
+// ============================================
+.step-content {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .step-icon {
+    font-size: 48px;
+    color: $neu-text-accent;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: $neu-text-primary;
+    margin: 0 0 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: $neu-text-secondary;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .email-highlight {
+    font-weight: 600;
+    color: $neu-text-accent;
+    margin-top: 8px;
   }
 }
 
 // ============================================
-// 📝 ION-ITEM Y INPUTS NEUMÓRFICOS
+// ION-ITEM
 // ============================================
 ion-item {
   --background: transparent;
@@ -95,11 +169,17 @@ ion-item {
   --inner-padding-start: 0;
   --padding-start: 0;
   --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
   --border-width: 0;
   --highlight-height: 0;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  position: relative;
 }
 
+// ============================================
+// NEU INPUT WRAPPER
+// ============================================
 .neu-input-wrapper {
   position: relative;
   background: $neu-bg;
@@ -122,9 +202,12 @@ ion-item {
   }
 }
 
+// ============================================
+// ION-INPUT
+// ============================================
 ion-input {
   --padding-start: 52px;
-  --padding-end: 16px;
+  --padding-end: 92px;
   --padding-top: 20px;
   --padding-bottom: 20px;
   --color: #{$neu-text-primary};
@@ -139,7 +222,7 @@ ion-input {
 }
 
 // ============================================
-// 🏷️ LABEL FLOTANTE
+// FLOATING LABEL
 // ============================================
 .neu-label {
   position: absolute;
@@ -165,7 +248,7 @@ ion-input {
 }
 
 // ============================================
-// 🔍 ICONOS DENTRO DEL INPUT
+// INPUT ICON
 // ============================================
 .input-icon {
   position: absolute;
@@ -187,7 +270,7 @@ ion-input {
 }
 
 // ============================================
-// 👁️ TOGGLE PASSWORD
+// PASSWORD TOGGLE
 // ============================================
 .password-toggle {
   position: absolute;
@@ -204,7 +287,9 @@ ion-input {
   align-items: center;
   justify-content: center;
   color: $neu-text-secondary;
-  box-shadow: 4px 4px 10px $neu-bg-dark, -4px -4px 10px $neu-bg-light;
+  box-shadow: 
+    4px 4px 10px $neu-bg-dark,
+    -4px -4px 10px $neu-bg-light;
   transition: all 0.3s ease;
   z-index: 2;
 
@@ -213,7 +298,9 @@ ion-input {
   }
 
   &:active {
-    box-shadow: inset 2px 2px 5px $neu-bg-dark, inset -2px -2px 5px $neu-bg-light;
+    box-shadow: 
+      inset 2px 2px 5px $neu-bg-dark,
+      inset -2px -2px 5px $neu-bg-light;
   }
 
   ion-icon {
@@ -222,11 +309,20 @@ ion-input {
 }
 
 // ============================================
-// ⚠️ MENSAJES DE ERROR
+// HELPER TEXT
 // ============================================
-.error-message {
+.helper-text {
   display: block;
-  margin: -16px 0 16px 20px;
+  margin: -8px 0 16px 20px;
+  font-size: 12px;
+}
+
+// ============================================
+// ERROR MESSAGE
+// ============================================
+ion-text[color="danger"] {
+  display: block;
+  margin: -8px 0 16px 20px;
   font-size: 12px;
   font-weight: 500;
   opacity: 0;
@@ -244,14 +340,235 @@ ion-input {
     gap: 4px;
 
     &::before {
-      content: "•";
+      content: "\2022";
       color: $neu-error;
     }
   }
 }
 
 // ============================================
-// 🔘 BOTÓN NEUMÓRFICO (ion-button)
+// CODE INPUTS (PASO 2)
+// ============================================
+.code-input-wrapper {
+  margin-bottom: 16px;
+}
+
+.code-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 0;
+
+  .code-digit {
+    width: 48px;
+    height: 56px;
+    border: none;
+    border-radius: $neu-radius-xs;
+    background: $neu-bg;
+    box-shadow: $neu-shadow-in;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: $neu-text-primary;
+    outline: none;
+    transition: all 0.3s ease;
+
+    &:focus {
+      box-shadow: $neu-shadow-in-focus;
+      background: $neu-bg-light;
+    }
+  }
+}
+
+// ============================================
+// SPAM NOTICE
+// ============================================
+.spam-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(108, 114, 147, 0.1);
+  border-radius: $neu-radius-xs;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 18px;
+    color: $neu-text-accent;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  small {
+    font-size: 13px;
+    color: $neu-text-secondary;
+    line-height: 1.5;
+  }
+}
+
+// ============================================
+// RESEND SECTION
+// ============================================
+.resend-section {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .countdown {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .resend-link {
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $neu-text-primary !important;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ============================================
+// STEP ACTIONS
+// ============================================
+.step-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+// ============================================
+// STEP FOOTER
+// ============================================
+.step-footer {
+  text-align: center;
+  margin-top: 20px;
+
+  ion-text {
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $neu-text-primary !important;
+    }
+  }
+}
+
+// ============================================
+// PASSWORD REQUIREMENTS
+// ============================================
+.password-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(108, 114, 147, 0.05);
+  border-radius: $neu-radius-xs;
+
+  .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+
+    small {
+      color: $neu-text-secondary;
+    }
+  }
+}
+
+// ============================================
+// PASSWORD STRENGTH
+// ============================================
+.password-strength {
+  margin: 16px 0;
+  text-align: center;
+
+  .strength-bar {
+    width: 100%;
+    height: 6px;
+    background: $neu-bg-dark;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+
+    .strength-fill {
+      height: 100%;
+      transition: width 0.3s ease, background 0.3s ease;
+      border-radius: 3px;
+
+      &.weak {
+        width: 33%;
+        background: $neu-error;
+      }
+
+      &.medium {
+        width: 66%;
+        background: #f59e0b;
+      }
+
+      &.strong {
+        width: 100%;
+        background: $neu-success;
+      }
+    }
+  }
+
+  .strength-text {
+    font-size: 12px;
+    color: $neu-text-secondary;
+    font-weight: 500;
+  }
+}
+
+// ============================================
+// SUCCESS STEP
+// ============================================
+.success-step {
+  text-align: center;
+  padding: 20px 0;
+
+  .success-icon {
+    ion-icon {
+      font-size: 80px;
+      color: $neu-success;
+      margin-bottom: 16px;
+      animation: scaleIn 0.5s ease-out;
+    }
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: $neu-text-primary;
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 14px;
+    color: $neu-text-secondary;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+}
+
+// ============================================
+// ION-BUTTON NEUMORFICO
 // ============================================
 ion-button {
   --background: #{$neu-bg};
@@ -263,13 +580,15 @@ ion-button {
   font-size: 16px;
   font-weight: 600;
   text-transform: none;
-  margin-top: 12px;
+  margin-top: 8px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 
   &:not([disabled]):hover {
-    --box-shadow: 12px 12px 30px $neu-bg-dark, -12px -12px 30px $neu-bg-light;
+    --box-shadow: 
+      12px 12px 30px $neu-bg-dark,
+      -12px -12px 30px $neu-bg-light;
     transform: translateY(-2px);
   }
 
@@ -285,20 +604,17 @@ ion-button {
     cursor: not-allowed;
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    transition: left 0.5s ease;
-    pointer-events: none;
-  }
+  &[fill="outline"] {
+    --background: transparent;
+    --border-style: solid;
+    --border-width: 2px;
+    --border-color: #{$neu-text-secondary};
+    --box-shadow: none;
+    --color: #{$neu-text-primary};
 
-  &:not([disabled]):hover::before {
-    left: 100%;
+    &:hover {
+      --border-color: #{$neu-text-primary};
+    }
   }
 
   ion-spinner {
@@ -308,374 +624,362 @@ ion-button {
 }
 
 // ============================================
-// 🔗 LINKS SECUNDARIOS
+// ANIMACIONES
 // ============================================
-.links {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  margin-top: 24px;
-  padding: 0 16px;
-
-  ion-text {
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    text-align: center;
-
-    &:hover {
-      color: $neu-text-primary !important;
-    }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// ============================================
-// ➕ ESTILOS ESPECÍFICOS PARA RECUPERACIÓN
-// ============================================
-
-// Header de cada paso (icono + título + descripción)
-.step-header {
-  text-align: center;
-  margin-bottom: 32px;
-  padding: 0 8px;
-
-  .step-icon {
-    font-size: 48px;
-    color: $neu-text-accent;
-    margin-bottom: 16px;
-    display: block;
-    background: $neu-bg;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 8px 8px 20px $neu-bg-dark, -8px -8px 20px $neu-bg-light;
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
   }
-
-  h2 {
-    color: $neu-text-primary;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 8px;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-
-  p {
-    color: $neu-text-secondary;
-    font-size: 14px;
-    margin: 4px 0;
-    
-    &.email-highlight {
-      color: $neu-text-primary;
-      font-weight: 500;
-      font-size: 15px;
-      background: $neu-bg;
-      padding: 4px 12px;
-      border-radius: $neu-radius-xs;
-      display: inline-block;
-      margin-top: 8px;
-      box-shadow: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light;
-    }
-  }
-}
-
-// Inputs de código de 6 dígitos (estilo neumórfico)
-.code-input-wrapper {
-  ion-item {
-    --background: transparent;
-    --inner-padding-end: 0;
-    --inner-padding-start: 0;
-    margin-bottom: 8px;
-  }
-}
-
-.code-inputs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 8px 0 16px;
-}
-
-.code-digit {
-  width: 44px;
-  height: 52px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
-  color: $neu-text-primary;
-  background: $neu-bg;
-  border: none;
-  border-radius: $neu-radius-sm;
-  box-shadow: $neu-shadow-in;
-  transition: all 0.3s ease;
-  outline: none;
-
-  &:focus {
-    box-shadow: $neu-shadow-in-focus;
-    transform: scale(1.03);
-  }
-
-  &::placeholder {
-    color: transparent;
-  }
-}
-
-// Sección de reenvío de código
-.resend-section {
-  text-align: center;
-  margin: 8px 0 20px;
-
-  .countdown {
-    font-size: 14px;
-    font-weight: 500;
-    color: $neu-text-secondary;
-  }
-
-  .resend-link {
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-    color: $neu-text-accent;
-
-    &.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    &:hover:not(.disabled) {
-      color: $neu-text-primary !important;
-    }
-  }
-}
-
-// Contenedor de botones de acción
-.step-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 24px;
-
-  ion-button[fill="outline"] {
-    --background: transparent;
-    --box-shadow: none;
-    --border-width: 2px;
-    --border-color: #{$neu-text-accent};
-    --color: #{$neu-text-accent};
-    
-    &:hover:not([disabled]) {
-      --color: #{$neu-text-primary};
-      --border-color: #{$neu-text-primary};
-      transform: none;
-    }
-    
-    &:active:not([disabled]) {
-      --background: #{$neu-bg};
-      box-shadow: $neu-shadow-btn-active;
-    }
-  }
-}
-
-// Footer del paso (link para volver)
-.step-footer {
-  text-align: center;
-  margin-top: 20px;
-
-  ion-text {
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    color: $neu-text-secondary;
-    
-    &:hover {
-      color: $neu-text-primary !important;
-    }
-  }
-}
-
-// Indicador de fortaleza de contraseña
-.password-strength {
-  margin: 8px 20px 16px;
-
-  .strength-bar {
-    height: 4px;
-    background: $neu-bg-dark;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 6px;
-    box-shadow: inset 2px 2px 4px $neu-bg-dark, inset -2px -2px 4px $neu-bg-light;
-  }
-
-  .strength-fill {
-    height: 100%;
-    width: 33%;
-    background: $neu-error;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-
-    &.medium {
-      width: 66%;
-      background: #ffc107;
-    }
-
-    &.strong {
-      width: 100%;
-      background: $neu-success;
-    }
-  }
-
-  .strength-text {
-    color: $neu-text-secondary;
-    font-size: 11px;
-    display: block;
-    text-align: center;
-    font-weight: 500;
-  }
-}
-
-// Paso de éxito (confirmación)
-.success-step {
-  text-align: center;
-  padding: 20px 16px;
-
-  .success-icon {
-    font-size: 72px;
-    color: $neu-success;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    animation: popIn 0.5s ease;
-    
-    ion-icon {
-      filter: drop-shadow(4px 4px 8px $neu-bg-dark) drop-shadow(-4px -4px 8px $neu-bg-light);
-    }
-  }
-
-  h2 {
-    color: $neu-text-primary;
-    font-size: 1.4rem;
-    margin-bottom: 12px;
-  }
-
-  p {
-    color: $neu-text-secondary;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-}
-
-// Animación de entrada
-@keyframes popIn {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-// Animación sutil para el contenedor principal
-.login-container {
-  animation: neuPulse 4s ease-in-out infinite;
-}
-
-@keyframes neuPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.98; }
 }
 
 // ============================================
-// 📱 RESPONSIVE - MÓVILES
+// RESPONSIVE - TABLETS (max-width: 768px)
 // ============================================
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   ion-content {
-    --padding-start: 12px;
-    --padding-end: 12px;
-    --padding-top: 12px;
-    --padding-bottom: 12px;
+    --padding-start: 20px;
+    --padding-end: 20px;
   }
 
   .login-container {
-    padding: 12px 0;
+    padding: 20px 0;
+  }
+
+  .logo {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 20px;
+  }
+
+  form {
+    padding: 28px 24px;
+    border-radius: $neu-radius-md;
+  }
+}
+
+// ============================================
+// RESPONSIVE - MOVILES (max-width: 480px) - CENTRADO
+// ============================================
+@media (max-width: 480px) {
+  // Ocultar header en moviles para dar mas espacio
+  .main-header {
+    display: none;
+  }
+
+  ion-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    min-height: 100vh;
+  }
+
+  .login-container {
+    min-height: 100vh;
+    max-width: 100%;
+    padding: 0 16px;
+    justify-content: center;
   }
 
   .logo {
     width: 80px;
     height: 80px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    padding: 6px;
   }
 
   form {
-    padding: 32px 24px;
+    padding: 24px 18px;
     border-radius: $neu-radius-md;
+    box-shadow: 
+      15px 15px 40px $neu-bg-dark,
+      -15px -15px 40px $neu-bg-light;
+  }
+
+  .step-header {
+    margin-bottom: 20px;
+
+    .step-icon {
+      font-size: 40px;
+    }
+
+    h2 {
+      font-size: 19px;
+    }
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  ion-item {
+    margin-bottom: 12px;
   }
 
   ion-input {
     --padding-start: 48px;
-    font-size: 15px;
+    --padding-top: 18px;
+    --padding-bottom: 18px;
+    font-size: 20px;
   }
 
   .neu-label {
     left: 48px;
     font-size: 15px;
-    &.floating { font-size: 11px; }
+
+    &.floating {
+      font-size: 11px;
+    }
   }
 
-  .input-icon { left: 14px; }
-  .password-toggle { width: 32px; height: 32px; right: 10px; }
-  
+  .input-icon {
+    left: 14px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .password-toggle {
+    width: 32px;
+    height: 32px;
+    right: 10px;
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+
+  .code-inputs {
+    gap: 8px;
+    padding: 12px 0;
+
+    .code-digit {
+      width: 42px;
+      height: 50px;
+      font-size: 22px;
+    }
+  }
+
+  .spam-notice {
+    padding: 10px 12px;
+
+    small {
+      font-size: 12px;
+    }
+  }
+
   ion-button {
     --padding-top: 16px;
     --padding-bottom: 16px;
     font-size: 15px;
+    --border-radius: 12px;
   }
 
-  // Ajustes específicos de recuperación
-  .step-header {
-    .step-icon {
-      width: 70px;
-      height: 70px;
-      font-size: 40px;
+  .step-footer {
+    margin-top: 16px;
+
+    ion-text {
+      font-size: 13px;
     }
-    h2 { font-size: 1.3rem; }
   }
 
-  .code-digit {
-    width: 38px;
-    height: 46px;
-    font-size: 18px;
+  .password-requirements {
+    padding: 10px 12px;
+
+    .requirement-item {
+      font-size: 12px;
+
+      ion-icon {
+        font-size: 14px;
+      }
+    }
   }
 
-  .success-icon {
-    font-size: 56px;
+  .success-step {
+    .success-icon ion-icon {
+      font-size: 64px;
+    }
+
+    h2 {
+      font-size: 19px;
+    }
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  ion-text[color="danger"] {
+    font-size: 11px;
+    margin: -4px 0 12px 16px;
   }
 }
 
 // ============================================
-// 📱 MÓVILES MUY PEQUEÑOS (< 360px)
+// RESPONSIVE - MOVILES MUY PEQUENOS (max-width: 360px)
 // ============================================
 @media (max-width: 360px) {
-  form {
-    padding: 28px 20px;
+  .main-header {
+    display: none;
   }
-  
-  .neu-label { left: 44px; }
-  ion-input { --padding-start: 44px; }
-  .input-icon { left: 12px; }
-  
-  .code-inputs { gap: 6px; }
-  .code-digit {
-    width: 34px;
-    height: 42px;
-    font-size: 16px;
+
+  ion-content {
+    min-height: 100vh;
+  }
+
+  .login-container {
+    min-height: 100vh;
+    padding: 0 12px;
+    justify-content: center;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 14px;
+  }
+
+  form {
+    padding: 20px 14px;
+    border-radius: 18px;
+    box-shadow: 
+      12px 12px 30px $neu-bg-dark,
+      -12px -12px 30px $neu-bg-light;
+  }
+
+  .step-header {
+    .step-icon {
+      font-size: 36px;
+    }
+
+    h2 {
+      font-size: 17px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  ion-input {
+    --padding-start: 44px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .neu-label {
+    left: 44px;
+    font-size: 14px;
+
+    &.floating {
+      font-size: 10px;
+    }
+  }
+
+  .input-icon {
+    left: 12px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .code-inputs {
+    gap: 6px;
+
+    .code-digit {
+      width: 38px;
+      height: 46px;
+      font-size: 20px;
+    }
+  }
+
+  ion-button {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-size: 14px;
+  }
+
+  .step-footer ion-text {
+    font-size: 12px;
   }
 }
 
 // ============================================
-// ♿ ACCESIBILIDAD
+// RESPONSIVE - LANDSCAPE MOVIL
+// ============================================
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-header {
+    display: none;
+  }
+
+  ion-content {
+    min-height: 100vh;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+
+  .login-container {
+    min-height: 100vh;
+    padding: 0 16px;
+    justify-content: center;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+
+  form {
+    padding: 16px 20px;
+  }
+
+  .step-header {
+    margin-bottom: 16px;
+
+    .step-icon {
+      font-size: 32px;
+    }
+
+    h2 {
+      font-size: 17px;
+    }
+  }
+
+  ion-item {
+    margin-bottom: 10px;
+  }
+
+  ion-input {
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+  }
+
+  ion-button {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+}
+
+// ============================================
+// ACCESIBILIDAD
 // ============================================
 :focus-visible {
   outline: 2px solid $neu-text-accent;
@@ -691,178 +995,5 @@ ion-button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-
-// ============================================
-// 📱 ESTILOS PARA TELÉFONO/WHATSAPP
-// ============================================
-
-// Helper text para formato de teléfono
-.helper-text {
-  display: block;
-  margin: -12px 0 12px 20px;
-  font-size: 12px;
-  font-weight: 400;
-  color: $neu-text-secondary;
-}
-
-// Highlight para número de teléfono
-.phone-highlight {
-  color: $neu-text-primary !important;
-  font-weight: 600 !important;
-  font-size: 15px !important;
-  background: $neu-bg !important;
-  padding: 4px 12px !important;
-  border-radius: $neu-radius-xs !important;
-  display: inline-block !important;
-  margin-top: 8px !important;
-  box-shadow: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light !important;
-}
-
-// Icono de WhatsApp en verde
-.whatsapp-icon {
-  color: #25D366 !important;
-  
-  ion-icon {
-    color: #25D366 !important;
-  }
-}
-
-// ============================================
-// 🔐 REQUISITOS DE CONTRASEÑA
-// ============================================
-.password-requirements {
-  margin: 8px 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  
-  .requirement-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    
-    ion-icon {
-      font-size: 14px;
-    }
-    
-    small {
-      flex: 1;
-    }
-  }
-}
-
-// ============================================
-// 💪 INDICADOR DE FORTALEZA (ajustes)
-// ============================================
-.password-strength {
-  margin: 12px 20px 16px;
-
-  .strength-bar {
-    height: 6px;
-    background: $neu-bg-dark;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 8px;
-    box-shadow: inset 2px 2px 4px $neu-bg-dark, inset -2px -2px 4px $neu-bg-light;
-  }
-
-  .strength-fill {
-    height: 100%;
-    width: 25%;
-    background: $neu-error;
-    border-radius: 3px;
-    transition: all 0.3s ease;
-
-    &.medium {
-      width: 60%;
-      background: #ffc107;
-    }
-
-    &.strong {
-      width: 100%;
-      background: $neu-success;
-    }
-  }
-
-  .strength-text {
-    color: $neu-text-secondary;
-    font-size: 12px;
-    display: block;
-    text-align: center;
-    font-weight: 500;
-  }
-}
-
-// ============================================
-// 📱 RESPONSIVE - AJUSTES PARA MÓVIL
-// ============================================
-@media (max-width: 480px) {
-  .password-requirements {
-    margin: 8px 16px 12px;
-    
-    .requirement-item {
-      font-size: 11px;
-      
-      ion-icon {
-        font-size: 13px;
-      }
-    }
-  }
-  
-  .code-digit {
-    width: 40px;
-    height: 48px;
-    font-size: 20px;
-  }
-}
-
-// ============================================
-// 📧 ESTILOS ESPECÍFICOS PARA CORREO
-// ============================================
-
-// Icono de correo en azul
-.email-icon {
-  color: #145da0 !important;
-}
-
-// Highlight para correo electrónico
-.email-highlight {
-  color: $neu-text-primary !important;
-  font-weight: 600 !important;
-  font-size: 15px !important;
-  background: $neu-bg !important;
-  padding: 6px 14px !important;
-  border-radius: $neu-radius-xs !important;
-  display: inline-block !important;
-  margin-top: 8px !important;
-  box-shadow: inset 4px 4px 8px $neu-bg-dark, inset -4px -4px 8px $neu-bg-light !important;
-  font-family: 'Courier New', monospace;
-}
-
-// Aviso de carpeta spam
-.spam-notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #dbeafe;
-  border-left: 4px solid #3b82f6;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin: 12px 0 20px;
-  color: #1e40af;
-  font-size: 13px;
-  
-  ion-icon {
-    font-size: 1.3rem;
-    flex-shrink: 0;
-  }
-  
-  small {
-    line-height: 1.4;
   }
 }
