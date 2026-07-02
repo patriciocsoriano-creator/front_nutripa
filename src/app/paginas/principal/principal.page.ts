@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, NavController, ToastController, Platform } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -31,6 +31,12 @@ export class PrincipalPage implements OnInit {
     'paciente': '/paciente'
   };
 
+  // Roles que solo pueden acceder desde móvil
+  private readonly rolesSoloMovil = ['paciente'];
+
+  // Roles que solo pueden acceder desde web
+  private readonly rolesSoloWeb = ['admin', 'doctor', 'nutricionista', 'enfermera'];
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -39,7 +45,8 @@ export class PrincipalPage implements OnInit {
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
     private toastCtrl: ToastController,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private platform: Platform
   ) { 
     this.inicializarFormulario();
   }
@@ -62,6 +69,29 @@ export class PrincipalPage implements OnInit {
 
     // Verificar sesion activa (opcional)
     await this.verificarSesionActiva();
+  }
+
+  // Detectar si es dispositivo móvil
+  private esDispositivoMovil(): boolean {
+    // Método 1: Usar Platform de Ionic
+    if (this.platform.is('mobile') || this.platform.is('android') || this.platform.is('ios')) {
+      return true;
+    }
+
+    // Método 2: User agent
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+    
+    if (mobileRegex.test(userAgent.toLowerCase())) {
+      return true;
+    }
+
+    // Método 3: Ancho de pantalla (menos de 768px)
+    if (window.innerWidth <= 768) {
+      return true;
+    }
+
+    return false;
   }
 
   // Verificar si hay sesion activa y validar token con backend
@@ -195,7 +225,7 @@ export class PrincipalPage implements OnInit {
       localStorage.setItem('user', JSON.stringify(response.usuario));
       console.log('[LOGIN] Sesion guardada');
 
-      // Redirigir segun rol
+      // Redirigir segun rol (con validacion de plataforma)
       await this.redirigirSegunRol(response.usuario.rol);
 
     } catch (error: any) {
@@ -209,12 +239,39 @@ export class PrincipalPage implements OnInit {
     }
   }
 
-  // Redirigir segun rol del usuario
+  // Redirigir segun rol del usuario con validacion de plataforma
   private async redirigirSegunRol(rol: string | undefined | null): Promise<void> {
     const rolNormalizado = rol?.toLowerCase().trim();
     const ruta = this.rutasPorRol[rolNormalizado || ''] || '/principal';
     
-    console.log('[REDIRECCION] ->', ruta);
+    console.log('[REDIRECCION] Rol:', rolNormalizado, '-> Ruta:', ruta);
+    
+    // Validar restricciones de plataforma
+    const esMovil = this.esDispositivoMovil();
+    // AQUI SI QUIERO MODIFICAR ALGO Y QUIERO VER EN LA LAPTOP DEBO COMENTAR TODA ESTA LINEA
+    // Si es paciente y esta en web, bloquear
+    if (this.rolesSoloMovil.includes(rolNormalizado || '') && !esMovil) {
+      console.warn('[REDIRECCION] Paciente intento acceder desde web - BLOQUEADO');
+      this.limpiarSesion();
+      await this.mostrarAlerta(
+        'Acceso Restringido',
+        'Los pacientes solo pueden acceder desde la aplicacion movil.\n\nPor favor, descarga la app desde tu tienda de aplicaciones.'
+      );
+      return;
+    }
+    
+    // Si es admin/medico/enfermera y esta en movil, bloquear
+    if (this.rolesSoloWeb.includes(rolNormalizado || '') && esMovil) {
+      console.warn('[REDIRECCION] Personal medico intento acceder desde movil - BLOQUEADO');
+      this.limpiarSesion();
+      await this.mostrarAlerta(
+        'Acceso Restringido',
+        'El personal medico (administradores, medicos, enfermeras) solo puede acceder desde una computadora.\n\nPor favor, ingresa desde un PC o laptop.'
+      );
+      return;
+    }
+    //HASTA AQUI DEBO DE COMENTAR OJO
+    console.log('[REDIRECCION] Acceso permitido');
     
     await this.navCtrl.navigateRoot(ruta, { 
       replaceUrl: true,
@@ -309,7 +366,7 @@ export class PrincipalPage implements OnInit {
     this.router.navigate(['/principalolvidocontrasena']);
   }
 
-  // Cerrar sesion (puedes llamarlo desde un menu o boton)
+  // Cerrar sesion
   async cerrarSesion(): Promise<void> {
     console.log('[LOGOUT] Cerrando sesion...');
     
