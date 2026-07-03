@@ -4,7 +4,7 @@ import { AlertController, ToastController, LoadingController } from '@ionic/angu
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
-//  Interfaces actualizadas según la BD real
+// Interfaces actualizadas según la BD real
 export interface PacienteReciente {
   id: string;
   nombre: string;
@@ -48,7 +48,7 @@ export interface DashboardData {
 })
 export class MedicoPage implements OnInit {
 
-  //  Información del médico
+  // Información del médico
   nombreDoctor: string = 'Dr. Usuario';
   especialidad: string = 'Especialista';
   
@@ -59,15 +59,19 @@ export class MedicoPage implements OnInit {
   alertasActivas: number = 0;
   listaAlertas: AlertaPaciente[] = [];
 
-  //  Lista de pacientes recientes
+  // Lista de pacientes recientes
   pacientesRecientes: PacienteReciente[] = [];
   
-  //  Estado de carga
+  // Estado de carga
   cargando: boolean = true;
 
-  //  Estado de la UI
+  // Estado de la UI
   sidebarOpen: boolean = false;
   submenuAbierto: string | null = null;
+
+  // Variables de notificaciones y mensajes
+  notificacionesSinLeer: number = 0;
+  mensajesNoLeidos: number = 0;
 
   constructor(
     private router: Router,
@@ -83,7 +87,7 @@ export class MedicoPage implements OnInit {
     await this.cargarNotificaciones();
   }
 
-  //  Cargar datos del usuario logueado
+  // Cargar datos del usuario logueado
   private cargarDatosUsuario(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -93,12 +97,12 @@ export class MedicoPage implements OnInit {
         this.especialidad = user.rol === 'medico' ? 'Médico Especialista' : 
                            user.rol === 'nutricionista' ? 'Nutricionista' : 'Especialista';
       } catch (e) { 
-        console.warn(' Error parseando usuario'); 
+        console.warn('Error parseando usuario'); 
       }
     }
   }
 
-  //  Cargar estadísticas REALES desde la API
+  // Cargar estadísticas REALES desde la API
   async cargarDatosDashboard(): Promise<void> {
     this.cargando = true;
     
@@ -130,25 +134,46 @@ export class MedicoPage implements OnInit {
       this.listaAlertas = data.listaAlertas || [];
       this.pacientesRecientes = data.pacientesRecientes || [];
 
-      console.log(' [DASHBOARD] Datos cargados:', data);
+      console.log('[DASHBOARD] Datos cargados:', data);
 
     } catch (error: any) {
-      console.error(' Error cargando dashboard:', error);
+      console.error('Error cargando dashboard:', error);
       await this.showToast('Error cargando datos del dashboard', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
-  //  Ver detalle de alertas
+  // Cargar notificaciones desde API
+  private async cargarNotificaciones(): Promise<void> {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+      const resp: any = await this.http.get(
+        `${environment.apiUrl}/nutricionapp-api/medico/notificaciones/no-leidas`,
+        { headers }
+      ).toPromise();
+
+      this.notificacionesSinLeer = resp?.total || 0;
+      this.mensajesNoLeidos = resp?.mensajesNoLeidos || 0;
+
+    } catch (error) {
+      console.warn('No se pudieron cargar notificaciones');
+    }
+  }
+
+  // Ver detalle de alertas
   async verAlertas(): Promise<void> {
     if (this.listaAlertas.length === 0) {
-      await this.showToast(' No hay alertas activas', 'success');
+      await this.showToast('No hay alertas activas', 'success');
       return;
     }
 
     const alert = await this.alertCtrl.create({
-      header: ` Alertas Activas (${this.listaAlertas.length})`,
+      header: `Alertas Activas (${this.listaAlertas.length})`,
       cssClass: 'alerta-paciente',
       buttons: ['Cerrar'],
       message: `
@@ -157,9 +182,9 @@ export class MedicoPage implements OnInit {
             <div style="padding: 10px; margin-bottom: 8px; background: ${a.nivel_riesgo === 'crítico' ? '#fee2e2' : '#fef3c7'}; border-radius: 8px; border-left: 4px solid ${a.nivel_riesgo === 'crítico' ? '#dc2626' : '#f59e0b'};">
               <strong style="color: #1a1f36;">${a.nombre_completo}</strong><br>
               <span style="font-size: 0.9rem; color: #6c7293;">
-                 PA: <strong style="color: ${a.nivel_riesgo === 'crítico' ? '#dc2626' : '#f59e0b'};">${a.presion_arterial} mmHg</strong><br>
-                 ${new Date(a.fecha_registro).toLocaleDateString('es-EC')}<br>
-                 Nivel: <strong>${a.nivel_riesgo.toUpperCase()}</strong>
+                PA: <strong style="color: ${a.nivel_riesgo === 'crítico' ? '#dc2626' : '#f59e0b'};">${a.presion_arterial} mmHg</strong><br>
+                ${new Date(a.fecha_registro).toLocaleDateString('es-EC')}<br>
+                Nivel: <strong>${a.nivel_riesgo.toUpperCase()}</strong>
               </span>
             </div>
           `).join('')}
@@ -169,17 +194,66 @@ export class MedicoPage implements OnInit {
     await alert.present();
   }
 
-  //  Ver detalle de un paciente
+  // Ver notificaciones
+  async verNotificaciones(): Promise<void> {
+    if (this.notificacionesSinLeer === 0) {
+      await this.showToast('No tienes notificaciones nuevas', 'success');
+      return;
+    }
+    
+    const alert = await this.alertCtrl.create({
+      header: 'Notificaciones',
+      message: `Tienes ${this.notificacionesSinLeer} notificacion(es) sin leer.`,
+      buttons: [
+        {
+          text: 'Marcar todas como leidas',
+          handler: () => this.marcarTodasComoLeidas()
+        },
+        { text: 'Cerrar', role: 'cancel' }
+      ]
+    });
+    await alert.present();
+  }
+
+  // Marcar todas las notificaciones como leídas
+  async marcarTodasComoLeidas(): Promise<void> {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+      await this.http.put(
+        `${environment.apiUrl}/nutricionapp-api/medico/notificaciones/leer-todas`,
+        {},
+        { headers }
+      ).toPromise();
+
+      this.notificacionesSinLeer = 0;
+      await this.showToast('Todas las notificaciones marcadas como leidas', 'success');
+
+    } catch (error) {
+      console.error('Error marcando notificaciones:', error);
+      await this.showToast('Error al marcar notificaciones', 'danger');
+    }
+  }
+
+  // Ver mensajes
+  async verMensajes(): Promise<void> {
+    this.router.navigate(['/medicomensajes']);
+  }
+
+  // Ver detalle de un paciente
   verDetallePaciente(paciente: PacienteReciente): void {
     this.router.navigate(['/medicoconsultarpaciente', paciente.id]);
   }
 
-  //  Alternar sidebar
+  // Alternar sidebar
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  //  Navegar a otra página
+  // Navegar a otra página
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'medico': '/medico',
@@ -188,15 +262,15 @@ export class MedicoPage implements OnInit {
       'medico-buscar-paciente': '/medico-buscar-paciente',
       'medicoplanesnutricionalescreados': '/medicoplanesnutricionalescreados',
       'medicoseguimientoclinico': '/medicoseguimientoclinico',
-      'medico-informes': '/medico-informes',
+      'medicoinformes': '/medico-informes',
+      'medicomensajes': '/medicomensajes',
+      'mediconotificaciones': '/mediconotificaciones',
       'medico-configuracion': '/medico-configuracion'
     };
-
-    const rutaDestino = rutas[ruta] || `/${ruta}`;
-    this.router.navigate([rutaDestino]);
+    this.router.navigate([rutas[ruta] || `/${ruta}`]);
   }
 
-  //  Cerrar sesión
+  // Cerrar sesión
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar Sesión',
@@ -219,7 +293,7 @@ export class MedicoPage implements OnInit {
     await alert.present();
   }
 
-  //  Mostrar toast
+  // Mostrar toast
   async showToast(message: string, color: 'primary' | 'success' | 'danger' | 'warning' = 'primary', duration: number = 2500): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
@@ -230,7 +304,7 @@ export class MedicoPage implements OnInit {
     toast.present();
   }
 
-  //  Color del badge según riesgo
+  // Color del badge según riesgo
   getRiesgoColor(riesgo: string): string {
     const colores: Record<string, string> = {
       'bajo': 'success',
@@ -241,7 +315,7 @@ export class MedicoPage implements OnInit {
     return colores[riesgo] || 'medium';
   }
 
-  //  Formatear fecha
+  // Formatear fecha
   formatearFecha(fecha?: string): string {
     if (!fecha) return 'Sin registro';
     return new Date(fecha).toLocaleDateString('es-EC', {
@@ -251,19 +325,15 @@ export class MedicoPage implements OnInit {
     });
   }
 
-  //  Refrescar datos
-  async refrescarDatos(event?: any): Promise<void> {
-    try {
-      await this.cargarDatosDashboard();
-      await this.showToast('Datos actualizados', 'success');
-    } finally {
-      if (event?.target?.complete) {
-        event.target.complete();
-      }
-    }
+  // Refrescar datos
+  async refrescarDatos(): Promise<void> {
+    this.cargando = true;
+    await this.cargarDatosDashboard();
+    await this.cargarNotificaciones();
+    await this.showToast('Datos actualizados', 'success');
   }
 
-  //  Alternar submenú
+  // Alternar submenú
   toggleSubmenu(nombre: string): void {
     this.submenuAbierto = this.submenuAbierto === nombre ? null : nombre;
   }
@@ -275,55 +345,4 @@ export class MedicoPage implements OnInit {
       this.submenuAbierto = null;
     }
   }
-
-
-
-  //  Variables de notificaciones y mensajes
-notificacionesSinLeer: number = 0;
-mensajesNoLeidos: number = 0;
-
-//  Ver notificaciones (confirmaciones de citas)
-async verNotificaciones(): Promise<void> {
-  // Aquí cargarías las notificaciones desde la API
-  // Por ahora solo un ejemplo
-  const alert = await this.alertCtrl.create({
-    header: '🔔 Notificaciones',
-    message: this.notificacionesSinLeer > 0 
-      ? `Tienes ${this.notificacionesSinLeer} confirmación(es) de cita(s) pendiente(s) de revisar.`
-      : ' No tienes notificaciones nuevas.',
-    buttons: ['Cerrar']
-  });
-  await alert.present();
-  
-  // Marcar como leídas
-  this.notificacionesSinLeer = 0;
-}
-
-//  Ver mensajes
-async verMensajes(): Promise<void> {
-  // Navegar a la página de mensajes o mostrar modal
-  this.router.navigate(['/medicomensajes']);
-}
-
-//  Cargar notificaciones desde API (llamar en ngOnInit)
-private async cargarNotificaciones(): Promise<void> {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-    const resp: any = await this.http.get(
-      `${environment.apiUrl}/nutricionapp-api/medico/notificaciones/no-leidas`,
-      { headers }
-    ).toPromise();
-
-    this.notificacionesSinLeer = resp?.total || 0;
-    this.mensajesNoLeidos = resp?.mensajesNoLeidos || 0;
-
-  } catch (error) {
-    console.warn('No se pudieron cargar notificaciones');
-  }
-}
-
 }

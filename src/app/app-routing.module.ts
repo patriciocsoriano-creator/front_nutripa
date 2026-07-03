@@ -247,6 +247,10 @@ const routes: Routes = [
     path: 'pacientemensajes',
     loadChildren: () => import('./paginas/pacientemensajes/pacientemensajes.module').then( m => m.PacientemensajesPageModule)
   },
+  {
+    path: 'mediconotificaciones',
+    loadChildren: () => import('./paginas/mediconotificaciones/mediconotificaciones.module').then( m => m.MediconotificacionesPageModule)
+  },
  
   
 ];

@@ -8,7 +8,7 @@
     <ion-buttons slot="end">
       <!--  Botón de NOTIFICACIONES (confirmaciones de citas) -->
       <ion-button 
-        class="notif-btn" 
+        class="notif-btn active-notif" 
         [class.has-notifications]="notificacionesSinLeer > 0"
         (click)="verNotificaciones()"
         title="Notificaciones">
@@ -17,6 +17,7 @@
           {{notificacionesSinLeer > 9 ? '9+' : notificacionesSinLeer}}
         </span>
       </ion-button>
+
 
       <!--  Botón de MENSAJES -->
       <ion-button 
