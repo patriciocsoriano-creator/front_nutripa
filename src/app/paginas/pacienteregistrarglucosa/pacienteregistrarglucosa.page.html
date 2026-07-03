@@ -235,66 +235,7 @@
         </div>
       </div>
 
-      <!-- Historial -->
-      <div class="historial-card">
-        <div class="card-header">
-          <ion-icon name="time-outline"></ion-icon>
-          <h2>Historial de Mediciones</h2>
-        </div>
-
-        <div class="filtros-dias">
-          <ion-button 
-            *ngFor="let filtro of filtrosDias" 
-            [fill]="diasHistorial === filtro.dias ? 'solid' : 'outline'"
-            size="small"
-            (click)="cambiarFiltroDias(filtro.dias)">
-            {{filtro.label}}
-          </ion-button>
-        </div>
-
-        <div *ngIf="cargandoHistorial" class="loading-state">
-          <ion-spinner name="crescent" color="primary"></ion-spinner>
-          <p>Cargando historial...</p>
-        </div>
-
-        <div *ngIf="!cargandoHistorial && mediciones.length === 0" class="empty-state">
-          <ion-icon name="water-outline" class="empty-icon"></ion-icon>
-          <p>No hay mediciones registradas en este periodo</p>
-        </div>
-
-        <div *ngIf="!cargandoHistorial && mediciones.length > 0" class="mediciones-list">
-          <div *ngFor="let medicion of mediciones" class="medicion-item">
-            <div class="medicion-header">
-              <div class="medicion-icon" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
-                <ion-icon [name]="getMomentoIcono(medicion.tipo_momento)"></ion-icon>
-              </div>
-              <div class="medicion-info">
-                <div class="medicion-valor" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
-                  {{medicion.valor_glucosa}} mg/dL
-                </div>
-                <div class="medicion-momento">
-                  {{getMomentoLabel(medicion.tipo_momento)}}
-                </div>
-                <div class="medicion-fecha">
-                  {{medicion.fecha_hora | date:'dd/MM/yyyy HH:mm'}}
-                </div>
-              </div>
-              <div class="medicion-clasificacion" [ngClass]="getClasificacionColor(medicion.valor_glucosa)">
-                {{getClasificacion(medicion.valor_glucosa, medicion.tipo_momento)}}
-              </div>
-            </div>
-            <div *ngIf="medicion.notas" class="medicion-notas">
-              <ion-icon name="document-text-outline"></ion-icon>
-              <span>{{medicion.notas}}</span>
-            </div>
-            <div class="medicion-actions">
-              <ion-button size="small" color="danger" fill="clear" (click)="eliminarMedicion(medicion)">
-                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-              </ion-button>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
     </div>
   </div>

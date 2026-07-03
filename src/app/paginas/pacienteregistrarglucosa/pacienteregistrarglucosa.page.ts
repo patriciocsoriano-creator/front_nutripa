@@ -27,16 +27,7 @@ export class PacienteregistrarglucosaPage implements OnInit {
     notas: ''
   };
 
-  mediciones: any[] = [];
-  cargandoHistorial = false;
-  diasHistorial = 7;
   
-  filtrosDias = [
-    { dias: 1, label: 'Hoy' },
-    { dias: 7, label: '7 dias' },
-    { dias: 15, label: '15 dias' },
-    { dias: 30, label: '30 dias' }
-  ];
 
   constructor(
     private router: Router,
@@ -50,7 +41,7 @@ export class PacienteregistrarglucosaPage implements OnInit {
     this.cargarDatosUsuario();
     this.inicializarFechaHora();
     await this.cargarEstadisticas();
-    await this.cargarHistorial();
+    
   }
 
   private detectMobile(): void {
@@ -106,33 +97,9 @@ export class PacienteregistrarglucosaPage implements OnInit {
     }
   }
 
-  async cargarHistorial(): Promise<void> {
-    this.cargandoHistorial = true;
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+  
 
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-      const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/historial?dias=${this.diasHistorial}`,
-        { headers }
-      ).toPromise();
-
-      if (response?.error === false) {
-        this.mediciones = response.mediciones || [];
-      }
-    } catch (error) {
-      console.error('Error cargando historial:', error);
-    } finally {
-      this.cargandoHistorial = false;
-    }
-  }
-
-  async cambiarFiltroDias(dias: number): Promise<void> {
-    this.diasHistorial = dias;
-    await this.cargarHistorial();
-  }
+  
 
   async registrarGlucosa(): Promise<void> {
     if (!this.nuevaMedicion.valor_glucosa || this.nuevaMedicion.valor_glucosa <= 0) {
@@ -173,7 +140,7 @@ export class PacienteregistrarglucosaPage implements OnInit {
 
       this.limpiarFormulario();
       await this.cargarEstadisticas();
-      await this.cargarHistorial();
+      
 
     } catch (error: any) {
       console.error('Error registrando:', error);
@@ -211,7 +178,7 @@ export class PacienteregistrarglucosaPage implements OnInit {
 
               await this.showToast('Medicion eliminada', 'success');
               await this.cargarEstadisticas();
-              await this.cargarHistorial();
+              
             } catch (error) {
               await this.showToast('Error al eliminar', 'danger');
             }

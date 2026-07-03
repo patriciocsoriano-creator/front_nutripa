@@ -31,16 +31,7 @@ export class PacienteregistrarpresionPage implements OnInit {
     notas: ''
   };
 
-  mediciones: any[] = [];
-  cargandoHistorial = false;
-  diasHistorial = 7;
   
-  filtrosDias = [
-    { dias: 1, label: 'Hoy' },
-    { dias: 7, label: '7 dias' },
-    { dias: 15, label: '15 dias' },
-    { dias: 30, label: '30 dias' }
-  ];
 
   constructor(
     private router: Router,
@@ -53,7 +44,7 @@ export class PacienteregistrarpresionPage implements OnInit {
     this.detectMobile();
     this.cargarDatosUsuario();
     this.inicializarFechaHora();
-    await this.cargarHistorial();
+    
   }
 
   private detectMobile(): void {
@@ -89,37 +80,7 @@ export class PacienteregistrarpresionPage implements OnInit {
     this.nuevaMedicion.fecha_hora = fecha;
   }
 
-  async cargarHistorial(): Promise<void> {
-    this.cargandoHistorial = true;
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-      const response: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/historial?dias=${this.diasHistorial}`,
-        { headers }
-      ).toPromise();
-
-      if (response?.error === false) {
-        this.mediciones = response.mediciones || [];
-        this.estadisticas = response.estadisticas || null;
-        this.ultimaMedicion = this.mediciones.length > 0 ? this.mediciones[0] : null;
-      }
-    } catch (error) {
-      console.error('Error cargando historial:', error);
-      this.ultimaMedicion = null;
-      this.estadisticas = null;
-    } finally {
-      this.cargandoHistorial = false;
-    }
-  }
-
-  async cambiarFiltroDias(dias: number): Promise<void> {
-    this.diasHistorial = dias;
-    await this.cargarHistorial();
-  }
+  
 
   async registrarPresion(): Promise<void> {
     if (!this.nuevaMedicion.sistolica || !this.nuevaMedicion.diastolica) {
@@ -176,7 +137,7 @@ export class PacienteregistrarpresionPage implements OnInit {
       }
 
       this.limpiarFormulario();
-      await this.cargarHistorial();
+      
 
     } catch (error: any) {
       console.error('Error registrando:', error);
@@ -197,35 +158,7 @@ export class PacienteregistrarpresionPage implements OnInit {
     this.inicializarFechaHora();
   }
 
-  async eliminarMedicion(medicion: any): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: 'Eliminar Medicion',
-      message: `Estas seguro de eliminar la medicion de <strong>${medicion.sistolica}/${medicion.diastolica} mmHg</strong>?`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Eliminar',
-          handler: async () => {
-            try {
-              const token = localStorage.getItem('token');
-              const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-              await this.http.delete(
-                `${environment.apiUrl}/nutricionapp-api/paciente/glucosa/presion/${medicion.id}`,
-                { headers }
-              ).toPromise();
-
-              await this.showToast('Medicion eliminada', 'success');
-              await this.cargarHistorial();
-            } catch (error) {
-              await this.showToast('Error al eliminar', 'danger');
-            }
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
+  
 
   getClasificacion(sistolica: number, diastolica: number): string {
     if (!sistolica || !diastolica) return '';
