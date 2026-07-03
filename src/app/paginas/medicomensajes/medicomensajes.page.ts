@@ -67,7 +67,7 @@ export class MedicoMensajesPage implements OnInit {
       if (this.conversacionActiva) {
         this.cargarMensajes(this.conversacionActiva.paciente_id);
       }
-    }, 30000);
+    }, 5000);
   }
 
   private cargarDatosUsuario(): void {
