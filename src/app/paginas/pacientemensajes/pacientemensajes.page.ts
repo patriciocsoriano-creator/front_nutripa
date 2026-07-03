@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 
 interface Conversacion {
   medico_id: string;
-  nombre_paciente: string;
+  nombre_medico: string;
   telefono_medico: string;
   ultimo_mensaje: string;
   ultimo_mensaje_fecha: string;
@@ -85,32 +85,56 @@ export class PacienteMensajesPage implements OnInit {
   }
 
   async cargarConversaciones(): Promise<void> {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Sin autenticacion');
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Sin autenticacion');
 
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-      const resp: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/mensajes/conversacion`,
-        { headers }
-      ).toPromise();
+    console.log('[DEBUG] ========================================');
+    console.log('[DEBUG] Llamando a endpoint de conversaciones');
+    console.log('[DEBUG] URL:', `${environment.apiUrl}/nutricionapp-api/paciente/mensajes/conversacion`);
+    console.log('[DEBUG] Token (primeros 20 chars):', token.substring(0, 20) + '...');
 
-      if (resp?.sinMedico) {
-        this.sinMedico = true;
-        this.conversaciones = [];
-      } else {
-        this.sinMedico = false;
-        this.conversaciones = resp?.conversaciones || [];
-      }
+    const resp: any = await this.http.get(
+      `${environment.apiUrl}/nutricionapp-api/paciente/mensajes/conversacion`,
+      { headers }
+    ).toPromise();
 
-    } catch (error) {
-      console.error('Error cargando conversaciones:', error);
+    console.log('[DEBUG] Respuesta completa del backend:', JSON.stringify(resp, null, 2));
+    console.log('[DEBUG] sinMedico:', resp?.sinMedico);
+    console.log('[DEBUG] conversaciones:', resp?.conversaciones);
+    console.log('[DEBUG] mensaje:', resp?.mensaje);
+    console.log('[DEBUG] ========================================');
+
+    if (resp?.sinMedico) {
+      this.sinMedico = true;
       this.conversaciones = [];
-    } finally {
-      this.cargando = false;
+      console.warn('[DEBUG] Backend dice que NO hay medico asignado');
+      console.warn('[DEBUG] Mensaje del backend:', resp?.mensaje);
+    } else {
+      this.sinMedico = false;
+      this.conversaciones = resp?.conversaciones || [];
+      console.log('[DEBUG] Conversaciones cargadas:', this.conversaciones.length);
+      
+      if (this.conversaciones.length > 0) {
+        console.log('[DEBUG] Primera conversacion:', JSON.stringify(this.conversaciones[0], null, 2));
+      }
     }
+
+  } catch (error: any) {
+    console.error('[ERROR] ========================================');
+    console.error('[ERROR] Error cargando conversaciones');
+    console.error('[ERROR] Status:', error.status);
+    console.error('[ERROR] StatusText:', error.statusText);
+    console.error('[ERROR] Mensaje:', error.message);
+    console.error('[ERROR] Error completo:', error);
+    console.error('[ERROR] ========================================');
+    this.conversaciones = [];
+  } finally {
+    this.cargando = false;
   }
+}
 
   async cargarMensajesNoLeidos(): Promise<void> {
     try {
@@ -302,7 +326,7 @@ export class PacienteMensajesPage implements OnInit {
       telefonoLimpio = '593' + telefonoLimpio;
     }
 
-    const mensaje = `Hola Dr. ${this.conversacionActiva.nombre_paciente}, soy ${this.nombrePaciente}. Le contacto desde la plataforma NutriAI.`;
+    const mensaje = `Hola Dr. ${this.conversacionActiva.nombre_medico}, soy ${this.nombrePaciente}. Le contacto desde la plataforma NutriAI.`;
     const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
