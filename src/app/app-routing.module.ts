@@ -239,6 +239,14 @@ const routes: Routes = [
     path: 'medicovermediciones',
     loadChildren: () => import('./paginas/medicovermediciones/medicovermediciones.module').then( m => m.MedicovermedicionesPageModule)
   },
+  {
+    path: 'medicomensajes',
+    loadChildren: () => import('./paginas/medicomensajes/medicomensajes.module').then( m => m.MedicomensajesPageModule)
+  },
+  {
+    path: 'pacientemensajes',
+    loadChildren: () => import('./paginas/pacientemensajes/pacientemensajes.module').then( m => m.PacientemensajesPageModule)
+  },
  
   
 ];

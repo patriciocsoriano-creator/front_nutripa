@@ -1,0 +1,263 @@
+<ion-header [translucent]="true" class="main-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-left">
+      <ion-icon name="medkit-outline" class="logo-icon"></ion-icon>
+      <ion-title>Mensajería</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button 
+        class="notif-btn" 
+        [class.has-notifications]="notificacionesSinLeer > 0"
+        (click)="verNotificaciones()"
+        title="Notificaciones">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notif-badge" *ngIf="notificacionesSinLeer > 0">
+          {{notificacionesSinLeer > 9 ? '9+' : notificacionesSinLeer}}
+        </span>
+      </ion-button>
+
+      <ion-button class="mensajes-btn active-mensajes" title="Mensajes">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <span class="mensajes-badge" *ngIf="mensajesNoLeidos > 0">
+          {{mensajesNoLeidos > 9 ? '9+' : mensajesNoLeidos}}
+        </span>
+      </ion-button>
+
+      <ion-button 
+        class="refresh-btn"
+        [class.refreshing]="cargando"
+        (click)="refrescarDatos()" 
+        title="Actualizar">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button class="logout-btn" (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
+      <div class="menu-icon" (click)="toggleSidebar()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </div>
+      <div class="user-info">
+        <ion-avatar>
+          <div class="avatar-placeholder">{{nombreDoctor.charAt(0)}}</div>
+        </ion-avatar>
+        <div class="user-details">
+          <h4>{{nombreDoctor}}</h4>
+          <p>{{especialidad}}</p>
+        </div>
+      </div>
+      <ul>
+        <li (click)="navegarA('medico')">
+          <ion-icon name="home-outline"></ion-icon><span>Inicio</span>
+        </li>
+        <li class="menu-item-with-submenu">
+          <div class="menu-link" (click)="toggleSubmenu('pacientes')">
+            <ion-icon name="people-outline"></ion-icon><span>Pacientes</span>
+            <ion-icon name="chevron-down-outline" class="submenu-arrow" [class.rotate]="submenuAbierto === 'pacientes'"></ion-icon>
+          </div>
+          <ul class="submenu" [class.active]="submenuAbierto === 'pacientes'">
+            <li (click)="navegarA('medicoverpacientes')"><ion-icon name="eye-outline"></ion-icon><span>Ver pacientes</span></li>
+            <li (click)="navegarA('medico-agregar-paciente')"><ion-icon name="person-add-outline"></ion-icon><span>Agregar paciente</span></li>
+            <li (click)="navegarA('medico-buscar-paciente')"><ion-icon name="search-outline"></ion-icon><span>Buscar paciente</span></li>
+          </ul>
+        </li>
+        <li (click)="navegarA('medicoplanesnutricionalescreados')">
+          <ion-icon name="nutrition-outline"></ion-icon><span>Planes nutricionales</span>
+        </li>
+        <li (click)="navegarA('medicoseguimientoclinico')">
+          <ion-icon name="pulse-outline"></ion-icon><span>Seguimiento clínico</span>
+        </li>
+        <li (click)="navegarA('medicoinformes')">
+          <ion-icon name="stats-chart-outline"></ion-icon><span>Informes</span>
+        </li>
+        <li (click)="navegarA('medicomensajes')" class="active">
+          <ion-icon name="chatbubbles-outline"></ion-icon><span>Mensajes</span>
+        </li>
+        <li (click)="navegarA('medico-configuracion')">
+          <ion-icon name="settings-outline"></ion-icon><span>Configuración</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+      
+      <!-- Loading -->
+      <div *ngIf="cargando" class="loading-state">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando mensajes...</p>
+      </div>
+
+      <div *ngIf="!cargando" class="mensajes-container">
+        
+        <!-- PANEL IZQUIERDO: LISTA DE CONVERSACIONES -->
+        <div class="conversaciones-panel" [class.mobile-hidden]="conversacionActiva">
+          
+          <div class="panel-header">
+            <h3>
+              <ion-icon name="chatbubbles-outline"></ion-icon>
+              Conversaciones
+            </h3>
+            <span class="total-conversaciones">{{conversaciones.length}}</span>
+          </div>
+
+          <!-- Búsqueda -->
+          <div class="search-box">
+            <ion-icon name="search-outline"></ion-icon>
+            <input 
+              type="text" 
+              [(ngModel)]="busqueda" 
+              placeholder="Buscar paciente..."
+              (input)="filtrarConversaciones()">
+          </div>
+
+          <!-- Lista de conversaciones -->
+          <div class="conversaciones-lista">
+            
+            <div *ngIf="conversacionesFiltradas.length === 0" class="empty-state">
+              <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+              <p>No hay conversaciones</p>
+            </div>
+
+            <div 
+              *ngFor="let conv of conversacionesFiltradas"
+              class="conversacion-item"
+              [class.active]="conversacionActiva?.paciente_id === conv.paciente_id"
+              [class.unread]="conv.mensajes_no_leidos > 0"
+              (click)="seleccionarConversacion(conv)">
+              
+              <ion-avatar class="conv-avatar">
+                <img src="assets/avatar-patient.png" alt="Paciente">
+              </ion-avatar>
+
+              <div class="conv-info">
+                <div class="conv-header">
+                  <span class="conv-nombre">{{conv.nombre_paciente}}</span>
+                  <span class="conv-hora">{{formatearHora(conv.ultimo_mensaje_fecha)}}</span>
+                </div>
+                <div class="conv-preview">
+                  <span class="conv-mensaje" [class.bold]="conv.mensajes_no_leidos > 0">
+                    {{conv.ultimo_mensaje}}
+                  </span>
+                  <span class="conv-badge" *ngIf="conv.mensajes_no_leidos > 0">
+                    {{conv.mensajes_no_leidos}}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PANEL DERECHO: CHAT ACTIVO -->
+        <div class="chat-panel" [class.mobile-visible]="conversacionActiva">
+          
+          <!-- Sin conversación seleccionada -->
+          <div *ngIf="!conversacionActiva" class="no-chat-selected">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <h3>Selecciona una conversación</h3>
+            <p>Elige un paciente de la lista para ver sus mensajes</p>
+          </div>
+
+          <!-- Chat activo -->
+          <div *ngIf="conversacionActiva" class="chat-activo">
+            
+            <!-- Header del chat -->
+            <div class="chat-header">
+              <ion-button fill="clear" class="back-btn" (click)="volverALista()">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+              </ion-button>
+              
+              <ion-avatar class="chat-avatar">
+                <img src="assets/avatar-patient.png" alt="Paciente">
+              </ion-avatar>
+
+              <div class="chat-info">
+                <h4>{{conversacionActiva.nombre_paciente}}</h4>
+                <span class="chat-estado">
+                  <ion-icon name="ellipse" [color]="conversacionActiva.en_linea ? 'success' : 'medium'"></ion-icon>
+                  {{conversacionActiva.en_linea ? 'En línea' : 'Desconectado'}}
+                </span>
+              </div>
+
+              <div class="chat-actions">
+                <ion-button fill="clear" (click)="contactarWhatsApp()" title="WhatsApp">
+                  <ion-icon name="logo-whatsapp" color="success"></ion-icon>
+                </ion-button>
+                <ion-button fill="clear" (click)="verHistorialPaciente()" title="Historial">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+            <!-- Mensajes -->
+            <div class="chat-mensajes" #chatContainer>
+              
+              <div *ngIf="mensajes.length === 0" class="empty-mensajes">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+                <p>No hay mensajes aún. ¡Inicia la conversación!</p>
+              </div>
+
+              <div 
+                *ngFor="let msg of mensajes; let i = index"
+                class="mensaje-wrapper"
+                [class.own]="msg.es_medico"
+                [class.other]="!msg.es_medico">
+                
+                <!-- Separador de fecha -->
+                <div *ngIf="mostrarSeparadorFecha(i)" class="fecha-separador">
+                  <span>{{formatearFechaMensaje(msg.fecha)}}</span>
+                </div>
+
+                <div class="mensaje-bubble">
+                  <p class="mensaje-texto">{{msg.contenido}}</p>
+                  <span class="mensaje-hora">
+                    {{formatearHoraMensaje(msg.fecha)}}
+                    <ion-icon *ngIf="msg.es_medico" name="checkmark-done" [class.leido]="msg.leido"></ion-icon>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Input de mensaje -->
+            <div class="chat-input">
+              <ion-button fill="clear" class="attach-btn" title="Adjuntar">
+                <ion-icon name="attach-outline"></ion-icon>
+              </ion-button>
+              
+              <div class="input-wrapper">
+                <textarea 
+                  [(ngModel)]="nuevoMensaje"
+                  placeholder="Escribe un mensaje..."
+                  rows="1"
+                  (keydown.enter)="enviarMensaje($event)"
+                  (input)="autoResize($event)">
+                </textarea>
+              </div>
+
+              <ion-button 
+                class="send-btn" 
+                [disabled]="!nuevoMensaje.trim()"
+                (click)="enviarMensaje()">
+                <ion-icon name="send" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ion-content>

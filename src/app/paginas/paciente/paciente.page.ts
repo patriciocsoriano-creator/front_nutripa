@@ -139,35 +139,42 @@ export class PacientePage implements OnInit {
   }
 
   private async cargarProximaCita(): Promise<void> {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-      const resp: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/paciente/plan/proxima-cita`,
-        { headers }
-      ).toPromise();
+    const resp: any = await this.http.get(
+      `${environment.apiUrl}/nutricionapp-api/paciente/plan/proxima-cita`,
+      { headers }
+    ).toPromise();
 
-      if (resp?.cita) {
-        this.proximaCita = resp.cita;
-        this.medicoNombre = resp.cita.medico_nombre || 'Tu medico';
-        this.medicoTelefono = resp.cita.medico_telefono || '';
-        
-        const fechaCita = new Date(this.proximaCita.fecha_hora);
-        const hoy = new Date();
-        const diffTime = fechaCita.getTime() - hoy.getTime();
-        this.diasParaCita = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (resp?.cita) {
+      this.proximaCita = resp.cita;
+      this.medicoNombre = resp.cita.medico_nombre || 'Tu medico';
+      this.medicoTelefono = resp.cita.medico_telefono || '';
+      
+      const fechaCita = new Date(this.proximaCita.fecha_hora);
+      const hoy = new Date();
+      const diffTime = fechaCita.getTime() - hoy.getTime();
+      this.diasParaCita = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (this.diasParaCita <= 3 && this.diasParaCita >= 0) {
-          this.mostrarAlertaCita();
-        }
+      //  SOLO mostrar alerta si:
+      // 1. La cita está dentro de los próximos 3 días
+      // 2. La cita NO está ya confirmada
+      // 3. La cita NO está cancelada
+      const citaPendiente = this.proximaCita.estado !== 'confirmada' 
+                         && this.proximaCita.estado !== 'cancelada';
+      
+      if (this.diasParaCita <= 3 && this.diasParaCita >= 0 && citaPendiente) {
+        this.mostrarAlertaCita();
       }
-    } catch (error) {
-      console.warn('No se pudo cargar proxima cita');
     }
+  } catch (error) {
+    console.warn('No se pudo cargar proxima cita');
   }
+}
 
   private async mostrarAlertaCita(): Promise<void> {
     const mensaje = this.diasParaCita === 0 

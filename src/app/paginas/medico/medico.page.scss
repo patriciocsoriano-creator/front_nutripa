@@ -661,3 +661,222 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+
+/* ============================================
+   BOTONES DE NOTIFICACIONES Y MENSAJERÍA
+   ============================================ */
+
+.header-toolbar {
+  --background: var(--ion-color-primary);
+  --color: #fff;
+  --border-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo-icon {
+  font-size: 1.6rem;
+  margin-right: 8px;
+  color: #fff;
+}
+
+ion-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.3px;
+}
+
+/* Contenedor de botones del header */
+ion-buttons[slot="end"] {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Botón base de notificaciones y mensajes */
+.notif-btn,
+.mensajes-btn {
+  --background: transparent;
+  --background-hover: rgba(255, 255, 255, 0.15);
+  --background-activated: rgba(255, 255, 255, 0.25);
+  --color: #fff;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  margin: 0 2px;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.25s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 1.45rem;
+  }
+
+  &:hover {
+    transform: scale(1.08);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Badge de notificaciones (confirmaciones de citas) */
+.notif-btn {
+  .notif-badge {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: var(--ion-color-danger);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+    animation: pulse-badge 2s infinite;
+    border: 2px solid var(--ion-color-primary);
+  }
+
+  &.has-notifications {
+    --background: rgba(220, 38, 38, 0.15);
+
+    ion-icon {
+      animation: shake 0.5s ease-in-out;
+    }
+  }
+}
+
+/* Badge de mensajes */
+.mensajes-btn {
+  .mensajes-badge {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: var(--ion-color-success);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4);
+    border: 2px solid var(--ion-color-primary);
+  }
+
+  &.has-mensajes {
+    --background: rgba(16, 185, 129, 0.15);
+  }
+}
+
+/* Botón de actualizar */
+.refresh-btn {
+  --background: transparent;
+  --background-hover: rgba(255, 255, 255, 0.15);
+  --color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+
+  ion-icon {
+    font-size: 1.3rem;
+    transition: transform 0.5s ease;
+  }
+
+  &:hover ion-icon {
+    transform: rotate(180deg);
+  }
+
+  &.refreshing ion-icon {
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* Botón de cerrar sesión */
+.logout-btn {
+  --background: rgba(255, 255, 255, 0.1);
+  --background-hover: rgba(220, 38, 38, 0.2);
+  --background-activated: rgba(220, 38, 38, 0.35);
+  --color: #fff;
+  margin-left: 4px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: all 0.25s ease;
+
+  ion-icon {
+    font-size: 1.3rem;
+  }
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.25);
+    transform: scale(1.08);
+  }
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.6);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .notif-btn,
+  .mensajes-btn,
+  .refresh-btn,
+  .logout-btn {
+    width: 36px;
+    height: 36px;
+
+    ion-icon {
+      font-size: 1.25rem;
+    }
+  }
+
+  ion-title {
+    font-size: 1rem;
+  }
+
+  .logo-icon {
+    display: none;
+  }
+}

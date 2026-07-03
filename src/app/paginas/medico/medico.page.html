@@ -6,11 +6,42 @@
     </div>
 
     <ion-buttons slot="end">
-      <ion-button (click)="refrescarDatos()" title="Actualizar datos">
-        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      <!--  Botón de NOTIFICACIONES (confirmaciones de citas) -->
+      <ion-button 
+        class="notif-btn" 
+        [class.has-notifications]="notificacionesSinLeer > 0"
+        (click)="verNotificaciones()"
+        title="Notificaciones">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notif-badge" *ngIf="notificacionesSinLeer > 0">
+          {{notificacionesSinLeer > 9 ? '9+' : notificacionesSinLeer}}
+        </span>
       </ion-button>
-      <ion-button (click)="cerrarSesion()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+
+      <!--  Botón de MENSAJES -->
+      <ion-button 
+        class="mensajes-btn"
+        [class.has-mensajes]="mensajesNoLeidos > 0"
+        (click)="verMensajes()"
+        title="Mensajes">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <span class="mensajes-badge" *ngIf="mensajesNoLeidos > 0">
+          {{mensajesNoLeidos > 9 ? '9+' : mensajesNoLeidos}}
+        </span>
+      </ion-button>
+
+      <!--  Botón de REFRESCAR -->
+      <ion-button 
+        class="refresh-btn"
+        [class.refreshing]="cargando"
+        (click)="refrescarDatos()" 
+        title="Actualizar datos">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+
+      <!--  Botón de CERRAR SESIÓN -->
+      <ion-button class="logout-btn" (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
