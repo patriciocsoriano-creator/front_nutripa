@@ -196,24 +196,8 @@ export class MedicoPage implements OnInit {
 
   // Ver notificaciones
   async verNotificaciones(): Promise<void> {
-    if (this.notificacionesSinLeer === 0) {
-      await this.showToast('No tienes notificaciones nuevas', 'success');
-      return;
-    }
-    
-    const alert = await this.alertCtrl.create({
-      header: 'Notificaciones',
-      message: `Tienes ${this.notificacionesSinLeer} notificacion(es) sin leer.`,
-      buttons: [
-        {
-          text: 'Marcar todas como leidas',
-          handler: () => this.marcarTodasComoLeidas()
-        },
-        { text: 'Cerrar', role: 'cancel' }
-      ]
-    });
-    await alert.present();
-  }
+  this.router.navigate(['/mediconotificaciones']);
+}
 
   // Marcar todas las notificaciones como leídas
   async marcarTodasComoLeidas(): Promise<void> {
