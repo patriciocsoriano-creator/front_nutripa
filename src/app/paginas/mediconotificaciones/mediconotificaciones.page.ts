@@ -141,9 +141,6 @@ export class MedicoNotificacionesPage implements OnInit {
 
   verDetallePaciente(notificacion: Notificacion): void {
     this.marcarComoLeida(notificacion);
-    this.router.navigate(['/medicoconsultarpaciente'], {
-      queryParams: { cedula: notificacion.cedula_paciente }
-    });
   }
 
   navegarA(ruta: string): void {

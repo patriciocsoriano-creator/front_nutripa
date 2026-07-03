@@ -312,14 +312,7 @@ export class MedicoMensajesPage implements OnInit {
 }
 
   async verNotificaciones(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: 'Notificaciones',
-      message: this.notificacionesSinLeer > 0 
-        ? `Tienes ${this.notificacionesSinLeer} notificacion(es) pendiente(s).`
-        : 'No tienes notificaciones nuevas.',
-      buttons: ['Cerrar']
-    });
-    await alert.present();
+    this.router.navigate(['/mediconotificaciones']);
   }
 
   navegarA(ruta: string): void {

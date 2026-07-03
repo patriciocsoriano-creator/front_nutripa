@@ -160,50 +160,103 @@ export class PacientePage implements OnInit {
       const diffTime = fechaCita.getTime() - hoy.getTime();
       this.diasParaCita = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      //  SOLO mostrar alerta si:
-      // 1. La cita está dentro de los próximos 3 días
-      // 2. La cita NO está ya confirmada
-      // 3. La cita NO está cancelada
-      const citaPendiente = this.proximaCita.estado !== 'confirmada' 
-                         && this.proximaCita.estado !== 'cancelada';
-      
-      if (this.diasParaCita <= 3 && this.diasParaCita >= 0 && citaPendiente) {
+      // SOLO mostrar alerta de confirmacion si:
+      // 1. La cita esta dentro de los proximos 3 dias
+      // 2. La cita esta agendada (NO confirmada ni cancelada)
+      if (this.diasParaCita <= 3 && this.diasParaCita >= 0 && this.proximaCita.estado === 'agendada') {
         this.mostrarAlertaCita();
       }
+    } else {
+      this.proximaCita = null;
     }
   } catch (error) {
     console.warn('No se pudo cargar proxima cita');
   }
 }
 
-  private async mostrarAlertaCita(): Promise<void> {
-    const mensaje = this.diasParaCita === 0 
-      ? 'Tienes una cita HOY!'
-      : this.diasParaCita === 1
-        ? 'Tienes una cita MANANA!'
-        : `Tienes una cita en ${this.diasParaCita} dias`;
 
-    const alert = await this.alertCtrl.create({
-      header: 'Recordatorio de Cita',
-      message: `${mensaje}<br><br>
-        <strong>Fecha:</strong> ${new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long' })}<br>
-        <strong>Hora:</strong> ${new Date(this.proximaCita.fecha_hora).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}<br><br>
-        Deseas confirmar tu asistencia?`,
-      cssClass: 'alert-cita-recordatorio',
-      buttons: [
-        { 
-          text: 'Cancelar cita', 
-          role: 'cancel',
-          handler: () => this.cancelarCita()
-        },
-        {
-          text: 'Confirmar asistencia',
-          handler: () => this.confirmarAsistencia()
-        }
-      ]
-    });
-    await alert.present();
-  }
+  private async mostrarAlertaCita(): Promise<void> {
+  const mensaje = this.diasParaCita === 0 
+    ? 'Tienes una cita HOY!'
+    : this.diasParaCita === 1
+      ? 'Tienes una cita MANANA!'
+      : `Tienes una cita en ${this.diasParaCita} dias`;
+
+  const fechaFormateada = new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long' 
+  });
+  const horaFormateada = new Date(this.proximaCita.fecha_hora).toLocaleTimeString('es-EC', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
+  // Usar texto plano con saltos de linea en lugar de HTML
+  const mensajeCompleto = `${mensaje}\n\n` +
+    `Fecha: ${fechaFormateada}\n` +
+    `Hora: ${horaFormateada}\n\n` +
+    `Deseas confirmar tu asistencia?`;
+
+  const alert = await this.alertCtrl.create({
+    header: 'Recordatorio de Cita',
+    message: mensajeCompleto,
+    cssClass: 'alert-cita-recordatorio',
+    buttons: [
+      { 
+        text: 'Cancelar cita', 
+        role: 'cancel',
+        handler: () => this.cancelarCita()
+      },
+      {
+        text: 'Confirmar asistencia',
+        handler: () => this.confirmarAsistencia()
+      }
+    ]
+  });
+  await alert.present();
+}
+
+// Nuevo metodo para mostrar detalles de cita ya confirmada
+async mostrarDetallesCitaConfirmada(): Promise<void> {
+  if (!this.proximaCita) return;
+
+  const fechaFormateada = new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long',
+    year: 'numeric'
+  });
+  const horaFormateada = new Date(this.proximaCita.fecha_hora).toLocaleTimeString('es-EC', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
+  const mensajeCompleto = `Tu cita ya esta confirmada\n\n` +
+    `Medico: ${this.medicoNombre}\n` +
+    `Fecha: ${fechaFormateada}\n` +
+    `Hora: ${horaFormateada}\n` +
+    `Tipo: ${this.getTipoCitaLabel(this.proximaCita.tipo || 'control')}\n` +
+    (this.proximaCita.motivo ? `Motivo: ${this.proximaCita.motivo}\n` : '') +
+    `\nRecuerda prepararte para tu consulta.`;
+
+  const alert = await this.alertCtrl.create({
+    header: 'Detalles de tu Cita',
+    message: mensajeCompleto,
+    cssClass: 'alert-cita-detalles',
+    buttons: [
+      {
+        text: 'Contactar por WhatsApp',
+        handler: () => this.contactarWhatsApp()
+      },
+      {
+        text: 'Cerrar',
+        role: 'cancel'
+      }
+    ]
+  });
+  await alert.present();
+}
 
   async confirmarAsistencia(): Promise<void> {
     if (!this.proximaCita) return;

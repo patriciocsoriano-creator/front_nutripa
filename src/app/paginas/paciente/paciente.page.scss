@@ -1533,3 +1533,66 @@ $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
   }
 }
+
+/* ============================================
+   ESTADOS DE CITA
+   ============================================ */
+.cita-icono-grande.confirmada {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  
+  ion-icon {
+    color: white;
+    animation: pulse-confirm 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-confirm {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.cita-countdown.confirmada {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  
+  .countdown-numero {
+    ion-icon {
+      font-size: 2rem;
+      color: white;
+    }
+  }
+}
+
+.cita-subtitulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-weight: 500;
+  
+  ion-icon {
+    font-size: 1.1rem;
+  }
+}
+
+/* ============================================
+   ALERT SIN HTML (texto plano con saltos de linea)
+   ============================================ */
+.alert-cita-recordatorio .alert-message,
+.alert-cita-detalles .alert-message {
+  white-space: pre-line;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .cita-acciones-destacadas {
+    flex-direction: column;
+    
+    ion-button {
+      width: 100%;
+    }
+  }
+}

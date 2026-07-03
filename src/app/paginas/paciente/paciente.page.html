@@ -150,102 +150,132 @@
         </div>
 
         <div class="proxima-cita-destacada">
-          
-          <ng-container *ngIf="proximaCita; else sinCita">
-            <div class="cita-header-section">
-              <div class="cita-icono-grande">
-                <ion-icon name="calendar-outline"></ion-icon>
-              </div>
-              <div class="cita-titulo-seccion">
-                <h2>Tu Proxima Cita</h2>
-                <p class="cita-subtitulo">No olvides prepararte para tu consulta</p>
-              </div>
-              <div class="cita-countdown" [class.urgente]="diasParaCita <= 1" [class.pronto]="diasParaCita > 1 && diasParaCita <= 3">
-                <div class="countdown-numero">{{diasParaCita === 0 ? 'HOY!' : diasParaCita}}</div>
-                <div class="countdown-texto" *ngIf="diasParaCita > 0">{{diasParaCita === 1 ? 'dia' : 'dias'}}</div>
-              </div>
-            </div>
-
-            <div class="cita-detalles-completos">
-              <div class="detalle-item">
-                <ion-icon name="person-outline"></ion-icon>
-                <div class="detalle-info">
-                  <span class="detalle-label">Medico</span>
-                  <span class="detalle-valor">{{medicoNombre}}</span>
-                </div>
-              </div>
-
-              <div class="detalle-item">
-                <ion-icon name="calendar-outline"></ion-icon>
-                <div class="detalle-info">
-                  <span class="detalle-label">Fecha</span>
-                  <span class="detalle-valor">{{proximaCita.fecha_hora | date:'EEEE, dd MMMM yyyy'}}</span>
-                </div>
-              </div>
-
-              <div class="detalle-item">
-                <ion-icon name="time-outline"></ion-icon>
-                <div class="detalle-info">
-                  <span class="detalle-label">Hora</span>
-                  <span class="detalle-valor">{{proximaCita.fecha_hora | date:'HH:mm'}} h</span>
-                </div>
-              </div>
-
-              <div class="detalle-item" *ngIf="proximaCita.tipo">
-                <ion-icon name="medkit-outline"></ion-icon>
-                <div class="detalle-info">
-                  <span class="detalle-label">Tipo de consulta</span>
-                  <span class="detalle-valor">{{getTipoCitaLabel(proximaCita.tipo)}}</span>
-                </div>
-              </div>
-
-              <div class="detalle-item" *ngIf="proximaCita.motivo">
-                <ion-icon name="document-text-outline"></ion-icon>
-                <div class="detalle-info">
-                  <span class="detalle-label">Motivo</span>
-                  <span class="detalle-valor">{{proximaCita.motivo}}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="cita-acciones-destacadas">
-              <ion-button color="success" size="default" (click)="contactarWhatsApp()">
-                <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
-                Confirmar asistencia
-              </ion-button>
-              <ion-button color="primary" size="default" fill="outline" (click)="verProximaCita()">
-                <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-                Ver detalles
-              </ion-button>
-            </div>
-          </ng-container>
-
-          <ng-template #sinCita>
-            <div class="cita-header-section">
-              <div class="cita-icono-grande sin-cita">
-                <ion-icon name="calendar-clear-outline"></ion-icon>
-              </div>
-              <div class="cita-titulo-seccion">
-                <h2>Proxima Cita</h2>
-                <p class="cita-subtitulo">No tienes citas programadas</p>
-              </div>
-            </div>
-
-            <div class="cita-sin-programar">
-              <ion-icon name="information-circle-outline"></ion-icon>
-              <p>Aun no tienes ninguna cita agendada con tu medico.</p>
-              <p class="cita-sugerencia">Contacta a tu medico para programar tu proxima consulta.</p>
-            </div>
-
-            <div class="cita-acciones-destacadas">
-              <ion-button color="success" size="default" (click)="contactarWhatsApp()">
-                <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
-                Contactar medico
-              </ion-button>
-            </div>
-          </ng-template>
-
+  
+  <ng-container *ngIf="proximaCita; else sinCita">
+    <div class="cita-header-section">
+      <div class="cita-icono-grande" [class.confirmada]="proximaCita.estado === 'confirmada'">
+        <ion-icon [name]="proximaCita.estado === 'confirmada' ? 'checkmark-circle-outline' : 'calendar-outline'"></ion-icon>
+      </div>
+      <div class="cita-titulo-seccion">
+        <h2>Tu Proxima Cita</h2>
+        <p class="cita-subtitulo" *ngIf="proximaCita.estado === 'confirmada'">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          Asistencia confirmada
+        </p>
+        <p class="cita-subtitulo" *ngIf="proximaCita.estado !== 'confirmada'">
+          No olvides prepararte para tu consulta
+        </p>
+      </div>
+      <div class="cita-countdown" 
+           [class.urgente]="diasParaCita <= 1 && proximaCita.estado !== 'confirmada'" 
+           [class.pronto]="diasParaCita > 1 && diasParaCita <= 3 && proximaCita.estado !== 'confirmada'"
+           [class.confirmada]="proximaCita.estado === 'confirmada'">
+        <div class="countdown-numero">
+          <ion-icon *ngIf="proximaCita.estado === 'confirmada'" name="checkmark-done"></ion-icon>
+          <span *ngIf="proximaCita.estado !== 'confirmada'">{{diasParaCita === 0 ? 'HOY!' : diasParaCita}}</span>
         </div>
+        <div class="countdown-texto" *ngIf="diasParaCita > 0 && proximaCita.estado !== 'confirmada'">
+          {{diasParaCita === 1 ? 'dia' : 'dias'}}
+        </div>
+      </div>
+    </div>
+
+    <div class="cita-detalles-completos">
+      <div class="detalle-item">
+        <ion-icon name="person-outline"></ion-icon>
+        <div class="detalle-info">
+          <span class="detalle-label">Medico</span>
+          <span class="detalle-valor">{{medicoNombre}}</span>
+        </div>
+      </div>
+
+      <div class="detalle-item">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <div class="detalle-info">
+          <span class="detalle-label">Fecha</span>
+          <span class="detalle-valor">{{proximaCita.fecha_hora | date:'EEEE, dd MMMM yyyy'}}</span>
+        </div>
+      </div>
+
+      <div class="detalle-item">
+        <ion-icon name="time-outline"></ion-icon>
+        <div class="detalle-info">
+          <span class="detalle-label">Hora</span>
+          <span class="detalle-valor">{{proximaCita.fecha_hora | date:'HH:mm'}} h</span>
+        </div>
+      </div>
+
+      <div class="detalle-item" *ngIf="proximaCita.tipo">
+        <ion-icon name="medkit-outline"></ion-icon>
+        <div class="detalle-info">
+          <span class="detalle-label">Tipo de consulta</span>
+          <span class="detalle-valor">{{getTipoCitaLabel(proximaCita.tipo)}}</span>
+        </div>
+      </div>
+
+      <div class="detalle-item" *ngIf="proximaCita.motivo">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <div class="detalle-info">
+          <span class="detalle-label">Motivo</span>
+          <span class="detalle-valor">{{proximaCita.motivo}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTONES DIFERENTES SEGUN ESTADO -->
+    <div class="cita-acciones-destacadas">
+      <!-- Si la cita YA esta confirmada: solo mostrar detalles y WhatsApp -->
+      <ng-container *ngIf="proximaCita.estado === 'confirmada'">
+        <ion-button color="success" size="default" disabled>
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          Asistencia Confirmada
+        </ion-button>
+        <ion-button color="primary" size="default" fill="outline" (click)="mostrarDetallesCitaConfirmada()">
+          <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+          Ver detalles
+        </ion-button>
+      </ng-container>
+
+      <!-- Si la cita esta agendada (pendiente): mostrar botones de accion -->
+      <ng-container *ngIf="proximaCita.estado === 'agendada'">
+        <ion-button color="success" size="default" (click)="confirmarAsistencia()">
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          Confirmar asistencia
+        </ion-button>
+        <ion-button color="primary" size="default" fill="outline" (click)="verProximaCita()">
+          <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+          Ver detalles
+        </ion-button>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <ng-template #sinCita>
+    <div class="cita-header-section">
+      <div class="cita-icono-grande sin-cita">
+        <ion-icon name="calendar-clear-outline"></ion-icon>
+      </div>
+      <div class="cita-titulo-seccion">
+        <h2>Proxima Cita</h2>
+        <p class="cita-subtitulo">No tienes citas programadas</p>
+      </div>
+    </div>
+
+    <div class="cita-sin-programar">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <p>Aun no tienes ninguna cita agendada con tu medico.</p>
+      <p class="cita-sugerencia">Contacta a tu medico para programar tu proxima consulta.</p>
+    </div>
+
+    <div class="cita-acciones-destacadas">
+      <ion-button color="success" size="default" (click)="contactarWhatsApp()">
+        <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+        Contactar medico
+      </ion-button>
+    </div>
+  </ng-template>
+
+</div>
 
         <div class="quick-access-grid">
           
