@@ -91,7 +91,21 @@ private ultimoTotalMensajes = 0;
   async ngOnInit() {
   this.cargarDatosUsuario();
   await this.cargarDatosDashboard();
-  await this.cargarNotificaciones(false); // No reproducir sonido al iniciar
+  await this.cargarNotificaciones(false);
+
+  // Desbloquear audio
+  document.addEventListener(
+    'click',
+    () => {
+      this.audioNotificacion.play()
+        .then(() => {
+          this.audioNotificacion.pause();
+          this.audioNotificacion.currentTime = 0;
+        })
+        .catch(() => {});
+    },
+    { once: true }
+  );
 }
 
   async ionViewWillEnter() {
