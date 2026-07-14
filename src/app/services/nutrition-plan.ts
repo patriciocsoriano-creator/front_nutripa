@@ -22,6 +22,11 @@ import { environment } from 'src/environments/environment';
 export class NutritionPlanService {
 
   private readonly API_URL = `${environment.apiUrl}/nutricionapp-api/medico/plan-nutricional`;
+  
+  // URL de tu base de datos de alimentos en el backend
+  // NOTA: Si el archivo está en la carpeta 'assets' de Angular en lugar del backend, 
+  // cambia esto a: '/assets/data/food_db.json'
+  private readonly FOOD_DB_URL = `${environment.apiUrl.replace(/\/$/, '')}/nutricionapp-api/data/food_db.json`;
 
   private readonly ALIMENTOS_NO_APROPIADOS = [
     'especia', 'fenogreco', 'galleta', 'cookie', 'spice', 'seasoning',
@@ -31,101 +36,195 @@ export class NutritionPlanService {
     'supplement', 'suplemento', 'powder', 'polvo', 'concentrate'
   ];
 
+  private foodDatabase: FoodItem[] = [];
+  private isDbLoaded = false;
+  private categorizedFoods: Record<string, FoodItem[]> | null = null;
+
   constructor(
     private http: HttpClient,
     private fatsecretApi: FatsecretApiService
   ) {}
 
-  async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
-  // 🔧 NORMALIZAR PERFIL: Mapear a valores válidos del modelo
-  const perfilesValidos = [
-    'Normocalorico', 
-    'Control Glucemico', 
-    'Hipocalorico', 
-    'Hipo-grasa'
-  ] as const;
-  
-  const perfilOriginal = input.profile_type;
-  const perfilNormalizado = perfilOriginal
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Elimina tildes
-    .toLowerCase()
-    .trim();
-  
-  // Buscar el perfil válido que coincida (sin importar tildes/mayúsculas)
-  const perfilEncontrado = perfilesValidos.find(p => 
-    p.normalize('NFD')
-     .replace(/[\u0300-\u036f]/g, '')
-     .toLowerCase() === perfilNormalizado
-  ) || 'Normocalorico';
-  
-  console.log('═══════════════════════════════════════');
-  console.log('🔧 Perfil original:', perfilOriginal);
-  console.log('🔧 Perfil normalizado:', perfilNormalizado);
-  console.log('✅ Perfil mapeado:', perfilEncontrado);
-  
-  // Actualizar input con el perfil válido
-  input.profile_type = perfilEncontrado;
-  
-  const needsGlycemicControl = this._needsGlycemicControl(input);
-  const profileType = needsGlycemicControl ? 'Control Glucemico' as const : perfilEncontrado;
-  
-  console.log('🎯 needsGlycemicControl:', needsGlycemicControl);
-  console.log('🎯 profileType final:', profileType);
-  console.log('📊 Macros:', this._getMacrosForProfile(profileType));
-  console.log('═══════════════════════════════════════');
-  
-  const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
-  const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
-  const monthlySummary = this.generateMonthlySummary(weekPlan);
-  
-  return {
-    patient_id: input.patient_id,
-    patient_name: input.patient_name,
-    profile_type: profileType,
-    profile_id: needsGlycemicControl ? 1 : input.profile_id,
-    daily_calorie_target: input.daily_calories,
-    macro_distribution: this._getMacrosForProfile(profileType),
-    restrictions: {
-      allergies: input.allergies,
-      intolerances: [],
-      avoid_foods: this.getFoodsToAvoid(profileType, input.allergies)
-    },
-    preferences: input.preferences,
-    recommendations: this._getRecommendations(profileType, input.recommendations),
-    plan: {
-      weekly: weekPlan,
-      monthly_summary: monthlySummary
-    },
-    generated_at: new Date().toISOString(),
-    valid_until: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-    metadata: {
-      ai_confidence: needsGlycemicControl ? 0.98 : 0.95,
-      clinical_validation_required: needsGlycemicControl,
-      source: 'fatsecret_api',
-      glycemic_control_applied: needsGlycemicControl
+  private async ensureFoodDatabaseLoaded(): Promise<void> {
+    if (this.isDbLoaded && this.foodDatabase.length > 0) {
+      return;
     }
-  };
-}
+    try {
+      console.log('Cargando base de datos de alimentos desde el backend...');
+      const data: any[] = await firstValueFrom(this.http.get<any[]>(this.FOOD_DB_URL));
+      this.foodDatabase = data.map(item => this.mapToFoodItem(item));
+      this.isDbLoaded = true;
+      this.categorizedFoods = null; // Resetear categorización para forzar recálculo
+      console.log('Base de datos de alimentos cargada exitosamente:', this.foodDatabase.length, 'alimentos');
+    } catch (error) {
+      console.error('Error cargando la base de datos de alimentos:', error);
+      this.foodDatabase = this.getFallbackFoods();
+      this.isDbLoaded = true;
+      this.categorizedFoods = null;
+    }
+  }
+
+  private mapToFoodItem(item: any): FoodItem {
+    if (item.food_id && item.name) {
+      return item as FoodItem;
+    }
+    
+    const name = item.description || 'Alimento desconocido';
+    const nutrients = item.foodNutrients || [];
+    
+    const getNutrient = (nutrientName: string) => {
+      const n = nutrients.find((nut: any) => 
+        nut.nutrient && nut.nutrient.name && nut.nutrient.name.toLowerCase().includes(nutrientName.toLowerCase())
+      );
+      return n ? (n.amount || 0) : 0;
+    };
+
+    const calories = getNutrient('Energy');
+    const protein = getNutrient('Protein');
+    const carbs = getNutrient('Carbohydrate');
+    const fat = getNutrient('lipid') || getNutrient('fat');
+    const fiber = getNutrient('Fiber');
+
+    return {
+      food_id: item.fdcId || item.food_id || Math.random().toString(36).substr(2, 9),
+      name: this._translateFoodName(name),
+      brand: item.brand || '',
+      serving_size: 100,
+      serving_unit: 'g',
+      calories: Math.round(calories * 10) / 10,
+      protein: Math.round(protein * 10) / 10,
+      carbs: Math.round(carbs * 10) / 10,
+      fat: Math.round(fat * 10) / 10,
+      fiber: Math.round(fiber * 10) / 10
+    };
+  }
+
+  private getFallbackFoods(): FoodItem[] {
+    return [
+      { food_id: 'fb_1', name: 'Pechuga de pollo', serving_size: 100, serving_unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+      { food_id: 'fb_2', name: 'Arroz integral', serving_size: 100, serving_unit: 'g', calories: 112, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8 },
+      { food_id: 'fb_3', name: 'Brócoli', serving_size: 100, serving_unit: 'g', calories: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6 },
+      { food_id: 'fb_4', name: 'Manzana', serving_size: 100, serving_unit: 'g', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4 },
+      { food_id: 'fb_5', name: 'Almendras', serving_size: 30, serving_unit: 'g', calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3.5 }
+    ];
+  }
+
+  private getCategorizedFoods(): Record<string, FoodItem[]> {
+    if (this.categorizedFoods) return this.categorizedFoods;
+
+    const categories: Record<string, FoodItem[]> = {
+      proteinas: [],
+      carbohidratos: [],
+      verduras: [],
+      frutas: [],
+      snacks: []
+    };
+
+    for (const food of this.foodDatabase) {
+      if (!this._esAlimentoApropiado(food)) continue;
+      const name = food.name.toLowerCase();
+      
+      if (name.match(/pollo|pavo|res|cerdo|pescado|salmón|atún|tofu|lentejas|frijol|huevo|garbanzo/)) {
+        categories['proteinas'].push(food);
+      } else if (name.match(/arroz|quinoa|avena|papa|camote|pan|pasta|tortilla/)) {
+        categories['carbohidratos'].push(food);
+      } else if (name.match(/brócoli|espinaca|zanahoria|pepino|lechuga|calabacín|ejote|coliflor|pimiento/)) {
+        categories['verduras'].push(food);
+      } else if (name.match(/manzana|pera|fresa|arándano|plátano|naranja|kiwi|melón|uva/)) {
+        categories['frutas'].push(food);
+      } else if (name.match(/almendra|nuez|yogur|cottage|semilla|palta|aguacate/)) {
+        categories['snacks'].push(food);
+      }
+    }
+    
+    this.categorizedFoods = categories;
+    return categories;
+  }
+
+  async generatePlan(input: PlanGenerationInput): Promise<GeneratedNutritionPlan> {
+    const perfilesValidos = [
+      'Normocalorico', 
+      'Control Glucemico', 
+      'Hipocalorico', 
+      'Hipo-grasa'
+    ] as const;
+    
+    const perfilOriginal = input.profile_type;
+    const perfilNormalizado = perfilOriginal
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+    
+    const perfilEncontrado = perfilesValidos.find(p => 
+      p.normalize('NFD')
+       .replace(/[\u0300-\u036f]/g, '')
+       .toLowerCase() === perfilNormalizado
+    ) || 'Normocalorico';
+    
+    console.log('Perfil original:', perfilOriginal);
+    console.log('Perfil normalizado:', perfilNormalizado);
+    console.log('Perfil mapeado:', perfilEncontrado);
+    
+    input.profile_type = perfilEncontrado;
+    
+    const needsGlycemicControl = this._needsGlycemicControl(input);
+    const profileType = needsGlycemicControl ? 'Control Glucemico' as const : perfilEncontrado;
+    
+    console.log('needsGlycemicControl:', needsGlycemicControl);
+    console.log('profileType final:', profileType);
+    console.log('Macros:', this._getMacrosForProfile(profileType));
+    
+    const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
+    const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
+    const monthlySummary = this.generateMonthlySummary(weekPlan);
+    
+    return {
+      patient_id: input.patient_id,
+      patient_name: input.patient_name,
+      profile_type: profileType,
+      profile_id: needsGlycemicControl ? 1 : input.profile_id,
+      daily_calorie_target: input.daily_calories,
+      macro_distribution: this._getMacrosForProfile(profileType),
+      restrictions: {
+        allergies: input.allergies,
+        intolerances: [],
+        avoid_foods: this.getFoodsToAvoid(profileType, input.allergies)
+      },
+      preferences: input.preferences,
+      recommendations: this._getRecommendations(profileType, input.recommendations),
+      plan: {
+        weekly: weekPlan,
+        monthly_summary: monthlySummary
+      },
+      generated_at: new Date().toISOString(),
+      valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      metadata: {
+        ai_confidence: needsGlycemicControl ? 0.98 : 0.95,
+        clinical_validation_required: needsGlycemicControl,
+        source: 'local_database',
+        glycemic_control_applied: needsGlycemicControl
+      }
+    };
+  }
 
   private _needsGlycemicControl(input: PlanGenerationInput): boolean {
-    // Normalizar para comparación
-  const perfilNormalizado = input.profile_type
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-  
-  if (perfilNormalizado === 'Control Glucemico') return true;
-  
-  const clinical = (input as any).datos_clinicos_base;
-  if (!clinical) return false;
-  
-  const glucosaAyunas = clinical.glucosa_ayunas;
-  const hba1c = clinical.hba1c;
-  
-  if (glucosaAyunas && glucosaAyunas >= 126) return true;
-  if (hba1c && hba1c >= 6.5) return true;
-  
-  return false;
+    const perfilNormalizado = input.profile_type
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    
+    if (perfilNormalizado === 'Control Glucemico') return true;
+    
+    const clinical = (input as any).datos_clinicos_base;
+    if (!clinical) return false;
+    
+    const glucosaAyunas = clinical.glucosa_ayunas;
+    const hba1c = clinical.hba1c;
+    
+    if (glucosaAyunas && glucosaAyunas >= 126) return true;
+    if (hba1c && hba1c >= 6.5) return true;
+    
+    return false;
   }
 
   private _getMacrosForProfile(profile: string): { protein: number; carbs: number; fat: number } {
@@ -155,15 +254,18 @@ export class NutritionPlanService {
     mealDist: Record<MealType, number>,
     needsGlycemicControl: boolean
   ): Promise<WeekPlan> {
+    await this.ensureFoodDatabaseLoaded();
+    
     const days: DayPlan[] = [];
     const today = new Date();
+    const usedFoodsThisWeek = new Set<string>();
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       const dayName = date.toLocaleDateString('es-EC', { weekday: 'long' });
       
-      const meals = await this.generateDayMeals(input, mealDist, dayName, i, needsGlycemicControl);
+      const meals = await this.generateDayMeals(input, mealDist, dayName, i, needsGlycemicControl, usedFoodsThisWeek);
       
       const daily_totals = meals.reduce((acc: any, meal: MealPlan) => ({
         calories: this._round(acc.calories + meal.total_calories),
@@ -203,111 +305,136 @@ export class NutritionPlanService {
   }
 
   private async generateDayMeals(
-  input: PlanGenerationInput, 
-  mealDist: Record<MealType, number>, 
-  dayName: string, 
-  dayIndex: number,
-  needsGlycemicControl: boolean
-): Promise<MealPlan[]> {
-  const meals: MealPlan[] = [];
-  const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
-  
-  // NUEVO: Rastrear alimentos usados en todo el día
-  const usedFoodsToday = new Set<string>();
-  
-  for (const mealType of mealOrder) {
-    if (mealDist[mealType] === 0) continue;
+    input: PlanGenerationInput, 
+    mealDist: Record<MealType, number>, 
+    dayName: string, 
+    dayIndex: number,
+    needsGlycemicControl: boolean,
+    usedFoodsThisWeek: Set<string>
+  ): Promise<MealPlan[]> {
+    const categories = this.getCategorizedFoods();
+    const meals: MealPlan[] = [];
+    const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
+    const usedFoodsToday = new Set<string>();
     
-    const targetCalories = Math.round(input.daily_calories * mealDist[mealType]);
-    
-    let foods = await this.selectFoodsForMeal(
-      input, 
-      mealType, 
-      targetCalories, 
-      dayIndex, 
-      needsGlycemicControl
-    );
-    
-    // Filtrar alergias
-    foods = foods.filter((food: FoodItem) => 
-      !input.allergies.some((allergy: string) => 
-        food.name.toLowerCase().includes(allergy.toLowerCase()) ||
-        food.brand?.toLowerCase().includes(allergy.toLowerCase())
-      )
-    );
-    
-    foods = foods.filter(food => this._esAlimentoApropiado(food));
-    
-    // NUEVO: Eliminar duplicados dentro de la comida
-    foods = this._eliminarDuplicados(foods);
-    
-    // NUEVO: Eliminar alimentos ya usados en otras comidas del día
-    foods = foods.filter(food => {
-      const key = food.name.toLowerCase().trim();
-      if (usedFoodsToday.has(key)) {
-        return false;
-      }
-      usedFoodsToday.add(key);
-      return true;
-    });
-    
-    foods = this.removeDoubleCarbs(foods);
-    
-    if (foods.length === 0) {
-      foods = this._getMinimumFoodsForMeal(mealType, needsGlycemicControl, input.allergies);
-    }
-    
-    // Garantizar proteína en almuerzo/cena
-    if (mealType === 'almuerzo' || mealType === 'cena') {
-      const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
-      const minProtein = targetCalories * 0.25 / 4;
+    for (const mealType of mealOrder) {
+      if (mealDist[mealType] === 0) continue;
       
-      if (totalProtein < minProtein * 0.7) {
-        const mockFoods = this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies);
-        const proteinFood = mockFoods.find(f => 
-          f.protein > 15 && 
-          !usedFoodsToday.has(f.name.toLowerCase().trim())
-        );
-        if (proteinFood) {
-          foods.unshift(proteinFood);
-          usedFoodsToday.add(proteinFood.name.toLowerCase().trim());
-        }
-      }
+      const targetCalories = Math.round(input.daily_calories * mealDist[mealType]);
+      
+      let foods = this.selectFoodsForMealFromDB(
+        mealType, 
+        needsGlycemicControl, 
+        categories,
+        usedFoodsThisWeek, 
+        usedFoodsToday, 
+        input.allergies
+      );
+      
+      foods = foods.map((f: FoodItem) => {
+        const adjusted = this._ajustarPorcionInteligente(f, targetCalories / (foods.length || 1));
+        return this._roundFoodValues(adjusted);
+      });
+      
+      const totals = foods.reduce((acc: any, food: FoodItem) => ({
+        calories: this._round(acc.calories + food.calories),
+        protein: this._round(acc.protein + food.protein),
+        carbs: this._round(acc.carbs + food.carbs),
+        fat: this._round(acc.fat + food.fat)
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      
+      meals.push({
+        meal_type: mealType,
+        time_suggestion: this.getSuggestedTime(mealType),
+        foods,
+        total_calories: totals.calories,
+        total_protein: totals.protein,
+        total_carbs: totals.carbs,
+        total_fat: totals.fat,
+        notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
+      });
     }
     
-    foods = foods.map(f => this._roundFoodValues(f));
+    let adjustedMeals = this.adjustPortionsToMeetCalories(meals, input.daily_calories);
+    adjustedMeals = this.validateMinimumCaloriesPerMeal(adjustedMeals, input.daily_calories, mealDist);
     
-    const totals = foods.reduce((acc: any, food: FoodItem) => ({
-      calories: this._round(acc.calories + food.calories),
-      protein: this._round(acc.protein + food.protein),
-      carbs: this._round(acc.carbs + food.carbs),
-      fat: this._round(acc.fat + food.fat)
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-    
-    meals.push({
-      meal_type: mealType,
-      time_suggestion: this.getSuggestedTime(mealType),
-      foods,
-      total_calories: totals.calories,
-      total_protein: totals.protein,
-      total_carbs: totals.carbs,
-      total_fat: totals.fat,
-      notes: this.getMealNotes(mealType, needsGlycemicControl ? 'Control Glucemico' : input.profile_type, dayName)
-    });
+    return adjustedMeals;
   }
-  
-    // AJUSTAR PORCIONES PARA CUMPLIR CALORÍAS DIARIAS
-  let adjustedMeals = this.adjustPortionsToMeetCalories(meals, input.daily_calories);
-  
-  // VALIDAR CALORÍAS MÍNIMAS POR COMIDA
-  adjustedMeals = this.validateMinimumCaloriesPerMeal(
-    adjustedMeals, 
-    input.daily_calories, 
-    mealDist
-  );
-  
-  return adjustedMeals;
-}
+
+  private selectFoodsForMealFromDB(
+    mealType: MealType,
+    needsGlycemicControl: boolean,
+    categories: Record<string, FoodItem[]>,
+    usedFoodsThisWeek: Set<string>,
+    usedFoodsToday: Set<string>,
+    allergies: string[]
+  ): FoodItem[] {
+    const selected: FoodItem[] = [];
+    
+    const pickFromCategory = (category: string, excludeKeywords: string[] = []) => {
+      const pool = categories[category].filter(f => 
+        !allergies.some(a => f.name.toLowerCase().includes(a.toLowerCase())) &&
+        !excludeKeywords.some(k => f.name.toLowerCase().includes(k))
+      );
+      
+      let available = pool.filter(f => 
+        !usedFoodsThisWeek.has(f.name.toLowerCase().trim()) && 
+        !usedFoodsToday.has(f.name.toLowerCase().trim())
+      );
+      
+      if (available.length === 0) {
+        available = pool.filter(f => !usedFoodsToday.has(f.name.toLowerCase().trim()));
+      }
+      
+      if (available.length === 0) {
+        available = pool;
+      }
+      
+      const shuffled = this._shuffleArray(available);
+      const picked = shuffled[0];
+      
+      if (picked) {
+        usedFoodsThisWeek.add(picked.name.toLowerCase().trim());
+        usedFoodsToday.add(picked.name.toLowerCase().trim());
+      }
+      return picked;
+    };
+
+    if (mealType === 'almuerzo' || mealType === 'cena') {
+      const protein = pickFromCategory('proteinas');
+      const carb = pickFromCategory('carbohidratos');
+      const veggie = pickFromCategory('verduras');
+      
+      if (protein) selected.push(protein);
+      if (carb) selected.push(carb);
+      if (veggie) selected.push(veggie);
+    } 
+    else if (mealType === 'desayuno') {
+      const carb = pickFromCategory('carbohidratos', ['arroz', 'papa', 'pasta']);
+      const proteinOrFruit = Math.random() > 0.5 ? pickFromCategory('proteinas') : pickFromCategory('frutas');
+      
+      if (carb) selected.push(carb);
+      if (proteinOrFruit) selected.push(proteinOrFruit);
+    } 
+    else {
+      const snack1 = pickFromCategory('snacks');
+      const snack2 = Math.random() > 0.6 ? pickFromCategory('frutas') : null;
+      
+      if (snack1) selected.push(snack1);
+      if (snack2) selected.push(snack2);
+    }
+    
+    return selected.filter(Boolean) as FoodItem[];
+  }
+
+  private _shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
 
   private _esAlimentoApropiado(food: FoodItem): boolean {
     const nameLower = food.name.toLowerCase();
@@ -325,182 +452,57 @@ export class NutritionPlanService {
     return true;
   }
 
-  private _eliminarDuplicados(foods: FoodItem[]): FoodItem[] {
-    const seen = new Set<string>();
-    const unique: FoodItem[] = [];
+  private validateFoodMacros(food: FoodItem): FoodItem {
+    const nameLower = food.name.toLowerCase();
+    const servingSize = food.serving_size || 100;
+    const multiplier = servingSize / 100;
     
-    for (const food of foods) {
-      const key = food.name.toLowerCase().trim();
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(food);
-      }
+    let maxProteinPer100g = 50;
+    let maxCarbsPer100g = 100;
+    let maxFatPer100g = 100;
+    
+    if (nameLower.match(/fresa|manzana|pera|banana|plátano|naranja|uva|kiwi|sandía|melón|durazno|mango|piña|arándano|fruit|berry|apple|pear|orange/)) {
+      maxProteinPer100g = 2;
+      maxCarbsPer100g = 25;
+      maxFatPer100g = 1;
+    }
+    else if (nameLower.match(/brócoli|broccoli|espinaca|zanahoria|pepino|tomate|lechuga|verdura|vegetable|spinach|carrot|cucumber/)) {
+      maxProteinPer100g = 5;
+      maxCarbsPer100g = 12;
+      maxFatPer100g = 1;
     }
     
-    return unique;
-  }
-
-  private removeDoubleCarbs(foods: FoodItem[]): FoodItem[] {
-    const carbFoods = foods.filter(f => f.carbs > 15);
+    const maxProtein = maxProteinPer100g * multiplier;
+    const maxCarbs = maxCarbsPer100g * multiplier;
+    const maxFat = maxFatPer100g * multiplier;
     
-    if (carbFoods.length <= 1) {
-      return foods;
-    }
-    
-    const hasLentils = carbFoods.some(f => 
-      f.name.toLowerCase().includes('lenteja')
-    );
-    
-    const hasBeans = carbFoods.some(f => 
-      f.name.toLowerCase().includes('frijol') || 
-      f.name.toLowerCase().includes('bean')
-    );
-    
-    if (!hasLentils && !hasBeans) {
-      return foods;
-    }
-    
-    return foods.filter(f => {
-      const name = f.name.toLowerCase();
-      
-      if (hasLentils && (name.includes('arroz') || name.includes('quinoa'))) {
-        return false;
-      }
-      
-      if (hasBeans && (name.includes('arroz') || name.includes('quinoa') || name.includes('papa'))) {
-        return false;
-      }
-      
-      return true;
-    });
-  }
-
-
-
-  // ========================================
-// VALIDACIÓN DE MACROS FÍSICAMENTE POSIBLES
-// ========================================
-private validateFoodMacros(food: FoodItem): FoodItem {
-  const nameLower = food.name.toLowerCase();
-  const servingSize = food.serving_size || 100;
-  const multiplier = servingSize / 100;
-  
-  // Límites máximos físicamente posibles por 100g según categoría
-  let maxProteinPer100g = 50;
-  let maxCarbsPer100g = 100;
-  let maxFatPer100g = 100;
-  
-  // Frutas: máximo 2g proteína, 25g carbs, 1g grasa por 100g
-  if (nameLower.match(/fresa|manzana|pera|banana|plátano|naranja|uva|kiwi|sandía|melón|durazno|mango|piña|arándano|fruit|berry|apple|pear|orange/)) {
-    maxProteinPer100g = 2;
-    maxCarbsPer100g = 25;
-    maxFatPer100g = 1;
-  }
-  // Verduras: máximo 5g proteína, 12g carbs, 1g grasa por 100g
-  else if (nameLower.match(/brócoli|broccoli|espinaca|zanahoria|pepino|tomate|lechuga|verdura|vegetable|spinach|carrot|cucumber/)) {
-    maxProteinPer100g = 5;
-    maxCarbsPer100g = 12;
-    maxFatPer100g = 1;
-  }
-  
-  const maxProtein = maxProteinPer100g * multiplier;
-  const maxCarbs = maxCarbsPer100g * multiplier;
-  const maxFat = maxFatPer100g * multiplier;
-  
-  // Verificar si los macros exceden los límites
-  if (food.protein > maxProtein || food.carbs > maxCarbs || food.fat > maxFat) {
-    console.warn(
-      `⚠️ [VALIDACIÓN] Macros imposibles detectados: ${food.name}`,
-      `\n   Proteína: ${food.protein}g (máx: ${maxProtein}g)`,
-      `\n   Carbs: ${food.carbs}g (máx: ${maxCarbs}g)`,
-      `\n   Grasa: ${food.fat}g (máx: ${maxFat}g)`
-    );
-    
-    // Corregir macros limitándolos a los valores máximos
-    const correctedProtein = Math.min(food.protein, maxProtein);
-    const correctedCarbs = Math.min(food.carbs, maxCarbs);
-    const correctedFat = Math.min(food.fat, maxFat);
-    
-    // Recalcular calorías basándose en macros corregidos
-    const recalculatedCalories = 
-      (correctedProtein * 4) + 
-      (correctedCarbs * 4) + 
-      (correctedFat * 9);
-    
-    return {
-      ...food,
-      protein: this._round(correctedProtein),
-      carbs: this._round(correctedCarbs),
-      fat: this._round(correctedFat),
-      calories: this._round(recalculatedCalories)
-    };
-  }
-  
-  return food;
-}
-
-
-  private async selectFoodsForMeal(
-    input: PlanGenerationInput, 
-    mealType: MealType, 
-    targetCalories: number, 
-    dayIndex: number,
-    needsGlycemicControl: boolean
-  ): Promise<FoodItem[]> {
-    
-    const searchQuery = this.getMainFoodQuery(mealType, input.preferences.dietary_style, dayIndex, needsGlycemicControl);
-    
-    if (mealType === 'almuerzo' || mealType === 'cena') {
-      return this._getMockFoodsForMeal(mealType, dayIndex, needsGlycemicControl, input.allergies)
-        .slice(0, 3)
-        .map((f: FoodItem) => this._roundFoodValues(f));
-    }
-    
-    if (['media_manana', 'media_tarde', 'colacion'].includes(mealType)) {
-      const snackIndex = this._getSnackIndex(mealType, dayIndex);
-      return this._getMockFoodsForMeal(mealType, snackIndex, needsGlycemicControl, input.allergies)
-        .slice(0, 2)
-        .map((f: FoodItem) => this._roundFoodValues(f));
-    }
-    
-    try {
-      const apiFoods: FoodItem[] = await firstValueFrom(
-        this.fatsecretApi.searchFoods(searchQuery, 10).pipe(timeout(10000))
+    if (food.protein > maxProtein || food.carbs > maxCarbs || food.fat > maxFat) {
+      console.warn(
+        `[VALIDACIÓN] Macros imposibles detectados: ${food.name}`,
+        `\n   Proteína: ${food.protein}g (máx: ${maxProtein}g)`,
+        `\n   Carbs: ${food.carbs}g (máx: ${maxCarbs}g)`,
+        `\n   Grasa: ${food.fat}g (máx: ${maxFat}g)`
       );
       
-      const filtered = apiFoods
-        .filter((food: FoodItem) => this._esAlimentoApropiado(food))
-        .filter((food: FoodItem) => food.calories > 0 && food.calories < 400)
-        .map((food: FoodItem) => this.validateFoodMacros(food))
-        .slice(0, 2);
+      const correctedProtein = Math.min(food.protein, maxProtein);
+      const correctedCarbs = Math.min(food.carbs, maxCarbs);
+      const correctedFat = Math.min(food.fat, maxFat);
       
-      if (filtered.length >= 1) {
-        if (filtered.length === 1) {
-          const backup = this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies);
-          const backupFiltered = backup.filter(f => 
-            !filtered.some(ff => ff.name.toLowerCase() === f.name.toLowerCase())
-          );
-          if (backupFiltered.length > 0) {
-            filtered.push(backupFiltered[0]);
-          }
-        }
-        
-        const caloriesPerFood = targetCalories / filtered.length;
-        return filtered
-          .map((f: FoodItem) => ({
-            ...f,
-            name: this._translateFoodName(f.name)
-          }))
-          .map((f: FoodItem) => this._ajustarPorcionInteligente(f, caloriesPerFood))
-          .map((f: FoodItem) => this._roundFoodValues(f));
-      }
-    } catch (error) {
-      console.warn(`API fallback para ${mealType}`);
+      const recalculatedCalories = 
+        (correctedProtein * 4) + 
+        (correctedCarbs * 4) + 
+        (correctedFat * 9);
+      
+      return {
+        ...food,
+        protein: this._round(correctedProtein),
+        carbs: this._round(correctedCarbs),
+        fat: this._round(correctedFat),
+        calories: this._round(recalculatedCalories)
+      };
     }
     
-    return this._getMockFoodsForMeal('desayuno', dayIndex, needsGlycemicControl, input.allergies)
-      .slice(0, 2)
-      .map((f: FoodItem) => this._roundFoodValues(f));
+    return food;
   }
 
   private _ajustarPorcionInteligente(food: FoodItem, targetCalories: number): FoodItem {
@@ -593,173 +595,6 @@ private validateFoodMacros(food: FoodItem): FoodItem {
     }
     
     return name.charAt(0).toUpperCase() + name.slice(1);
-  }
-
-  private _getSnackIndex(mealType: MealType, dayIndex: number): number {
-    const offsets: Record<string, number> = {
-      'media_manana': 0,
-      'media_tarde': 2,
-      'colacion': 4
-    };
-    return (dayIndex + (offsets[mealType] || 0)) % 7;
-  }
-
-  private getMainFoodQuery(
-    mealType: MealType, 
-    dietaryStyle: DietaryStyle, 
-    dayIndex: number, 
-    needsGlycemicControl: boolean
-  ): string {
-    if (needsGlycemicControl) {
-      const glycemicOptions: Record<MealType, string[]> = {
-        desayuno: ['egg', 'greek yogurt', 'oatmeal'],
-        media_manana: ['almonds', 'apple'],
-        almuerzo: ['grilled chicken', 'salmon', 'white fish'],
-        media_tarde: ['greek yogurt', 'walnuts'],
-        cena: ['grilled fish', 'chicken breast'],
-        colacion: ['cottage cheese', 'almonds']
-      };
-      return glycemicOptions[mealType]?.[dayIndex % glycemicOptions[mealType].length] || 'vegetables';
-    }
-    
-    const options: Record<MealType, string[]> = {
-      desayuno: ['oatmeal', 'egg'],
-      media_manana: ['apple', 'almonds'],
-      almuerzo: ['chicken breast', 'white fish'],
-      media_tarde: ['greek yogurt', 'carrot'],
-      cena: ['grilled fish', 'tofu'],
-      colacion: ['apple', 'almonds']
-    };
-    
-    return options[mealType]?.[dayIndex % options[mealType].length] || 'vegetables';
-  }
-
-  private _getMockFoodsForMeal(
-    mealType: MealType, 
-    dayIndex: number, 
-    needsGlycemicControl: boolean,
-    allergies: string[]
-  ): FoodItem[] {
-    
-    const mockDB: Record<string, FoodItem[]> = {
-      desayuno: [
-        { food_id: 'mock_avena_1', name: 'Avena en hojuelas', brand: 'Quaker', serving_size: 40, serving_unit: 'g', calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4 },
-        { food_id: 'mock_huevo_1', name: 'Huevo de gallina cocido', brand: '', serving_size: 1, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 },
-        { food_id: 'mock_pan_1', name: 'Pan integral de trigo', brand: '', serving_size: 1, serving_unit: 'rebanada', calories: 80, protein: 4, carbs: 15, fat: 1, fiber: 2 },
-        { food_id: 'mock_yogur_1', name: 'Yogur natural sin azúcar', brand: '', serving_size: 125, serving_unit: 'g', calories: 70, protein: 6, carbs: 8, fat: 2, fiber: 0 }
-      ],
-      proteina_principal: [
-        { food_id: 'mock_pollo_1', name: 'Pechuga de pollo a la plancha', brand: '', serving_size: 120, serving_unit: 'g', calories: 198, protein: 37.2, carbs: 0, fat: 4.3, fiber: 0 },
-        { food_id: 'mock_pollo_2', name: 'Pollo guisado casero', brand: '', serving_size: 120, serving_unit: 'g', calories: 228, protein: 30, carbs: 6, fat: 9.6, fiber: 1.2 },
-        { food_id: 'mock_pescado_1', name: 'Filete de pescado blanco a la plancha', brand: '', serving_size: 120, serving_unit: 'g', calories: 144, protein: 26.4, carbs: 0, fat: 3.6, fiber: 0 },
-        { food_id: 'mock_salmón_1', name: 'Salmón al horno', brand: '', serving_size: 120, serving_unit: 'g', calories: 247, protein: 26.4, carbs: 0, fat: 15.6, fiber: 0 },
-        { food_id: 'mock_lentejas_1', name: 'Lentejas cocidas', brand: '', serving_size: 100, serving_unit: 'g', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 8 },
-        { food_id: 'mock_tofu_1', name: 'Tofu firme', brand: '', serving_size: 100, serving_unit: 'g', calories: 144, protein: 17, carbs: 3, fat: 9, fiber: 2 }
-      ],
-      carbohidrato_principal: [
-        { food_id: 'mock_arroz_integral_1', name: 'Arroz integral cocido', brand: '', serving_size: 150, serving_unit: 'g', calories: 168, protein: 3.9, carbs: 34.5, fat: 1.4, fiber: 2.7 },
-        { food_id: 'mock_quinoa_1', name: 'Quinoa cocida', brand: '', serving_size: 100, serving_unit: 'g', calories: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8 },
-        { food_id: 'mock_papa_1', name: 'Papa cocida', brand: '', serving_size: 150, serving_unit: 'g', calories: 131, protein: 2.9, carbs: 30, fat: 0.2, fiber: 3.3 }
-      ],
-      verduras_bajo_ig: [
-        { food_id: 'mock_brocoli_1', name: 'Brócoli cocido', brand: '', serving_size: 100, serving_unit: 'g', calories: 35, protein: 2.4, carbs: 7, fat: 0.4, fiber: 3.3 },
-        { food_id: 'mock_espinaca_1', name: 'Espinacas cocidas', brand: '', serving_size: 100, serving_unit: 'g', calories: 23, protein: 3, carbs: 3.8, fat: 0.3, fiber: 2.4 },
-        { food_id: 'mock_zanahoria_1', name: 'Zanahoria cocida', brand: '', serving_size: 100, serving_unit: 'g', calories: 35, protein: 0.8, carbs: 8, fat: 0.2, fiber: 2.8 },
-        { food_id: 'mock_pepino_1', name: 'Pepino en rodajas', brand: '', serving_size: 100, serving_unit: 'g', calories: 15, protein: 0.7, carbs: 3.6, fat: 0.1, fiber: 0.5 }
-      ],
-      snack_rotativo: [
-        { food_id: 'mock_almendras_1', name: 'Almendras crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3.5 },
-        { food_id: 'mock_manzana_1', name: 'Manzana con cáscara', brand: '', serving_size: 150, serving_unit: 'g', calories: 78, protein: 0.5, carbs: 21, fat: 0.3, fiber: 3.6 },
-        { food_id: 'mock_yogur_griego_1', name: 'Yogur griego natural', brand: '', serving_size: 150, serving_unit: 'g', calories: 90, protein: 16, carbs: 6, fat: 0, fiber: 0 },
-        { food_id: 'mock_cottage_1', name: 'Queso cottage', brand: '', serving_size: 100, serving_unit: 'g', calories: 98, protein: 11, carbs: 3.4, fat: 4.3, fiber: 0 },
-        { food_id: 'mock_pera_1', name: 'Pera fresca', brand: '', serving_size: 150, serving_unit: 'g', calories: 86, protein: 0.6, carbs: 22.5, fat: 0.2, fiber: 4.7 },
-        { food_id: 'mock_nueces_1', name: 'Nueces crudas', brand: '', serving_size: 30, serving_unit: 'g', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, fiber: 1.9 }
-      ]
-    };
-
-    let candidates: FoodItem[] = [];
-
-    if (mealType === 'desayuno') {
-      const desayunoRotativo: [string, string][] = [
-        ['mock_avena_1', 'mock_huevo_1'],
-        ['mock_pan_1', 'mock_yogur_1'],
-        ['mock_avena_1', 'mock_yogur_1'],
-        ['mock_huevo_1', 'mock_pan_1'],
-        ['mock_avena_1', 'mock_huevo_1'],
-        ['mock_pan_1', 'mock_yogur_1'],
-        ['mock_huevo_1', 'mock_yogur_1']
-      ];
-      const [food1, food2] = desayunoRotativo[dayIndex % desayunoRotativo.length];
-      candidates = mockDB['desayuno'].filter(f => f.food_id === food1 || f.food_id === food2);
-
-    } else if (mealType === 'almuerzo' || mealType === 'cena') {
-  const proteins = mockDB['proteina_principal'];
-  const carbs = mockDB['carbohidrato_principal'];
-  const veggies = mockDB['verduras_bajo_ig'];
-  
-  // Usar índice diferente para cena (desplazado)
-  const proteinIndex = mealType === 'cena' 
-    ? (dayIndex + 3) % proteins.length 
-    : dayIndex % proteins.length;
-  
-  const carbIndex = mealType === 'cena'
-    ? (dayIndex + 2) % carbs.length
-    : dayIndex % carbs.length;
-  
-  const veggieIndex = mealType === 'cena'
-    ? (dayIndex + 1) % veggies.length
-    : dayIndex % veggies.length;
-  
-  candidates = [
-    proteins[proteinIndex],
-    carbs[carbIndex],
-    veggies[veggieIndex]
-  ];
-
-    } else {
-      const snackPool = mockDB['snack_rotativo'];
-      const idx1 = dayIndex % snackPool.length;
-      const idx2 = (dayIndex + 1) % snackPool.length;
-      candidates = [snackPool[idx1], snackPool[idx2]];
-    }
-
-    return candidates
-      .filter((f: FoodItem) => !allergies.some((a: string) => 
-        f.name.toLowerCase().includes(a.toLowerCase())
-      ))
-      .slice(0, 3);
-  }
-
-  private _getMinimumFoodsForMeal(mealType: MealType, needsGlycemicControl: boolean, allergies: string[]): FoodItem[] {
-    const minimums: Record<MealType, FoodItem[]> = {
-      desayuno: [
-        { food_id: 'min_avena', name: 'Avena cocida', serving_size: 40, serving_unit: 'g', calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4 },
-        { food_id: 'min_huevo', name: 'Huevo cocido', serving_size: 1, serving_unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 }
-      ],
-      almuerzo: [
-        { food_id: 'min_pollo', name: 'Pechuga de pollo', serving_size: 120, serving_unit: 'g', calories: 198, protein: 37.2, carbs: 0, fat: 4.3, fiber: 0 },
-        { food_id: 'min_arroz_integral', name: 'Arroz integral', serving_size: 150, serving_unit: 'g', calories: 168, protein: 3.9, carbs: 34.5, fat: 1.4, fiber: 2.7 },
-        { food_id: 'min_brocoli', name: 'Brócoli', serving_size: 100, serving_unit: 'g', calories: 35, protein: 2.4, carbs: 7, fat: 0.4, fiber: 3.3 }
-      ],
-      cena: [
-        { food_id: 'min_pescado', name: 'Pescado blanco', serving_size: 120, serving_unit: 'g', calories: 144, protein: 26.4, carbs: 0, fat: 3.6, fiber: 0 },
-        { food_id: 'min_quinoa', name: 'Quinoa', serving_size: 100, serving_unit: 'g', calories: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8 }
-      ],
-      media_manana: [
-        { food_id: 'min_yogur', name: 'Yogur natural', serving_size: 125, serving_unit: 'g', calories: 70, protein: 6, carbs: 8, fat: 2, fiber: 0 },
-        { food_id: 'min_manzana', name: 'Manzana', serving_size: 150, serving_unit: 'g', calories: 78, protein: 0.5, carbs: 21, fat: 0.3, fiber: 3.6 }
-      ],
-      media_tarde: [
-        { food_id: 'min_almendras', name: 'Almendras', serving_size: 30, serving_unit: 'g', calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3.5 }
-      ],
-      colacion: [
-        { food_id: 'min_cottage', name: 'Cottage cheese', serving_size: 100, serving_unit: 'g', calories: 98, protein: 11, carbs: 3.4, fat: 4.3, fiber: 0 }
-      ]
-    };
-    
-    return minimums[mealType].filter((f: FoodItem) => 
-      !allergies.some((a: string) => f.name.toLowerCase().includes(a.toLowerCase()))
-    );
   }
 
   private _roundFoodValues(food: FoodItem): FoodItem {
@@ -939,90 +774,24 @@ private validateFoodMacros(food: FoodItem): FoodItem {
       return { error: true, mensaje: error.error?.mensaje || 'Error al actualizar' };
     }
   }
-  // ========================================
-// AJUSTAR PORCIONES PARA CUMPLIR CALORÍAS DIARIAS
-// ========================================
-private adjustPortionsToMeetCalories(
-  meals: MealPlan[], 
-  targetDailyCalories: number
-): MealPlan[] {
-  const currentTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
-  const deficit = targetDailyCalories - currentTotal;
-  
-  // Si ya estamos dentro del rango ±5%, no ajustar
-  if (Math.abs(deficit) <= targetDailyCalories * 0.05) {
-    return meals;
-  }
-  
-  console.log(`🔧 [AJUSTE] Déficit calórico: ${deficit.toFixed(0)} kcal (${currentTotal.toFixed(0)} → ${targetDailyCalories})`);
-  
-  const factor = targetDailyCalories / currentTotal;
-  
-  // Limitar el factor para evitar cambios extremos
-  const limitedFactor = Math.max(0.8, Math.min(1.4, factor));
-  
-  meals.forEach(meal => {
-    meal.foods.forEach(food => {
-      // No ajustar alimentos en unidades (huevos, rebanadas)
-      if (food.serving_unit === 'unidad' || food.serving_unit === 'rebanada') {
-        return;
-      }
-      
-      const newServing = food.serving_size * limitedFactor;
-      const scale = newServing / food.serving_size;
-      
-      food.serving_size = this._round(newServing);
-      food.calories = this._round(food.calories * scale);
-      food.protein = this._round(food.protein * scale);
-      food.carbs = this._round(food.carbs * scale);
-      food.fat = this._round(food.fat * scale);
-      if (food.fiber) {
-        food.fiber = this._round(food.fiber * scale);
-      }
-    });
+
+  private adjustPortionsToMeetCalories(
+    meals: MealPlan[], 
+    targetDailyCalories: number
+  ): MealPlan[] {
+    const currentTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
+    const deficit = targetDailyCalories - currentTotal;
     
-    // Recalcular totales de la comida
-    const mealTotals = meal.foods.reduce((acc: any, food: FoodItem) => ({
-      calories: acc.calories + food.calories,
-      protein: acc.protein + food.protein,
-      carbs: acc.carbs + food.carbs,
-      fat: acc.fat + food.fat
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    if (Math.abs(deficit) <= targetDailyCalories * 0.05) {
+      return meals;
+    }
     
-    meal.total_calories = this._round(mealTotals.calories);
-    meal.total_protein = this._round(mealTotals.protein);
-    meal.total_carbs = this._round(mealTotals.carbs);
-    meal.total_fat = this._round(mealTotals.fat);
-  });
-  
-  const newTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
-  console.log(`✅ [AJUSTE] Nuevo total: ${newTotal.toFixed(0)} kcal`);
-  
-  return meals;
-}
-// ========================================
-// VALIDAR CALORÍAS MÍNIMAS POR COMIDA
-// ========================================
-private validateMinimumCaloriesPerMeal(
-  meals: MealPlan[], 
-  dailyCalories: number,
-  mealDist: Record<MealType, number>
-): MealPlan[] {
-  
-  meals.forEach(meal => {
-    const targetCalories = dailyCalories * mealDist[meal.meal_type];
-    const minCalories = targetCalories * 0.7; // Mínimo 70% del objetivo
+    console.log(`[AJUSTE] Déficit calórico: ${deficit.toFixed(0)} kcal (${currentTotal.toFixed(0)} -> ${targetDailyCalories})`);
     
-    if (meal.total_calories < minCalories) {
-      console.warn(
-        `⚠️ [VALIDACIÓN] ${meal.meal_type} tiene solo ${meal.total_calories.toFixed(0)} kcal ` +
-        `(mínimo esperado: ${minCalories.toFixed(0)} kcal)`
-      );
-      
-      // Calcular factor de ajuste para esta comida específica
-      const factor = targetCalories / meal.total_calories;
-      const limitedFactor = Math.min(2.0, factor); // Máximo duplicar
-      
+    const factor = targetDailyCalories / currentTotal;
+    const limitedFactor = Math.max(0.8, Math.min(1.4, factor));
+    
+    meals.forEach(meal => {
       meal.foods.forEach(food => {
         if (food.serving_unit === 'unidad' || food.serving_unit === 'rebanada') {
           return;
@@ -1041,7 +810,6 @@ private validateMinimumCaloriesPerMeal(
         }
       });
       
-      // Recalcular totales
       const mealTotals = meal.foods.reduce((acc: any, food: FoodItem) => ({
         calories: acc.calories + food.calories,
         protein: acc.protein + food.protein,
@@ -1053,11 +821,67 @@ private validateMinimumCaloriesPerMeal(
       meal.total_protein = this._round(mealTotals.protein);
       meal.total_carbs = this._round(mealTotals.carbs);
       meal.total_fat = this._round(mealTotals.fat);
+    });
+    
+    const newTotal = meals.reduce((sum, meal) => sum + meal.total_calories, 0);
+    console.log(`[AJUSTE] Nuevo total: ${newTotal.toFixed(0)} kcal`);
+    
+    return meals;
+  }
+
+  private validateMinimumCaloriesPerMeal(
+    meals: MealPlan[], 
+    dailyCalories: number,
+    mealDist: Record<MealType, number>
+  ): MealPlan[] {
+    
+    meals.forEach(meal => {
+      const targetCalories = dailyCalories * mealDist[meal.meal_type];
+      const minCalories = targetCalories * 0.7;
       
-      console.log(`✅ [VALIDACIÓN] ${meal.meal_type} ajustado a ${meal.total_calories.toFixed(0)} kcal`);
-    }
-  });
-  
-  return meals;
-}
+      if (meal.total_calories < minCalories) {
+        console.warn(
+          `[VALIDACIÓN] ${meal.meal_type} tiene solo ${meal.total_calories.toFixed(0)} kcal ` +
+          `(mínimo esperado: ${minCalories.toFixed(0)} kcal)`
+        );
+        
+        const factor = targetCalories / meal.total_calories;
+        const limitedFactor = Math.min(2.0, factor);
+        
+        meal.foods.forEach(food => {
+          if (food.serving_unit === 'unidad' || food.serving_unit === 'rebanada') {
+            return;
+          }
+          
+          const newServing = food.serving_size * limitedFactor;
+          const scale = newServing / food.serving_size;
+          
+          food.serving_size = this._round(newServing);
+          food.calories = this._round(food.calories * scale);
+          food.protein = this._round(food.protein * scale);
+          food.carbs = this._round(food.carbs * scale);
+          food.fat = this._round(food.fat * scale);
+          if (food.fiber) {
+            food.fiber = this._round(food.fiber * scale);
+          }
+        });
+        
+        const mealTotals = meal.foods.reduce((acc: any, food: FoodItem) => ({
+          calories: acc.calories + food.calories,
+          protein: acc.protein + food.protein,
+          carbs: acc.carbs + food.carbs,
+          fat: acc.fat + food.fat
+        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        meal.total_calories = this._round(mealTotals.calories);
+        meal.total_protein = this._round(mealTotals.protein);
+        meal.total_carbs = this._round(mealTotals.carbs);
+        meal.total_fat = this._round(mealTotals.fat);
+        
+        console.log(`[VALIDACIÓN] ${meal.meal_type} ajustado a ${meal.total_calories.toFixed(0)} kcal`);
+      }
+    });
+    
+    return meals;
+  }
 }
