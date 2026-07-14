@@ -73,6 +73,13 @@ export class MedicoPage implements OnInit {
   notificacionesSinLeer: number = 0;
   mensajesNoLeidos: number = 0;
 
+  // Sonido de notificación
+private audioNotificacion = new Audio('assets/sounds/notificacion.mp3');
+
+// Para detectar si llegaron nuevas notificaciones
+private ultimoTotalNotificaciones = 0;
+private ultimoTotalMensajes = 0;
+
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -82,14 +89,15 @@ export class MedicoPage implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.cargarDatosUsuario();
-    await this.cargarDatosDashboard();
-  }
+  this.cargarDatosUsuario();
+  await this.cargarDatosDashboard();
+  await this.cargarNotificaciones(false); // No reproducir sonido al iniciar
+}
 
   async ionViewWillEnter() {
-    await this.cargarNotificaciones();
-    await this.cargarDatosDashboard();
-  }
+  await this.cargarNotificaciones(true);
+  await this.cargarDatosDashboard();
+}
 
   // Cargar datos del usuario logueado
   private cargarDatosUsuario(): void {
@@ -149,25 +157,52 @@ export class MedicoPage implements OnInit {
   }
 
   // Cargar notificaciones desde API
-  private async cargarNotificaciones(): Promise<void> {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+  private async cargarNotificaciones(reproducirSonido: boolean = false): Promise<void> {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
 
-      const resp: any = await this.http.get(
-        `${environment.apiUrl}/nutricionapp-api/medico/notificaciones/no-leidas`,
-        { headers }
-      ).toPromise();
+    const resp: any = await this.http.get(
+      `${environment.apiUrl}/nutricionapp-api/medico/notificaciones/no-leidas`,
+      { headers }
+    ).toPromise();
 
-      this.notificacionesSinLeer = resp?.total || 0;
-      this.mensajesNoLeidos = resp?.mensajesNoLeidos || 0;
+    const nuevasNotificaciones = resp?.total || 0;
+    const nuevosMensajes = resp?.mensajesNoLeidos || 0;
 
-    } catch (error) {
-      console.warn('No se pudieron cargar notificaciones');
+    // Si aumentó el número, reproducir sonido
+    if (
+      reproducirSonido &&
+      (
+        nuevasNotificaciones > this.ultimoTotalNotificaciones ||
+        nuevosMensajes > this.ultimoTotalMensajes
+      )
+    ) {
+      this.reproducirSonido();
     }
+
+    this.notificacionesSinLeer = nuevasNotificaciones;
+    this.mensajesNoLeidos = nuevosMensajes;
+
+    this.ultimoTotalNotificaciones = nuevasNotificaciones;
+    this.ultimoTotalMensajes = nuevosMensajes;
+
+  } catch (error) {
+    console.warn('No se pudieron cargar notificaciones');
   }
+}
+
+private reproducirSonido(): void {
+  this.audioNotificacion.currentTime = 0;
+
+  this.audioNotificacion.play().catch(err => {
+    console.warn('No se pudo reproducir el sonido:', err);
+  });
+}
 
   // Ver detalle de alertas
   async verAlertas(): Promise<void> {
