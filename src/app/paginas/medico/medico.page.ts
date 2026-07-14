@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ToastController, LoadingController } from '@ionic/angular';
+import { AlertController, ToastController, LoadingController} from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -84,7 +84,11 @@ export class MedicoPage implements OnInit {
   async ngOnInit() {
     this.cargarDatosUsuario();
     await this.cargarDatosDashboard();
+  }
+
+  async ionViewWillEnter() {
     await this.cargarNotificaciones();
+    await this.cargarDatosDashboard();
   }
 
   // Cargar datos del usuario logueado
