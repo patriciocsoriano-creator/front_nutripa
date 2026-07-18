@@ -11,14 +11,14 @@ import { environment } from 'src/environments/environment';
   standalone: false,
 })
 export class AdminVerUsuariosPage implements OnInit {
-  // 🎯 Sidebar
+  //  Sidebar
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombreAdmin: string = '';
   rol: string = 'Administrador';
   private isMobile = false;
 
-  // 👥 Usuarios
+  //  Usuarios
   usuarios: any[] = [];
   usuariosFiltrados: any[] = [];
   cargando = false;
@@ -46,7 +46,7 @@ export class AdminVerUsuariosPage implements OnInit {
     this.cargarUsuarios();
   }
 
-  // 👤 Cargar datos del admin
+  //  Cargar datos del admin
   private cargarDatosAdmin() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -55,12 +55,12 @@ export class AdminVerUsuariosPage implements OnInit {
         this.nombreAdmin = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Administrador';
         this.rol = user.rol === 'admin' ? 'Administrador General' : 'Administrador';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn(' Error parseando usuario');
       }
     }
   }
 
-  // 📋 Cargar usuarios desde backend
+  //  Cargar usuarios desde backend
   async cargarUsuarios() {
     this.cargando = true;
     const token = localStorage.getItem('token');
@@ -74,7 +74,7 @@ export class AdminVerUsuariosPage implements OnInit {
       if (response?.error === false) {
         this.usuarios = response.usuarios || [];
         this.aplicarFiltros();
-        console.log('✅ Usuarios cargados:', this.usuarios.length);
+        console.log(' Usuarios cargados:', this.usuarios.length);
       } else {
         await this.showToast('Error al cargar usuarios', 'danger');
       }
@@ -86,7 +86,7 @@ export class AdminVerUsuariosPage implements OnInit {
     }
   }
 
-  // 🔍 Aplicar filtros
+  //  Aplicar filtros
   aplicarFiltros() {
     let filtrados = [...this.usuarios];
     
@@ -107,10 +107,10 @@ export class AdminVerUsuariosPage implements OnInit {
     this.usuariosFiltrados = filtrados;
   }
 
-  // 🗑️ Eliminar usuario
+  //  Eliminar usuario
   async eliminarUsuario(usuario: any) {
     const alert = await this.alertCtrl.create({
-      header: '⚠️ Eliminar Usuario',
+      header: ' Eliminar Usuario',
       message: `¿Eliminar a <strong>${usuario.nombre} ${usuario.apellido}</strong>?<br><br>Esta acción no se puede deshacer.`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
@@ -124,10 +124,10 @@ export class AdminVerUsuariosPage implements OnInit {
                 `${environment.apiUrl}/nutricionapp-api/admin/usuarios/${usuario.id}`,
                 { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
               ).toPromise();
-              await this.showToast('✅ Usuario eliminado', 'success');
+              await this.showToast(' Usuario eliminado', 'success');
               this.cargarUsuarios();
             } catch (error) {
-              await this.showToast('❌ Error al eliminar', 'danger');
+              await this.showToast(' Error al eliminar', 'danger');
             }
           }
         }
@@ -136,7 +136,7 @@ export class AdminVerUsuariosPage implements OnInit {
     await alert.present();
   }
 
-  // 🔄 Toggle activo/inactivo
+  //  Toggle activo/inactivo
   async toggleActivo(usuario: any) {
     const token = localStorage.getItem('token');
     try {
@@ -152,7 +152,7 @@ export class AdminVerUsuariosPage implements OnInit {
     }
   }
 
-  // 🎨 Helpers visuales
+  //  Helpers visuales
   getRolLabel(rol: string): string {
     const labels: Record<string, string> = {
       'admin': 'Administrador',
@@ -175,7 +175,7 @@ export class AdminVerUsuariosPage implements OnInit {
     return colores[rol] || 'default';
   }
 
-  // 🧭 Navegación
+  //  Navegación
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'admin-inicio': '/administrador',

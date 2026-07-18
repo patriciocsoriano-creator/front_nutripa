@@ -53,7 +53,7 @@ export class NutritionOptimizerService {
     targets: NutritionTargets
   ): GeneratedNutritionPlan {
     
-    console.log('🔧 [Optimizer] Iniciando optimización del plan...');
+    console.log(' [Optimizer] Iniciando optimización del plan...');
     
     // PASO 1: Corregir macros físicamente imposibles
     const planStep1 = this.fixImpossibleMacros(plan);
@@ -73,7 +73,7 @@ export class NutritionOptimizerService {
     // PASO 6: Recalcular totales finales
     const finalPlan = this.recalculateTotals(planStep5);
     
-    console.log('✅ [Optimizer] Optimización completada');
+    console.log(' [Optimizer] Optimización completada');
     this.printPlanSummary(finalPlan, targets);
     
     return finalPlan;
@@ -121,7 +121,7 @@ export class NutritionOptimizerService {
         correctedFat !== originalFat) {
       
       console.warn(
-        `⚠️ [Optimizer] Macros corregidos: ${food.name}`,
+        ` [Optimizer] Macros corregidos: ${food.name}`,
         `\n   Antes: P=${originalProtein}g C=${originalCarbs}g G=${originalFat}g`,
         `\n   Ahora: P=${correctedProtein}g C=${correctedCarbs}g G=${correctedFat}g`
       );
@@ -303,7 +303,7 @@ export class NutritionOptimizerService {
             dailyFoods.add(key);
             uniqueFoods.push(food);
           } else {
-            console.warn(`🔄 [Optimizer] Eliminado duplicado del día: ${food.name}`);
+            console.warn(` [Optimizer] Eliminado duplicado del día: ${food.name}`);
           }
         });
         
@@ -339,7 +339,7 @@ export class NutritionOptimizerService {
           }
           
           if (category === 'verdura' && food.protein > 5) {
-            console.warn(`🥦 [Optimizer] Reemplazando verdura problemática: ${food.name}`);
+            console.warn(` [Optimizer] Reemplazando verdura problemática: ${food.name}`);
             return this.getDefaultVegetable(food.serving_size);
           }
           
@@ -413,7 +413,7 @@ export class NutritionOptimizerService {
         Math.abs(fatDeviation) <= tolerance * 2;
       
       if (withinTolerance) {
-        console.log(`✅ [Optimizer] Objetivos cumplidos en intento ${attempt + 1}`);
+        console.log(` [Optimizer] Objetivos cumplidos en intento ${attempt + 1}`);
         break;
       }
       
@@ -608,7 +608,7 @@ export class NutritionOptimizerService {
     const totals = this.calculateDailyTotals(plan);
     const tolerance = targets.tolerance;
     
-    console.log('\n📊 [Optimizer] RESUMEN FINAL:');
+    console.log('\n [Optimizer] RESUMEN FINAL:');
     console.log('─'.repeat(60));
     console.log(
       `Calorías:    ${totals.calories.toFixed(0)} kcal ` +

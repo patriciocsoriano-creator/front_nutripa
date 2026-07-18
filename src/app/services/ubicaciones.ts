@@ -26,7 +26,7 @@ export interface Provincia {
 export class LocationsService {
 
   
-// ✅ URL correcta (sin .git, con /raw/)
+//  URL correcta (sin .git, con /raw/)
   private readonly DATA_URL = 'https://gist.githubusercontent.com/emamut/6626d3dff58598b624a1/raw';  private locationsData: any = null;
   private dataLoaded$ = new BehaviorSubject<boolean>(false);
   private provincesList: Provincia[] = [];
@@ -47,10 +47,10 @@ export class LocationsService {
         this.locationsData = data;
         this.provincesList = this.parseProvincesSafe(data);
         this.dataLoaded$.next(true);
-        console.log('✅ Ubicaciones de Ecuador cargadas:', this.provincesList.length, 'provincias');
+        console.log(' Ubicaciones de Ecuador cargadas:', this.provincesList.length, 'provincias');
       }),
       catchError(error => {
-        console.error('❌ Error cargando ubicaciones de Ecuador:', error);
+        console.error(' Error cargando ubicaciones de Ecuador:', error);
         this.loadFallbackData();
         this.dataLoaded$.next(true);
         return of(false);
@@ -64,7 +64,7 @@ export class LocationsService {
    */
   private parseProvincesSafe(data: any): Provincia[] {
     if (!data || typeof data !== 'object') {
-      console.warn('⚠️ Datos de ubicaciones inválidos');
+      console.warn(' Datos de ubicaciones inválidos');
       return [];
     }
 
@@ -76,7 +76,7 @@ export class LocationsService {
       const nombreProvincia = info?.provincia || info?.nombre || info?.Provincia;
       
       if (!nombreProvincia || typeof nombreProvincia !== 'string') {
-        console.warn(`⚠️ Provincia con código "${codigo}" no tiene nombre válido, saltando...`);
+        console.warn(` Provincia con código "${codigo}" no tiene nombre válido, saltando...`);
         return;
       }
 
@@ -87,7 +87,7 @@ export class LocationsService {
       });
     });
 
-    // ✅ Sort SEGURO: validar que ambos nombres existan antes de comparar
+    //  Sort SEGURO: validar que ambos nombres existan antes de comparar
     return provinces.sort((a, b) => {
       if (!a?.nombre || !b?.nombre) return 0;
       return a.nombre.localeCompare(b.nombre, 'es-ES');
@@ -207,14 +207,14 @@ export class LocationsService {
       "24": { provincia: "SANTA ELENA", cantones: {} }
     };
     this.provincesList = this.parseProvincesSafe(this.locationsData);
-    console.warn('⚠️ Usando datos de respaldo para ubicaciones de Ecuador');
+    console.warn(' Usando datos de respaldo para ubicaciones de Ecuador');
   }
 
   /**
    * Método utilitario para depuración
    */
   debugData(): void {
-    console.log('📊 LocationsService Debug:', {
+    console.log(' LocationsService Debug:', {
       loaded: !!this.locationsData,
       provincesCount: this.provincesList.length,
       firstProvince: this.provincesList[0],

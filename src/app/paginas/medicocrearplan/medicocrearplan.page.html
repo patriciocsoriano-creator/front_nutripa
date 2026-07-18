@@ -62,16 +62,16 @@
     <!-- ================= CONTENIDO PRINCIPAL ================= -->
     <div class="main-content">
       
-      <!-- ⏳ Loading inicial -->
+      <!--  Loading inicial -->
       <div *ngIf="cargandoPaciente" class="loading-state">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
         <p>Cargando datos del paciente...</p>
       </div>
 
-      <!-- ✅ Formulario principal -->
+      <!--  Formulario principal -->
       <form *ngIf="!cargandoPaciente" (ngSubmit)="guardarPlan()" #planForm="ngForm">
         
-        <!-- 📋 Header del paciente -->
+        <!--  Header del paciente -->
         <ion-card class="patient-summary-card">
           <ion-card-header>
             <ion-card-title>
@@ -145,12 +145,12 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 🧠 Sección de IA / Red Neuronal -->
+        <!--  Sección de IA / Red Neuronal -->
         <ion-card class="ml-section-card" [class.loading]="cargandoML">
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="sparkles-outline" color="primary" slot="start"></ion-icon>
-              🧠 Recomendación de IA
+               Recomendación de IA
             </ion-card-title>
             <ion-card-subtitle>
               Perfil dietético sugerido según protocolo PAM
@@ -209,10 +209,10 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 🎯 Objetivos del plan -->
+        <!--  Objetivos del plan -->
         <ion-card class="objetivos-card">
           <ion-card-header>
-            <ion-card-title>🎯 Objetivos del Plan</ion-card-title>
+            <ion-card-title> Objetivos del Plan</ion-card-title>
             <ion-card-subtitle>Seleccione los objetivos prioritarios</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
@@ -234,10 +234,10 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- ⚙️ Preferencias y contexto -->
+        <!--  Preferencias y contexto -->
         <ion-card class="preferencias-card">
           <ion-card-header>
-            <ion-card-title>⚙️ Preferencias y Contexto</ion-card-title>
+            <ion-card-title> Preferencias y Contexto</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <ion-grid>
@@ -271,10 +271,10 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 📝 Recomendaciones y notas -->
+        <!--  Recomendaciones y notas -->
         <ion-card class="recomendaciones-card">
           <ion-card-header>
-            <ion-card-title>📝 Recomendaciones Personalizadas</ion-card-title>
+            <ion-card-title> Recomendaciones Personalizadas</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <ion-item>
@@ -292,7 +292,98 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 👇 Botones de acción -->
+                <!--  Configuración de Intercambios y Distribución -->
+        <ion-card class="config-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="settings-outline" slot="start"></ion-icon>
+              Configuracion de Intercambios y Distribucion
+            </ion-card-title>
+            <ion-card-subtitle>
+              Ajuste los valores nutricionales y la distribucion de comidas. Estos cambios se guardaran globalmente en el sistema.
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button expand="block" color="primary" (click)="toggleConfiguracion()" fill="outline">
+              {{ mostrarConfiguracion ? 'Ocultar Configuracion' : 'Mostrar / Editar Configuracion' }}
+            </ion-button>
+
+            <div *ngIf="mostrarConfiguracion" class="ion-margin-top">
+              <ion-segment
+    [(ngModel)]="segmentoConfig"
+    name="segmentoConfig"
+    color="primary">
+                <ion-segment-button value="intercambios">
+                  <ion-label>Lista de Intercambio</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="distribucion">
+                  <ion-label>Tiempos de Comida</ion-label>
+                </ion-segment-button>
+              </ion-segment>
+
+                            <div *ngIf="segmentoConfig === 'intercambios'" class="ion-margin-top">
+                <div class="table-responsive">
+                  <table class="config-table">
+                    <thead>
+                      <tr>
+                        <th>Grupo de Alimento</th>
+                        <th>CHO (g)</th>
+                        <th>Proteina (g)</th>
+                        <th>Grasa (g)</th>
+                        <th>Kcal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of intercambios">
+                        <td class="font-weight-bold">{{ item.grupo_alimento }}</td>
+                        <td><ion-input type="number" step="0.1" [(ngModel)]="item.cho" name="cho_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.1" [(ngModel)]="item.proteina" name="proteina_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.1" [(ngModel)]="item.grasa" name="grasa_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.1" [(ngModel)]="item.kcal" name="kcal_{{item.id}}"></ion-input></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div *ngIf="segmentoConfig === 'distribucion'" class="ion-margin-top">
+                <div class="table-responsive">
+                  <table class="config-table">
+                    <thead>
+                      <tr>
+                        <th>Grupo</th>
+                        <th>Desayuno</th>
+                        <th>Media Manana</th>
+                        <th>Almuerzo</th>
+                        <th>Media Tarde</th>
+                        <th>Cena</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of distribucion">
+                        <td class="font-weight-bold">{{ item.grupo_alimento }}</td>
+                        <td><ion-input type="number" step="0.5" [(ngModel)]="item.desayuno" name="desayuno_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.5" [(ngModel)]="item.media_manana" name="media_manana_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.5" [(ngModel)]="item.almuerzo" name="almuerzo_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.5" [(ngModel)]="item.media_tarde" name="media_tarde_{{item.id}}"></ion-input></td>
+                        <td><ion-input type="number" step="0.5" [(ngModel)]="item.cena" name="cena_{{item.id}}"></ion-input></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="ion-text-center ion-margin-top">
+                <ion-button color="success" (click)="guardarConfiguracion()" [disabled]="cargandoConfig">
+                  {{ cargandoConfig ? 'Guardando...' : 'Guardar Configuracion Global' }}
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        
+        <!--  Botones de acción -->
         <div class="form-actions">
           <ion-button fill="outline" color="medium" (click)="volver()" type="button">
             <ion-icon name="arrow-back-outline" slot="start"></ion-icon>

@@ -12,25 +12,25 @@ import { environment } from 'src/environments/environment';
 })
 export class PacienteverplanPage implements OnInit {
 
-  // 👤 UI State
+  //  UI State
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombrePaciente: string = '';
   isMobile = false;
   
-  // 📋 Plan
+  //  Plan
   plan: any = null;
   cargando = true;
   
-  // 📅 Vista
+  //  Vista
   vistaActual: 'semana' | 'dia' | 'mes' = 'semana';
   fechaSeleccionada: string = '';
   diaSeleccionado: any = null;
 
-  // 📊 Datos adicionales
+  //  Datos adicionales
   ultimoRegistro: any = null;
   proximaCita: any = null;
-  diasParaCita: number = 0;  // ✅ PROPIEDAD AGREGADA
+  diasParaCita: number = 0;  //  PROPIEDAD AGREGADA
 
   constructor(
     private router: Router,
@@ -66,7 +66,7 @@ export class PacienteverplanPage implements OnInit {
     }
   }
 
-  // ✅ Cargar todos los datos en paralelo
+  //  Cargar todos los datos en paralelo
   async cargarDatos(): Promise<void> {
     this.cargando = true;
     try {
@@ -83,9 +83,9 @@ export class PacienteverplanPage implements OnInit {
         this.http.get<any>(`${baseUrl}/proxima-cita`, { headers }).toPromise().catch(() => null)
       ]);
 
-      console.log('📋 Respuesta plan:', planResp);
-      console.log('📊 Respuesta registro:', registroResp);
-      console.log('📅 Respuesta cita:', citaResp);
+      console.log(' Respuesta plan:', planResp);
+      console.log(' Respuesta registro:', registroResp);
+      console.log(' Respuesta cita:', citaResp);
 
       // Asignar plan
       if (planResp?.plan) {
@@ -108,18 +108,18 @@ export class PacienteverplanPage implements OnInit {
       // Asignar próxima cita y calcular días
       if (citaResp?.cita) {
         this.proximaCita = citaResp.cita;
-        this.calcularDiasParaCita();  // ✅ Calcular días
+        this.calcularDiasParaCita();  //  Calcular días
       }
 
     } catch (error: any) {
-      console.error('❌ Error cargando datos:', error);
+      console.error(' Error cargando datos:', error);
       await this.showToast('Error al cargar los datos', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
-  // ✅ MÉTODO AGREGADO: Calcular días para la cita
+  //  MÉTODO AGREGADO: Calcular días para la cita
   private calcularDiasParaCita(): void {
     if (!this.proximaCita?.fecha_hora) {
       this.diasParaCita = 0;
@@ -136,7 +136,7 @@ export class PacienteverplanPage implements OnInit {
     const diffTime = fechaCita.getTime() - hoy.getTime();
     this.diasParaCita = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    console.log(`📅 Días para la cita: ${this.diasParaCita}`);
+    console.log(` Días para la cita: ${this.diasParaCita}`);
   }
 
   cambiarVista(): void {
@@ -154,7 +154,7 @@ export class PacienteverplanPage implements OnInit {
     ) || null;
   }
 
-  // 🎨 Helpers de UI
+  //  Helpers de UI
   getMealIcon(mealType: string): string {
     const icons: Record<string, string> = {
       desayuno: 'sunny-outline',
@@ -191,7 +191,7 @@ export class PacienteverplanPage implements OnInit {
     return colors[mealType] || '';
   }
 
-  // 💬 Contactar médico por WhatsApp
+  //  Contactar médico por WhatsApp
   async contactarWhatsApp(): Promise<void> {
     if (!this.plan?.medico_telefono) {
       await this.showToast('No hay teléfono del médico registrado', 'warning');
@@ -211,7 +211,7 @@ export class PacienteverplanPage implements OnInit {
     window.open(url, '_blank');
   }
 
-  // 📅 Ver próxima cita
+  //  Ver próxima cita
   async verProximaCita(): Promise<void> {
     if (this.proximaCita) {
       const fecha = new Date(this.proximaCita.fecha_hora).toLocaleDateString('es-EC', {
@@ -223,7 +223,7 @@ export class PacienteverplanPage implements OnInit {
       });
       
       const alert = await this.alertCtrl.create({
-        header: '📅 Próxima Cita',
+        header: ' Próxima Cita',
         message: `<strong>${this.proximaCita.medico_nombre}</strong><br>${fecha}<br><br>${this.proximaCita.motivo || ''}`,
         buttons: ['OK']
       });
@@ -231,7 +231,7 @@ export class PacienteverplanPage implements OnInit {
     }
   }
 
-  // 🧭 Navegación
+  //  Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
     const rutas: Record<string, string> = {

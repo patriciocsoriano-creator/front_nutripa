@@ -9,7 +9,7 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   
-  <!-- 📋 Encabezado del formulario -->
+  <!--  Encabezado del formulario -->
   <div class="form-header ion-text-center ion-padding-vertical">
     <div class="header-icon-wrapper">
       <ion-icon name="person-add-outline" size="large"></ion-icon>
@@ -18,7 +18,7 @@
     <p class="ion-text-muted ion-no-margin">Complete sus datos para crear una cuenta</p>
   </div>
 
-  <!-- 🎉 BANNER DE AUTOCOMPLETADO -->
+  <!--  BANNER DE AUTOCOMPLETADO -->
   <ion-card *ngIf="pacienteEncontrado" class="autocompletado-banner" color="success">
     <ion-card-content>
       <div class="autocompletado-content">
@@ -33,7 +33,7 @@
 
   <form #formDirective="ngForm">
     
-    <!-- 👤 Sección: Datos Personales -->
+    <!--  Sección: Datos Personales -->
     <ion-card class="card-section">
       <ion-card-header>
         <ion-card-title>
@@ -44,7 +44,7 @@
       </ion-card-header>
       <ion-card-content>
 
-        <!-- 🆕 NOTA INFORMATIVA PARA PACIENTES -->
+        <!--  NOTA INFORMATIVA PARA PACIENTES -->
         <div class="nota-paciente" *ngIf="registroForm.rol === 'paciente' || !registroForm.rol">
           <ion-icon name="information-circle-outline"></ion-icon>
           <div class="nota-texto">
@@ -214,7 +214,7 @@
             </ion-col>
           </ion-row>
 
-          <!-- 🆕 BOTÓN PARA BUSCAR POR NOMBRE -->
+          <!--  BOTÓN PARA BUSCAR POR NOMBRE -->
           <ion-row *ngIf="registroForm.rol === 'paciente' && registroForm.nombre && registroForm.apellido && !pacienteEncontrado && !buscandoPaciente">
             <ion-col size="12">
               <ion-button expand="block" fill="outline" size="small" color="primary" (click)="buscarPorNombre()">
@@ -228,7 +228,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- 🏠 Sección: Ubicación -->
+    <!--  Sección: Ubicación -->
     <ion-card class="card-section">
       <ion-card-header>
         <ion-card-title>
@@ -342,7 +342,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- 🔐 Sección: Seguridad y Configuración -->
+    <!--  Sección: Seguridad y Configuración -->
     <ion-card class="card-section">
       <ion-card-header>
         <ion-card-title>
@@ -369,7 +369,7 @@
           </ion-button>
         </ion-item>
 
-        <!-- 🆕 BARRA DE SEGURIDAD DE CONTRASEÑA -->
+        <!--  BARRA DE SEGURIDAD DE CONTRASEÑA -->
         <div class="password-security-container" *ngIf="registroForm.password">
           
           <!-- Barra de progreso -->
@@ -440,7 +440,7 @@
           </ion-button>
         </ion-item>
         
-        <!-- 🆕 Indicador de coincidencia -->
+        <!--  Indicador de coincidencia -->
         <div class="password-match-indicator" *ngIf="registroForm.confirmarPassword">
           <ion-icon [name]="passwordsCoinciden ? 'checkmark-circle' : 'close-circle'" 
                     [color]="passwordsCoinciden ? 'success' : 'danger'"></ion-icon>
@@ -489,7 +489,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- 🎯 Botones de Acción -->
+    <!--  Botones de Acción -->
     <div class="action-buttons ion-padding">
       
       <ion-button 

@@ -40,7 +40,7 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
   diaSeleccionado: DayPlan | null = null;
 
   private planInput: PlanGenerationInput | null = null;
-  private planIdBase: string | null = null;  // 👈 ID del plan base creado en medicocrearplan
+  private planIdBase: string | null = null;  //  ID del plan base creado en medicocrearplan
 
   constructor(
   private router: Router,
@@ -54,7 +54,7 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
 ) {
   this.platform.ready().then(() => {
     this.isMobile = this.platform.is('mobile') || this.platform.width() <= 1024;
-    // ✅ Forzar abierto si NO es móvil
+    //  Forzar abierto si NO es móvil
     if (!this.isMobile) {
       this.sidebarOpen = true;
     }
@@ -84,7 +84,7 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
         const user = JSON.parse(userStr);
         this.nombreDoctor = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Dr. Usuario';
         this.especialidad = user.rol === 'medico' ? 'Médico Especialista' : 'Nutricionista';
-      } catch (e) { console.warn('⚠️ Error parseando usuario'); }
+      } catch (e) { console.warn(' Error parseando usuario'); }
     }
   }
 
@@ -93,7 +93,7 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
     try {
       const navigation = this.router.getCurrentNavigation();
       
-      // 👇 Obtener planData Y planId del state del router
+      //  Obtener planData Y planId del state del router
       const planData = navigation?.extras?.state?.['planData'] as PlanGenerationInput | null;
       const planIdRecibido = navigation?.extras?.state?.['planId'] as string | null;
       
@@ -102,25 +102,25 @@ export class MedicoplanalimenticioPage implements OnInit, OnDestroy {
       }
       
       this.planInput = planData;
-      this.planIdBase = planIdRecibido;  // 👈 Guardar ID del plan base
+      this.planIdBase = planIdRecibido;  //  Guardar ID del plan base
       
-      console.log('🔍 [PLAN] Plan base ID recibido:', this.planIdBase);
+      console.log(' [PLAN] Plan base ID recibido:', this.planIdBase);
       
       // Generar plan detallado con alimentos
       this.plan = await this.nutritionPlanService.generatePlan(this.planInput);
 
-// 🔧 FORZAR MACROS CORRECTOS SEGÚN EL PERFIL CLÍNICO
+//  FORZAR MACROS CORRECTOS SEGÚN EL PERFIL CLÍNICO
 if (this.plan) {
   const profileMacros: Record<string, { protein: number; carbs: number; fat: number }> = {
-    'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
-    'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
+    'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },   // Más grasa/proteína para saciedad y bajo IG distribucion calorica
+    'Normocalorico': { protein: 25, carbs: 50, fat: 25 },   // Balance estándar para mantenimiento
     'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
-    'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 }
+    'Hipograsa': { protein: 25, carbs: 55, fat: 20 }   // ¡GRASA AL 20%! unido modificar documento
   };
   
   this.plan.macro_distribution = profileMacros[this.plan.profile_type] || profileMacros['Normocalorico'];
   
-  console.log('✅ [PLAN] Macros forzados para perfil', this.plan.profile_type, ':', this.plan.macro_distribution);
+  console.log(' [PLAN] Macros forzados para perfil', this.plan.profile_type, ':', this.plan.macro_distribution);
 }
 
 if (this.plan?.plan.weekly.days.length) {
@@ -129,7 +129,7 @@ if (this.plan?.plan.weekly.days.length) {
 }
       
     } catch (error: any) {
-      console.error('❌ Error generando plan:', error);
+      console.error(' Error generando plan:', error);
       this.error = error.message || 'No se pudo generar el plan alimenticio';
       await this.showToast('Error generando plan. Verifica la conexión a FatSecret API.', 'danger');
     } finally {
@@ -185,7 +185,7 @@ if (this.plan?.plan.weekly.days.length) {
   hasPlanForDay(_week: number, _day: number): boolean { return true; }
 
   async descargarPDF() {
-    await this.showToast('📄 Generando PDF... (Funcionalidad en desarrollo)', 'primary');
+    await this.showToast(' Generando PDF... (Funcionalidad en desarrollo)', 'primary');
   }
 
   async compartirPlan() {
@@ -205,39 +205,39 @@ if (this.plan?.plan.weekly.days.length) {
 
   private async compartirPorApp(app: 'whatsapp' | 'email') {
     if (!this.plan) return;
-    const message = `🥗 Tu Plan Alimenticio Personalizado\n\nPaciente: ${this.plan.patient_name}\nPerfil: ${this.plan.profile_type}\nCalorías diarias: ${this.plan.daily_calorie_target} kcal\n\n📅 Semana del ${this.plan.plan.weekly.start_date} al ${this.plan.plan.weekly.end_date}\n\nRecomendación principal:\n"${this.plan.recommendations.main}"`;
+    const message = ` Tu Plan Alimenticio Personalizado\n\nPaciente: ${this.plan.patient_name}\nPerfil: ${this.plan.profile_type}\nCalorías diarias: ${this.plan.daily_calorie_target} kcal\n\n📅 Semana del ${this.plan.plan.weekly.start_date} al ${this.plan.plan.weekly.end_date}\n\nRecomendación principal:\n"${this.plan.recommendations.main}"`;
     
     if (app === 'whatsapp') {
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     } else {
       window.location.href = `mailto:?subject=Tu Plan Alimenticio&body=${encodeURIComponent(message)}`;
     }
-    await this.showToast('✅ Plan compartido', 'success');
+    await this.showToast(' Plan compartido', 'success');
   }
 
   async imprimirPlan() {
     window.print();
-    await this.showToast('🖨️ Abriendo vista de impresión...', 'primary');
+    await this.showToast(' Abriendo vista de impresión...', 'primary');
   }
 
   /**
-   * 💾 CONFIRMAR Y ENVIAR: ACTUALIZA el plan existente con plan_detallado
+   *  CONFIRMAR Y ENVIAR: ACTUALIZA el plan existente con plan_detallado
    * NO crea un nuevo registro, evita duplicados
    */
   async confirmarYEnviar() {
-    // ✅ Validar que plan y planInput no sean null
+    //  Validar que plan y planInput no sean null
     if (!this.plan || !this.planInput) {
-      await this.showToast('⚠️ No hay plan para confirmar', 'warning');
+      await this.showToast(' No hay plan para confirmar', 'warning');
       return;
     }
     
-    // ✅ Validar que tenemos el planIdBase del paso anterior
+    //  Validar que tenemos el planIdBase del paso anterior
     if (!this.planIdBase) {
-      await this.showToast('⚠️ No se encontró el plan base. Por favor, reinicia el proceso.', 'warning');
+      await this.showToast(' No se encontró el plan base. Por favor, reinicia el proceso.', 'warning');
       return;
     }
     
-    // 👇 Guardar referencias locales no-null para evitar errores de TypeScript en async handler
+    //  Guardar referencias locales no-null para evitar errores de TypeScript en async handler
     const planToSave: GeneratedNutritionPlan = this.plan;
     const planInputToUse: PlanGenerationInput = this.planInput;
     const planIdToUpdate: string = this.planIdBase;
@@ -258,10 +258,10 @@ if (this.plan?.plan.weekly.days.length) {
             await loading.present();
             
             try {
-              // 💾 ACTUALIZAR plan_detallado del plan existente (NO INSERT nuevo)
+              //  ACTUALIZAR plan_detallado del plan existente (NO INSERT nuevo)
               const updateResult = await this.nutritionPlanService.updatePlanDetail(
-                planIdToUpdate,  // 👈 ID del plan base creado en medicocrearplan
-                planToSave.plan  // 👈 Solo el objeto plan { weekly, monthly_summary }
+                planIdToUpdate,  //  ID del plan base creado en medicocrearplan
+                planToSave.plan  //  Solo el objeto plan { weekly, monthly_summary }
               );
               
               if (updateResult.error) {
@@ -269,21 +269,21 @@ if (this.plan?.plan.weekly.days.length) {
               }
               
               await loading.dismiss();
-              await this.showToast('✅ Plan detallado guardado y enviado al paciente', 'success');
+              await this.showToast(' Plan detallado guardado y enviado al paciente', 'success');
               
               // Redirigir al panel de pacientes
               this.router.navigate(['/medicoverpacientes'], { 
                 state: { 
                   pacienteId: planToSave.patient_id,
-                  planId: planIdToUpdate,  // 👈 Mismo ID, no uno nuevo
+                  planId: planIdToUpdate,  //  Mismo ID, no uno nuevo
                   mensaje: 'Plan confirmado exitosamente'
                 } 
               });
               
             } catch (error: any) {
               await loading.dismiss();
-              console.error('❌ Error actualizando plan detallado:', error);
-              await this.showToast(`⚠️ ${error.message || 'Error al guardar el plan detallado'}`, 'danger');
+              console.error(' Error actualizando plan detallado:', error);
+              await this.showToast(` ${error.message || 'Error al guardar el plan detallado'}`, 'danger');
             }
           }
         }
@@ -301,7 +301,7 @@ if (this.plan?.plan.weekly.days.length) {
     await this.toastCtrl.create({ message, color, duration: 3000, position: 'bottom' }).then(t => t.present());
   }
 
-  // 🧭 Navegar a otra página
+  //  Navegar a otra página
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'medico': '/medico',

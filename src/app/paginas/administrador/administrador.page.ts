@@ -100,7 +100,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
         this.nombreAdmin = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Administrador';
         this.rol = user.rol === 'admin' ? 'Administrador General' : 'Administrador';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn(' Error parseando usuario');
       }
     }
   }
@@ -109,7 +109,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
   private async cargarEstadisticas() {
   const token = localStorage.getItem('token');
   if (!token) {
-    console.warn('⚠️ No hay token, redirigiendo a login');
+    console.warn(' No hay token, redirigiendo a login');
     this.router.navigate(['/principal']);
     return;
   }
@@ -285,7 +285,7 @@ export class AdministradorPage implements OnInit, OnDestroy {
     await this.showToast(' Datos actualizados', 'success');
   }
 
-  // 🚪 Cerrar sesión
+  //  Cerrar sesión
   async cerrarSesion() {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar sesión',

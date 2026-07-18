@@ -10,9 +10,9 @@ import {
   MealType,
   PlanGenerationInput,
   PlanSaveResponse,
-  NutritionPlanPreferences,
   NutritionPlanRecommendations,
-  ActivityLevel
+  ActivityLevel,
+  DietTotals
 } from '../models/nutrition-plan.model';
 import { environment } from 'src/environments/environment';
 
@@ -40,18 +40,15 @@ export class NutritionPlanService {
     'supplement', 'suplemento', 'powder', 'polvo', 'concentrate'
   ];
 
-  // CATÁLOGO CURADO Y SEPARADO POR TIPO DE COMIDA PARA CONTROL TOTAL
   private readonly CURATED_CATALOG: Record<string, CuratedFood[]> = {
     desayuno_carbs: [
       { name: 'Avena en hojuelas', serving_size: 40, unit: 'g', calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4 },
       { name: 'Pan integral de trigo', serving_size: 1, unit: 'rebanada', calories: 80, protein: 4, carbs: 15, fat: 1, fiber: 2 },
-      { name: 'Tortilla de maíz', serving_size: 1, unit: 'unidad', calories: 52, protein: 1.4, carbs: 10.7, fat: 0.7, fiber: 1.4 },
-      { name: 'Arepa de maíz', serving_size: 1, unit: 'unidad', calories: 150, protein: 3, carbs: 30, fat: 2, fiber: 2 }
+      { name: 'Tortilla de maíz', serving_size: 1, unit: 'unidad', calories: 52, protein: 1.4, carbs: 10.7, fat: 0.7, fiber: 1.4 }
     ],
     desayuno_proteins: [
       { name: 'Huevo de gallina', serving_size: 1, unit: 'unidad', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0 },
       { name: 'Yogur griego natural', serving_size: 150, unit: 'g', calories: 90, protein: 16, carbs: 6, fat: 0, fiber: 0 },
-      { name: 'Queso fresco', serving_size: 50, unit: 'g', calories: 130, protein: 10, carbs: 2, fat: 9, fiber: 0 },
       { name: 'Queso cottage', serving_size: 100, unit: 'g', calories: 98, protein: 11, carbs: 3.4, fat: 4.3, fiber: 0 }
     ],
     almuerzo_proteins: [
@@ -59,41 +56,32 @@ export class NutritionPlanService {
       { name: 'Filete de pescado blanco', serving_size: 120, unit: 'g', calories: 144, protein: 26.4, carbs: 0, fat: 3.6, fiber: 0 },
       { name: 'Salmón al horno', serving_size: 120, unit: 'g', calories: 247, protein: 26.4, carbs: 0, fat: 15.6, fiber: 0 },
       { name: 'Lentejas cocidas', serving_size: 100, unit: 'g', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 8 },
-      { name: 'Frijoles negros cocidos', serving_size: 100, unit: 'g', calories: 132, protein: 8.9, carbs: 23.7, fat: 0.5, fiber: 8.7 },
       { name: 'Carne de res magra', serving_size: 100, unit: 'g', calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
-      { name: 'Tofu firme', serving_size: 100, unit: 'g', calories: 144, protein: 17, carbs: 3, fat: 9, fiber: 2 },
-      { name: 'Atún en agua', serving_size: 100, unit: 'g', calories: 116, protein: 25.5, carbs: 0, fat: 0.8, fiber: 0 }
+      { name: 'Tofu firme', serving_size: 100, unit: 'g', calories: 144, protein: 17, carbs: 3, fat: 9, fiber: 2 }
     ],
     almuerzo_carbs: [
       { name: 'Arroz integral cocido', serving_size: 150, unit: 'g', calories: 168, protein: 3.9, carbs: 34.5, fat: 1.4, fiber: 2.7 },
       { name: 'Quinoa cocida', serving_size: 100, unit: 'g', calories: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8 },
       { name: 'Papa cocida', serving_size: 150, unit: 'g', calories: 131, protein: 2.9, carbs: 30, fat: 0.2, fiber: 3.3 },
-      { name: 'Camote cocido', serving_size: 150, unit: 'g', calories: 129, protein: 1.6, carbs: 30, fat: 0.2, fiber: 4.5 },
-      { name: 'Pasta integral cocida', serving_size: 100, unit: 'g', calories: 124, protein: 5.3, carbs: 26.5, fat: 0.5, fiber: 3.9 },
-      { name: 'Plátano verde cocido', serving_size: 100, unit: 'g', calories: 122, protein: 1.3, carbs: 31, fat: 0.4, fiber: 2.3 }
+      { name: 'Pasta integral cocida', serving_size: 100, unit: 'g', calories: 124, protein: 5.3, carbs: 26.5, fat: 0.5, fiber: 3.9 }
     ],
     almuerzo_veggies: [
       { name: 'Brócoli cocido', serving_size: 100, unit: 'g', calories: 35, protein: 2.4, carbs: 7, fat: 0.4, fiber: 3.3 },
       { name: 'Espinacas salteadas', serving_size: 100, unit: 'g', calories: 23, protein: 3, carbs: 3.8, fat: 0.3, fiber: 2.4 },
       { name: 'Zanahoria cocida', serving_size: 100, unit: 'g', calories: 35, protein: 0.8, carbs: 8, fat: 0.2, fiber: 2.8 },
       { name: 'Ensalada mixta', serving_size: 100, unit: 'g', calories: 20, protein: 1, carbs: 4, fat: 0.2, fiber: 1.5 },
-      { name: 'Ejotes cocidos', serving_size: 100, unit: 'g', calories: 31, protein: 1.8, carbs: 7, fat: 0.2, fiber: 2.7 },
-      { name: 'Calabacín a la plancha', serving_size: 100, unit: 'g', calories: 17, protein: 1.2, carbs: 3.1, fat: 0.3, fiber: 1 }
+      { name: 'Ejotes cocidos', serving_size: 100, unit: 'g', calories: 31, protein: 1.8, carbs: 7, fat: 0.2, fiber: 2.7 }
     ],
     snack_fruits: [
       { name: 'Manzana', serving_size: 150, unit: 'g', calories: 78, protein: 0.5, carbs: 21, fat: 0.3, fiber: 3.6 },
       { name: 'Pera', serving_size: 150, unit: 'g', calories: 86, protein: 0.6, carbs: 22.5, fat: 0.2, fiber: 4.7 },
       { name: 'Fresas', serving_size: 150, unit: 'g', calories: 48, protein: 1, carbs: 11.7, fat: 0.5, fiber: 3 },
-      { name: 'Arándanos', serving_size: 100, unit: 'g', calories: 57, protein: 0.7, carbs: 14.5, fat: 0.3, fiber: 2.4 },
-      { name: 'Plátano', serving_size: 120, unit: 'g', calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3.1 },
-      { name: 'Naranja', serving_size: 150, unit: 'g', calories: 70, protein: 1.4, carbs: 17.6, fat: 0.2, fiber: 3.8 },
-      { name: 'Kiwi', serving_size: 100, unit: 'g', calories: 61, protein: 1.1, carbs: 14.7, fat: 0.5, fiber: 3 }
+      { name: 'Plátano', serving_size: 120, unit: 'g', calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3.1 }
     ],
     snack_extras: [
       { name: 'Almendras crudas', serving_size: 30, unit: 'g', calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3.5 },
       { name: 'Nueces', serving_size: 30, unit: 'g', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, fiber: 1.9 },
-      { name: 'Semillas de chía', serving_size: 15, unit: 'g', calories: 73, protein: 2.5, carbs: 6.3, fat: 4.6, fiber: 5.1 },
-      { name: 'Palta (Aguacate)', serving_size: 50, unit: 'g', calories: 80, protein: 1, carbs: 4.3, fat: 7.3, fiber: 3.4 }
+      { name: 'Semillas de chía', serving_size: 15, unit: 'g', calories: 73, protein: 2.5, carbs: 6.3, fat: 4.6, fiber: 5.1 }
     ]
   };
 
@@ -113,13 +101,14 @@ export class NutritionPlanService {
     ) || 'Normocalorico';
     
     input.profile_type = perfilEncontrado;
-    
     const needsGlycemicControl = this._needsGlycemicControl(input);
     const profileType = needsGlycemicControl ? 'Control Glucemico' as const : perfilEncontrado;
     
     const mealDistribution = this.calculateMealDistribution(profileType, input.preferences.activity_level);
     const weekPlan = await this.generateWeekPlan(input, mealDistribution, needsGlycemicControl);
     const monthlySummary = this.generateMonthlySummary(weekPlan);
+    
+    const dietTotals = this.calculateDietTotals(weekPlan);
     
     return {
       patient_id: input.patient_id,
@@ -139,6 +128,7 @@ export class NutritionPlanService {
         weekly: weekPlan,
         monthly_summary: monthlySummary
       },
+      diet_totals: dietTotals,
       generated_at: new Date().toISOString(),
       valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       metadata: {
@@ -147,6 +137,34 @@ export class NutritionPlanService {
         source: 'local_database',
         glycemic_control_applied: needsGlycemicControl
       }
+    };
+  }
+
+  private calculateDietTotals(weekPlan: WeekPlan): DietTotals {
+    let totalCho = 0;
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCalories = 0;
+    let totalFiber = 0;
+
+    weekPlan.days.forEach(day => {
+      day.meals.forEach(meal => {
+        meal.foods.forEach(food => {
+          totalCho += food.carbs || 0;
+          totalProtein += food.protein || 0;
+          totalFat += food.fat || 0;
+          totalCalories += food.calories || 0;
+          totalFiber += food.fiber || 0;
+        });
+      });
+    });
+
+    return {
+      total_cho: this._round(totalCho / 7),
+      total_protein: this._round(totalProtein / 7),
+      total_fat: this._round(totalFat / 7),
+      total_calories: Math.round(totalCalories / 7),
+      total_fiber: this._round(totalFiber / 7)
     };
   }
 
@@ -242,7 +260,7 @@ export class NutritionPlanService {
     usedFoodsThisWeek: Set<string>
   ): Promise<MealPlan[]> {
     const meals: MealPlan[] = [];
-    const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena', 'colacion'];
+    const mealOrder: MealType[] = ['desayuno', 'media_manana', 'almuerzo', 'media_tarde', 'cena'];
     const usedFoodsToday = new Set<string>();
     
     for (const mealType of mealOrder) {
@@ -262,7 +280,12 @@ export class NutritionPlanService {
       foods = foods.filter(f => !this.ALIMENTOS_NO_APROPIADOS.some(noApto => f.name.toLowerCase().includes(noApto)));
       foods = foods.filter(f => !input.allergies.some(a => f.name.toLowerCase().includes(a.toLowerCase())));
       
-      foods = foods.map((f: FoodItem) => this._ajustarPorcionInteligente(f, targetCalories / foods.length));
+      if (mealType === 'almuerzo' || mealType === 'cena') {
+        foods = this.aplicarMetodoDelPlato(foods, targetCalories);
+      } else {
+        foods = foods.map((f: FoodItem) => this._ajustarPorcionInteligente(f, targetCalories / (foods.length || 1)));
+      }
+      
       foods = foods.map(f => this._roundFoodValues(f));
       
       const totals = foods.reduce((acc: any, food: FoodItem) => ({
@@ -350,6 +373,59 @@ export class NutritionPlanService {
     return result;
   }
 
+  private aplicarMetodoDelPlato(foods: FoodItem[], targetCalories: number): FoodItem[] {
+    if (foods.length !== 3) {
+      return foods.map(f => this._ajustarPorcionInteligente(f, targetCalories / foods.length));
+    }
+
+    const protein = foods.find(f => this.esProteina(f.name)) || foods[0];
+    const carb = foods.find(f => this.esCarbohidrato(f.name)) || foods[1];
+    const veggie = foods.find(f => this.esVerdura(f.name)) || foods[2];
+
+    const calPer100g_P = (protein.calories / protein.serving_size) * 100;
+    const calPer100g_C = (carb.calories / carb.serving_size) * 100;
+    const calPer100g_V = (veggie.calories / veggie.serving_size) * 100;
+
+    const denominator = calPer100g_P + calPer100g_C + (2 * calPer100g_V);
+    const x = (targetCalories * 100) / denominator;
+
+    const weightP = x;
+    const weightC = x;
+    const weightV = 2 * x;
+
+    const applyWeight = (food: FoodItem, newWeight: number) => {
+      const factor = newWeight / food.serving_size;
+      return {
+        ...food,
+        serving_size: Math.max(30, Math.round(newWeight)),
+        serving_unit: 'g',
+        calories: this._round(food.calories * factor),
+        protein: this._round(food.protein * factor),
+        carbs: this._round(food.carbs * factor),
+        fat: this._round(food.fat * factor),
+        fiber: food.fiber ? this._round(food.fiber * factor) : 0
+      };
+    };
+
+    return [
+      applyWeight(protein, weightP),
+      applyWeight(carb, weightC),
+      applyWeight(veggie, weightV)
+    ];
+  }
+
+  private esProteina(name: string): boolean {
+    return /pollo|pescado|salmón|lentejas|res|tofu|atún|huevo|queso|yogur/i.test(name);
+  }
+
+  private esCarbohidrato(name: string): boolean {
+    return /arroz|quinoa|papa|pasta|avena|pan|tortilla|camote/i.test(name);
+  }
+
+  private esVerdura(name: string): boolean {
+    return /brócoli|espinaca|zanahoria|ensalada|ejote|calabacín|pepino|tomate/i.test(name);
+  }
+
   private _ajustarPorcionInteligente(food: FoodItem, targetCalories: number): FoodItem {
     const esUnidad = food.serving_unit === 'unidad' || food.serving_unit === 'rebanada';
     
@@ -406,18 +482,22 @@ export class NutritionPlanService {
 
   private calculateMealDistribution(profile: string, activity: ActivityLevel): Record<MealType, number> {
     const distributions: Record<string, Record<MealType, number>> = {
-      'Normocalorico': { desayuno: 0.25, media_manana: 0.10, almuerzo: 0.35, media_tarde: 0.10, cena: 0.15, colacion: 0.05 },
-      'Control Glucemico': { desayuno: 0.20, media_manana: 0.15, almuerzo: 0.30, media_tarde: 0.15, cena: 0.15, colacion: 0.05 },
-      'Hipocalorico': { desayuno: 0.30, media_manana: 0.05, almuerzo: 0.40, media_tarde: 0.05, cena: 0.15, colacion: 0.05 },
-      'Hipo-grasa': { desayuno: 0.25, media_manana: 0.10, almuerzo: 0.35, media_tarde: 0.10, cena: 0.15, colacion: 0.05 }
+      'Normocalorico': { desayuno: 0.25, media_manana: 0.10, almuerzo: 0.35, media_tarde: 0.15, cena: 0.15, colacion: 0 },
+      'Control Glucemico': { desayuno: 0.20, media_manana: 0.15, almuerzo: 0.30, media_tarde: 0.15, cena: 0.20, colacion: 0 },
+      'Hipocalorico': { desayuno: 0.30, media_manana: 0.05, almuerzo: 0.40, media_tarde: 0.10, cena: 0.15, colacion: 0 },
+      'Hipo-grasa': { desayuno: 0.25, media_manana: 0.10, almuerzo: 0.35, media_tarde: 0.15, cena: 0.15, colacion: 0 }
     };
     return distributions[profile] || distributions['Normocalorico'];
   }
 
   private getSuggestedTime(mealType: MealType): string {
     const times: Record<MealType, string> = {
-      desayuno: '07:00', media_manana: '10:00', almuerzo: '13:00',
-      media_tarde: '16:00', cena: '19:30', colacion: '21:00'
+      desayuno: '07:00', 
+      media_manana: '10:00', 
+      almuerzo: '13:00',
+      media_tarde: '16:00', 
+      cena: '19:30',
+      colacion: '21:00'
     };
     return times[mealType];
   }
@@ -433,9 +513,9 @@ export class NutritionPlanService {
         'Monitorear glucosa 2h post-almuerzo',
         'Evitar picos de carbohidratos en la tarde',
         'Incluir fibra en cada comida',
-        'Recordar hidratación constante',
+        'Recordar hidratacion constante',
         'Cena ligera',
-        'Revisar síntomas de hipoglucemia',
+        'Revisar sintomas de hipoglucemia',
         'Planificar snacks de emergencia'
       ];
       return notes[dayIndex % notes.length];
@@ -445,16 +525,16 @@ export class NutritionPlanService {
 
   private getMealNotes(mealType: MealType, profile: string, _dayName: string): string {
     if (profile === 'Control Glucemico') {
-      if (mealType === 'desayuno') return 'Incluir proteína para estabilizar glucosa matutina';
+      if (mealType === 'desayuno') return 'Incluir proteina para estabilizar glucosa matutina';
       if (mealType === 'cena') return 'Cena ligera, al menos 3h antes de dormir';
-      return 'Combinar carbohidratos con proteína/fibra';
+      return 'Combinar carbohidratos con proteina/fibra';
     }
     return '';
   }
 
   private getFoodsToAvoid(profile: string, allergies: string[]): string[] {
     const baseAvoid: Record<string, string[]> = {
-      'Control Glucemico': ['azúcar refinada', 'jugos industriales', 'pan blanco'],
+      'Control Glucemico': ['azucar refinada', 'jugos industriales', 'pan blanco'],
       'Hipocalorico': ['fritos', 'salsas cremosas', 'bebidas azucaradas'],
       'Hipo-grasa': ['manteca', 'embutidos', 'frituras']
     };
@@ -463,10 +543,10 @@ export class NutritionPlanService {
 
   private getWeeklyFocusAreas(profile: string): string[] {
     const focuses: Record<string, string[]> = {
-      'Normocalorico': ['Mantener horarios regulares', 'Variedad de vegetales', 'Hidratación'],
-      'Control Glucemico': ['Monitoreo glucémico', 'Carbohidratos de bajo IG', 'Fibra en cada comida'],
-      'Hipocalorico': ['Saciedad con baja densidad', 'Actividad física', 'Mindful eating'],
-      'Hipo-grasa': ['Grasas saludables', 'Cocción al vapor/horno', 'Lectura de etiquetas']
+      'Normocalorico': ['Mantener horarios regulares', 'Variedad de vegetales', 'Hidratacion'],
+      'Control Glucemico': ['Monitoreo glucemico', 'Carbohidratos de bajo IG', 'Fibra en cada comida'],
+      'Hipocalorico': ['Saciedad con baja densidad', 'Actividad fisica', 'Mindful eating'],
+      'Hipo-grasa': ['Grasas saludables', 'Coccion al vapor/horno', 'Lectura de etiquetas']
     };
     return focuses[profile] || focuses['Normocalorico'];
   }
@@ -475,12 +555,12 @@ export class NutritionPlanService {
     return {
       total_days: 28,
       avg_calories: week1.weekly_goals.avg_daily_calories,
-      adherence_tips: ['Preparar comidas con anticipación', 'Mantener diario de alimentación', 'Revisar progreso semana 2 y 4', 'Ajustar porciones según saciedad'],
+      adherence_tips: ['Preparar comidas con anticipacion', 'Mantener diario de alimentacion', 'Revisar progreso semana 2 y 4', 'Ajustar porciones segun saciedad'],
       progress_checkpoints: [
-        { week: 1, goal: 'Adaptación a nuevos horarios' },
-        { week: 2, goal: 'Evaluación de saciedad' },
+        { week: 1, goal: 'Adaptacion a nuevos horarios' },
+        { week: 2, goal: 'Evaluacion de saciedad' },
         { week: 3, goal: 'Ajuste de porciones' },
-        { week: 4, goal: 'Planificación de mantenimiento' }
+        { week: 4, goal: 'Planificacion de mantenimiento' }
       ]
     };
   }

@@ -1,7 +1,7 @@
 // src/app/services/patient-data-util.ts
 import { Injectable } from '@angular/core';
 
-// ✅ INTERFAZ ACTUALIZADA con las 6 variables del modelo 2026
+//  INTERFAZ ACTUALIZADA con las 6 variables del modelo 2026
 export interface PatientClinicalData {
   imc: number | null;
   edad: number | null;
@@ -15,7 +15,7 @@ export interface PatientClinicalData {
   sexo?: string | null;
 }
 
-// ✅ INTERFAZ ACTUALIZADA para el payload de inferencia
+//  INTERFAZ ACTUALIZADA para el payload de inferencia
 export interface PayloadInferenciaIA {
   edad: number;
   genero: 'M' | 'F';
@@ -33,7 +33,7 @@ export class PatientDataUtilService {
   constructor() {}
 
   /**
-   * 🔢 Calcular edad a partir de fechaNacimiento (YYYY-MM-DD)
+   *  Calcular edad a partir de fechaNacimiento (YYYY-MM-DD)
    */
   calcularEdad(fechaNacimiento: string | null): number | null {
     if (!fechaNacimiento) return null;
@@ -54,7 +54,7 @@ export class PatientDataUtilService {
   }
 
   /**
-   * 🔄 Mapear sexo del formulario a formato de API ('M' | 'F')
+   *  Mapear sexo del formulario a formato de API ('M' | 'F')
    */
   mapearGenero(sexo: string | null): 'M' | 'F' | null {
     if (!sexo) return null;
@@ -72,7 +72,7 @@ export class PatientDataUtilService {
   }
 
   /**
-   * 📦 Preparar payload para FastAPI con las 6 variables del modelo 2026
+   *  Preparar payload para FastAPI con las 6 variables del modelo 2026
    * @param datos Datos clínicos del paciente
    * @returns Payload listo para enviar a la API de inferencia
    */
@@ -106,24 +106,24 @@ export class PatientDataUtilService {
     if (!pesoFinal && tallaFinal && datos.imc) {
       const tallaM = tallaFinal / 100;
       pesoFinal = parseFloat((datos.imc * tallaM * tallaM).toFixed(2));
-      console.log(`⚠️ Peso calculado desde IMC: ${pesoFinal} kg`);
+      console.log(` Peso calculado desde IMC: ${pesoFinal} kg`);
     }
     
     if (!tallaFinal && pesoFinal && datos.imc) {
       const tallaM = Math.sqrt(pesoFinal / datos.imc);
       tallaFinal = parseFloat((tallaM * 100).toFixed(2));
-      console.log(`⚠️ Talla calculada desde IMC: ${tallaFinal} cm`);
+      console.log(` Talla calculada desde IMC: ${tallaFinal} cm`);
     }
     
     // Valores por defecto si aún faltan
     if (!pesoFinal) {
       pesoFinal = genero === 'M' ? 75 : 65;
-      console.log(`⚠️ Peso asumido por defecto: ${pesoFinal} kg`);
+      console.log(` Peso asumido por defecto: ${pesoFinal} kg`);
     }
     
     if (!tallaFinal) {
       tallaFinal = genero === 'M' ? 170 : 160;
-      console.log(`⚠️ Talla asumida por defecto: ${tallaFinal} cm`);
+      console.log(` Talla asumida por defecto: ${tallaFinal} cm`);
     }
 
     // Tiene diabetes (por defecto 0)
@@ -138,12 +138,12 @@ export class PatientDataUtilService {
       tiene_diabetes: tieneDiabetes
     };
 
-    console.log('📦 [PatientDataUtil] Payload preparado:', payload);
+    console.log(' [PatientDataUtil] Payload preparado:', payload);
     return payload;
   }
 
   /**
-   * ✅ Validar que los datos están completos para inferencia
+   *  Validar que los datos están completos para inferencia
    */
   validarDatosParaInferencia(datos: PatientClinicalData): {
     valido: boolean;

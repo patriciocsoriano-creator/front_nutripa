@@ -1,5 +1,4 @@
 // src/app/models/nutrition-plan.model.ts
-// ✅ Este archivo ya está correcto. No necesita cambios.
 
 export type MealType = 'desayuno' | 'media_manana' | 'almuerzo' | 'media_tarde' | 'cena' | 'colacion';
 export type DietaryStyle = 'occidental' | 'mediterranea' | 'baja_carbo' | 'vegetariana';
@@ -11,7 +10,7 @@ export interface FoodItem {
   name: string;
   brand?: string;
   serving_size: number;
-  serving_unit: string;  // ✅ Debe ser: 'g', 'ml', 'unidad', 'rebanada', 'taza', etc.
+  serving_unit: string;  // Debe ser: 'g', 'ml', 'unidad', 'rebanada', 'taza', etc.
   calories: number;
   protein: number;
   carbs: number;
@@ -84,12 +83,21 @@ export interface PlanGenerationInput {
   registro_id?: string;
 }
 
+export interface DietTotals {
+  total_cho: number;
+  total_protein: number;
+  total_fat: number;
+  total_calories: number;
+  total_fiber?: number;
+}
+
 export interface GeneratedNutritionPlan {
   patient_id: string;
   patient_name: string;
   profile_type: 'Hipocalorico' | 'Control Glucemico' | 'Hipo-grasa' | 'Normocalorico';
   profile_id: number;
   daily_calorie_target: number;
+  diet_totals?: DietTotals;
   macro_distribution: { protein: number; carbs: number; fat: number };
   restrictions: {
     allergies: string[];
@@ -122,3 +130,4 @@ export interface PlanSaveResponse {
   mensaje: string;
   plan_id?: string;
 }
+

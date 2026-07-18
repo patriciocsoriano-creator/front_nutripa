@@ -20,7 +20,7 @@ export class PrincipalregistroPage implements OnInit {
     { value: 'O', label: 'Otro' }
   ];
 
-  // 👥 Opciones de rol con iconos
+  //  Opciones de rol con iconos
   roles = [
     { value: 'paciente', label: 'Paciente', icon: 'person-outline' },
     { value: 'nutricionista', label: 'Nutricionista', icon: 'restaurant-outline' },
@@ -28,30 +28,30 @@ export class PrincipalregistroPage implements OnInit {
     { value: 'admin', label: 'Administrador', icon: 'settings-outline' }
   ];
 
-  // 🌍 Datos de ubicaciones
+  //  Datos de ubicaciones
   provincias: Provincia[] = [];
   cantones: Canton[] = [];
   parroquias: Parroquia[] = [];
   isLoadingLocations = false;
   locationsError = false;
 
-  // 🔐 Estados de UI
+  //  Estados de UI
   showPassword = false;
   showConfirmPassword = false;
 
-  // ⚠️ Mensajes de validación
+  //  Mensajes de validación
   cedulaError = '';
   cedulaValida = false;
   telefonoError = '';
   passwordError = '';
 
-  // 🆕 Estados para autocompletado
+  //  Estados para autocompletado
   pacienteEncontrado = false;
   pacienteIdExistente: string | null = null;
   buscandoPaciente = false;
   mensajeAutocompletado = '';
 
-  // 🆕 NUEVO: Seguridad de contraseña
+  //  NUEVO: Seguridad de contraseña
   seguridadPassword = {
     nivel: 'muy_debil' as 'muy_debil' | 'debil' | 'media' | 'fuerte' | 'muy_fuerte',
     texto: 'Muy débil',
@@ -66,7 +66,7 @@ export class PrincipalregistroPage implements OnInit {
   };
   passwordsCoinciden = false;
 
-  // 📝 Formulario de registro completo
+  //  Formulario de registro completo
   registroForm = {
     nombre: '',
     apellido: '',
@@ -110,13 +110,13 @@ export class PrincipalregistroPage implements OnInit {
     this.destroy$.complete();
   }
 
-  // 🔹 Método helper para fecha máxima
+  //  Método helper para fecha máxima
   getFechaMaxima(): string {
     const hoy = new Date();
     return hoy.toISOString().split('T')[0];
   }
 
-  // 🎂 Calcular edad automáticamente
+  //  Calcular edad automáticamente
   calcularEdad(): void {
     const fecha = this.registroForm.fechaNacimiento;
     
@@ -144,7 +144,7 @@ export class PrincipalregistroPage implements OnInit {
     this.registroForm.edad = edad >= 0 && edad <= 120 ? edad : null;
   }
 
-  // 🆕 NUEVO: Calcular seguridad de la contraseña
+  //  NUEVO: Calcular seguridad de la contraseña
   calcularSeguridadPassword(): void {
     const password = this.registroForm.password || '';
     
@@ -208,7 +208,7 @@ export class PrincipalregistroPage implements OnInit {
                               password === this.registroForm.confirmarPassword;
   }
 
-  // 🆔 Validación COMPLETA de cédula ecuatoriana
+  //  Validación COMPLETA de cédula ecuatoriana
   validarCedula(): void {
     let cedula = this.registroForm.cedula.replace(/\D/g, '');
     this.registroForm.cedula = cedula;
@@ -238,7 +238,7 @@ export class PrincipalregistroPage implements OnInit {
     }
   }
 
-  // 🔍 Algoritmo oficial de validación de cédula ecuatoriana
+  //  Algoritmo oficial de validación de cédula ecuatoriana
   private validarCedulaEcuador(cedula: string): { valido: boolean; mensaje: string } {
     if (!/^\d{10}$/.test(cedula)) {
       return { valido: false, mensaje: 'La cédula debe contener solo números' };
@@ -280,7 +280,7 @@ export class PrincipalregistroPage implements OnInit {
     return { valido: true, mensaje: '' };
   }
 
-  // 📱 Validar teléfono
+  //  Validar teléfono
   validarTelefono(): void {
     const telefono = this.registroForm.telefono.replace(/\D/g, '');
     this.registroForm.telefono = telefono;
@@ -312,7 +312,7 @@ validarPasswords(): void {
   }
 }
 
-  // 🌍 Cargar ubicaciones
+  //  Cargar ubicaciones
   async cargarUbicaciones(): Promise<void> {
     this.isLoadingLocations = true;
     
@@ -325,7 +325,7 @@ validarPasswords(): void {
           this.locationsError = !success;
           
           if (!success) {
-            this.showToast('⚠️ Algunas ubicaciones podrían no estar disponibles', 'warning');
+            this.showToast(' Algunas ubicaciones podrían no estar disponibles', 'warning');
           }
         },
         error: () => {
@@ -336,7 +336,7 @@ validarPasswords(): void {
       });
   }
 
-  // 🔄 Cambios en provincia
+  //  Cambios en provincia
   onProvinciaChange(provinciaCodigo: string): void {
     this.registroForm.provinciaCodigo = provinciaCodigo;
     this.registroForm.canton = '';
@@ -357,7 +357,7 @@ validarPasswords(): void {
     }
   }
 
-  // 🔄 Cambios en cantón
+  //  Cambios en cantón
   onCantonChange(cantonCodigo: string): void {
     this.registroForm.cantonCodigo = cantonCodigo;
     this.registroForm.parroquia = '';
@@ -379,7 +379,7 @@ validarPasswords(): void {
     }
   }
 
-  // 🔄 Cambios en parroquia
+  //  Cambios en parroquia
   onParroquiaChange(parroquiaCodigo: string): void {
     this.registroForm.parroquiaCodigo = parroquiaCodigo;
     const parroquiaSeleccionada = this.parroquias.find(p => p.codigo === parroquiaCodigo);
@@ -394,9 +394,9 @@ validarPasswords(): void {
     cssClass: 'alert-rol-custom'
   };
 
-  // 🆕 Cuando cambia el rol
+  //  Cuando cambia el rol
   onRolChange(): void {
-    console.log('🔄 Rol seleccionado:', this.registroForm.rol);
+    console.log(' Rol seleccionado:', this.registroForm.rol);
     
     if (this.registroForm.rol === 'paciente' && this.registroForm.cedula.length === 10) {
       this.buscarPacienteExistente();
@@ -407,7 +407,7 @@ validarPasswords(): void {
     }
   }
 
-  // ✅ Validar formulario completo
+  //  Validar formulario completo
   esFormularioValido(): boolean {
     const f = this.registroForm;
     
@@ -433,7 +433,7 @@ validarPasswords(): void {
       return false;
     }
     
-    // 🆕 NUEVO: Validar seguridad de contraseña
+    //  NUEVO: Validar seguridad de contraseña
     if (this.seguridadPassword.nivel === 'muy_debil' || this.seguridadPassword.nivel === 'debil') {
       this.showToast('La contraseña es muy débil. Debe tener al menos 8 caracteres, mayúscula, minúscula, número y símbolo especial.', 'danger');
       return false;
@@ -448,7 +448,7 @@ validarPasswords(): void {
     return true;
   }
 
-  // 🚀 Registrar usuario
+  //  Registrar usuario
   async registrarUsuario(): Promise<void> {
     if (!this.esFormularioValido()) return;
 
@@ -489,18 +489,18 @@ validarPasswords(): void {
     if (this.registroForm.rol === 'paciente' && this.pacienteIdExistente) {
       datosEnvio.pacienteExistenteId = this.pacienteIdExistente;
       datosEnvio.vincularPaciente = true;
-      console.log('🔗 Vinculando paciente existente:', this.pacienteIdExistente);
+      console.log(' Vinculando paciente existente:', this.pacienteIdExistente);
     }
 
-    console.log('📦 Datos que se enviarán al backend:', JSON.stringify(datosEnvio, null, 2));
+    console.log(' Datos que se enviarán al backend:', JSON.stringify(datosEnvio, null, 2));
 
     this.generalService.registrarUsuario(datosEnvio).subscribe({
       next: async (response: any) => {
         await loading.dismiss();
         
         const mensaje = this.pacienteEncontrado 
-          ? '✅ Cuenta creada y vinculada a su registro existente' 
-          : '✅ Cuenta creada exitosamente';
+          ? ' Cuenta creada y vinculada a su registro existente' 
+          : ' Cuenta creada exitosamente';
         
         await this.showToast(mensaje, 'success');
         this.redirigirSegunRol(this.registroForm.rol);
@@ -508,7 +508,7 @@ validarPasswords(): void {
       },
       error: async (error) => {
         await loading.dismiss();
-        console.error('❌ Error en registro:', error);
+        console.error(' Error en registro:', error);
         
         const mensaje = error?.error?.mensaje || error?.message || 'Error al crear la cuenta. Verifique los datos e intente nuevamente.';
         await this.showToast(mensaje, 'danger');
@@ -516,7 +516,7 @@ validarPasswords(): void {
     });
   }
 
-  // 🧭 Redirigir según rol
+  //  Redirigir según rol
   redirigirSegunRol(rol: string): void {
     const rolNormalizado = rol?.toLowerCase();
     let ruta = '/login';
@@ -540,16 +540,16 @@ validarPasswords(): void {
         ruta = '/login';
     }
 
-    console.log(`🔄 Redirigiendo rol "${rolNormalizado}" a: ${ruta}`);
+    console.log(` Redirigiendo rol "${rolNormalizado}" a: ${ruta}`);
     this.router.navigate([ruta], { replaceUrl: true });
   }
 
-  // 🔄 Ir al login
+  //  Ir al login
   irALogin(): void {
     this.router.navigate(['/principal']);
   }
 
-  // 🧹 Limpiar formulario
+  //  Limpiar formulario
   limpiarFormulario(): void {
     this.registroForm = {
       nombre: '',
@@ -580,7 +580,7 @@ validarPasswords(): void {
     this.cantones = [];
     this.parroquias = [];
     
-    // 🆕 Resetear seguridad de contraseña
+    //  Resetear seguridad de contraseña
     this.seguridadPassword = {
       nivel: 'muy_debil',
       texto: 'Muy débil',
@@ -601,7 +601,7 @@ validarPasswords(): void {
     this.buscandoPaciente = false;
   }
 
-  // 🔔 Mostrar toast
+  //  Mostrar toast
   async showToast(message: string, color: string = 'primary', duration: number = 3000): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
@@ -614,7 +614,7 @@ validarPasswords(): void {
     toast.present();
   }
 
-  // ⚠️ Mostrar términos y condiciones
+  //  Mostrar términos y condiciones
   async verTerminos(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Términos y Condiciones',
@@ -645,7 +645,7 @@ validarPasswords(): void {
     await alert.present();
   }
 
-  // 🆕 Buscar paciente al perder foco en cédula
+  //  Buscar paciente al perder foco en cédula
   async buscarPacienteExistente(): Promise<void> {
     const cedula = this.registroForm.cedula?.trim();
     
@@ -673,15 +673,15 @@ validarPasswords(): void {
           }
           
           if (!response.encontrado) {
-            this.mensajeAutocompletado = 'ℹ️ No se encontraron registros previos. Complete todos los datos.';
+            this.mensajeAutocompletado = ' No se encontraron registros previos. Complete todos los datos.';
             setTimeout(() => { this.mensajeAutocompletado = ''; }, 3000);
             return;
           }
           
-          // 🆕 CASO: Ya tiene cuenta con rol PACIENTE
+          //  CASO: Ya tiene cuenta con rol PACIENTE
           if (response.ya_registrado && !response.rol_diferente) {
             const alert = await this.alertCtrl.create({
-              header: '⚠️ Cuenta Existente',
+              header: ' Cuenta Existente',
               message: `Este paciente ya tiene una cuenta registrada con el correo: <strong>${response.correo}</strong><br><br>¿Desea iniciar sesión?`,
               buttons: [
                 { text: 'Cancelar', role: 'cancel' },
@@ -695,10 +695,10 @@ validarPasswords(): void {
             return;
           }
           
-          // 🆕 CASO: Ya tiene cuenta con OTRO ROL
+          //  CASO: Ya tiene cuenta con OTRO ROL
           if (response.ya_registrado && response.rol_diferente) {
             const alert = await this.alertCtrl.create({
-              header: '⚠️ Cédula en Uso',
+              header: ' Cédula en Uso',
               message: response.mensaje,
               buttons: [
                 { text: 'Entendido', role: 'cancel' },
@@ -712,7 +712,7 @@ validarPasswords(): void {
             return;
           }
           
-          // ✅ CASO: Paciente existe sin cuenta → autocompletar
+          //  CASO: Paciente existe sin cuenta → autocompletar
           this.pacienteEncontrado = true;
           this.pacienteIdExistente = response.paciente_id;
           this.mensajeAutocompletado = response.mensaje;
@@ -736,16 +736,16 @@ validarPasswords(): void {
           
           this.validarCedula();
           
-          await this.showToast('✅ Datos encontrados. Complete su correo y contraseña.', 'success');
+          await this.showToast(' Datos encontrados. Complete su correo y contraseña.', 'success');
         },
         error: (error) => {
           this.buscandoPaciente = false;
-          console.error('❌ Error buscando paciente:', error);
+          console.error(' Error buscando paciente:', error);
         }
       });
   }
 
-  // 🆕 Buscar por nombre+apellido
+  //  Buscar por nombre+apellido
   async buscarPorNombre(): Promise<void> {
     const nombre = this.registroForm.nombre?.trim();
     const apellido = this.registroForm.apellido?.trim();
@@ -764,10 +764,10 @@ validarPasswords(): void {
         next: async (response: any) => {
           this.buscandoPaciente = false;
           
-          // 🆕 Ya tiene cuenta con rol paciente
+          //  Ya tiene cuenta con rol paciente
           if (response.encontrado && response.ya_registrado && !response.rol_diferente) {
             const alert = await this.alertCtrl.create({
-              header: '⚠️ Cuenta Existente',
+              header: ' Cuenta Existente',
               message: `Este paciente ya tiene una cuenta registrada con el correo: <strong>${response.correo}</strong><br><br>¿Desea iniciar sesión?`,
               buttons: [
                 { text: 'Cancelar', role: 'cancel' },
@@ -781,10 +781,10 @@ validarPasswords(): void {
             return;
           }
           
-          // 🆕 Ya tiene cuenta con otro rol
+          //  Ya tiene cuenta con otro rol
           if (response.encontrado && response.ya_registrado && response.rol_diferente) {
             const alert = await this.alertCtrl.create({
-              header: '⚠️ Cédula en Uso',
+              header: ' Cédula en Uso',
               message: response.mensaje,
               buttons: [
                 { text: 'Entendido', role: 'cancel' },
@@ -798,7 +798,7 @@ validarPasswords(): void {
             return;
           }
           
-          // ✅ Paciente existe sin cuenta
+          //  Paciente existe sin cuenta
           if (response.encontrado && !response.ya_registrado) {
             this.registroForm.cedula = response.datos.cedula;
             this.registroForm.telefono = response.datos.telefono || this.registroForm.telefono;
@@ -818,7 +818,7 @@ validarPasswords(): void {
             this.mensajeAutocompletado = response.mensaje;
             this.validarCedula();
             
-            await this.showToast('✅ Datos encontrados', 'success');
+            await this.showToast(' Datos encontrados', 'success');
           } else {
             await this.showToast('No se encontraron registros', 'medium');
           }

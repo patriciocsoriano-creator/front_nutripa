@@ -1,7 +1,7 @@
 // src/app/services/registro-paciente.ts
 import { Injectable } from '@angular/core';
 
-// 📋 Interfaces para tipado seguro
+//  Interfaces para tipado seguro
 export interface PersonalData {
   nombres?: string;
   apellidos?: string;
@@ -56,7 +56,7 @@ export interface PatientDataContainer {
 })
 export class PatientRegistrationService {
   
-  // 📦 Almacenamiento en memoria con tipado explícito
+  //  Almacenamiento en memoria con tipado explícito
   private patientData: PatientDataContainer = {
     informacionPersonal: {},
     signosVitales: {},
@@ -67,7 +67,7 @@ export class PatientRegistrationService {
   constructor() { }
 
   // ============================================
-  // 👇 SETTERS: Guardar datos de cada paso
+  //  SETTERS: Guardar datos de cada paso
   // ============================================
 
   setPersonalData(data: Partial<PersonalData>): void {
@@ -103,7 +103,7 @@ export class PatientRegistrationService {
   }
 
   // ============================================
-  // 👆 GETTERS: Recuperar datos de cada paso
+  //  GETTERS: Recuperar datos de cada paso
   // ============================================
 
   getPersonalData(): PersonalData | null {
@@ -131,7 +131,7 @@ export class PatientRegistrationService {
   }
 
   // ============================================
-  // 📦 Obtener todos los datos acumulados
+  //  Obtener todos los datos acumulados
   // ============================================
 
   getPatientData(): PatientDataContainer & { fechaRegistro: string; imcCalculado: number | null } {
@@ -143,7 +143,7 @@ export class PatientRegistrationService {
   }
 
   // ============================================
-  // 🧹 Limpiar datos después de guardar
+  //  Limpiar datos después de guardar
   // ============================================
 
   clearData(): void {
@@ -156,7 +156,7 @@ export class PatientRegistrationService {
   }
 
   // ============================================
-  // ✅ Validar que un paso esté completo antes de avanzar
+  //  Validar que un paso esté completo antes de avanzar
   // ============================================
 
   isStepValid(step: string): boolean {
@@ -178,10 +178,10 @@ export class PatientRegistrationService {
   }
 
   // ============================================
-  // 🔍 Utilidades adicionales (CORREGIDAS CON TIPOS)
+  //  Utilidades adicionales (CORREGIDAS CON TIPOS)
   // ============================================
 
-  // ✅ Verificar si hay datos guardados en cualquier sección (TS2769 SOLUCIONADO)
+  //  Verificar si hay datos guardados en cualquier sección (TS2769 SOLUCIONADO)
   hasAnyData(): boolean {
     // Tipado explícito para evitar error TS2769
     const sections: Record<string, object>[] = [
@@ -194,7 +194,7 @@ export class PatientRegistrationService {
     return sections.some(section => Object.keys(section).length > 0);
   }
 
-  // ✅ Obtener resumen del progreso del registro
+  //  Obtener resumen del progreso del registro
   getProgress(): { step: string; completed: boolean }[] {
     return [
       { step: 'personal', completed: this.isStepValid('personal') },

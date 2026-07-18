@@ -266,7 +266,7 @@
 
       <!-- TOP MÉDICOS -->
       <div class="top-medicos" *ngIf="reportesGlobales.topMedicos.length > 0">
-        <h2>🏆 Top Médicos con más pacientes</h2>
+        <h2> Top Médicos con más pacientes</h2>
         <div class="medicos-list">
           <div class="medico-item" *ngFor="let medico of reportesGlobales.topMedicos.slice(0, 5); let i = index">
             <div class="medico-rank">#{{i + 1}}</div>
@@ -298,8 +298,8 @@
             <div class="activity-info">
               <p class="activity-text">{{activity.descripcion}}</p>
               <p class="activity-meta">
-                <span *ngIf="activity.usuario_nombre">👤 {{activity.usuario_nombre}}</span>
-                <span *ngIf="activity.ip_address">🌐 {{activity.ip_address}}</span>
+                <span *ngIf="activity.usuario_nombre"> {{activity.usuario_nombre}}</span>
+                <span *ngIf="activity.ip_address"> {{activity.ip_address}}</span>
               </p>
               <p class="activity-time">{{activity.tiempo}}</p>
             </div>

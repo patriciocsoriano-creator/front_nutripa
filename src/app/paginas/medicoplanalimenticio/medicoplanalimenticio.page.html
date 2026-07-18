@@ -18,7 +18,7 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
     
-    <!-- 🧭 SIDEBAR (Mismo menú) -->
+    <!--  SIDEBAR (Mismo menú) -->
     <div class="sidebar" [class.open]="sidebarOpen" (mouseenter)="sidebarOpen = true" (mouseleave)="sidebarOpen = false">
       <div class="menu-icon" (click)="toggleSidebar()">
         <ion-icon name="menu-outline"></ion-icon>
@@ -62,20 +62,20 @@
       </ul>
     </div>
 
-    <!-- 📦 CONTENIDO PRINCIPAL -->
+    <!--  CONTENIDO PRINCIPAL -->
     <div class="main-content plan-layout">
       
-      <!-- ⏳ Loading -->
+      <!--  Loading -->
       <div *ngIf="cargando" class="loading-state">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
         <p>Generando plan alimenticio personalizado...</p>
         <small>Consultando base de alimentos y aplicando reglas clínicas</small>
       </div>
 
-      <!-- ✅ Plan Generado -->
+      <!--  Plan Generado -->
       <div *ngIf="!cargando && plan" class="plan-container">
         
-        <!-- 📋 Header del Plan -->
+        <!--  Header del Plan -->
         <ion-card class="plan-header-card">
           <ion-card-header>
             <ion-card-title>
@@ -118,10 +118,10 @@
                     <ion-label position="stacked">Restricciones</ion-label>
                     <ion-label class="ion-text-wrap">
                       <span *ngIf="plan.restrictions.allergies.length > 0">
-                        🚫 {{plan.restrictions.allergies.join(', ')}}
+                         {{plan.restrictions.allergies.join(', ')}}
                       </span>
                       <span *ngIf="plan.restrictions.avoid_foods.length > 0">
-                        <br>⚠️ {{plan.restrictions.avoid_foods.slice(0, 3).join(', ')}}
+                        <br> {{plan.restrictions.avoid_foods.slice(0, 3).join(', ')}}
                         <span *ngIf="plan.restrictions.avoid_foods.length > 3">...</span>
                       </span>
                     </ion-label>
@@ -132,7 +132,72 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- 📅 Selector de Vista: Semana / Día / Mes -->
+                <!-- RESUMEN NUTRICIONAL DIARIO PROMEDIO (TOTALES) -->
+        <ion-card class="diet-totals-card" *ngIf="plan?.diet_totals">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+              Resumen Nutricional Diario Promedio
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="3">
+                  <ion-item color="success">
+                    <ion-label position="stacked">Total CHO</ion-label>
+                    <ion-text color="dark">
+                      <h2>{{ plan.diet_totals?.total_cho }} g</h2>
+                    </ion-text>
+                    <ion-note slot="end">{{ ((plan.diet_totals?.total_cho || 0) * 4) }} kcal</ion-note>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item color="primary">
+                    <ion-label position="stacked">Total Proteina</ion-label>
+                    <ion-text color="dark">
+                      <h2>{{ plan.diet_totals?.total_protein }} g</h2>
+                    </ion-text>
+                    <ion-note slot="end">{{ ((plan.diet_totals?.total_protein || 0) * 4) }} kcal</ion-note>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item color="warning">
+                    <ion-label position="stacked">Total Grasa</ion-label>
+                    <ion-text color="dark">
+                      <h2>{{ plan.diet_totals?.total_fat }} g</h2>
+                    </ion-text>
+                    <ion-note slot="end">{{ ((plan.diet_totals?.total_fat || 0) * 9) }} kcal</ion-note>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" size-md="3">
+                  <ion-item color="danger">
+                    <ion-label position="stacked">TOTAL DIETA</ion-label>
+                    <ion-text color="dark">
+                      <h2>{{ plan.diet_totals?.total_calories }} kcal</h2>
+                    </ion-text>
+                    <ion-note slot="end">Diario</ion-note>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              
+              <ion-row *ngIf="plan.diet_totals?.total_fiber">
+                <ion-col size="12">
+                  <ion-item color="secondary">
+                    <ion-label>Fibra Total</ion-label>
+                    <ion-text color="dark">
+                      <strong>{{ plan.diet_totals?.total_fiber }} g</strong>
+                    </ion-text>
+                    <ion-note slot="end">Recomendado: 25-30g/dia</ion-note>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+
+        <!--  Selector de Vista: Semana / Día / Mes -->
         <ion-segment [(ngModel)]="vistaActual" (ionChange)="cambiarVista()">
           <ion-segment-button value="semana">
             <ion-icon name="calendar-outline"></ion-icon>
@@ -148,7 +213,7 @@
           </ion-segment-button>
         </ion-segment>
 
-        <!-- 🗓️ Vista: Semana -->
+        <!--  Vista: Semana -->
         <div *ngIf="vistaActual === 'semana'" class="week-view">
           <ion-card *ngFor="let day of plan.plan.weekly.days" class="day-card">
             <ion-card-header>
@@ -220,28 +285,84 @@
           </ion-card>
         </div>
 
-        <!-- 📅 Vista: Día (Selector de fecha) -->
+                <!-- 📅 Vista: Día (Solo el día seleccionado, sin calendario) -->
         <div *ngIf="vistaActual === 'dia'" class="day-view">
-          <ion-datetime 
-            [(ngModel)]="fechaSeleccionada" 
-            displayFormat="DDDD, D MMMM YYYY"
-            (ionChange)="cargarDiaSeleccionado()"
-            min="{{plan.plan.weekly.start_date}}"
-            max="{{plan.plan.weekly.end_date}}"
-            class="datetime-picker">
-          </ion-datetime>
-          
-          <!-- Contenido del día seleccionado (similar a week-view pero un solo día) -->
           <ion-card *ngIf="diaSeleccionado" class="day-card">
-            <!-- ... mismo contenido que day-card en week-view ... -->
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon name="sunny-outline"></ion-icon>
+                {{diaSeleccionado.day_name}} {{diaSeleccionado.date | date:'dd/MM/yyyy'}}
+              </ion-card-title>
+              <ion-card-subtitle>
+                {{diaSeleccionado.daily_totals.calories}} kcal • 
+                P: {{diaSeleccionado.daily_totals.protein}}g • 
+                C: {{diaSeleccionado.daily_totals.carbs}}g • 
+                G: {{diaSeleccionado.daily_totals.fat}}g
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <!-- Comidas del día -->
+              <div class="meals-timeline">
+                <div *ngFor="let meal of diaSeleccionado.meals" class="meal-item">
+                  <div class="meal-header">
+                    <ion-icon [name]="getMealIcon(meal.meal_type)" class="meal-icon"></ion-icon>
+                    <div>
+                      <strong>{{getMealLabel(meal.meal_type)}}</strong>
+                      <small>{{meal.time_suggestion}}</small>
+                    </div>
+                    <ion-chip [color]="getMealChipColor(meal.total_calories, diaSeleccionado.daily_totals.calories)">
+                      {{meal.total_calories}} kcal
+                    </ion-chip>
+                  </div>
+                  
+                  <!-- Alimentos de la comida -->
+                  <div class="meal-foods">
+                    <ion-item *ngFor="let food of meal.foods" class="food-item" lines="none">
+                      <ion-avatar slot="start" *ngIf="food.image_url">
+                        <img [src]="food.image_url" [alt]="food.name" />
+                      </ion-avatar>
+                      <ion-label>
+                        <h3>{{food.name}}</h3>
+                        <p>
+                          {{food.serving_size}}{{food.serving_unit}} • 
+                          P:{{food.protein}}g C:{{food.carbs}}g G:{{food.fat}}g
+                        </p>
+                      </ion-label>
+                      <ion-badge slot="end" color="light">{{food.calories}} kcal</ion-badge>
+                    </ion-item>
+                  </div>
+                  
+                  <!-- Notas de la comida -->
+                  <ion-note *ngIf="meal.notes" class="meal-notes">
+                    <ion-icon name="information-circle-outline"></ion-icon>
+                    {{meal.notes}}
+                  </ion-note>
+                </div>
+              </div>
+              
+              <!-- Hidratación y notas del día -->
+              <div class="day-footer">
+                <ion-item lines="none">
+                  <ion-icon name="water-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label>Meta de hidratación: <strong>{{diaSeleccionado.hydration_goal_liters}} L</strong></ion-label>
+                </ion-item>
+                <ion-note *ngIf="diaSeleccionado.special_notes" class="day-notes">
+                  <ion-icon name="lightbulb-outline"></ion-icon>
+                  {{diaSeleccionado.special_notes}}
+                </ion-note>
+              </div>
+            </ion-card-content>
           </ion-card>
         </div>
 
-        <!-- 📊 Vista: Mes (Resumen) -->
+                <!--  Vista: Mes (Resumen) -->
         <div *ngIf="vistaActual === 'mes'" class="month-view">
           <ion-card class="summary-card">
             <ion-card-header>
-              <ion-card-title>📈 Resumen Mensual</ion-card-title>
+              <ion-card-title>
+                <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+                Resumen Mensual
+              </ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <ion-grid>
@@ -267,7 +388,9 @@
               
               <!-- Tips de adherencia -->
               <ion-list>
-                <ion-list-header>💡 Consejos para el Éxito</ion-list-header>
+                <ion-list-header>
+                  <ion-label>Consejos para el Éxito</ion-label>
+                </ion-list-header>
                 <ion-item *ngFor="let tip of plan.plan.monthly_summary.adherence_tips">
                   <ion-icon name="checkmark-circle-outline" slot="start" color="success"></ion-icon>
                   <ion-label>{{tip}}</ion-label>
@@ -276,7 +399,9 @@
               
               <!-- Puntos de control -->
               <ion-list>
-                <ion-list-header>🎯 Puntos de Control</ion-list-header>
+                <ion-list-header>
+                  <ion-label>Puntos de Control</ion-label>
+                </ion-list-header>
                 <ion-item *ngFor="let checkpoint of plan.plan.monthly_summary.progress_checkpoints">
                   <ion-badge slot="start" color="primary">Sem {{checkpoint.week}}</ion-badge>
                   <ion-label>{{checkpoint.goal}}</ion-label>
@@ -284,31 +409,9 @@
               </ion-list>
             </ion-card-content>
           </ion-card>
-          
-          <!-- Mini calendario de 4 semanas -->
-          <ion-card class="calendar-card">
-            <ion-card-header>
-              <ion-card-title>🗓️ Vista Rápida de Semanas</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <div class="mini-weeks">
-                <div *ngFor="let week of [1,2,3,4]" class="mini-week">
-                  <div class="week-label">Semana {{week}}</div>
-                  <div class="week-days">
-                    <div *ngFor="let day of [1,2,3,4,5,6,7]" 
-                         class="day-cell"
-                         [class.today]="isToday(week, day)"
-                         [class.has-plan]="hasPlanForDay(week, day)">
-                      {{day}}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ion-card-content>
-          </ion-card>
         </div>
 
-        <!-- 🔘 Acciones Finales -->
+        <!--  Acciones Finales -->
         <div class="plan-actions">
           <ion-button fill="outline" color="medium" (click)="descargarPDF()">
             <ion-icon slot="start" name="download-outline"></ion-icon>

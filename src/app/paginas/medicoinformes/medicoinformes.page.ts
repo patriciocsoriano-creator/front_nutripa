@@ -12,18 +12,18 @@ import { environment } from 'src/environments/environment';
 })
 export class MedicoinformesPage implements OnInit {
 
-  // 👤 UI State
+  //  UI State
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombreDoctor: string = '';
   especialidad: string = '';
   cargando = true;
 
-  // 🔍 Filtros
+  //  Filtros
   filtroPeriodo: string = '30';
   tipoInforme: string = 'todos';
 
-  // 📊 Informes
+  //  Informes
   informesIA: any = {
     confianzaPromedio: 0,
     tendenciaConfianza: 0,
@@ -98,7 +98,7 @@ export class MedicoinformesPage implements OnInit {
         this.especialidad = user.rol === 'medico' ? 'Médico Especialista' : 
                            user.rol === 'nutricionista' ? 'Nutricionista' : 'Especialista';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn(' Error parseando usuario');
       }
     }
   }
@@ -121,7 +121,7 @@ export class MedicoinformesPage implements OnInit {
       ]);
 
     } catch (error: any) {
-      console.error('❌ Error cargando informes:', error);
+      console.error(' Error cargando informes:', error);
       await this.showToast('Error al cargar informes', 'danger');
     } finally {
       this.cargando = false;
@@ -139,7 +139,7 @@ export class MedicoinformesPage implements OnInit {
         this.informesIA = response.informes;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar informes de IA');
+      console.warn(' No se pudieron cargar informes de IA');
     }
   }
 
@@ -154,7 +154,7 @@ export class MedicoinformesPage implements OnInit {
         this.informesPacientes = response.informes;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar informes de pacientes');
+      console.warn(' No se pudieron cargar informes de pacientes');
     }
   }
 
@@ -169,7 +169,7 @@ export class MedicoinformesPage implements OnInit {
         this.informesPlanes = response.informes;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar informes de planes');
+      console.warn(' No se pudieron cargar informes de planes');
     }
   }
 
@@ -184,7 +184,7 @@ export class MedicoinformesPage implements OnInit {
         this.informesAlertas = response.informes;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar informes de alertas');
+      console.warn(' No se pudieron cargar informes de alertas');
     }
   }
 
@@ -199,12 +199,12 @@ export class MedicoinformesPage implements OnInit {
         this.informesRegistros = response.informes;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar informes de registros');
+      console.warn(' No se pudieron cargar informes de registros');
     }
   }
 
   aplicarFiltros(): void {
-    console.log('🔍 Aplicando filtros:', { periodo: this.filtroPeriodo, tipo: this.tipoInforme });
+    console.log(' Aplicando filtros:', { periodo: this.filtroPeriodo, tipo: this.tipoInforme });
     // Aquí puedes recargar los datos con los filtros aplicados
     this.cargarInformes();
   }
@@ -242,13 +242,13 @@ export class MedicoinformesPage implements OnInit {
         {
           text: 'PDF',
           handler: () => {
-            this.showToast('📄 Generando PDF... (Funcionalidad en desarrollo)', 'primary');
+            this.showToast(' Generando PDF... (Funcionalidad en desarrollo)', 'primary');
           }
         },
         {
           text: 'Excel',
           handler: () => {
-            this.showToast('📊 Generando Excel... (Funcionalidad en desarrollo)', 'primary');
+            this.showToast(' Generando Excel... (Funcionalidad en desarrollo)', 'primary');
           }
         }
       ]
@@ -256,7 +256,7 @@ export class MedicoinformesPage implements OnInit {
     await alert.present();
   }
 
-  // 🧭 Navegación
+  //  Navegación
   navegarA(ruta: string): void {
     const rutas: Record<string, string> = {
       'medico': '/medico',

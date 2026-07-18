@@ -814,3 +814,85 @@ app-medicocrearplan {
     }
   }
 }
+
+/* ==== CONFIGURACIÓN DE INTERCAMBIOS ==== */
+.config-card {
+  border-radius: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  --background: transparent;
+
+  ion-card-header {
+    padding-bottom: 10px;
+
+    ion-card-title {
+      color: #495057;
+      font-weight: 600;
+      font-size: 1.15rem;
+    }
+
+    ion-card-subtitle {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.config-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+  font-size: 0.9rem;
+
+  th, td {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  th {
+    background-color: #f4f7fb;
+    color: #0a4d68;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: #333;
+    padding-left: 16px;
+  }
+
+  ion-input {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --min-height: 36px;
+    --border-radius: 6px;
+    --background: #f8f9fa;
+    text-align: center;
+    font-weight: 600;
+    color: #0a4d68;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.2s ease;
+
+    &:focus-within {
+      border-color: #667eea;
+      --background: #ffffff;
+    }
+  }
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}

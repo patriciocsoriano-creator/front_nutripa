@@ -1,17 +1,15 @@
-// src/app/paginas/medicocrearplan/medicocrearplan.page.ts
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
-import { MlService, PrediccionResponse } from 'src/app/services/ml-service';  // 
+import { MlService, PrediccionResponse } from 'src/app/services/ml-service';
 import { firstValueFrom } from 'rxjs';
 import { PatientClinicalData } from 'src/app/services/patient-data-util';
 import { FormControl } from '@angular/forms';
 
-// 👤 Interfaces para tipado seguro
 interface PacienteData {
-  id?: string;  // ✅ HACER OPCIONAL para evitar error TS2322
+  id?: string;
   nombre_completo?: string;
   edad?: number;
   fechaNacimiento?: string;
@@ -44,7 +42,6 @@ interface FormularioPlan {
   alergias: string;
 }
 
-// ✅ AGREGAR DECORADOR @Component (CRÍTICO para evitar NG6001)
 @Component({
   selector: 'app-medicocrearplan',
   templateUrl: './medicocrearplan.page.html',
@@ -53,7 +50,6 @@ interface FormularioPlan {
 })
 export class MedicocrearplanPage implements OnInit {
 
-  // 👤 UI State
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombreDoctor: string = 'Dr. Usuario';
@@ -61,12 +57,10 @@ export class MedicocrearplanPage implements OnInit {
 
   preferenciasControl = new FormControl('equilibrada');
 
-  // 📋 Datos del paciente
   pacienteId: string | null = null;
   pacienteData: PacienteData | null = null;
   cargandoPaciente = false;
 
-  // 🧠 Predicción de la red neuronal
   perfilRecomendado: string | null = null;
   perfilRecomendadoId: number | null = null;
   confianzaPrediccion: number | null = null;
@@ -74,7 +68,6 @@ export class MedicocrearplanPage implements OnInit {
   errorML: string | null = null;
   respuestaIA: PrediccionResponse | null = null;
 
-  // 📝 Formulario del plan
   formulario: FormularioPlan = {
     paciente_id: '',
     nombre_paciente: '',
@@ -95,20 +88,17 @@ export class MedicocrearplanPage implements OnInit {
     alergias: ''
   };
 
-  // 🎯 Opciones del formulario
   objetivosDisponibles = [
     { id: 'control_glucosa', label: 'Control de glucosa', icon: 'flask-outline' },
-    { id: 'perder_peso', label: 'Pérdida de peso', icon: 'scale-outline' },
-    { id: 'mejorar_lipidos', label: 'Mejorar lípidos', icon: 'heart-outline' },
-    { id: 'aumentar_energia', label: 'Aumentar energía', icon: 'flash-outline' },
-    { id: 'educacion_nutricional', label: 'Educación nutricional', icon: 'school-outline' }
+    { id: 'perder_peso', label: 'Perdida de peso', icon: 'scale-outline' },
+    { id: 'mejorar_lipidos', label: 'Mejorar lipidos', icon: 'heart-outline' },
+    { id: 'aumentar_energia', label: 'Aumentar energia', icon: 'flash-outline' },
+    { id: 'educacion_nutricional', label: 'Educacion nutricional', icon: 'school-outline' }
   ];
 
   preferenciasAlimentarias = [
-    { id: 'equilibrada', label: 'equilibrada' },
-    { id: 'mediterranea', label: 'Mediterránea' },
+    { id: 'equilibrada', label: 'Equilibrada' },
     { id: 'baja_carbo', label: 'Baja en carbohidratos' },
-    { id: 'vegetariana', label: 'Vegetariana' },
     { id: 'sin_restricciones', label: 'Sin restricciones' }
   ];
 
@@ -118,19 +108,24 @@ export class MedicocrearplanPage implements OnInit {
     { id: 'alta', label: 'Recursos amplios' }
   ];
 
-  // ✅ Perfiles dietéticos con tipado seguro
   perfilesDieteticos: Record<number, { nombre: string; color: string; desc: string }> = {
-    0: { nombre: 'Hipocalórico', color: 'warning', desc: 'Enfocado en déficit calórico controlado para pérdida de peso' },
-    1: { nombre: 'Control Glucémico', color: 'danger', desc: 'Control estricto de carbohidratos y estabilidad glucémica' },
-    2: { nombre: 'Hipo-grasa', color: 'tertiary', desc: 'Reducción de grasas saturadas y colesterol para salud cardiovascular' },
-    3: { nombre: 'Normocalórico', color: 'success', desc: 'Mantenimiento con equilibrio nutricional para peso estable' }
+    0: { nombre: 'Hipocalorico', color: 'warning', desc: 'Enfocado en deficit calorico controlado para perdida de peso' },
+    1: { nombre: 'Control Glucemico', color: 'danger', desc: 'Control estricto de carbohidratos y estabilidad glucemica' },
+    2: { nombre: 'Hipo-grasa', color: 'tertiary', desc: 'Reduccion de grasas saturadas y colesterol para salud cardiovascular' },
+    3: { nombre: 'Normocalorico', color: 'success', desc: 'Mantenimiento con equilibrio nutricional para peso estable' }
   };
+
+  intercambios: any[] = [];
+  distribucion: any[] = [];
+  mostrarConfiguracion = false;
+  segmentoConfig = 'intercambios';
+  cargandoConfig = false;
 
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private http: HttpClient,
-    private mlService: MlService,  // ✅ Ahora funcionará si MlService tiene @Injectable
+    private mlService: MlService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
@@ -139,13 +134,11 @@ export class MedicocrearplanPage implements OnInit {
 
   async ngOnInit() {
     this.cargarDatosUsuario();
-
     this.preferenciasControl.valueChanges.subscribe(value => {
-    if (value) {
-      this.formulario.preferencias_alimentarias = value;
-    }
-  });
-
+      if (value) {
+        this.formulario.preferencias_alimentarias = value;
+      }
+    });
     await this.inicializarFormulario();
   }
 
@@ -156,13 +149,14 @@ export class MedicocrearplanPage implements OnInit {
         const user = JSON.parse(userStr);
         this.nombreDoctor = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Dr. Usuario';
         this.especialidad = user.rol || user.especialidad || 'Especialista';
-      } catch (e) { console.warn('⚠️ Error parseando usuario'); }
+      } catch (e) { 
+        console.warn('Error parseando usuario'); 
+      }
     }
   }
 
   async inicializarFormulario() {
     this.cargandoPaciente = true;
-
     this.pacienteId = 
       this.activatedRoute.snapshot.queryParamMap.get('paciente_id') ||
       this.activatedRoute.snapshot.paramMap.get('id');
@@ -174,7 +168,6 @@ export class MedicocrearplanPage implements OnInit {
     } else if (this.pacienteId) {
       await this.cargarDatosPacienteDesdeAPI();
     }
-
     this.cargandoPaciente = false;
 
     if (this.formulario.imc) {
@@ -186,10 +179,9 @@ export class MedicocrearplanPage implements OnInit {
     this.formulario.paciente_id = data.id || '';
     this.formulario.nombre_paciente = data.nombre_completo || '';
 
-    // ✅ Usar asignación directa sin spread para evitar errores de tipado
-    if (data.edad !== undefined) this.pacienteData = { ...this.pacienteData, edad: data.edad };
-    if (data.fechaNacimiento !== undefined) this.pacienteData = { ...this.pacienteData, fechaNacimiento: data.fechaNacimiento };
-    if (data.sexo !== undefined) this.pacienteData = { ...this.pacienteData, sexo: data.sexo };
+    if (data.edad !== undefined) this.pacienteData = { ...this.pacienteData, edad: data.edad } as PacienteData;
+    if (data.fechaNacimiento !== undefined) this.pacienteData = { ...this.pacienteData, fechaNacimiento: data.fechaNacimiento } as PacienteData;
+    if (data.sexo !== undefined) this.pacienteData = { ...this.pacienteData, sexo: data.sexo } as PacienteData;
 
     if (data.ultimos_datos?.datos_antropometricos) {
       const ant = data.ultimos_datos.datos_antropometricos;
@@ -219,13 +211,12 @@ export class MedicocrearplanPage implements OnInit {
 
   async cargarDatosPacienteDesdeAPI() {
     if (!this.pacienteId) return;
-
     try {
       const token = localStorage.getItem('token');
-      const response: any = await this.http.get(
+      const response: any = await firstValueFrom(this.http.get(
         `${environment.apiUrl}/nutricionapp-api/medico/paciente/${this.pacienteId}/detalle`,
         { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) }
-      ).toPromise();
+      ));
 
       if (response?.paciente) {
         const paciente = response.paciente;
@@ -240,147 +231,92 @@ export class MedicocrearplanPage implements OnInit {
         this.prellenarFormularioConDatos({ ...paciente, ultimos_datos: response.ultimos_datos });
       }
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar datos del paciente desde API');
-      await this.showToast('Usando datos básicos del paciente', 'warning');
+      console.warn('No se pudo cargar datos del paciente desde API');
+      await this.showToast('Usando datos basicos del paciente', 'warning');
     }
   }
 
   async ejecutarPrediccionML() {
-  this.cargandoML = true;
-  this.errorML = null;
+    this.cargandoML = true;
+    this.errorML = null;
 
-  try {
-    console.log('🔍 [DEBUG] pacienteData completa:', this.pacienteData);
-    console.log('🔍 [DEBUG] formulario completo:', this.formulario);
+    try {
+      const datosClinicos: PatientClinicalData = {
+        imc: this.formulario.imc,
+        edad: this.pacienteData?.edad || null,
+        genero: this.pacienteData?.sexo || null,
+        peso_kg: this.formulario.peso || null,
+        talla_cm: this.formulario.talla || null,
+        tiene_diabetes: this.inferirTieneDiabetes(),
+        fechaNacimiento: this.pacienteData?.fechaNacimiento || null,
+        sexo: this.pacienteData?.sexo || null
+      };
 
-    // ✅ Preparar datos clínicos COMPLETOS con las 6 variables requeridas
-    const datosClinicos: PatientClinicalData = {
-      // Variables básicas
-      imc: this.formulario.imc,
-      edad: this.pacienteData?.edad || null,
-      genero: this.pacienteData?.sexo || null,
-      
-      // ✅ NUEVAS VARIABLES REQUERIDAS POR EL MODELO 2026
-      peso_kg: this.formulario.peso || null,
-      talla_cm: this.formulario.talla || null,
-      
-      // ✅ INFERIR tiene_diabetes de los datos disponibles
-      tiene_diabetes: this.inferirTieneDiabetes(),
-      
-      // Compatibilidad con campos opcionales
-      fechaNacimiento: this.pacienteData?.fechaNacimiento || null,
-      sexo: this.pacienteData?.sexo || null
-    };
-
-    console.log('📤 [Componente] Enviando a IA:', datosClinicos);
-
-    // Validar datos antes de enviar
-    const validacion = this.mlService.dataUtilService.validarDatosParaInferencia(datosClinicos);
-    if (!validacion.valido) {
-      throw new Error(`Datos inválidos: ${validacion.errores.join(', ')}`);
-    }
-    if (validacion.advertencias.length > 0) {
-      console.warn('⚠️ Advertencias:', validacion.advertencias);
-      for (const advertencia of validacion.advertencias) {
-        await this.showToast(advertencia, 'warning');
-      }
-    }
-
-    // Llamar al servicio de inferencia
-    this.respuestaIA = await firstValueFrom(
-      this.mlService.inferirPerfilDesdeDatosClinicos(datosClinicos)
-    );
-
-    if (this.respuestaIA?.perfil_id !== undefined) {
-      const perfilInfo = this.perfilesDieteticos[this.respuestaIA.perfil_id];
-      
-      this.perfilRecomendadoId = this.respuestaIA.perfil_id;
-      this.perfilRecomendado = perfilInfo?.nombre || 'Desconocido';
-      this.confianzaPrediccion = this.respuestaIA.confianza || null;
-      
-      this.sugerirObjetivosPorPerfil(this.respuestaIA.perfil_id);
-      
-      if (!this.formulario.recomendaciones && this.respuestaIA.recomendacion) {
-        this.formulario.recomendaciones = this.respuestaIA.recomendacion;
+      const validacion = this.mlService.dataUtilService.validarDatosParaInferencia(datosClinicos);
+      if (!validacion.valido) {
+        throw new Error(`Datos invalidos: ${validacion.errores.join(', ')}`);
       }
       
-      const confianzaPorcentaje = this.respuestaIA.confianza 
-        ? (this.respuestaIA.confianza * 100).toFixed(1) 
-        : 'N/A';
-      await this.showToast(
-        `✅ Perfil: ${this.perfilRecomendado} (${confianzaPorcentaje}% confianza)`, 
-        'success'
+      this.respuestaIA = await firstValueFrom(
+        this.mlService.inferirPerfilDesdeDatosClinicos(datosClinicos)
       );
-    }
 
-  } catch (error: any) {
-    console.error('❌ Error en predicción ML:', error);
-    this.errorML = error.message || 'No se pudo conectar con el servicio de IA.';
-    
-    if (this.errorML && (this.errorML.includes('Datos inválidos') || this.errorML.includes('IMC'))) {
-      await this.showToast(this.errorML, 'danger');
-    } else {
-      await this.showToast('Predicción IA no disponible. Continuando con formulario manual.', 'warning');
-    }
-  } finally {
-    this.cargandoML = false;
-  }
-}
-
-// ✅ MÉTODO: Inferir si el paciente tiene diabetes
-private inferirTieneDiabetes(): number {
-  // Si hay datos bioquímicos claros, usarlos
-  if (this.formulario.glucosa_ayunas && this.formulario.glucosa_ayunas >= 126) {
-    return 1;
-  }
-  
-  if (this.formulario.hba1c && this.formulario.hba1c >= 6.5) {
-    return 1;
-  }
-  
-  // Si hay condiciones metabólicas que sugieren diabetes
-  if (this.pacienteData?.ultimos_datos?.condiciones_metabolicas) {
-    const cm = this.pacienteData.ultimos_datos.condiciones_metabolicas;
-    if (cm.diabetes || cm.diabetesTipo2 || cm.dm2) {
-      return 1;
+      if (this.respuestaIA?.perfil_id !== undefined) {
+        const perfilInfo = this.perfilesDieteticos[this.respuestaIA.perfil_id];
+        this.perfilRecomendadoId = this.respuestaIA.perfil_id;
+        this.perfilRecomendado = perfilInfo?.nombre || 'Desconocido';
+        this.confianzaPrediccion = this.respuestaIA.confianza || null;
+        
+        this.sugerirObjetivosPorPerfil(this.respuestaIA.perfil_id);
+        
+        if (!this.formulario.recomendaciones && this.respuestaIA.recomendacion) {
+          this.formulario.recomendaciones = this.respuestaIA.recomendacion;
+        }
+        
+        const confianzaPorcentaje = this.respuestaIA.confianza 
+          ? (this.respuestaIA.confianza * 100).toFixed(1) 
+          : 'N/A';
+        await this.showToast(`Perfil: ${this.perfilRecomendado} (${confianzaPorcentaje}% confianza)`, 'success');
+      }
+    } catch (error: any) {
+      console.error('Error en prediccion ML:', error);
+      this.errorML = error.message || 'No se pudo conectar con el servicio de IA.';
+      await this.showToast('Prediccion IA no disponible. Continuando con formulario manual.', 'warning');
+    } finally {
+      this.cargandoML = false;
     }
   }
-  
-  // Por defecto, asumir que NO tiene diabetes
-  return 0;
-}
 
-
+  private inferirTieneDiabetes(): number {
+    if (this.formulario.glucosa_ayunas && this.formulario.glucosa_ayunas >= 126) return 1;
+    if (this.formulario.hba1c && this.formulario.hba1c >= 6.5) return 1;
+    if (this.pacienteData?.ultimos_datos?.condiciones_metabolicas) {
+      const cm = this.pacienteData.ultimos_datos.condiciones_metabolicas;
+      if (cm.diabetes || cm.diabetesTipo2 || cm.dm2) return 1;
+    }
+    return 0;
+  }
 
   private sugerirObjetivosPorPerfil(perfilId: number) {
-  // 🎯 Objetivos sugeridos
-  const sugerencias: Record<number, string[]> = {
-    0: ['perder_peso', 'mejorar_lipidos'],
-    1: ['control_glucosa', 'educacion_nutricional'],
-    2: ['mejorar_lipidos', 'control_glucosa'],
-    3: ['aumentar_energia', 'educacion_nutricional']
-  };
-  this.formulario.objetivos = sugerencias[perfilId] || [];
+    const sugerencias: Record<number, string[]> = {
+      0: ['perder_peso', 'mejorar_lipidos'],
+      1: ['control_glucosa', 'educacion_nutricional'],
+      2: ['mejorar_lipidos', 'control_glucosa'],
+      3: ['aumentar_energia', 'educacion_nutricional']
+    };
+    this.formulario.objetivos = sugerencias[perfilId] || [];
 
-  // 🍽️ Preferencia alimentaria sugerida según perfil
-  const preferenciasPorPerfil: Record<number, string> = {
-    0: 'baja_carbo',
-    1: 'mediterranea',
-    2: 'vegetariana',
-    3: 'equilibrada'
-  };
-  
-  const nuevaPreferencia = preferenciasPorPerfil[perfilId] || 'equilibrada';
-  
-  console.log(`🍽️ Perfil ${perfilId} → Preferencia: ${nuevaPreferencia}`);
-  
-  // ✅ SOLUCIÓN DEFINITIVA: Actualizar FormControl
-  this.preferenciasControl.setValue(nuevaPreferencia);
-  this.formulario.preferencias_alimentarias = nuevaPreferencia;
-  
-  console.log(`✅ FormControl actualizado a: ${this.preferenciasControl.value}`);
-}
-  
+    const preferenciasPorPerfil: Record<number, string> = {
+      0: 'equilibrada',
+      1: 'baja_carbo',
+      2: 'equilibrada',
+      3: 'sin_restricciones'
+    };
+    
+    const nuevaPreferencia = preferenciasPorPerfil[perfilId] || 'equilibrada';
+    this.preferenciasControl.setValue(nuevaPreferencia);
+    this.formulario.preferencias_alimentarias = nuevaPreferencia;
+  }
 
   toggleObjetivo(objetivoId: string) {
     const index = this.formulario.objetivos.indexOf(objetivoId);
@@ -392,169 +328,145 @@ private inferirTieneDiabetes(): number {
   }
 
   async guardarPlan() {
-  if (!this.formulario.paciente_id) {
-    await this.showToast('⚠️ Seleccione un paciente primero', 'warning');
-    return;
-  }
-  if (this.formulario.objetivos.length === 0) {
-    await this.showToast('⚠️ Seleccione al menos un objetivo', 'warning');
-    return;
-  }
+    if (!this.formulario.paciente_id) {
+      await this.showToast('Seleccione un paciente primero', 'warning');
+      return;
+    }
+    if (this.formulario.objetivos.length === 0) {
+      await this.showToast('Seleccione al menos un objetivo', 'warning');
+      return;
+    }
 
-  const loading = await this.loadingCtrl.create({ 
-    message: 'Guardando plan nutricional...', 
-    spinner: 'crescent' 
-  });
-  await loading.present();
-
-  try {
-    const token = localStorage.getItem('token');
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    
-    // Preparar datos para guardar el plan base
-    const planData = {
-      paciente_id: this.formulario.paciente_id,
-      medico_id: userData.id,
-      perfil_recomendado: this.perfilRecomendado,
-      perfil_recomendado_id: this.perfilRecomendadoId,
-      confianza_ia: this.confianzaPrediccion,
-      respuesta_ia_completa: this.respuestaIA,
-      datos_clinicos_base: {
-        imc: this.formulario.imc,
-        glucosa_ayunas: this.formulario.glucosa_ayunas,
-        hba1c: this.formulario.hba1c
-      },
-      objetivos: this.formulario.objetivos,
-      recomendaciones: this.formulario.recomendaciones,
-      duracion_semanas: this.formulario.duracion_semanas,
-      notas_adicionales: this.formulario.notas_adicionales,
-      alergias: this.formulario.alergias.split(',').map((a: string) => a.trim()).filter((a: string) => a),
-      preferencias: {
-        actividad_fisica: this.formulario.actividad_fisica,
-        alimentarias: this.formulario.preferencias_alimentarias,
-        economicas: this.formulario.situacion_economica
-      },
-      fecha_creacion: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      estado: 'activo',
-      validado_por_ia: this.respuestaIA !== null
-    };
-
-    // 1️⃣ Guardar plan base en API
-    const response: any = await this.http.post(
-      `${environment.apiUrl}/nutricionapp-api/medico/plan-nutricional`,
-      planData,
-      { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }) }
-    ).toPromise();
-
-    if (response?.error) throw new Error(response.mensaje);
-
-    await loading.dismiss();
-    await this.showToast('✅ Plan nutricional creado exitosamente', 'success');
-
-    // 2️⃣ Preparar datos para generar el plan detallado en medicoplanalimenticio
-    const planGenerationInput = {
-      patient_id: this.formulario.paciente_id,
-      patient_name: this.formulario.nombre_paciente,
-      profile_type: this.perfilRecomendado as 'Hipocalorico' | 'Control Glucemico' | 'Hipo-grasa' | 'Normocalorico',
-      profile_id: this.perfilRecomendadoId!,
-      daily_calories: this.calcularCaloriasDiarias(), // 👈 Implementa esta función según tus reglas
-      macros: { 
-        protein: this.calcularMacroPorcentaje('protein'), 
-        carbs: this.calcularMacroPorcentaje('carbs'), 
-        fat: this.calcularMacroPorcentaje('fat') 
-      },
-      allergies: this.formulario.alergias.split(',').map((a: string) => a.trim()).filter((a: string) => a),
-      preferences: {
-        dietary_style: this.formulario.preferencias_alimentarias as 'equilibrada' | 'mediterranea' | 'baja_carbo' | 'vegetariana',
-        economic_level: this.formulario.situacion_economica as 'baja' | 'media' | 'alta',
-        activity_level: this.formulario.actividad_fisica as 'sedentario' | 'ligera' | 'moderada' | 'intensa'
-      },
-      recommendations: {
-        main: this.formulario.recomendaciones,
-        additional_notes: this.formulario.notas_adicionales
-      }
-    };
-
-    // 3️⃣ Redirigir a medicoplanalimenticio con los datos del plan
-    this.router.navigate(['/medicoplanalimenticio'], {
-      state: { 
-        planData: planGenerationInput,
-        planId: response.plan_id // ID del plan recién creado
-      }
+    const loading = await this.loadingCtrl.create({ 
+      message: 'Guardando plan nutricional...', 
+      spinner: 'crescent' 
     });
+    await loading.present();
 
-  } catch (error: any) {
-    await loading.dismiss();
-    console.error('❌ Error guardando plan:', error);
-    await this.showToast('Error al guardar el plan: ' + (error.message || 'Error desconocido'), 'danger');
+    try {
+      const token = localStorage.getItem('token');
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const caloriasDiarias = this.calcularCaloriasDiarias();
+      const perfilNombre = this.perfilRecomendado || 'Normocalorico';
+
+      const planData = {
+        paciente_id: this.formulario.paciente_id,
+        medico_id: userData.id,
+        perfil_recomendado: perfilNombre,
+        perfil_recomendado_id: this.perfilRecomendadoId,
+        confianza_ia: this.confianzaPrediccion,
+        respuesta_ia_completa: this.respuestaIA,
+        datos_clinicos_base: {
+          imc: this.formulario.imc,
+          glucosa_ayunas: this.formulario.glucosa_ayunas,
+          hba1c: this.formulario.hba1c
+        },
+        objetivos: this.formulario.objetivos,
+        recomendaciones: this.formulario.recomendaciones,
+        duracion_semanas: this.formulario.duracion_semanas,
+        notas_adicionales: this.formulario.notas_adicionales,
+        alergias: this.formulario.alergias.split(',').map((a: string) => a.trim()).filter((a: string) => a),
+        preferencias: {
+          actividad_fisica: this.formulario.actividad_fisica,
+          alimentarias: this.formulario.preferencias_alimentarias,
+          economicas: this.formulario.situacion_economica
+        },
+        fecha_creacion: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        estado: 'activo',
+        validado_por_ia: this.respuestaIA !== null
+      };
+
+      const response: any = await firstValueFrom(this.http.post(
+        `${environment.apiUrl}/nutricionapp-api/medico/plan-nutricional`,
+        planData,
+        { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }) }
+      ));
+
+      if (response?.error) throw new Error(response.mensaje);
+
+      await loading.dismiss();
+      await this.showToast('Plan nutricional creado exitosamente', 'success');
+
+      const planGenerationInput = {
+        patient_id: this.formulario.paciente_id,
+        patient_name: this.formulario.nombre_paciente,
+        profile_type: perfilNombre as 'Hipocalorico' | 'Control Glucemico' | 'Hipo-grasa' | 'Normocalorico',
+        profile_id: this.perfilRecomendadoId !== null ? this.perfilRecomendadoId : 3,
+        daily_calories: caloriasDiarias,
+        allergies: this.formulario.alergias.split(',').map((a: string) => a.trim()).filter((a: string) => a),
+        preferences: {
+          dietary_style: this.formulario.preferencias_alimentarias as 'equilibrada' | 'baja_carbo' | 'sin_restricciones',
+          economic_level: this.formulario.situacion_economica as 'baja' | 'media' | 'alta',
+          activity_level: this.formulario.actividad_fisica as 'sedentario' | 'ligera' | 'moderada' | 'intensa'
+        },
+        recommendations: {
+          main: this.formulario.recomendaciones,
+          additional_notes: this.formulario.notas_adicionales
+        }
+      };
+
+      this.router.navigate(['/medicoplanalimenticio'], {
+        state: { 
+          planData: planGenerationInput,
+          planId: response.plan_id
+        }
+      });
+
+    } catch (error: any) {
+      await loading.dismiss();
+      console.error('Error guardando plan:', error);
+      await this.showToast('Error al guardar el plan: ' + (error.message || 'Error desconocido'), 'danger');
+    }
   }
-}
 
-// 🔢 Helpers para calcular calorías y macros (ajusta según tus reglas clínicas)
-private calcularCaloriasDiarias(): number {
-  // Fórmula simplificada: Mifflin-St Jeor o Harris-Benedict
-  // Aquí puedes usar los datos del paciente para calcular TMB + factor de actividad
-  const peso = this.formulario.peso || 70;
-  const talla = this.formulario.talla ? this.formulario.talla / 100 : 1.70; // cm → m
-  const edad = this.pacienteData?.edad || 30;
-  const sexo = this.pacienteData?.sexo === 'M' ? 'M' : 'F';
-  const actividad = this.formulario.actividad_fisica;
+  private calcularCaloriasDiarias(): number {
+    const peso = this.formulario.peso || 70;
+    const talla = this.formulario.talla ? this.formulario.talla / 100 : 1.70;
+    const edad = this.pacienteData?.edad || 30;
+    const sexo = this.pacienteData?.sexo === 'M' || this.pacienteData?.sexo === 'Masculino' ? 'M' : 'F';
+    const actividad = this.formulario.actividad_fisica;
 
-  // Mifflin-St Jeor
-  let tmb = (10 * peso) + (6.25 * talla * 100) - (5 * edad);
-  tmb += sexo === 'M' ? 5 : -161;
+    let tmb = (10 * peso) + (6.25 * (talla * 100)) - (5 * edad);
+    tmb += sexo === 'M' ? 5 : -161;
 
-  // Factor de actividad
-  const factores: Record<string, number> = {
-    sedentario: 1.2,
-    ligera: 1.375,
-    moderada: 1.55,
-    intensa: 1.725
-  };
+    const factores: Record<string, number> = {
+      sedentario: 1.2,
+      ligera: 1.375,
+      moderada: 1.55,
+      intensa: 1.725
+    };
 
-  return Math.round(tmb * (factores[actividad] || 1.2));
-}
+    return Math.round(tmb * (factores[actividad] || 1.2));
+  }
 
-private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
-  // Distribución por perfil recomendado
-  const distribuciones: Record<string, Record<string, number>> = {
-    'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
-    'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
-    'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
-    'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 }
-  };
-  
-  const perfil = this.perfilRecomendado || 'Normocalorico';
-  return distribuciones[perfil]?.[macro] || 25;
-}
-
-
+  private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
+    const distribuciones: Record<string, Record<string, number>> = {
+      'Normocalorico': { protein: 25, carbs: 50, fat: 25 },
+      'Control Glucemico': { protein: 30, carbs: 40, fat: 30 },
+      'Hipocalorico': { protein: 35, carbs: 40, fat: 25 },
+      'Hipo-grasa': { protein: 25, carbs: 55, fat: 20 }
+    };
+    
+    const perfil = this.perfilRecomendado || 'Normocalorico';
+    return distribuciones[perfil]?.[macro] || 25;
+  }
 
   limpiarFormulario() {
-  this.formulario = {
-    paciente_id: '',
-    nombre_paciente: '',
-    imc: null, peso: null, talla: null,
-    glucosa_ayunas: null, hba1c: null, cintura: null, colesterol_ldl: null,
-    actividad_fisica: 'moderada',
-    preferencias_alimentarias: 'equilibrada',
-    situacion_economica: 'media',
-    objetivos: [],
-    recomendaciones: '',
-    duracion_semanas: 4,
-    notas_adicionales: '',
-    alergias: ''
-  };
-  
-  //  NUEVO: Resetear FormControl también
-  this.preferenciasControl.setValue('equilibrada');
-  
-  this.perfilRecomendado = null;
-  this.perfilRecomendadoId = null;
-  this.confianzaPrediccion = null;
-  this.respuestaIA = null;
-  this.errorML = null;
-}
+    this.formulario = {
+      paciente_id: '', nombre_paciente: '', imc: null, peso: null, talla: null,
+      glucosa_ayunas: null, hba1c: null, cintura: null, colesterol_ldl: null,
+      actividad_fisica: 'moderada', preferencias_alimentarias: 'equilibrada',
+      situacion_economica: 'media', objetivos: [], recomendaciones: '',
+      duracion_semanas: 4, notas_adicionales: '', alergias: ''
+    };
+    this.preferenciasControl.setValue('equilibrada');
+    this.perfilRecomendado = null;
+    this.perfilRecomendadoId = null;
+    this.confianzaPrediccion = null;
+    this.respuestaIA = null;
+    this.errorML = null;
+  }
 
   volver() {
     this.router.navigate(['/medicoverpacientes']);
@@ -582,7 +494,7 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
   async cerrarSesion() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    await this.showToast('Sesión cerrada', 'success');
+    await this.showToast('Sesion cerrada', 'success');
     this.router.navigate(['/principal'], { replaceUrl: true });
   }
   
@@ -600,10 +512,10 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
 
   getColorPorPerfil(nombrePerfil: string): string {
     const colores: Record<string, string> = {
-      'Hipocalórico': 'warning',
-      'Control Glucémico': 'danger',
+      'Hipocalorico': 'warning',
+      'Control Glucemico': 'danger',
       'Hipo-grasa': 'tertiary',
-      'Normocalórico': 'success'
+      'Normocalorico': 'success'
     };
     return colores[nombrePerfil] || 'primary';
   }
@@ -612,13 +524,71 @@ private calcularMacroPorcentaje(macro: 'protein' | 'carbs' | 'fat'): number {
     return this.formulario.objetivos.includes(id);
   }
 
-  // ✅ TIPAR EXPLÍCITAMENTE para evitar TS18046
   getProbabilidadesIA(): Array<{ nombre: string; prob: number }> {
     if (!this.respuestaIA?.probabilidades) return [];
-    
     return Object.entries(this.respuestaIA.probabilidades)
-      // ✅ Tipar como [string, number] para que TypeScript sepa que prob es number
       .map(([nombre, prob]: [string, number]) => ({ nombre, prob: prob * 100 }))
       .sort((a, b) => b.prob - a.prob);
+  }
+
+  toggleConfiguracion() {
+    this.mostrarConfiguracion = !this.mostrarConfiguracion;
+    if (this.mostrarConfiguracion && this.intercambios.length === 0) {
+      this.cargarConfiguracion();
+    }
+  }
+
+    async cargarConfiguracion() {
+    this.cargandoConfig = true;
+    try {
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      
+      // Eliminamos cualquier barra final del apiUrl para evitar la doble barra //
+      const baseUrl = environment.apiUrl.replace(/\/$/, ''); 
+      
+      const resInt: any = await firstValueFrom(
+  this.http.get(
+    `${baseUrl}/nutricionapp-api/medico/configuracion/intercambios`,
+    { headers }
+  )
+);
+
+const resDist: any = await firstValueFrom(
+  this.http.get(
+    `${baseUrl}/nutricionapp-api/medico/configuracion/distribucion`,
+    { headers }
+  )
+);
+
+      this.intercambios = resInt.data || [];
+      this.distribucion = resDist.data || [];
+    } catch (error) {
+      console.error('Error cargando configuracion', error);
+      await this.showToast('No se pudo cargar la configuracion', 'warning');
+    } finally {
+      this.cargandoConfig = false;
+    }
+  }
+
+  async guardarConfiguracion() {
+    this.cargandoConfig = true;
+    try {
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' });
+      
+      const baseUrl = environment.apiUrl.replace(/\/$/, '');
+      
+      await firstValueFrom(this.http.put(`${baseUrl}/nutricionapp-api/medico/configuracion/intercambios`, { datos: this.intercambios }, { headers }));
+      await firstValueFrom(this.http.put(`${baseUrl}/nutricionapp-api/medico/configuracion/distribucion`, { datos: this.distribucion }, { headers }));
+      
+      await this.showToast('Configuracion guardada exitosamente', 'success');
+      this.mostrarConfiguracion = false;
+    } catch (error: any) {
+      console.error('Error guardando configuracion', error);
+      await this.showToast('Error al guardar la configuracion', 'danger');
+    } finally {
+      this.cargandoConfig = false;
+    }
   }
 }

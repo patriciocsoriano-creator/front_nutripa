@@ -1,5 +1,5 @@
 /* =========================================
-   🎨 VARIABLES
+    VARIABLES
    ========================================= */
 $primary-color: #0a4d68;
 $secondary-color: #145da0;
@@ -28,18 +28,18 @@ ion-content {
 }
 
 /* =========================================
-   🧭 DASHBOARD CONTAINER - SIN OVERFLOW HIDDEN
+    DASHBOARD CONTAINER - SIN OVERFLOW HIDDEN
    ========================================= */
 ::ng-deep .dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
   background: #{$bg-color};
   font-family: 'Roboto', 'Segoe UI', sans-serif;
-  /* ✅ REMOVIDO: overflow: hidden (causaba el problema de scroll) */
+  /*  REMOVIDO: overflow: hidden (causaba el problema de scroll) */
 }
 
 /* =========================================
-   🧭 SIDEBAR
+    SIDEBAR
    ========================================= */
 ::ng-deep .sidebar {
   width: 70px;
@@ -188,14 +188,14 @@ ion-content {
     }
     
     .submenu {
-      position: absolute; // 👈 CAMBIO: absolute para que se superponga
-      left: 100%; // 👈 CAMBIO: a la derecha del sidebar
+      position: absolute; //  CAMBIO: absolute para que se superponga
+      left: 100%; //  CAMBIO: a la derecha del sidebar
       top: 0;
       background: linear-gradient(180deg, #083d52 0%, #062d3d 100%);
-      min-width: 220px; // 👈 CAMBIO: ancho fijo
+      min-width: 220px; //  CAMBIO: ancho fijo
       border-radius: 0 8px 8px 0;
       box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-      z-index: 1000; // 👈 CAMBIO: z-index alto
+      z-index: 1000; //  CAMBIO: z-index alto
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease;
@@ -203,7 +203,7 @@ ion-content {
       margin: 0;
       
       &.active {
-        max-height: 300px; // 👈 CAMBIO: altura suficiente para mostrar items
+        max-height: 300px; //  CAMBIO: altura suficiente para mostrar items
       }
       
       li {
@@ -223,7 +223,7 @@ ion-content {
         }
         
         span {
-          opacity: 1; // 👈 Siempre visible en submenú
+          opacity: 1; //  Siempre visible en submenú
         }
       }
     }
@@ -235,18 +235,18 @@ ion-content {
 }
 
 /* =========================================
-   📦 MAIN CONTENT - CON SCROLL
+    MAIN CONTENT - CON SCROLL
    ========================================= */
 ::ng-deep .main-content {
   flex: 1;
   padding: 24px;
-  overflow-y: auto; /* ✅ PERMITE SCROLL VERTICAL */
+  overflow-y: auto; /*  PERMITE SCROLL VERTICAL */
   overflow-x: hidden;
   background: #{$bg-color};
 }
 
 /* =========================================
-   📋 PLAN LAYOUT
+    PLAN LAYOUT
    ========================================= */
 .plan-layout {
   .loading-state {
@@ -299,7 +299,7 @@ ion-content {
 }
 
 /* =========================================
-   📋 PLAN HEADER CARD
+    PLAN HEADER CARD
    ========================================= */
 .plan-header-card {
   --background: #{$card-bg};
@@ -375,7 +375,7 @@ ion-content {
 }
 
 /* =========================================
-   🗓️ SELECTOR DE VISTA
+    SELECTOR DE VISTA
    ========================================= */
 ion-segment {
   --background: #e2e8f0;
@@ -395,7 +395,7 @@ ion-segment {
 }
 
 /* =========================================
-   🗓️ VISTA SEMANAL - MOSTRAR TODOS LOS DÍAS
+    VISTA SEMANAL - MOSTRAR TODOS LOS DÍAS
    ========================================= */
 .week-view {
   display: flex;
@@ -620,7 +620,7 @@ ion-segment {
 }
 
 /* =========================================
-   📅 VISTA DÍA - CALENDARIO FUNCIONAL
+    VISTA DÍA - CALENDARIO FUNCIONAL
    ========================================= */
 .day-view {
   display: flex;
@@ -637,7 +637,7 @@ ion-segment {
 }
 
 /* =========================================
-   📊 VISTA MES
+    VISTA MES
    ========================================= */
 .month-view {
   display: flex;
@@ -721,7 +721,7 @@ ion-segment {
 }
 
 /* =========================================
-   🔘 ACCIONES FINALES
+    ACCIONES FINALES
    ========================================= */
 .plan-actions {
   display: flex;
@@ -740,7 +740,7 @@ ion-segment {
 }
 
 /* =========================================
-   📱 RESPONSIVE
+    RESPONSIVE
    ========================================= */
 @media (max-width: 768px) {
   ::ng-deep .dashboard-container {
@@ -783,7 +783,7 @@ ion-segment {
 }
 
 /* =========================================
-   ♿ ACCESIBILIDAD
+    ACCESIBILIDAD
    ========================================= */
 :focus-visible {
   outline: 2px solid $accent-color;
@@ -801,7 +801,7 @@ ion-segment {
 }
 
 /* =========================================
-   🖨️ PRINT STYLES
+    PRINT STYLES
    ========================================= */
 @media print {
   ::ng-deep .sidebar,
@@ -826,5 +826,77 @@ ion-segment {
   .plan-header-card {
     box-shadow: none;
     border: 1px solid #ccc;
+  }
+}
+
+/* =========================================
+   RESUMEN DE TOTALES NUTRICIONALES
+   ========================================= */
+.diet-totals-card {
+  --background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border-top: 4px solid $secondary-color;
+  
+  ion-card-header {
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    color: white;
+    padding: 16px 20px;
+    
+    ion-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      ion-icon {
+        font-size: 1.3rem;
+      }
+    }
+  }
+  
+  ion-card-content {
+    padding: 20px;
+    
+    ion-item {
+      --background: #f8fafc;
+      --border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.05);
+      
+      h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0;
+        color: $text-primary;
+      }
+      
+      ion-note {
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+      
+      ion-label {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .diet-totals-card ion-card-content ion-grid ion-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .diet-totals-card ion-item {
+    margin-bottom: 8px;
   }
 }

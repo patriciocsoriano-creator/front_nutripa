@@ -12,20 +12,20 @@ import { environment } from 'src/environments/environment';
 })
 export class MedicoplanesnutricionalescreadosverPage implements OnInit {
 
-  // 👤 Sidebar
+  //  Sidebar
   sidebarOpen = false;
   submenuAbierto: string | null = null;
   nombreDoctor: string = '';
   especialidad: string = '';
 
-  // 📋 Datos del plan
+  //  Datos del plan
   plan: any = null;
   paciente: any = null;
   datosClinicos: any = null;
   cargando = true;
   error: string | null = null;
 
-  // 🎛️ Tabs
+  //  Tabs
   tabActiva: string = 'resumen';
 
   private planId: string | null = null;
@@ -54,7 +54,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     await this.cargarPlan();
   }
 
-  // 👤 Cargar datos del usuario
+  //  Cargar datos del usuario
   private cargarDatosUsuario(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -63,12 +63,12 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
         this.nombreDoctor = `${user.nombre || ''} ${user.apellido || ''}`.trim() || 'Dr. Usuario';
         this.especialidad = user.rol === 'medico' ? 'Médico Especialista' : 'Nutricionista';
       } catch (e) {
-        console.warn('⚠️ Error parseando usuario');
+        console.warn(' Error parseando usuario');
       }
     }
   }
 
-  // 🔄 Cargar plan completo desde la API
+  //  Cargar plan completo desde la API
   async cargarPlan(): Promise<void> {
     this.cargando = true;
     this.error = null;
@@ -106,14 +106,14 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
       }
 
     } catch (error: any) {
-      console.error('❌ Error cargando plan:', error);
+      console.error(' Error cargando plan:', error);
       this.error = error?.message || 'Error al cargar el plan';
     } finally {
       this.cargando = false;
     }
   }
 
-  // 👤 Cargar datos adicionales del paciente
+  //  Cargar datos adicionales del paciente
   private async cargarDatosPaciente(pacienteId: string): Promise<void> {
     try {
       const token = localStorage.getItem('token');
@@ -130,11 +130,11 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
         this.paciente = response.paciente;
       }
     } catch (error) {
-      console.warn('⚠️ No se pudieron cargar datos adicionales del paciente');
+      console.warn(' No se pudieron cargar datos adicionales del paciente');
     }
   }
 
-  // 🎨 Color del badge según estado
+  //  Color del badge según estado
   getBadgeColor(estado: string): string {
     const colores: Record<string, string> = {
       'activo': 'success',
@@ -145,7 +145,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     return colores[estado] || 'medium';
   }
 
-  // 📊 Categoría IMC
+  //  Categoría IMC
   getIMCCategory(imc: number): string {
     if (imc < 18.5) return 'Bajo peso';
     if (imc < 25) return 'Normal';
@@ -153,21 +153,21 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     return 'Obesidad';
   }
 
-  // 💧 Categoría glucosa
+  //  Categoría glucosa
   getGlucosaCategory(glucosa: number): string {
     if (glucosa < 100) return 'Normal';
     if (glucosa < 126) return 'Pre-diabetes';
     return 'Diabetes';
   }
 
-  // 🔬 Categoría HbA1c
+  //  Categoría HbA1c
   getHbA1cCategory(hba1c: number): string {
     if (hba1c < 5.7) return 'Normal';
     if (hba1c < 6.5) return 'Pre-diabetes';
     return 'Diabetes';
   }
 
-  // 🏃 Descripción actividad física
+  //  Descripción actividad física
   getActividadDescripcion(actividad: string): string {
     const descripciones: Record<string, string> = {
       'sedentario': 'Poca o ninguna actividad física',
@@ -179,7 +179,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     return descripciones[actividad?.toLowerCase()] || 'No especificada';
   }
 
-  // 🍽️ Icono por tipo de comida
+  //  Icono por tipo de comida
   getMealIcon(mealType: string): string {
     const icons: Record<string, string> = {
       'desayuno': 'sunny-outline',
@@ -192,7 +192,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     return icons[mealType] || 'restaurant-outline';
   }
 
-  // 🏷️ Label por tipo de comida
+  //  Label por tipo de comida
   getMealLabel(mealType: string): string {
     const labels: Record<string, string> = {
       'desayuno': 'Desayuno',
@@ -205,28 +205,28 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     return labels[mealType] || mealType;
   }
 
-  // 🔄 Cambiar tab activa
+  //  Cambiar tab activa
   cambiarTab(): void {
-    console.log('📑 Tab activa:', this.tabActiva);
+    console.log(' Tab activa:', this.tabActiva);
   }
 
-  // 🖨️ Imprimir plan
+  //  Imprimir plan
   async imprimirPlan(): Promise<void> {
     window.print();
-    await this.showToast('🖨️ Abriendo vista de impresión...', 'primary');
+    await this.showToast(' Abriendo vista de impresión...', 'primary');
   }
 
-  // 📄 Descargar PDF
+  //  Descargar PDF
   async descargarPDF(): Promise<void> {
-    await this.showToast('📄 Generando PDF... (Funcionalidad en desarrollo)', 'primary');
+    await this.showToast(' Generando PDF... (Funcionalidad en desarrollo)', 'primary');
   }
 
-  // 🔙 Volver
+  //  Volver
   volver(): void {
     this.router.navigate(['/medicoplanesnutricionalescreados']);
   }
 
-  // 🧭 Navegación
+  //  Navegación
   navegarA(ruta: string): void {
     this.sidebarOpen = false;
     
@@ -245,7 +245,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     this.router.navigate([destino]);
   }
 
-  // 🎛️ Sidebar
+  //  Sidebar
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
@@ -254,7 +254,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     this.submenuAbierto = this.submenuAbierto === item ? null : item;
   }
 
-  // 🚪 Cerrar sesión
+  //  Cerrar sesión
   async cerrarSesion(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar Sesión',
@@ -267,7 +267,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             this.router.navigate(['/principal'], { replaceUrl: true });
-            this.showToast('👋 Sesión cerrada correctamente', 'primary');
+            this.showToast(' Sesión cerrada correctamente', 'primary');
           }
         }
       ]
@@ -275,7 +275,7 @@ export class MedicoplanesnutricionalescreadosverPage implements OnInit {
     await alert.present();
   }
 
-  // 🔔 Toast
+  //  Toast
   async showToast(message: string, color: 'primary'|'success'|'danger'|'warning' = 'primary'): Promise<void> {
     await this.toastCtrl.create({
       message,

@@ -6,7 +6,7 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { PatientDataUtilService, PatientClinicalData, PayloadInferenciaIA } from './patient-data-util';
 
-// ✅ Interfaz de respuesta de la API
+//  Interfaz de respuesta de la API
 export interface PrediccionResponse {
   perfil_id: number;
   perfil_nombre: string;
@@ -33,29 +33,29 @@ export class MlService {
    * 🚀 Inferir perfil dietético desde datos clínicos del paciente
    */
   inferirPerfilDesdeDatosClinicos(datosClinicos: PatientClinicalData): Observable<PrediccionResponse> {
-    console.log('📥 [MlService] Datos clínicos recibidos:', datosClinicos);
+    console.log(' [MlService] Datos clínicos recibidos:', datosClinicos);
     
     const validacion = this.dataUtil.validarDatosParaInferencia(datosClinicos);
     
     if (!validacion.valido) {
-      console.error('❌ [MlService] Validación fallida:', validacion.errores);
+      console.error(' [MlService] Validación fallida:', validacion.errores);
       return throwError(() => new Error(
         `Datos inválidos para inferencia: ${validacion.errores.join(', ')}`
       ));
     }
 
     if (validacion.advertencias.length > 0) {
-      console.warn('⚠️ [MlService] Advertencias:', validacion.advertencias);
+      console.warn(' [MlService] Advertencias:', validacion.advertencias);
     }
 
     const payload = this.dataUtil.prepararPayloadInferencia(datosClinicos);
-    console.log('📤 [MlService] Payload final enviado al proxy:', payload);
+    console.log(' [MlService] Payload final enviado al proxy:', payload);
 
     return this.predecirPerfil(payload);
   }
 
   /**
-   * 🚀 Llamar al endpoint de inferencia a través del proxy del backend
+   *  Llamar al endpoint de inferencia a través del proxy del backend
    */
   private predecirPerfil(payload: PayloadInferenciaIA): Observable<PrediccionResponse> {
     const token = localStorage.getItem('token');
@@ -64,7 +64,7 @@ export class MlService {
       'Authorization': `Bearer ${token}`
     });
 
-    console.log('🚀 [MlService] Enviando petición a:', `${this.ML_API_URL}/prediccion-perfil`);
+    console.log(' [MlService] Enviando petición a:', `${this.ML_API_URL}/prediccion-perfil`);
 
     return this.http.post<PrediccionResponse>(
       `${this.ML_API_URL}/prediccion-perfil`,
@@ -72,11 +72,11 @@ export class MlService {
       { headers }
     ).pipe(
       map(response => {
-        console.log('✅ [MlService] Perfil obtenido:', response.perfil_nombre);
+        console.log(' [MlService] Perfil obtenido:', response.perfil_nombre);
         return response;
       }),
       catchError(error => {
-        console.error('❌ [MlService] Error en inferencia:', error);
+        console.error(' [MlService] Error en inferencia:', error);
         
         let mensajeError = 'No se pudo obtener el perfil dietético.';
         
@@ -96,7 +96,7 @@ export class MlService {
   }
 
   /**
-   * 🔍 Verificar estado del servicio de IA
+   *  Verificar estado del servicio de IA
    */
   verificarSaludML(): Observable<any> {
     const token = localStorage.getItem('token');
@@ -106,7 +106,7 @@ export class MlService {
 
     return this.http.get(`${this.ML_API_URL}/health`, { headers }).pipe(
       catchError(error => {
-        console.warn('⚠️ Servicio de IA no disponible:', error);
+        console.warn(' Servicio de IA no disponible:', error);
         return throwError(() => new Error(
           'El servicio de inteligencia artificial no está disponible.'
         ));
